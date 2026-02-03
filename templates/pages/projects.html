@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}Projects - Capstone CH61{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/projects.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="projects-container">
+    <div class="projects-header">
+        <h1 class="projects-title">My Projects</h1>
+        <p class="projects-subtitle">Showcasing my latest work and technical expertise</p>
+    </div>
+    
+    <div class="projects-grid">
+        <div class="project-card">
+            <div class="project-image">
+                <i class="fas fa-code"></i>
+            </div>
+            <div class="project-content">
+                <h3 class="project-name">Portfolio Website</h3>
+                <p class="project-description">
+                    A secure, responsive portfolio built with Django and custom CSS with dark mode support 
+                    and OWASP Top 10 compliance.
+                </p>
+                <div class="project-tech">
+                    <span class="tech-tag">Django</span>
+                    <span class="tech-tag">Python</span>
+                    <span class="tech-tag">CSS3</span>
+                    <span class="tech-tag">Security</span>
+                </div>
+                <a href="#" class="project-link">View Project <i class="fas fa-arrow-right"></i></a>
+            </div>
+        </div>
+        
+        <div class="project-card">
+            <div class="project-image">
+                <i class="fas fa-database"></i>
+            </div>
+            <div class="project-content">
+                <h3 class="project-name">RESTful API</h3>
+                <p class="project-description">
+                    A secure REST API with authentication, proper error handling, and comprehensive 
+                    input validation following security best practices.
+                </p>
+                <div class="project-tech">
+                    <span class="tech-tag">Python</span>
+                    <span class="tech-tag">Django REST</span>
+                    <span class="tech-tag">PostgreSQL</span>
+                    <span class="tech-tag">JWT Auth</span>
+                </div>
+                <a href="#" class="project-link">View Project <i class="fas fa-arrow-right"></i></a>
+            </div>
+        </div>
+        
+        <div class="project-card">
+            <div class="project-image">
+                <i class="fas fa-mobile-alt"></i>
+            </div>
+            <div class="project-content">
+                <h3 class="project-name">Responsive Web App</h3>
+                <p class="project-description">
+                    A mobile-first web application with responsive design, optimized performance, 
+                    and accessibility features for all users.
+                </p>
+                <div class="project-tech">
+                    <span class="tech-tag">HTML5</span>
+                    <span class="tech-tag">CSS3</span>
+                    <span class="tech-tag">JavaScript</span>
+                    <span class="tech-tag">Mobile-First</span>
+                </div>
+                <a href="#" class="project-link">View Project <i class="fas fa-arrow-right"></i></a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

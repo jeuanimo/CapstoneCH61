@@ -1,0 +1,283 @@
+/* ============================================================================
+   CSS STYLESHEET GUIDE
+   ============================================================================
+   
+   This document outlines the CSS file structure and how to use them in your
+   Django templates. Follow this structure when adding new pages.
+
+   PROJECT STRUCTURE
+   ==================
+   
+   /static/css/
+   ├── base.css           - Global styles for all pages
+   ├── navbar.css         - Navigation, header, and top bar styles
+   ├── pages.css          - Home, About, and basic page styles
+   ├── projects.css       - Project listing and detail pages
+   ├── auth-forms.css     - Authentication and form page styles
+   ├── skills.css         - Skills and abilities display
+   └── [page-name].css    - Page-specific styles (when adding new pages)
+
+   ============================================================================
+   HOW TO USE IN TEMPLATES
+   ============================================================================
+
+   1. ALWAYS INCLUDE base.css
+      This file contains all global styles and should be loaded in every page.
+
+   2. ADD PAGE-SPECIFIC CSS
+      For each new page, include the appropriate CSS file after base.css.
+
+   EXAMPLE - Home Page Template:
+   ==============================
+   {% load static %}
+   <!DOCTYPE html>
+   <html>
+   <head>
+       <link rel="stylesheet" href="{% static 'css/base.css' %}">
+       <link rel="stylesheet" href="{% static 'css/navbar.css' %}">
+       <link rel="stylesheet" href="{% static 'css/pages.css' %}">
+   </head>
+   <body>
+       <!-- Content here -->
+   </body>
+   </html>
+
+   EXAMPLE - Projects Page Template:
+   ==================================
+   {% load static %}
+   <!DOCTYPE html>
+   <html>
+   <head>
+       <link rel="stylesheet" href="{% static 'css/base.css' %}">
+       <link rel="stylesheet" href="{% static 'css/navbar.css' %}">
+       <link rel="stylesheet" href="{% static 'css/projects.css' %}">
+   </head>
+   <body>
+       <!-- Content here -->
+   </body>
+   </html>
+
+   EXAMPLE - Login Page Template:
+   =============================
+   {% load static %}
+   <!DOCTYPE html>
+   <html>
+   <head>
+       <link rel="stylesheet" href="{% static 'css/base.css' %}">
+       <link rel="stylesheet" href="{% static 'css/navbar.css' %}">
+       <link rel="stylesheet" href="{% static 'css/auth-forms.css' %}">
+   </head>
+   <body>
+       <!-- Content here -->
+   </body>
+   </html>
+
+   ============================================================================
+   AVAILABLE CSS CLASSES AND UTILITIES
+   ============================================================================
+
+   COLORS (use as classes or CSS variables):
+   --primary-color: #164f90 (blue)
+   --secondary-color: #c8c9c7 (gray)
+   --accent-color: #164f90
+   --success-color: #4caf50 (green)
+   --error-color: #d32f2f (red)
+   --warning-color: #ff9800 (orange)
+
+   BUTTON CLASSES:
+   .btn              - Base button styling
+   .btn-primary      - Primary blue button
+   .btn-secondary    - Secondary gray button
+   .btn-danger       - Red danger button
+   .btn-success      - Green success button
+   .btn-block        - Full-width button
+
+   CARD AND SECTION CLASSES:
+   .card             - Styled card container
+   .section          - Section with margin
+   .container        - Max-width container (1200px)
+   .container-fluid  - Full-width container
+
+   FORM CLASSES:
+   .form-container   - Form wrapper
+   .form-group       - Form input group
+   .form-input       - Styled input field
+   .form-errors      - Error message container
+   .field-error      - Single field error
+
+   ALERT CLASSES:
+   .alert            - Base alert
+   .alert-error      - Error alert (red)
+   .alert-success    - Success alert (green)
+   .alert-warning    - Warning alert (orange)
+   .alert-info       - Info alert (blue)
+
+   TEXT UTILITIES:
+   .text-primary     - Primary color text
+   .text-secondary   - Secondary color text
+   .text-center      - Center text
+   .text-left        - Left align text
+   .text-right       - Right align text
+
+   SPACING UTILITIES:
+   .mt-1, .mt-2, .mt-3, .mt-4    - Margin top
+   .mb-1, .mb-2, .mb-3, .mb-4    - Margin bottom
+   .ml-1, .ml-2, .ml-3           - Margin left
+   .mr-1, .mr-2, .mr-3           - Margin right
+   .p-1, .p-2, .p-3              - Padding
+   .pt-1, .pt-2, .pt-3           - Padding top
+   .pb-1, .pb-2, .pb-3           - Padding bottom
+
+   DISPLAY UTILITIES:
+   .d-none           - Display none
+   .d-block          - Display block
+   .d-inline         - Display inline
+   .d-flex           - Display flex
+   .flex-wrap        - Flex wrap
+   .gap-1, .gap-2    - Gap between flex items
+
+   ============================================================================
+   DARK MODE SUPPORT
+   ============================================================================
+
+   All styles include dark mode support. To enable dark mode on body:
+   
+   <body class="dark-mode">
+   
+   The CSS automatically handles:
+   - Color inversions
+   - Background changes
+   - Border color adjustments
+   - Form input styling
+   - Alert styling
+   
+   No additional CSS needed for dark mode!
+
+   ============================================================================
+   ADDING NEW PAGE STYLES
+   ============================================================================
+
+   When creating a new page:
+
+   1. Create a new CSS file: /static/css/[page-name].css
+
+   2. Follow this template structure:
+
+   /* ============================================================================
+      [PAGE-NAME].CSS - Description
+      ============================================================================ */
+
+   /* ============================================================================
+      SECTION NAME
+      ========================================================================== */
+
+   .new-class {
+       /* Your styles */
+   }
+
+   /* Dark Mode Support */
+   body.dark-mode .new-class {
+       /* Dark mode styles */
+   }
+
+   /* Responsive Design */
+   @media (max-width: 768px) {
+       .new-class {
+           /* Tablet styles */
+       }
+   }
+
+   @media (max-width: 480px) {
+       .new-class {
+           /* Mobile styles */
+       }
+   }
+
+   3. Always include dark mode overrides using:
+      body.dark-mode .your-class { ... }
+
+   4. Always include responsive breakpoints:
+      @media (max-width: 768px) { ... }  /* Tablet */
+      @media (max-width: 480px) { ... }  /* Mobile */
+
+   5. Include the new CSS file in your template after base.css
+
+   ============================================================================
+   RESPONSIVE BREAKPOINTS
+   ============================================================================
+
+   The CSS uses these standard breakpoints:
+
+   Desktop (Default):  1200px and above
+   Tablet:             768px and below
+   Mobile:             480px and below
+
+   Example:
+   @media (max-width: 768px) { ... }
+   @media (max-width: 480px) { ... }
+
+   ============================================================================
+   SECURITY NOTES
+   ============================================================================
+
+   - All form inputs include proper styling
+   - Error messages are clearly visible
+   - Dark mode maintains contrast for accessibility
+   - Button states (hover, active) are clearly distinguished
+   - Forms validate visually with error states
+   - Input focus states are clear and visible
+
+   ============================================================================
+   PERFORMANCE NOTES
+   ============================================================================
+
+   - CSS is organized by component for easy maintenance
+   - Use CSS variables for consistent theming
+   - Media queries are used for responsive design
+   - Minimal specificity to avoid cascading issues
+   - No unnecessary animations or transitions
+
+   ============================================================================
+   CUSTOMIZATION
+   ============================================================================
+
+   To customize colors globally, modify the CSS variables in base.css:
+
+   :root {
+       --primary-color: #164f90;      /* Change primary color */
+       --secondary-color: #c8c9c7;    /* Change secondary color */
+       /* ... other variables ... */
+   }
+
+   All components will automatically update with the new colors!
+
+   ============================================================================
+   ACCESSIBILITY
+   ============================================================================
+
+   - Color contrast meets WCAG AA standards
+   - Focus states are clearly visible
+   - Form labels are properly associated
+   - Buttons have adequate click targets (42px minimum)
+   - Responsive design works on all screen sizes
+
+   ============================================================================
+   TESTING CHECKLIST
+   ============================================================================
+
+   When adding new pages:
+
+   [ ] Include base.css first
+   [ ] Include navbar.css if navigation is present
+   [ ] Include page-specific CSS file
+   [ ] Test on desktop (1200px+)
+   [ ] Test on tablet (768px)
+   [ ] Test on mobile (480px)
+   [ ] Test light mode
+   [ ] Test dark mode (add class="dark-mode" to body)
+   [ ] Test form validation styling
+   [ ] Test alert messages
+   [ ] Test button hover/active states
+   [ ] Verify color contrast
+
+   ============================================================================

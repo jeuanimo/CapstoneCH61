@@ -1,0 +1,478 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block title %}Chapter Programs - Phi Beta Sigma Fraternity, Inc. | Nu Gamma Sigma Chapter{% endblock %}
+
+{% block css %}
+<style>
+    html, body {
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+    }
+    
+    .page-container {
+        width: 100vw;
+        margin-left: calc(-50vw + 50%);
+        padding: 2rem 1rem;
+        min-height: calc(100vh - 210px);
+        background-image: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)), url('{% static 'img/ngs.jpg' %}');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: scroll;
+        box-sizing: border-box;
+    }
+    
+    body.dark-mode .page-container {
+        background-image: linear-gradient(rgba(11, 16, 32, 0.95), rgba(11, 16, 32, 0.95)), url('{% static 'img/ngs.jpg' %}');
+    }
+    
+    .content-wrapper {
+        max-width: 1000px;
+        margin: 0 auto;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 8px;
+        padding: 2rem;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+    
+    body.dark-mode .content-wrapper {
+        background: rgba(26, 42, 74, 0.95);
+        color: #e8edf7;
+    }
+    
+    .page-header {
+        text-align: center;
+        margin-bottom: 2rem;
+        border-bottom: 3px solid #164f90;
+        padding-bottom: 1rem;
+    }
+    
+    .page-header h1 {
+        color: #164f90;
+        font-size: 2.5rem;
+        margin: 0 0 0.5rem 0;
+    }
+    
+    body.dark-mode .page-header h1 {
+        color: #e8edf7;
+    }
+    
+    .page-header p {
+        color: #666;
+        font-size: 1.1rem;
+        margin: 0;
+    }
+    
+    body.dark-mode .page-header p {
+        color: #b0b8c8;
+    }
+    
+    .page-content {
+        font-size: 1rem;
+        line-height: 1.8;
+        color: #333;
+    }
+    
+    body.dark-mode .page-content {
+        color: #e8edf7;
+    }
+    
+    .page-content h2 {
+        color: #164f90;
+        margin-top: 2rem;
+        margin-bottom: 1rem;
+    }
+    
+    body.dark-mode .page-content h2 {
+        color: #87ceeb;
+    }
+    
+    .page-content p {
+        margin-bottom: 1.5rem;
+    }
+    
+    .programs-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+        margin: 2rem 0;
+    }
+    
+    .program-card {
+        background: #f9f9f9;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+
+    .program-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25);
+    }
+
+    body.dark-mode .program-card {
+        background: #1a2a4a;
+    }
+
+    .program-card-image {
+        width: 100%;
+        height: 180px;
+        background: linear-gradient(135deg, #164f90 0%, #c8c9c7 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 0.95rem;
+        flex-shrink: 0;
+    }
+
+    .program-card-content {
+        padding: 1rem;
+        text-align: center;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: #c8c9c7;
+    }
+
+    body.dark-mode .program-card-content {
+        background: rgba(26, 42, 74, 0.95);
+    }
+
+    .program-card h3 {
+        color: #164f90;
+        margin: 0 0 0.5rem 0;
+        font-size: 1.2rem;
+    }
+
+    body.dark-mode .program-card h3 {
+        color: #87ceeb;
+    }
+
+    .program-card p {
+        font-size: 0.95rem;
+        color: #164f90;
+        margin: 0;
+    }
+
+    body.dark-mode .program-card p {
+        color: #e8edf7;
+    }
+    
+    body.dark-mode .program-card p {
+        color: #b0b8c8;
+    }
+    
+    .objectives-list {
+        background: #f9f9f9;
+        padding: 1.5rem;
+        border-left: 4px solid #164f90;
+        border-radius: 6px;
+        margin: 1.5rem 0;
+    }
+    
+    body.dark-mode .objectives-list {
+        background: rgba(11, 16, 32, 0.6);
+        border-left-color: #87ceeb;
+    }
+    
+    .objectives-list ol {
+        margin: 1rem 0;
+        padding-left: 2rem;
+    }
+    
+    .objectives-list li {
+        margin-bottom: 1rem;
+        line-height: 1.6;
+    }
+    
+    .partners-carousel {
+        position: relative;
+        max-width: 600px;
+        margin: 2rem auto;
+        background: #f9f9f9;
+        border-radius: 6px;
+        padding: 2rem;
+        text-align: center;
+    }
+    
+    body.dark-mode .partners-carousel {
+        background: rgba(11, 16, 32, 0.6);
+    }
+    
+    .carousel-container {
+        position: relative;
+        height: 200px;
+        overflow: hidden;
+        border-radius: 6px;
+        background: white;
+    }
+    
+    body.dark-mode .carousel-container {
+        background: rgba(26, 42, 74, 0.95);
+    }
+    
+    .carousel-slide {
+        display: none;
+        height: 200px;
+        width: 100%;
+        align-items: center;
+        justify-content: center;
+        animation: fadeInSlide 0.5s ease;
+    }
+    
+    .carousel-slide.active {
+        display: flex;
+    }
+    
+    .carousel-slide img {
+        max-height: 180px;
+        max-width: 90%;
+        object-fit: contain;
+    }
+    
+    .carousel-prev, .carousel-next {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background-color: #164f90;
+        color: white;
+        border: none;
+        padding: 0.75rem 1rem;
+        cursor: pointer;
+        font-size: 1.2rem;
+        border-radius: 4px;
+        transition: all 0.3s ease;
+        z-index: 10;
+    }
+    
+    body.dark-mode .carousel-prev, body.dark-mode .carousel-next {
+        background-color: #87ceeb;
+        color: #164f90;
+    }
+    
+    .carousel-prev:hover, .carousel-next:hover {
+        background-color: #c8c9c7;
+        color: #164f90;
+    }
+    
+    .carousel-prev {
+        left: 0.5rem;
+    }
+    
+    .carousel-next {
+        right: 0.5rem;
+    }
+    
+    .carousel-dots {
+        display: flex;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-top: 1rem;
+    }
+    
+    .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background-color: #c8c9c7;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .dot.active {
+        background-color: #164f90;
+        width: 30px;
+        border-radius: 5px;
+    }
+    
+    body.dark-mode .dot {
+        background-color: #164f90;
+    }
+    
+    body.dark-mode .dot.active {
+        background-color: #87ceeb;
+    }
+    
+    @keyframes fadeInSlide {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    @media (max-width: 768px) {
+        .page-header h1 {
+            font-size: 1.8rem;
+        }
+        
+        .content-wrapper {
+            padding: 1.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="content-wrapper">
+        <div class="page-header">
+            <h1>Phi Beta Sigma Fraternity</h1>
+            <h2 style="font-size: 1.5rem; margin: 0.5rem 0 0 0; color: #164f90;">Programs</h2>
+        </div>
+        
+        <div class="page-content">
+            <h2 style="text-align: center; margin-top: 0;">Our Community Initiatives, Partnerships and Programs</h2>
+            
+            <p>Phi Beta Sigma Fraternity, Inc., is an international organization comprised of 225,000 college-educated men, and built primarily on the ideology of promoting <strong>Brotherhood, Scholarship and Service</strong>. Over its one hundred plus years of existence, the Fraternity has focused on improving the global community through dedicated service. This focus has compelled the development of the organization's four main programs: <strong>Bigger and Better Business, Education, Social Action and Sigma Beta Clubs</strong> that embrace these objectives:</p>
+            
+            <div class="objectives-list">
+                <ol>
+                    <li>To support Sigma's vision of ensuring programs are focused and committed to serving our communities and serving young males through mentoring and scholarships;</li>
+                    <li>To ensure symmetry among all organizational and community initiatives;</li>
+                    <li>To develop a sense of pride and commitment in the community toward healthy living that will reduce the incidences of health conditions that adversely affect men of color.</li>
+                </ol>
+            </div>
+            
+            <p>Through the lens of these programs, members determine how best they can serve their respective communities. For example, our national mentoring program for males ages 8-18 provides for the development of young men as they prepare for college and the workforce. The organization's partnerships with the American Cancer Society, March of Dimes, Center for Disease Control and Prevention, Boy Scouts of America and the Thurgood Marshall College Fund are examples of its efforts to address societal ills including health disparities and educational and developmental challenges for people of all backgrounds.</p>
+            
+            <h2>Our Four Pillars</h2>
+            <div class="programs-grid">
+                <div class="program-card">
+                    <div class="program-card-image">
+                        <i class="fas fa-briefcase" style="font-size: 3rem; margin-bottom: 0.5rem;"></i>
+                    </div>
+                    <div class="program-card-content">
+                        <h3>Bigger and Better Business</h3>
+                        <p>Economic empowerment and business development initiatives</p>
+                    </div>
+                </div>
+                <div class="program-card">
+                    <div class="program-card-image">
+                        <i class="fas fa-graduation-cap" style="font-size: 3rem; margin-bottom: 0.5rem;"></i>
+                    </div>
+                    <div class="program-card-content">
+                        <h3>Education</h3>
+                        <p>Scholarships and educational advancement programs</p>
+                    </div>
+                </div>
+                <div class="program-card">
+                    <div class="program-card-image">
+                        <i class="fas fa-hands-helping" style="font-size: 3rem; margin-bottom: 0.5rem;"></i>
+                    </div>
+                    <div class="program-card-content">
+                        <h3>Social Action</h3>
+                        <p>Community service and social change initiatives</p>
+                    </div>
+                </div>
+                <div class="program-card">
+                    <div class="program-card-image" style="background: #ffffff;">
+                        <img src="{% static 'img/SBC_Color_Shield600px.jpg' %}" alt="Sigma Beta Club" style="max-height: 140px; max-width: 80%; object-fit: contain;">
+                    </div>
+                    <div class="program-card-content">
+                        <h3>Sigma Beta Club</h3>
+                        <p>Youth mentoring program for ages 8-18</p>
+                    </div>
+                </div>
+            </div>
+            
+            <h2 style="text-align: center; margin-top: 3rem;">Thank you to our Global Partners!</h2>
+            <div class="partners-carousel">
+                <div class="carousel-container">
+                    <div class="carousel-slide active">
+                        <img src="https://phibetasigma1914.org/wp-content/uploads/2023/04/mens_wearhouse.jpg" alt="Men's Wearhouse">
+                    </div>
+                    <div class="carousel-slide">
+                        <img src="https://www.cancer.org/content/dam/cancer-org/images/logos/acs/acs-logo.svg" alt="American Cancer Society">
+                    </div>
+                    <div class="carousel-slide">
+                        <img src="https://www.marchforbabies.org/image/home/2023-MOD-MFB-Logo.svg" alt="March of Dimes">
+                    </div>
+                    <div class="carousel-slide">
+                        <img src="https://tools.cdc.gov/TemplatePackage/4.0/assets/imgs/logo/logo-notext.svg" alt="CDC">
+                    </div>
+                    <div class="carousel-slide">
+                        <img src="https://www.scouting.org/wp-content/uploads/2023/05/BSA_Logo.png" alt="Boy Scouts of America">
+                    </div>
+                    <div class="carousel-slide">
+                        <img src="https://tmcf.org/wp-content/uploads/logo-tmcf-300x96.png" alt="Thurgood Marshall College Fund">
+                    </div>
+                    
+                    <button class="carousel-prev" onclick="prevSlide();">❮</button>
+                    <button class="carousel-next" onclick="nextSlide();">❯</button>
+                </div>
+                
+                <div class="carousel-dots">
+                    <span class="dot" onclick="currentDot(0);"></span>
+                    <span class="dot" onclick="currentDot(1);"></span>
+                    <span class="dot" onclick="currentDot(2);"></span>
+                    <span class="dot" onclick="currentDot(3);"></span>
+                    <span class="dot" onclick="currentDot(4);"></span>
+                    <span class="dot" onclick="currentDot(5);"></span>
+                </div>
+                
+                <p style="margin-top: 1.5rem; font-size: 0.9rem;"><strong>Partners:</strong> American Cancer Society • March of Dimes • Center for Disease Control and Prevention • Boy Scouts of America • Thurgood Marshall College Fund</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentSlide = 0;
+    let slides, dots;
+    
+    function initCarousel() {
+        slides = document.querySelectorAll('.carousel-slide');
+        dots = document.querySelectorAll('.dot');
+        
+        if (slides.length > 0) {
+            showSlide(currentSlide);
+            // Auto-rotate carousel every 3 seconds
+            setInterval(nextSlide, 3000);
+        }
+    }
+    
+    function showSlide(n) {
+        if (!slides.length) return;
+        
+        if (n >= slides.length) currentSlide = 0;
+        if (n < 0) currentSlide = slides.length - 1;
+        
+        slides.forEach(slide => slide.classList.remove('active'));
+        dots.forEach(dot => dot.classList.remove('active'));
+        
+        slides[currentSlide].classList.add('active');
+        dots[currentSlide].classList.add('active');
+    }
+    
+    function nextSlide() {
+        currentSlide++;
+        showSlide(currentSlide);
+    }
+    
+    function prevSlide() {
+        currentSlide--;
+        showSlide(currentSlide);
+    }
+    
+    function currentDot(n) {
+        currentSlide = n;
+        showSlide(currentSlide);
+    }
+    
+    // Initialize carousel when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initCarousel);
+    } else {
+        initCarousel();
+    }
+</script>
+{% endblock %}

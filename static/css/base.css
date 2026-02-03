@@ -1,0 +1,654 @@
+/* ============================================================================
+   BASE.CSS - Global Styles for All Pages
+   ============================================================================
+   This file contains the global theme configuration, typography, and utility
+   classes that apply to all pages of the application.
+   ========================================================================== */
+
+/* CSS Variables for Color Scheme */
+:root {
+    --primary-color: #164f90;
+    --secondary-color: #c8c9c7;
+    --accent-color: #164f90;
+    --text-light: #ffffff;
+    --text-dark: #164f90;
+    --background-light: #ffffff;
+    --border-color: #c8c9c7;
+    --success-color: #4caf50;
+    --error-color: #d32f2f;
+    --warning-color: #ff9800;
+}
+
+/* Dark Mode Variables */
+body.dark-mode {
+    --background-light: #0b1020;
+    --text-dark: #e8edf7;
+    --border-color: #1a2a4a;
+}
+
+/* ============================================================================
+   RESET AND BASE STYLES
+   ========================================================================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background-color: var(--background-light);
+    transition: background-color 0.3s ease, color 0.3s ease;
+    min-height: 100vh;
+}
+
+/* ============================================================================
+   LAYOUT STRUCTURE
+   ========================================================================== */
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.container-fluid {
+    width: 100%;
+    padding: 0 30px;
+}
+
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.col-md-4 {
+    flex: 0 0 33.333333%;
+    max-width: 33.333333%;
+}
+
+.col-md-8 {
+    flex: 0 0 66.666667%;
+    max-width: 66.666667%;
+}
+
+/* ============================================================================
+   TYPOGRAPHY
+   ========================================================================== */
+
+h1, h2, h3, h4, h5, h6 {
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+h1 {
+    font-size: 2.5rem;
+    border-bottom: 3px solid var(--primary-color);
+    padding-bottom: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+h2 {
+    font-size: 2rem;
+    margin-top: 2rem;
+}
+
+h3 {
+    font-size: 1.5rem;
+}
+
+h4 {
+    font-size: 1.25rem;
+}
+
+h5 {
+    font-size: 1.1rem;
+}
+
+h6 {
+    font-size: 1rem;
+}
+
+p {
+    margin-bottom: 1rem;
+    line-height: 1.8;
+}
+
+a {
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: var(--secondary-color);
+}
+
+ul, ol {
+    margin-left: 2rem;
+    margin-bottom: 1rem;
+}
+
+li {
+    margin-bottom: 0.5rem;
+}
+
+/* Dark Mode Typography */
+body.dark-mode h1,
+body.dark-mode h2,
+body.dark-mode h3,
+body.dark-mode h4,
+body.dark-mode h5,
+body.dark-mode h6 {
+    color: #9ec5ff;
+}
+
+body.dark-mode p,
+body.dark-mode li {
+    color: #e8edf7;
+}
+
+body.dark-mode a {
+    color: #9ec5ff;
+}
+
+/* ============================================================================
+   BUTTONS AND LINKS
+   ========================================================================== */
+
+.btn {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    text-align: center;
+    text-decoration: none;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background: linear-gradient(180deg, #1e6bb8 0%, #0f3d6e 100%);
+    color: var(--text-light);
+    border: 1px solid #0a2d52;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.4);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.btn-primary:hover {
+    background: linear-gradient(180deg, #2a7dd4 0%, #1e6bb8 50%, #0f3d6e 100%);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.5),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.3);
+    transform: translateY(-2px);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.btn-secondary {
+    background-color: var(--secondary-color);
+    color: var(--primary-color);
+    border: 1px solid #a8a9a7;
+}
+
+.btn-secondary:hover {
+    background-color: #b0b1af;
+    color: #0f3d6e;
+    transform: translateY(-2px);
+}
+
+.btn-danger {
+    background-color: var(--error-color);
+    color: var(--text-light);
+    border: 1px solid #b71c1c;
+}
+
+.btn-danger:hover {
+    background-color: #c62828;
+    transform: translateY(-2px);
+}
+
+.btn-success {
+    background-color: var(--success-color);
+    color: var(--text-light);
+    border: 1px solid #388e3c;
+}
+
+.btn-success:hover {
+    background-color: #45a049;
+    transform: translateY(-2px);
+}
+
+.btn-block {
+    width: 100%;
+}
+
+/* ============================================================================
+   CARDS AND SECTIONS
+   ========================================================================== */
+
+.card {
+    background-color: var(--background-light);
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 15px rgba(22, 79, 144, 0.25);
+}
+
+.section {
+    margin-bottom: 3rem;
+}
+
+/* Dark Mode Cards */
+body.dark-mode .card {
+    background-color: #0f172a;
+    border-color: #1f2937;
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.35);
+}
+
+/* ============================================================================
+   FORMS AND INPUTS
+   ========================================================================== */
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    color: var(--primary-color);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.form-input,
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="date"],
+textarea,
+select {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    background-color: var(--background-light);
+    color: #333;
+}
+
+.form-input:focus,
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="number"]:focus,
+input[type="date"]:focus,
+textarea:focus,
+select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 5px rgba(22, 79, 144, 0.2);
+}
+
+textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+    cursor: pointer;
+}
+
+/* Dark Mode Forms */
+body.dark-mode .form-input,
+body.dark-mode input[type="text"],
+body.dark-mode input[type="email"],
+body.dark-mode input[type="password"],
+body.dark-mode input[type="number"],
+body.dark-mode input[type="date"],
+body.dark-mode textarea,
+body.dark-mode select {
+    background-color: #232d39;
+    border-color: #3a4a5a;
+    color: #e8edf7;
+}
+
+body.dark-mode .form-input:focus,
+body.dark-mode input:focus,
+body.dark-mode textarea:focus,
+body.dark-mode select:focus {
+    border-color: #9ec5ff;
+    box-shadow: 0 0 5px rgba(158, 197, 255, 0.3);
+}
+
+body.dark-mode .form-group label {
+    color: #9ec5ff;
+}
+
+/* Form Errors */
+.form-errors {
+    background-color: #ffebee;
+    border: 1px solid var(--error-color);
+    border-radius: 4px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.form-errors p.error {
+    color: var(--error-color);
+    margin: 0.5rem 0;
+}
+
+.field-error {
+    color: var(--error-color);
+    font-size: 0.85rem;
+    margin-top: 0.25rem;
+}
+
+body.dark-mode .form-errors {
+    background-color: #3d2c2c;
+    border-color: var(--error-color);
+}
+
+body.dark-mode .field-error {
+    color: #ff6b6b;
+}
+
+/* ============================================================================
+   ALERTS AND MESSAGES
+   ========================================================================== */
+
+.messages {
+    margin-bottom: 1.5rem;
+}
+
+.alert {
+    padding: 1rem;
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+    border-left: 4px solid;
+}
+
+.alert-error,
+.alert-danger {
+    background-color: #ffebee;
+    border-color: var(--error-color);
+    color: var(--error-color);
+}
+
+.alert-success {
+    background-color: #e8f5e9;
+    border-color: var(--success-color);
+    color: #2e7d32;
+}
+
+.alert-warning {
+    background-color: #fff3e0;
+    border-color: var(--warning-color);
+    color: #e65100;
+}
+
+.alert-info {
+    background-color: #e3f2fd;
+    border-color: #2196f3;
+    color: #1565c0;
+}
+
+/* Dark Mode Alerts */
+body.dark-mode .alert-error,
+body.dark-mode .alert-danger {
+    background-color: #3d2c2c;
+    color: #ff6b6b;
+}
+
+body.dark-mode .alert-success {
+    background-color: #2d3d2c;
+    color: #7cda6e;
+}
+
+/* ============================================================================
+   UTILITY CLASSES
+   ========================================================================== */
+
+.text-primary {
+    color: var(--primary-color);
+}
+
+.text-secondary {
+    color: var(--secondary-color);
+}
+
+.text-center {
+    text-align: center;
+}
+
+.text-left {
+    text-align: left;
+}
+
+.text-right {
+    text-align: right;
+}
+
+.bg-primary {
+    background-color: var(--primary-color);
+    color: var(--text-light);
+}
+
+.bg-secondary {
+    background-color: var(--secondary-color);
+}
+
+/* Spacing Utilities */
+.mt-1 { margin-top: 1rem; }
+.mt-2 { margin-top: 2rem; }
+.mt-3 { margin-top: 3rem; }
+.mt-4 { margin-top: 4rem; }
+
+.mb-1 { margin-bottom: 1rem; }
+.mb-2 { margin-bottom: 2rem; }
+.mb-3 { margin-bottom: 3rem; }
+.mb-4 { margin-bottom: 4rem; }
+
+.ml-1 { margin-left: 1rem; }
+.ml-2 { margin-left: 2rem; }
+.ml-3 { margin-left: 3rem; }
+
+.mr-1 { margin-right: 1rem; }
+.mr-2 { margin-right: 2rem; }
+.mr-3 { margin-right: 3rem; }
+
+.p-1 { padding: 1rem; }
+.p-2 { padding: 2rem; }
+.p-3 { padding: 3rem; }
+
+.pt-1 { padding-top: 1rem; }
+.pt-2 { padding-top: 2rem; }
+.pt-3 { padding-top: 3rem; }
+
+.pb-1 { padding-bottom: 1rem; }
+.pb-2 { padding-bottom: 2rem; }
+.pb-3 { padding-bottom: 3rem; }
+
+/* Display Utilities */
+.d-none {
+    display: none !important;
+}
+
+.d-block {
+    display: block !important;
+}
+
+.d-inline {
+    display: inline !important;
+}
+
+.d-flex {
+    display: flex !important;
+}
+
+.flex-wrap {
+    flex-wrap: wrap;
+}
+
+.gap-1 {
+    gap: 1rem;
+}
+
+.gap-2 {
+    gap: 2rem;
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+}
+
+/* ============================================================================
+   LAYOUT AND MAIN CONTENT
+   ========================================================================== */
+
+.main-content {
+    min-height: calc(100vh - 200px);
+    padding: 3rem 0;
+    background-color: var(--background-light);
+}
+
+/* Navigation */
+nav {
+    background-color: var(--primary-color);
+    color: var(--text-light);
+    padding: 1rem;
+}
+
+/* Footer */
+footer {
+    background-color: var(--primary-color);
+    color: var(--text-light);
+    text-align: center;
+    padding: 1rem;
+    position: relative;
+    bottom: 0;
+    width: 100%;
+}
+
+footer p {
+    margin: 0;
+}
+
+footer a {
+    color: var(--text-light);
+    text-decoration: underline;
+}
+
+footer a:hover {
+    color: var(--secondary-color);
+}
+
+/* Dark Mode Footer */
+body.dark-mode footer {
+    background-color: #0a1324;
+    color: #e8edf7;
+}
+
+/* ============================================================================
+   RESPONSIVE DESIGN
+   ========================================================================== */
+
+@media (max-width: 768px) {
+    .row {
+        flex-direction: column;
+    }
+
+    .col-md-4,
+    .col-md-8 {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+
+    h1 {
+        font-size: 2rem;
+    }
+
+    h2 {
+        font-size: 1.5rem;
+    }
+
+    h3 {
+        font-size: 1.25rem;
+    }
+
+    .container {
+        padding: 0 15px;
+    }
+
+    .container-fluid {
+        padding: 0 15px;
+    }
+
+    .main-content {
+        padding: 2rem 0;
+    }
+
+    ul, ol {
+        margin-left: 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    h1 {
+        font-size: 1.75rem;
+    }
+
+    h2 {
+        font-size: 1.25rem;
+    }
+
+    h3 {
+        font-size: 1.1rem;
+    }
+
+    .btn {
+        padding: 0.65rem 1.2rem;
+        font-size: 0.95rem;
+    }
+
+    .card {
+        padding: 1.25rem;
+    }
+}

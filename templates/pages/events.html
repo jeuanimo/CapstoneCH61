@@ -1,0 +1,409 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block title %}Calendar of Events - Phi Beta Sigma Fraternity, Inc. | Nu Gamma Sigma Chapter{% endblock %}
+
+{% block css %}
+<style>
+    html, body {
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+    }
+    
+    .events-container {
+        width: 100vw;
+        margin-left: calc(-50vw + 50%);
+        padding: 2rem 1rem;
+        min-height: calc(100vh - 210px);
+        background-image: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)), url('{% static 'img/ngs.jpg' %}');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: scroll;
+        box-sizing: border-box;
+    }
+    
+    body.dark-mode .events-container {
+        background-image: linear-gradient(rgba(11, 16, 32, 0.95), rgba(11, 16, 32, 0.95)), url('{% static 'img/ngs.jpg' %}');
+    }
+    
+    .events-wrapper {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 8px;
+        padding: 2rem;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+    
+    body.dark-mode .events-wrapper {
+        background: rgba(26, 42, 74, 0.95);
+        color: #e8edf7;
+    }
+    
+    .events-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    
+    .events-header h1 {
+        color: #164f90;
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    body.dark-mode .events-header h1 {
+        color: #e8edf7;
+    }
+    
+    .search-box {
+        margin-bottom: 2rem;
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+    }
+    
+    .search-box input {
+        padding: 0.75rem 1rem;
+        border: 2px solid #164f90;
+        border-radius: 4px;
+        font-size: 1rem;
+        width: 300px;
+    }
+    
+    body.dark-mode .search-box input {
+        background: #1a2a4a;
+        color: #e8edf7;
+        border-color: #c8c9c7;
+    }
+    
+    .search-box button {
+        background-color: #164f90;
+        color: #ffffff;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 4px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+    
+    .search-box button:hover {
+        background-color: #c8c9c7;
+        color: #164f90;
+    }
+    
+    .calendar-container {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .calendar-box {
+        background: #f5f5f5;
+        padding: 1.5rem;
+        border-radius: 8px;
+        border: 2px solid #c8c9c7;
+    }
+    
+    body.dark-mode .calendar-box {
+        background: #0b1020;
+        border-color: #1a2a4a;
+    }
+    
+    .calendar-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    
+    .calendar-header h2 {
+        color: #164f90;
+        margin: 0;
+        font-size: 1.5rem;
+    }
+    
+    body.dark-mode .calendar-header h2 {
+        color: #e8edf7;
+    }
+    
+    .calendar-nav {
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    .calendar-nav a {
+        background-color: #164f90;
+        color: #ffffff;
+        padding: 0.5rem 0.75rem;
+        border-radius: 4px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.9rem;
+        transition: background-color 0.3s ease;
+    }
+    
+    .calendar-nav a:hover {
+        background-color: #c8c9c7;
+        color: #164f90;
+    }
+    
+    .calendar-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 1rem;
+    }
+    
+    .calendar-table th,
+    .calendar-table td {
+        padding: 0.5rem;
+        text-align: center;
+        border: 1px solid #c8c9c7;
+        color: #164f90;
+    }
+    
+    body.dark-mode .calendar-table th,
+    body.dark-mode .calendar-table td {
+        border-color: #1a2a4a;
+        color: #e8edf7;
+    }
+    
+    .calendar-table th {
+        background-color: #164f90;
+        color: #ffffff;
+        font-weight: 700;
+    }
+    
+    body.dark-mode .calendar-table th {
+        background-color: #1a2a4a;
+    }
+    
+    .calendar-table td {
+        height: 60px;
+        background-color: white;
+    }
+    
+    body.dark-mode .calendar-table td {
+        background-color: #0b1020;
+    }
+    
+    .calendar-empty {
+        background-color: #f0f0f0;
+    }
+    
+    body.dark-mode .calendar-empty {
+        background-color: #050810;
+    }
+    
+    .calendar-table td:hover:not(.calendar-empty) {
+        background-color: #e8f0f7;
+        cursor: pointer;
+    }
+    
+    body.dark-mode .calendar-table td:hover:not(.calendar-empty) {
+        background-color: #1a3a5a;
+    }
+    
+    .upcoming-events {
+        background: #f5f5f5;
+        padding: 1.5rem;
+        border-radius: 8px;
+        border: 2px solid #c8c9c7;
+    }
+    
+    body.dark-mode .upcoming-events {
+        background: #0b1020;
+        border-color: #1a2a4a;
+    }
+    
+    .upcoming-events h3 {
+        color: #164f90;
+        margin-top: 0;
+    }
+    
+    body.dark-mode .upcoming-events h3 {
+        color: #e8edf7;
+    }
+    
+    .event-item {
+        background: white;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border-left: 4px solid #164f90;
+        border-radius: 4px;
+    }
+    
+    body.dark-mode .event-item {
+        background: #1a2a4a;
+        border-left-color: #c8c9c7;
+    }
+    
+    .event-item h4 {
+        margin: 0 0 0.5rem 0;
+        color: #164f90;
+    }
+    
+    body.dark-mode .event-item h4 {
+        color: #e8edf7;
+    }
+    
+    .event-item p {
+        margin: 0.25rem 0;
+        font-size: 0.9rem;
+        color: #666;
+    }
+    
+    body.dark-mode .event-item p {
+        color: #b0b8c8;
+    }
+    
+    .event-date {
+        font-weight: 600;
+        color: #164f90;
+    }
+    
+    body.dark-mode .event-date {
+        color: #87ceeb;
+    }
+    
+    .no-events {
+        text-align: center;
+        color: #666;
+        padding: 2rem;
+    }
+    
+    body.dark-mode .no-events {
+        color: #b0b8c8;
+    }
+    
+    @media (max-width: 768px) {
+        .calendar-container {
+            grid-template-columns: 1fr;
+        }
+        
+        .events-header h1 {
+            font-size: 1.8rem;
+        }
+        
+        .search-box {
+            flex-direction: column;
+        }
+        
+        .search-box input {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="events-container">
+    <div class="events-wrapper">
+        <div class="events-header">
+            <h1>Calendar of Events</h1>
+            <p>Stay updated with all Nu Gamma Sigma Chapter events</p>
+        </div>
+        
+        <div class="search-box">
+            <form method="get" style="display: flex; gap: 1rem; width: 100%; justify-content: center;">
+                <input type="text" name="title" placeholder="Search events..." value="{{ request.GET.title }}">
+                <button type="submit">Search</button>
+            </form>
+        </div>
+        
+        <div class="calendar-container">
+            <div class="calendar-box">
+                <div class="calendar-header">
+                    <h2>{{ month_name }} {{ year }}</h2>
+                    <div class="calendar-nav">
+                        <a href="?month={{ month|add:'-1'|default:12 }}&year={% if month == 1 %}{{ year|add:'-1' }}{% else %}{{ year }}{% endif %}">← Prev</a>
+                        <a href="?month={{ month|add:'1'|default:1 }}&year={% if month == 12 %}{{ year|add:'1' }}{% else %}{{ year }}{% endif %}">Next →</a>
+                    </div>
+                </div>
+                
+                <table class="calendar-table">
+                    <thead>
+                        <tr>
+                            <th>Sun</th>
+                            <th>Mon</th>
+                            <th>Tue</th>
+                            <th>Wed</th>
+                            <th>Thu</th>
+                            <th>Fri</th>
+                            <th>Sat</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for week in calendar %}
+                            <tr>
+                                {% for day in week %}
+                                    {% if day == 0 %}
+                                        <td class="calendar-empty"></td>
+                                    {% else %}
+                                        <td>
+                                            <strong>{{ day }}</strong>
+                                        </td>
+                                    {% endif %}
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="upcoming-events">
+                <h3>Upcoming Events</h3>
+                {% if events_this_month %}
+                    {% for event in events_this_month %}
+                        <div class="event-item">
+                            {% if event.image %}
+                                <img src="{{ event.image.url }}" alt="{{ event.title }}" style="width: 100%; height: 150px; object-fit: cover; border-radius: 4px; margin-bottom: 0.75rem;">
+                            {% endif %}
+                            <h4>{{ event.title }}</h4>
+                            <p><span class="event-date">{{ event.start_date|date:"M d, Y - g:i A" }}</span></p>
+                            {% if event.location %}
+                                <p><strong>Location:</strong> {{ event.location }}</p>
+                            {% endif %}
+                            {% if event.description %}
+                                <p>{{ event.description }}</p>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="no-events">
+                        <p>No events scheduled for this month</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        {% if events %}
+            <div class="events-list">
+                <h2 style="color: #164f90; text-align: center; margin-bottom: 1.5rem;">Search Results</h2>
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem;">
+                    {% for event in events %}
+                        <div class="event-item">
+                            {% if event.image %}
+                                <img src="{{ event.image.url }}" alt="{{ event.title }}" style="width: 100%; height: 150px; object-fit: cover; border-radius: 4px; margin-bottom: 0.75rem;">
+                            {% endif %}
+                            <h4>{{ event.title }}</h4>
+                            <p><span class="event-date">{{ event.start_date|date:"M d, Y - g:i A" }}</span></p>
+                            {% if event.location %}
+                                <p><strong>Location:</strong> {{ event.location }}</p>
+                            {% endif %}
+                            {% if event.description %}
+                                <p>{{ event.description }}</p>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

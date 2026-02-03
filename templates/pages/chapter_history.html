@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block title %}Chapter History - Phi Beta Sigma Fraternity, Inc. | Nu Gamma Sigma Chapter{% endblock %}
+
+{% block css %}
+<style>
+    html, body {
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+    }
+    
+    .page-container {
+        width: 100vw;
+        margin-left: calc(-50vw + 50%);
+        padding: 2rem 1rem;
+        min-height: calc(100vh - 210px);
+        background-image: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)), url('{% static 'img/ngs.jpg' %}');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: scroll;
+        box-sizing: border-box;
+    }
+    
+    body.dark-mode .page-container {
+        background-image: linear-gradient(rgba(11, 16, 32, 0.95), rgba(11, 16, 32, 0.95)), url('{% static 'img/ngs.jpg' %}');
+    }
+    
+    .content-wrapper {
+        max-width: 1000px;
+        margin: 0 auto;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 8px;
+        padding: 2rem;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+    
+    body.dark-mode .content-wrapper {
+        background: rgba(26, 42, 74, 0.95);
+        color: #e8edf7;
+    }
+    
+    .page-header {
+        text-align: center;
+        margin-bottom: 2rem;
+        border-bottom: 3px solid #164f90;
+        padding-bottom: 1rem;
+    }
+    
+    .page-header h1 {
+        color: #164f90;
+        font-size: 2.5rem;
+        margin: 0 0 0.5rem 0;
+    }
+    
+    body.dark-mode .page-header h1 {
+        color: #e8edf7;
+    }
+    
+    .page-header p {
+        color: #666;
+        font-size: 1.1rem;
+        margin: 0;
+    }
+    
+    body.dark-mode .page-header p {
+        color: #b0b8c8;
+    }
+    
+    .page-content {
+        font-size: 1rem;
+        line-height: 1.8;
+        color: #333;
+    }
+    
+    body.dark-mode .page-content {
+        color: #e8edf7;
+    }
+    
+    .page-content h2 {
+        color: #164f90;
+        margin-top: 2rem;
+        margin-bottom: 1rem;
+    }
+    
+    body.dark-mode .page-content h2 {
+        color: #87ceeb;
+    }
+    
+    .page-content p {
+        margin-bottom: 1.5rem;
+    }
+    
+    @media (max-width: 768px) {
+        .page-header h1 {
+            font-size: 1.8rem;
+        }
+        
+        .content-wrapper {
+            padding: 1.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="content-wrapper">
+        <div class="page-header">
+            <h1>Chapter History</h1>
+            <p>The Story of Nu Gamma Sigma Chapter</p>
+        </div>
+        
+        <div class="page-content">
+            <p>Welcome to the Chapter History page. This is where we share the rich history and heritage of the Nu Gamma Sigma Chapter of Phi Beta Sigma Fraternity, Inc.</p>
+            
+            <h2>Our Beginning</h2>
+            <p>Add your chapter's founding story and historical background here...</p>
+            
+            <h2>Milestones & Achievements</h2>
+            <p>Share key milestones, achievements, and important events in your chapter's history...</p>
+            
+            <h2>Leadership Legacy</h2>
+            <p>Highlight past leaders and their contributions to the chapter's development...</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

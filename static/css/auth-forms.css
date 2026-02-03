@@ -1,0 +1,401 @@
+/* ============================================================================
+   AUTH-FORMS.CSS - Styles for Authentication and Form Pages
+   ============================================================================
+   Import this stylesheet in auth/form templates along with base.css
+   ========================================================================== */
+
+/* ============================================================================
+   FORM CONTAINER AND LAYOUT
+   ========================================================================== */
+
+.form-section {
+    padding: 2rem 0;
+}
+
+.form-container {
+    max-width: 800px;
+    margin: 0 auto;
+    background-color: var(--background-light);
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    padding: 2rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.form-container h1 {
+    color: var(--primary-color);
+    margin-bottom: 2rem;
+}
+
+.form-container p {
+    color: #666666;
+}
+
+/* ============================================================================
+   FORM GROUPS AND INPUTS
+   ========================================================================== */
+
+.form-group {
+    margin-bottom: 1.5rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    color: var(--primary-color);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+}
+
+.form-group label .required {
+    color: var(--error-color);
+    font-weight: bold;
+}
+
+.form-input,
+.form-group input,
+.form-group textarea,
+.form-group select {
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    background-color: var(--background-light);
+    color: #333;
+}
+
+.form-input:focus,
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 5px rgba(22, 79, 144, 0.2);
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+.form-group input[type="checkbox"],
+.form-group input[type="radio"] {
+    cursor: pointer;
+    width: auto;
+    margin-right: 0.5rem;
+}
+
+.checkbox-group,
+.radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.checkbox-item,
+.radio-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.checkbox-item input,
+.radio-item input {
+    width: auto;
+}
+
+/* Dark Mode Forms */
+body.dark-mode .form-container {
+    background-color: #0b1020;
+    border-color: #1a2a4a;
+}
+
+body.dark-mode .form-container h1 {
+    color: #9ec5ff;
+}
+
+body.dark-mode .form-container p {
+    color: #b0b8c4;
+}
+
+body.dark-mode .form-group label {
+    color: #9ec5ff;
+}
+
+body.dark-mode .form-input,
+body.dark-mode .form-group input,
+body.dark-mode .form-group textarea,
+body.dark-mode .form-group select {
+    background-color: #232d39;
+    border-color: #3a4a5a;
+    color: #e8edf7;
+}
+
+body.dark-mode .form-input:focus,
+body.dark-mode .form-group input:focus,
+body.dark-mode .form-group textarea:focus,
+body.dark-mode .form-group select:focus {
+    border-color: #9ec5ff;
+    box-shadow: 0 0 5px rgba(158, 197, 255, 0.3);
+}
+
+/* ============================================================================
+   FORM ERRORS AND MESSAGES
+   ========================================================================== */
+
+.form-errors {
+    background-color: #ffebee;
+    border: 1px solid var(--error-color);
+    border-radius: 4px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.form-errors ul {
+    margin: 0;
+    padding-left: 1.5rem;
+}
+
+.form-errors p,
+.form-errors li {
+    color: var(--error-color);
+    margin: 0.5rem 0;
+    font-size: 0.9rem;
+}
+
+.field-error {
+    color: var(--error-color);
+    font-size: 0.85rem;
+    margin-top: 0.25rem;
+}
+
+.field-help {
+    color: #666;
+    font-size: 0.85rem;
+    margin-top: 0.25rem;
+    font-style: italic;
+}
+
+/* Dark Mode Form Errors */
+body.dark-mode .form-errors {
+    background-color: #3d2c2c;
+    border-color: var(--error-color);
+}
+
+body.dark-mode .field-error {
+    color: #ff6b6b;
+}
+
+body.dark-mode .field-help {
+    color: #9aa3b0;
+}
+
+/* ============================================================================
+   FORM ACTIONS
+   ========================================================================== */
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+}
+
+.form-actions .btn {
+    min-width: 150px;
+}
+
+/* ============================================================================
+   AUTHENTICATION PAGES
+   ========================================================================== */
+
+.auth-section {
+    min-height: 70vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+
+.auth-container {
+    max-width: 500px;
+    width: 100%;
+    background-color: var(--background-light);
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    padding: 3rem 2rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.auth-container h1 {
+    color: var(--primary-color);
+    text-align: center;
+    margin-bottom: 0.5rem;
+    border: none;
+    padding-bottom: 0;
+}
+
+.auth-subtitle {
+    text-align: center;
+    color: #666;
+    margin-bottom: 2rem;
+    font-size: 0.95rem;
+}
+
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.auth-form .form-group {
+    margin-bottom: 0;
+}
+
+.auth-footer {
+    text-align: center;
+    margin-top: 2rem;
+    color: #666;
+}
+
+.auth-footer a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.auth-footer a:hover {
+    text-decoration: underline;
+}
+
+/* Dark Mode Auth */
+body.dark-mode .auth-container {
+    background-color: #1a2332;
+    border-color: #2a3a4a;
+}
+
+body.dark-mode .auth-container h1 {
+    color: #9ec5ff;
+}
+
+body.dark-mode .auth-subtitle,
+body.dark-mode .auth-footer {
+    color: #b0b8c4;
+}
+
+body.dark-mode .auth-footer a {
+    color: #9ec5ff;
+}
+
+/* ============================================================================
+   CONTACT FORM STYLES
+   ========================================================================== */
+
+.contact-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.contact-form input,
+.contact-form textarea,
+.contact-form select {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    box-sizing: border-box;
+    background-color: var(--background-light);
+    color: #333333;
+}
+
+.contact-form input:focus,
+.contact-form textarea:focus,
+.contact-form select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 5px rgba(22, 79, 144, 0.2);
+}
+
+.contact-form textarea {
+    resize: vertical;
+    min-height: 150px;
+}
+
+/* Dark Mode Contact Form */
+body.dark-mode .contact-form input,
+body.dark-mode .contact-form textarea,
+body.dark-mode .contact-form select {
+    background-color: #232d39;
+    color: #e8edf7;
+    border-color: #3a4a5a;
+}
+
+body.dark-mode .contact-form input:focus,
+body.dark-mode .contact-form textarea:focus,
+body.dark-mode .contact-form select:focus {
+    border-color: #9ec5ff;
+    box-shadow: 0 0 5px rgba(158, 197, 255, 0.3);
+}
+
+/* ============================================================================
+   INLINE FORMS
+   ========================================================================== */
+
+.inline-form {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-end;
+    flex-wrap: wrap;
+}
+
+.inline-form .form-group {
+    flex: 1;
+    min-width: 250px;
+    margin-bottom: 0;
+}
+
+.inline-form .btn {
+    margin: 0;
+}
+
+/* ============================================================================
+   RESPONSIVE FORMS
+   ========================================================================== */
+
+@media (max-width: 768px) {
+    .form-container {
+        padding: 1.5rem;
+    }
+
+    .auth-container {
+        padding: 2rem 1.5rem;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .form-actions .btn {
+        width: 100%;
+    }
+
+    .inline-form {
+        flex-direction: column;
+    }
+
+    .inline-form .form-group {
+        min-width: auto;
+    }
+
+    .inline-form .btn {
+        width: 100%;
+    }
+}

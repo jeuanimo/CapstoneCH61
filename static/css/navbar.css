@@ -1,0 +1,443 @@
+/* ============================================================================
+   NAVBAR.CSS - Navigation and Header Styles
+   ============================================================================
+   Import this stylesheet for all pages with navigation
+   ========================================================================== */
+
+/* ============================================================================
+   TOP BAR
+   ========================================================================== */
+
+.top-bar {
+    background: linear-gradient(180deg, #f5f6f7 0%, #d8dadd 60%, #c8c9c7 100%);
+    border-bottom: 2px solid #9ba0a3;
+    padding: 1.5rem 0;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.7),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 1001;
+}
+
+.brand-wrapper {
+    flex: 1;
+    text-align: center;
+}
+
+.brand-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+}
+
+.top-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.navbar-brand {
+    color: var(--primary-color);
+    text-decoration: none;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 1rem;
+    margin: 0 auto;
+}
+
+.brand-logo {
+    max-height: 80px;
+    width: auto;
+    order: 1;
+    border-radius: 4px;
+}
+
+.brand-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    order: 2;
+}
+
+.brand-name {
+    font-size: 2.1rem;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    line-height: 1;
+}
+
+.brand-subtitle {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    line-height: 1;
+}
+
+.navbar-brand:hover {
+    color: var(--secondary-color);
+    text-decoration: none;
+}
+
+/* Dark Mode Top Bar */
+body.dark-mode .top-bar {
+    background: linear-gradient(180deg, #16243d 0%, #0f1a30 60%, #0a1324 100%);
+    border-bottom: 2px solid #1f2e4a;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.35),
+                inset 0 1px 0 rgba(255, 255, 255, 0.15),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.4);
+}
+
+body.dark-mode .navbar-brand {
+    color: #e8edf7;
+}
+
+body.dark-mode .brand-name {
+    color: #e8edf7;
+}
+
+body.dark-mode .brand-subtitle {
+    color: #9ec5ff;
+}
+
+/* ============================================================================
+   SOCIAL MEDIA LINKS
+   ========================================================================== */
+
+.social-media {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.social-link {
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-light);
+    text-decoration: none;
+    transition: all 0.25s ease;
+    font-size: 1rem;
+    border-radius: 7px;
+    background: linear-gradient(180deg, #2a7dd4 0%, #1e6bb8 50%, #0f3d6e 100%);
+    border: 1px solid #0a2d52;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.45),
+                0 0 0 1px rgba(255, 255, 255, 0.08),
+                inset 0 1px 0 rgba(255, 255, 255, 0.5),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.4),
+                inset 1px 0 0 rgba(255, 255, 255, 0.3),
+                inset -1px 0 0 rgba(0, 0, 0, 0.3);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.55);
+}
+
+.social-link:hover {
+    background: linear-gradient(180deg, #3a8be3 0%, #2a7dd4 50%, #15508c 100%);
+    color: var(--text-light);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 14px rgba(0, 0, 0, 0.5),
+                0 0 0 1px rgba(255, 255, 255, 0.12),
+                inset 0 1px 0 rgba(255, 255, 255, 0.6),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.35),
+                inset 1px 0 0 rgba(255, 255, 255, 0.35),
+                inset -1px 0 0 rgba(0, 0, 0, 0.3);
+}
+
+.social-link:active {
+    transform: translateY(0);
+    background: linear-gradient(180deg, #1e6bb8 0%, #15508c 60%, #0a2d52 100%);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.45),
+                0 0 0 1px rgba(255, 255, 255, 0.08),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.45),
+                inset 1px 0 0 rgba(255, 255, 255, 0.3),
+                inset -1px 0 0 rgba(0, 0, 0, 0.3);
+}
+
+.social-link i {
+    font-size: 1.1rem;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6),
+                 0 -1px 1px rgba(255, 255, 255, 0.4);
+}
+
+/* ============================================================================
+   USER BADGE
+   ========================================================================== */
+
+.user-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: linear-gradient(180deg, #2a7dd4 0%, #1e6bb8 50%, #0f3d6e 100%);
+    color: var(--text-light);
+    border: 1px solid #0a2d52;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.35),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.3);
+}
+
+.user-badge i {
+    font-size: 1.2rem;
+}
+
+.user-badge .username {
+    white-space: nowrap;
+}
+
+/* Dark Mode User Badge */
+body.dark-mode .user-badge {
+    background: linear-gradient(180deg, #1f3b6a 0%, #112746 60%, #0a1a33 100%);
+    border: 1px solid #0a2d52;
+    color: #e8edf7;
+}
+
+/* ============================================================================
+   THEME TOGGLE BUTTON
+   ========================================================================== */
+
+.theme-toggle-btn {
+    width: auto;
+    height: 42px;
+    padding: 0 1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    background: linear-gradient(180deg, #2a7dd4 0%, #1e6bb8 50%, #0f3d6e 100%);
+    color: var(--text-light);
+    border: 1px solid #0a2d52;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.35),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.3);
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+.theme-toggle-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.45),
+                inset 0 1px 0 rgba(255, 255, 255, 0.45),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.3);
+}
+
+.theme-toggle-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.35);
+}
+
+.theme-toggle-btn i {
+    font-size: 1.1rem;
+}
+
+.theme-label {
+    font-size: 0.85rem;
+    white-space: nowrap;
+}
+
+/* Dark Mode Theme Toggle */
+body.dark-mode .theme-toggle-btn {
+    background: linear-gradient(180deg, #2a4d8c 0%, #1f3b6a 50%, #112746 100%);
+    border-color: #0a2d52;
+}
+
+/* ============================================================================
+   MAIN NAVIGATION
+   ========================================================================== */
+
+.navbar {
+    background: linear-gradient(180deg, #1e6bb8 0%, #0f3d6e 100%);
+    padding: 0.35rem 0;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    border-bottom: 2px solid #0a2d52;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25),
+                inset 0 1px 0 rgba(255, 255, 255, 0.35),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.25);
+}
+
+.navbar-toggler {
+    background: linear-gradient(180deg, #c8c9c7 0%, #9ba0a3 100%);
+    border: 1px solid #5d6369;
+    color: #0f3d6e;
+    padding: 0.6rem 1.1rem;
+    cursor: pointer;
+    font-size: 1rem;
+    display: none;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25),
+                inset 0 1px 0 rgba(255, 255, 255, 0.5),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+}
+
+.navbar-collapse {
+    display: flex;
+    justify-content: center;
+}
+
+.navbar-nav {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    gap: 0.35rem;
+    flex-wrap: nowrap;
+    justify-content: center;
+}
+
+.nav-item {
+    position: relative;
+    flex: 0 0 auto;
+}
+
+.nav-link {
+    color: var(--text-light);
+    text-decoration: none;
+    padding: 0.65rem 0.6rem;
+    display: block;
+    font-size: clamp(0.62rem, 0.75vw, 0.8rem);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    transition: all 0.25s ease;
+    border-radius: 6px;
+    width: 9.25rem;
+    min-height: 2.7rem;
+    text-align: center;
+    white-space: normal;
+    line-height: 1.1;
+    word-break: break-word;
+    background: linear-gradient(180deg, #2a7dd4 0%, #1e6bb8 50%, #0f3d6e 100%);
+    border: 1px solid #0a2d52;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.35),
+                inset 1px 0 0 rgba(255, 255, 255, 0.25),
+                inset -1px 0 0 rgba(0, 0, 0, 0.25);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+}
+
+.nav-link:hover,
+.nav-item.active .nav-link {
+    background: linear-gradient(180deg, #3a8be3 0%, #2a7dd4 50%, #15508c 100%);
+    color: var(--text-light);
+    transform: translateY(-1px);
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.5),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.3),
+                inset 1px 0 0 rgba(255, 255, 255, 0.3),
+                inset -1px 0 0 rgba(0, 0, 0, 0.25);
+}
+
+/* Dark Mode Navbar */
+body.dark-mode .navbar {
+    background: linear-gradient(180deg, #0f1f3a 0%, #0a1324 100%);
+    border-bottom: 2px solid #0a2d52;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.45),
+                inset 0 1px 0 rgba(255, 255, 255, 0.15),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.35);
+}
+
+body.dark-mode .nav-link {
+    background: linear-gradient(180deg, #1f3b6a 0%, #112746 100%);
+    border: 1px solid #0a2d52;
+    color: #e8edf7;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.45),
+                inset 0 1px 0 rgba(255, 255, 255, 0.25),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.35);
+}
+
+body.dark-mode .nav-link:hover,
+body.dark-mode .nav-item.active .nav-link {
+    background: linear-gradient(180deg, #2a4d8c 0%, #1f3b6a 60%, #112746 100%);
+    color: #ffffff;
+}
+
+/* ============================================================================
+   RESPONSIVE NAVBAR
+   ========================================================================== */
+
+@media (max-width: 768px) {
+    .navbar-toggler {
+        display: block;
+    }
+
+    .navbar-collapse {
+        display: none;
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .navbar-collapse.show {
+        display: flex;
+    }
+
+    .navbar-nav {
+        flex-direction: column;
+        width: 100%;
+        gap: 0;
+    }
+
+    .nav-link {
+        text-align: center;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 0;
+        width: 100%;
+        font-size: 0.9rem;
+        letter-spacing: 0.4px;
+    }
+
+    .brand-row {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .top-actions {
+        order: -1;
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .brand-wrapper {
+        order: 2;
+    }
+}
+
+@media (max-width: 480px) {
+    .brand-name {
+        font-size: 1.5rem;
+        letter-spacing: 1px;
+    }
+
+    .brand-subtitle {
+        font-size: 0.7rem;
+        letter-spacing: 2px;
+    }
+
+    .nav-link {
+        padding: 0.75rem 1rem;
+        font-size: 0.82rem;
+        letter-spacing: 0.3px;
+    }
+
+    .social-link {
+        width: 36px;
+        height: 36px;
+        font-size: 0.9rem;
+    }
+}

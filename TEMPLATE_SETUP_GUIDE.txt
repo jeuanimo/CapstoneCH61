@@ -1,0 +1,410 @@
+================================================================================
+TEMPLATE SETUP GUIDE - Copy These Snippets
+================================================================================
+
+Use the snippets below as starting points for your Django templates.
+Each snippet includes the correct CSS files and structure.
+
+================================================================================
+BASE TEMPLATE (base.html) - Use for all pages
+================================================================================
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Capstone CH61{% endblock %}</title>
+    
+    <!-- Global CSS -->
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/navbar.css' %}">
+    
+    <!-- Page-specific CSS - Override in child templates -->
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Top Bar with Brand and Social Links -->
+    <div class="top-bar">
+        <div class="container">
+            <div class="brand-row">
+                <div class="brand-wrapper">
+                    <a href="{% url 'home' %}" class="navbar-brand">
+                        <div class="brand-name">YourName</div>
+                        <div class="brand-subtitle">Portfolio</div>
+                    </a>
+                </div>
+                <div class="top-actions">
+                    <div class="social-media">
+                        <!-- Add social links here -->
+                        <a href="#" class="social-link" title="GitHub">
+                            <i class="fab fa-github"></i>
+                        </a>
+                        <a href="#" class="social-link" title="LinkedIn">
+                            <i class="fab fa-linkedin"></i>
+                        </a>
+                        <a href="#" class="social-link" title="Email">
+                            <i class="fas fa-envelope"></i>
+                        </a>
+                    </div>
+                    {% if user.is_authenticated %}
+                    <div class="user-badge">
+                        <i class="fas fa-user-circle"></i>
+                        <span class="username">{{ user.username }}</span>
+                    </div>
+                    {% endif %}
+                    <button class="theme-toggle-btn" id="themeToggle">
+                        <i class="fas fa-moon"></i>
+                        <span class="theme-label">Dark</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-collapse">
+                <ul class="navbar-nav">
+                    <li class="nav-item {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
+                        <a href="{% url 'home' %}" class="nav-link">Home</a>
+                    </li>
+                    <li class="nav-item {% if request.resolver_match.url_name == 'about' %}active{% endif %}">
+                        <a href="{% url 'about' %}" class="nav-link">About</a>
+                    </li>
+                    <li class="nav-item {% if request.resolver_match.url_name == 'projects' %}active{% endif %}">
+                        <a href="{% url 'projects' %}" class="nav-link">Projects</a>
+                    </li>
+                    <li class="nav-item {% if request.resolver_match.url_name == 'contact' %}active{% endif %}">
+                        <a href="{% url 'contact' %}" class="nav-link">Contact</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Messages/Alerts -->
+    {% if messages %}
+    <div class="container mt-2">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 Capstone CH61. All rights reserved.</p>
+    </footer>
+
+    <!-- JavaScript for theme toggle -->
+    <script>
+        document.getElementById('themeToggle').addEventListener('click', function() {
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+        });
+        
+        // Load saved theme preference
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark-mode');
+        }
+    </script>
+</body>
+</html>
+
+================================================================================
+HOME PAGE (home.html)
+================================================================================
+
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Home - Capstone CH61{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/pages.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="home-container">
+    <div class="home-content">
+        <h1 class="home-title">Welcome</h1>
+        <p class="home-subtitle">Innovative Developer & Problem Solver</p>
+        <p class="home-description">
+            Welcome to my portfolio. Here you'll find my projects, experience, and skills.
+            I'm passionate about creating beautiful and functional web applications.
+        </p>
+        <div class="home-actions">
+            <a href="{% url 'about' %}" class="btn btn-primary">Learn About Me</a>
+            <a href="{% url 'projects' %}" class="btn btn-secondary">View Projects</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+================================================================================
+ABOUT PAGE (about.html)
+================================================================================
+
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}About - Capstone CH61{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/pages.css' %}">
+{% endblock %}
+
+{% block content %}
+<h1>About Me</h1>
+
+<div class="about-container">
+    <div class="about-left">
+        <div class="photo-circle">
+            <div class="photo-placeholder">👤</div>
+        </div>
+    </div>
+    <div class="about-right">
+        <div class="about-card">
+            <p>
+                Hello! I'm a full-stack developer with a passion for creating elegant solutions
+                to complex problems. With experience in both frontend and backend development,
+                I bring a comprehensive approach to every project.
+            </p>
+            <p>
+                My expertise spans across multiple technologies including Django, React, Python,
+                and JavaScript. I'm committed to writing clean, maintainable code and following
+                best practices in security and performance.
+            </p>
+        </div>
+    </div>
+</div>
+
+<h2 class="mt-3">Experience</h2>
+<div class="experience-grid">
+    <div class="experience-card">
+        <div class="card-icon">
+            <i class="fas fa-code"></i>
+        </div>
+        <h3>Full Stack Development</h3>
+        <p>Building complete applications from frontend to backend with modern technologies.</p>
+    </div>
+    <div class="experience-card">
+        <div class="card-icon">
+            <i class="fas fa-shield-alt"></i>
+        </div>
+        <h3>Security First</h3>
+        <p>Implementing secure coding practices and protecting against common vulnerabilities.</p>
+    </div>
+    <div class="experience-card">
+        <div class="card-icon">
+            <i class="fas fa-mobile-alt"></i>
+        </div>
+        <h3>Responsive Design</h3>
+        <p>Creating beautiful, responsive interfaces that work on all devices.</p>
+    </div>
+</div>
+{% endblock %}
+
+================================================================================
+PROJECTS PAGE (projects.html)
+================================================================================
+
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Projects - Capstone CH61{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/projects.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="projects">
+    <h1>My Projects</h1>
+    
+    <div class="projects-header">
+        <p>A collection of my recent projects and work</p>
+        {% if user.is_staff %}
+        <a href="{% url 'add-project' %}" class="btn btn-primary">Add Project</a>
+        {% endif %}
+    </div>
+
+    <div class="projects-container">
+        {% for project in projects %}
+        <div class="project-card">
+            <h2>{{ project.title }}</h2>
+            <p class="project-year">{{ project.year }}</p>
+            <p>{{ project.description }}</p>
+            {% if project.skills %}
+            <div class="project-skills">
+                <strong>Skills:</strong>
+                <div class="skills-list">
+                    {% for skill in project.skills.all %}
+                    <span class="skill-tag">{{ skill.name }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+            {% if project.link %}
+            <a href="{{ project.link }}" target="_blank" class="btn btn-primary">View Project</a>
+            {% endif %}
+        </div>
+        {% empty %}
+        <p class="text-center">No projects yet.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+================================================================================
+CONTACT PAGE (contact.html)
+================================================================================
+
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Contact - Capstone CH61{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/auth-forms.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="form-section">
+    <div class="form-container">
+        <h1>Contact Me</h1>
+        <p>Have a question or project in mind? I'd love to hear from you.</p>
+
+        {% if form.non_field_errors %}
+        <div class="form-errors">
+            {% for error in form.non_field_errors %}
+            <p class="error">{{ error }}</p>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <form method="POST" class="contact-form">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                {{ form.name.label_tag }}
+                {{ form.name }}
+                {% if form.name.errors %}
+                <span class="field-error">{{ form.name.errors.0 }}</span>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                {{ form.email.label_tag }}
+                {{ form.email }}
+                {% if form.email.errors %}
+                <span class="field-error">{{ form.email.errors.0 }}</span>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                {{ form.subject.label_tag }}
+                {{ form.subject }}
+                {% if form.subject.errors %}
+                <span class="field-error">{{ form.subject.errors.0 }}</span>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                {{ form.message.label_tag }}
+                {{ form.message }}
+                {% if form.message.errors %}
+                <span class="field-error">{{ form.message.errors.0 }}</span>
+                {% endif %}
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Send Message</button>
+                <a href="{% url 'home' %}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+================================================================================
+LOGIN PAGE (login.html)
+================================================================================
+
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Login - Capstone CH61{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/auth-forms.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="auth-section">
+    <div class="auth-container">
+        <h1>Login</h1>
+        <p class="auth-subtitle">Sign in to your account</p>
+
+        {% if form.non_field_errors %}
+        <div class="form-errors">
+            {% for error in form.non_field_errors %}
+            <p class="error">{{ error }}</p>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <form method="POST" class="auth-form">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                {{ form.username.label_tag }}
+                {{ form.username }}
+                {% if form.username.errors %}
+                <span class="field-error">{{ form.username.errors.0 }}</span>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                {{ form.password.label_tag }}
+                {{ form.password }}
+                {% if form.password.errors %}
+                <span class="field-error">{{ form.password.errors.0 }}</span>
+                {% endif %}
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block">Sign In</button>
+        </form>
+
+        <div class="auth-footer">
+            Don't have an account? <a href="{% url 'register' %}">Create one</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+================================================================================
+NOTES
+================================================================================
+
+1. Replace URL names with your actual URL names from urls.py
+2. Customize brand name, social links, and content as needed
+3. Add Font Awesome or icon library to base.html head:
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+4. All forms automatically get dark mode support
+5. Navigation highlights current page automatically
+6. Theme toggle saves preference to localStorage
+
+================================================================================

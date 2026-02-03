@@ -1,0 +1,37 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:x='urn:schemas-microsoft-com:office:excel' xmlns='http://www.w3.org/TR/REC-html40'>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style>
+
+</style>
+<!--[if gte mso 9]>
+
+<![endif]-->
+</head>
+<body>
+<table class="CaptionTextInvisible" rules="all" summary="Grid table view level . Contains flat or hierarchical data represented in a tabular manner." border="1" id="ctl01_TemplateBody_WebPartManager1_gwpciDirectory_ciDirectory_ChapterSearch_ResultsGrid_Grid1_ctl00" style="width:100%;table-layout:auto;empty-cells:show;">
+	<colgroup>
+		<col  />
+		<col  />
+		<col  />
+		<col  />
+		<col  />
+		<col  />
+		<col  />
+		<col  />
+		<col  />
+		<col  />
+		<col  />
+	</colgroup>
+<thead>
+		<tr>
+			<th scope="col">Chapter</th><th scope="col">Mailing Address</th><th scope="col">Phone</th><th scope="col">Email</th><th scope="col">Chapter President First Name</th><th scope="col">Chapter President Last Name</th><th scope="col">Region</th><th scope="col">Chapter Type</th><th scope="col">Is HBCU</th><th scope="col">University/Location</th><th scope="col">Charter Date</th>
+		</tr>
+	</thead><tbody>
+	<tr>
+		<td style="mso-number-format:\@;">Nu Gamma Sigma</td><td style="mso-number-format:\@;">P.O. BOX 23183Belleville, IL  62223-9294</td><td style="mso-number-format:\@;">(000) 000-0000</td><td style="mso-number-format:\@;">Rmcclellan0271@outlook.com</td><td style="mso-number-format:\@;">Ronald</td><td style="mso-number-format:\@;">McClellan</td><td style="mso-number-format:\@;">Great Lakes</td><td style="mso-number-format:\@;">Alumni</td><td style="mso-number-format:\@;">False</td><td style="mso-number-format:\@;">Belleville, IL</td><td style="mso-number-format:\@;">5/21/2002</td>
+	</tr>
+	</tbody>
+
+</table></body></html>

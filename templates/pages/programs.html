@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}Programs - Phi Beta Sigma Fraternity, Inc. | Nu Gamma Sigma Chapter{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/pages.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="events-container">
+    <div class="events-header">
+        <h1 class="events-title">Programs</h1>
+        <p class="events-subtitle">Scholarship, leadership, and community initiatives</p>
+    </div>
+
+    <div class="events-grid">
+        <div class="event-card">
+            <h3>Scholarship & Education</h3>
+            <div class="event-meta">Year-round</div>
+            <p>Academic mentorship, scholarship awareness, and educational workshops.</p>
+        </div>
+        <div class="event-card">
+            <h3>Leadership Development</h3>
+            <div class="event-meta">Ongoing</div>
+            <p>Programs that cultivate leadership, professionalism, and civic responsibility.</p>
+        </div>
+        <div class="event-card">
+            <h3>Community Service</h3>
+            <div class="event-meta">Ongoing</div>
+            <p>Volunteer initiatives focused on local community impact and outreach.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

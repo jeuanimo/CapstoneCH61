@@ -1,0 +1,464 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block title %}Home - Phi Beta Sigma Fraternity, Inc. | Nu Gamma Sigma Chapter{% endblock %}
+
+{% block css %}
+<style>
+    html, body {
+        height: 100%;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        background-color: var(--background-light);
+    }
+    
+    body.dark-mode {
+        background-color: #0b1020;
+    }
+    
+    .home-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: calc(100vh - 210px);
+        width: 100vw;
+        margin-left: calc(-50vw + 50%);
+        padding: 1rem 0.5rem;
+        background-image: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)), url('{% static 'img/ngs.jpg' %}');
+        background-size: contain;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: scroll;
+        box-sizing: border-box;
+    }
+    
+    body.dark-mode .home-container {
+        background-image: linear-gradient(rgba(11, 16, 32, 0.95), rgba(11, 16, 32, 0.95)), url('{% static 'img/ngs.jpg' %}');
+    }
+    
+    .home-cards {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.5rem;
+        width: 100%;
+        max-width: 1200px;
+        height: 100%;
+    }
+    
+    .home-card {
+        background: var(--bg-secondary);
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+    
+    body.dark-mode .home-card {
+        background: #1a2a4a;
+    }
+    
+    .home-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25);
+    }
+    
+    .card-btn {
+        background-color: var(--primary-color);
+        color: #ffffff !important;
+        border: none;
+        padding: 0.5rem 0.75rem;
+        border-radius: 4px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+        margin-top: 0.5rem;
+        text-decoration: none;
+        display: inline-block;
+        white-space: nowrap;
+    }
+    
+    .card-btn:hover {
+        background-color: var(--secondary-color);
+        color: var(--primary-color) !important;
+        transform: scale(1.05);
+        text-decoration: none;
+    }
+    
+    .btn-group {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: space-between;
+        width: 100%;
+        margin-top: 0.5rem;
+        flex-wrap: wrap;
+    }
+    
+    .btn-group .card-btn {
+        flex: 1;
+        min-width: 80px;
+        margin: 0 2px;
+    }
+    
+    .card-image {
+        width: 100%;
+        height: 50%;
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3.5rem;
+        color: rgba(255, 255, 255, 0.3);
+        flex-shrink: 0;
+    }
+    
+    .card-image img {
+        max-width: 85%;
+        max-height: 85%;
+        object-fit: contain;
+    }
+    
+    .card-content {
+        padding: 1rem;
+        text-align: center;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 50%;
+        gap: 0.5rem;
+        background-color: #c8c9c7;
+        color: #164f90;
+    }
+    
+    .card-title {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #164f90 !important;
+        margin: 0;
+    }
+    
+    @media (max-width: 768px) {
+        .home-cards {
+            grid-template-columns: 1fr;
+        }
+    }
+    
+    /* Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 2000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        animation: fadeIn 0.3s ease;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    .modal.show {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .modal-content {
+        background-color: #ffffff;
+        padding: 2rem;
+        border-radius: 8px;
+        max-width: 700px;
+        width: 90%;
+        max-height: 80vh;
+        overflow-y: auto;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        position: relative;
+        animation: slideDown 0.3s ease;
+    }
+    
+    @keyframes slideDown {
+        from {
+            transform: translateY(-50px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+    
+    body.dark-mode .modal-content {
+        background-color: #1a2a4a;
+        color: #e8edf7;
+    }
+    
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        border-bottom: 2px solid #164f90;
+        padding-bottom: 1rem;
+    }
+    
+    body.dark-mode .modal-header {
+        border-bottom-color: #87ceeb;
+    }
+    
+    .modal-header h2 {
+        margin: 0;
+        color: #164f90;
+        font-size: 1.8rem;
+    }
+    
+    body.dark-mode .modal-header h2 {
+        color: #87ceeb;
+    }
+    
+    .modal-close {
+        background-color: #164f90;
+        color: #ffffff;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: background-color 0.3s ease;
+    }
+    
+    .modal-close:hover {
+        background-color: #c8c9c7;
+        color: #164f90;
+    }
+    
+    .modal-body {
+        font-size: 1rem;
+        line-height: 1.8;
+        color: #333;
+    }
+    
+    body.dark-mode .modal-body {
+        color: #e8edf7;
+    }
+    
+    .modal-body h3 {
+        color: #164f90;
+        margin-top: 1.5rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    body.dark-mode .modal-body h3 {
+        color: #87ceeb;
+    }
+    
+    .modal-body p {
+        margin-bottom: 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="home-container">
+    <div class="home-cards">
+        <div class="home-card">
+            <div class="card-image">
+                <img src="{% static 'img/PBS_Seal_2019_Color.png' %}" alt="Phi Beta Sigma Seal">
+            </div>
+            <div class="card-content">
+                <h3 class="card-title">International Headquarters</h3>
+                <div class="btn-group">
+                    <button class="card-btn" onclick="window.open('https://phibetasigma1914.org/about-history/', '_blank', 'width=1000,height=800,menubar=no,toolbar=no');">History</button>
+                    <button class="card-btn" onclick="window.open('https://phibetasigma1914.org/leadership/presidents-message/', '_blank', 'width=1000,height=800,menubar=no,toolbar=no');">Leadership</button>
+                    <button class="card-btn" onclick="window.open('https://phibetasigma1914.org/about/sigma-membership/', '_blank', 'width=1000,height=800,menubar=no,toolbar=no');">Membership</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="home-card">
+            <div class="card-image">
+                <img src="{% static 'img/ngs_logo.png' %}" alt="Nu Gamma Sigma Chapter Logo">
+            </div>
+            <div class="card-content">
+                <h3 class="card-title">Our Chapter</h3>
+                <div class="btn-group">
+                    <button class="card-btn" onclick="openModal('historyModal');">History</button>
+                    <button class="card-btn" onclick="window.location.href='{% url 'chapter_leadership' %}';">Leadership</button>
+                    <button class="card-btn" onclick="openModal('membershipModal');">Membership</button>
+                    <button class="card-btn" onclick="window.location.href='{% url 'chapter_programs' %}';">Programs</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="home-card">
+            <div class="card-image">
+                <img src="{% static 'img/calendar.png' %}" alt="Calendar of Events">
+            </div>
+            <div class="card-content">
+                <h3 class="card-title">Calendar of Events</h3>
+                <div class="btn-group">
+                    <button class="card-btn" onclick="openModal('calendarModal');">View Calendar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- History Modal -->
+<div id="historyModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Chapter History</h2>
+            <button class="modal-close" onclick="closeModal('historyModal');">Close</button>
+        </div>
+        <div class="modal-body">
+            <p>Welcome to the Chapter History section. This is where we share the rich history and heritage of the Nu Gamma Sigma Chapter of Phi Beta Sigma Fraternity, Inc.</p>
+            
+            <h3>Our Beginning</h3>
+            <p>Add your chapter's founding story and historical background here...</p>
+            
+            <h3>Milestones & Achievements</h3>
+            <p>Share key milestones, achievements, and important events in your chapter's history...</p>
+            
+            <h3>Leadership Legacy</h3>
+            <p>Highlight past leaders and their contributions to the chapter's development...</p>
+        </div>
+    </div>
+</div>
+
+<!-- Leadership Modal -->
+<div id="leadershipModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Chapter Leadership</h2>
+            <button class="modal-close" onclick="closeModal('leadershipModal');">Close</button>
+        </div>
+        <div class="modal-body">
+            <p>Welcome to the Chapter Leadership section. Learn about the current and past leadership of Nu Gamma Sigma Chapter.</p>
+            
+            <h3>Current Officers</h3>
+            <p>Add information about your current chapter officers and their roles...</p>
+            
+            <h3>Leadership Structure</h3>
+            <p>Describe your chapter's organizational structure and leadership hierarchy...</p>
+            
+            <h3>Contact Leadership</h3>
+            <p>Provide information on how to contact chapter leadership...</p>
+        </div>
+    </div>
+</div>
+
+<!-- Membership Modal -->
+<div id="membershipModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Chapter Membership</h2>
+            <button class="modal-close" onclick="closeModal('membershipModal');">Close</button>
+        </div>
+        <div class="modal-body">
+            <h3>Basic Eligibility Requirements</h3>
+            <p><strong>Membership in Phi Beta Sigma Fraternity, Inc.</strong> is divided into two main categories: <strong>Collegiate</strong> (members currently attending colleges and universities), and <strong>Alumni</strong> (members who have completed their undergraduate education).</p>
+            
+            <h4 style="color: #164f90; margin-top: 1.5rem;">Collegiate Membership</h4>
+            <p>Membership in Phi Beta Sigma Fraternity is limited to college men who are actively working toward obtaining a baccalaureate degree at a recognized college or university. Potential candidates should have:</p>
+            <ul style="margin-left: 1.5rem;">
+                <li>Completed at least one grading period</li>
+                <li>Obtained a minimum of a 2.5 cumulative GPA based on a four-point scale</li>
+            </ul>
+            
+            <h4 style="color: #164f90; margin-top: 1.5rem;">Alumni Membership</h4>
+            <p>Membership in Phi Beta Sigma Fraternity is limited to professional men who have earned a baccalaureate degree or other degree from a recognized college or university.</p>
+            
+            <h4 style="color: #164f90; margin-top: 1.5rem;">General Eligibility Requirements</h4>
+            <ul style="margin-left: 1.5rem;">
+                <li>Candidates of Phi Beta Sigma Fraternity <strong>cannot hold active or previous membership in another intercollegiate fraternity</strong>, other than an honorary or professional fraternity.</li>
+                <li>Candidates for membership in Phi Beta Sigma Fraternity must apply to a chapter in the region where they reside, based upon the terms and conditions outlined in the Fraternity's membership intake and development process.</li>
+                <li><strong>Nu Gamma Sigma Chapter is an Alumni Chapter</strong> and expects applicants to meet the requirements for Alumni Status.</li>
+            </ul>
+            
+            <h3 style="margin-top: 2rem; border-top: 1px solid #164f90; padding-top: 1rem;">Ready to Become a Man of Sigma?</h3>
+            <p>If you are interested in becoming a man of Sigma and joining Nu Gamma Sigma Chapter, we want to hear from you! Contact us today to learn more about membership opportunities.</p>
+            <div style="text-align: center; margin-top: 1.5rem;">
+                <a href="{% url 'contact' %}" class="card-btn" style="background-color: #164f90; color: #ffffff; padding: 0.75rem 2rem; font-size: 1rem;">Contact Us</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Calendar Modal -->
+<div id="calendarModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Calendar of Events</h2>
+            <button class="modal-close" onclick="closeModal('calendarModal');">Close</button>
+        </div>
+        <div class="modal-body">
+            <div style="margin-bottom: 1.5rem;">
+                <form method="GET" action="{% url 'events' %}" style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+                    <input type="text" name="title" placeholder="Search events..." style="flex: 1; padding: 0.5rem; border: 1px solid #c8c9c7; border-radius: 4px; font-size: 0.95rem;">
+                    <button type="submit" style="padding: 0.5rem 1.5rem; background-color: #164f90; color: #ffffff; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">Search</button>
+                    <a href="{% url 'events' %}" style="padding: 0.5rem 1.5rem; background-color: #c8c9c7; color: #164f90; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; text-decoration: none; text-align: center;">View Full Calendar</a>
+                </form>
+            </div>
+            
+            <h3>Upcoming Events</h3>
+            {% if upcoming_events %}
+                <div style="display: grid; gap: 1rem;">
+                    {% for event in upcoming_events %}
+                        <div style="padding: 1rem; background: #f9f9f9; border-radius: 4px; border-left: 4px solid #164f90;">
+                            <p style="font-weight: bold; color: #164f90; margin: 0 0 0.5rem 0;">{{ event.title }}</p>
+                            <p style="font-size: 0.9rem; color: #666; margin: 0.25rem 0;">📅 {{ event.start_date|date:"M d, Y - g:i A" }}</p>
+                            {% if event.location %}
+                                <p style="font-size: 0.9rem; color: #666; margin: 0.25rem 0;">📍 {{ event.location }}</p>
+                            {% endif %}
+                            {% if event.description %}
+                                <p style="font-size: 0.9rem; color: #333; margin: 0.5rem 0 0 0; line-height: 1.5;">{{ event.description|truncatewords:30 }}</p>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p style="text-align: center; color: #999; padding: 2rem;">No upcoming events scheduled yet.</p>
+            {% endif %}
+            
+            <div style="text-align: center; margin-top: 1.5rem;">
+                <a href="{% url 'events' %}" class="card-btn" style="background-color: #164f90; color: #ffffff; padding: 0.75rem 2rem; font-size: 1rem; display: inline-block;">View Full Calendar</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openModal(modalId) {
+        const modal = document.getElementById(modalId);
+        modal.classList.add('show');
+        document.body.style.overflow = 'hidden';
+    }
+    
+    function closeModal(modalId) {
+        const modal = document.getElementById(modalId);
+        modal.classList.remove('show');
+        document.body.style.overflow = 'auto';
+    }
+    
+    // Close modal when clicking outside the modal content
+    window.onclick = function(event) {
+        if (event.target.classList.contains('modal')) {
+            event.target.classList.remove('show');
+            document.body.style.overflow = 'auto';
+        }
+    }
+</script>
+
+{% endblock %}

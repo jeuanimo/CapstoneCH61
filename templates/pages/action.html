@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Nu Gamma Sigma in Action - Phi Beta Sigma Fraternity, Inc.{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/pages.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="events-container">
+    <div class="events-header">
+        <h1 class="events-title">Nu Gamma Sigma in Action</h1>
+        <p class="events-subtitle">Photos, stories, and community impact</p>
+    </div>
+
+    <div class="events-grid">
+        <div class="event-card">
+            <h3>Service Highlights</h3>
+            <div class="event-meta">Community Impact</div>
+            <p>Snapshots and stories from recent service projects and outreach efforts.</p>
+        </div>
+        <div class="event-card">
+            <h3>Brotherhood Moments</h3>
+            <div class="event-meta">Chapter Life</div>
+            <p>Events that strengthen our bonds and celebrate the chapter’s legacy.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

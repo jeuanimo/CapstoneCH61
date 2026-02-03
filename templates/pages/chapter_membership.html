@@ -1,0 +1,373 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block title %}Chapter Membership - Phi Beta Sigma Fraternity, Inc. | Nu Gamma Sigma Chapter{% endblock %}
+
+{% block css %}
+<style>
+    html, body {
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+    }
+    
+    .page-container {
+        width: 100vw;
+        margin-left: calc(-50vw + 50%);
+        padding: 2rem 1rem;
+        min-height: calc(100vh - 210px);
+        background-image: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)), url('{% static 'img/ngs.jpg' %}');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: scroll;
+        box-sizing: border-box;
+    }
+    
+    body.dark-mode .page-container {
+        background-image: linear-gradient(rgba(11, 16, 32, 0.95), rgba(11, 16, 32, 0.95)), url('{% static 'img/ngs.jpg' %}');
+    }
+    
+    .content-wrapper {
+        max-width: 1000px;
+        margin: 0 auto;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 8px;
+        padding: 2rem;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+    
+    body.dark-mode .content-wrapper {
+        background: rgba(26, 42, 74, 0.95);
+        color: #e8edf7;
+    }
+    
+    .page-header {
+        text-align: center;
+        margin-bottom: 2rem;
+        border-bottom: 3px solid #164f90;
+        padding-bottom: 1rem;
+    }
+    
+    .page-header h1 {
+        color: #164f90;
+        font-size: 2.5rem;
+        margin: 0 0 0.5rem 0;
+    }
+    
+    body.dark-mode .page-header h1 {
+        color: #e8edf7;
+    }
+    
+    .page-header p {
+        color: #666;
+        font-size: 1.1rem;
+        margin: 0;
+    }
+    
+    body.dark-mode .page-header p {
+        color: #b0b8c8;
+    }
+    
+    .page-content {
+        font-size: 1rem;
+        line-height: 1.8;
+        color: #333;
+    }
+    
+    body.dark-mode .page-content {
+        color: #e8edf7;
+    }
+    
+    .page-content h2 {
+        color: #164f90;
+        margin-top: 2rem;
+        margin-bottom: 1rem;
+    }
+    
+    body.dark-mode .page-content h2 {
+        color: #87ceeb;
+    }
+    
+    .page-content p {
+        margin-bottom: 1.5rem;
+    }
+    
+    .eligibility-section {
+        background: #f9f9f9;
+        padding: 1.5rem;
+        border-radius: 6px;
+        border-left: 4px solid #164f90;
+        margin: 2rem 0;
+    }
+    
+    body.dark-mode .eligibility-section {
+        background: rgba(11, 16, 32, 0.6);
+        border-left-color: #87ceeb;
+    }
+    
+    .eligibility-section h3 {
+        color: #164f90;
+        margin-top: 1.5rem;
+        margin-bottom: 0.75rem;
+        font-size: 1.2rem;
+    }
+    
+    body.dark-mode .eligibility-section h3 {
+        color: #87ceeb;
+    }
+    
+    .eligibility-section h3:first-child {
+        margin-top: 0;
+    }
+    
+    .eligibility-section ul {
+        margin: 1rem 0;
+        padding-left: 2rem;
+    }
+    
+    .eligibility-section li {
+        margin-bottom: 1rem;
+        line-height: 1.6;
+    }
+    
+    .return-modal {
+        display: none;
+        position: fixed;
+        z-index: 2000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        animation: fadeIn 0.3s ease;
+    }
+    
+    .return-modal.show {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .return-modal-content {
+        background-color: #ffffff;
+        padding: 3rem 2rem;
+        border-radius: 8px;
+        max-width: 500px;
+        text-align: center;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        animation: slideDown 0.3s ease;
+    }
+    
+    body.dark-mode .return-modal-content {
+        background-color: rgba(26, 42, 74, 0.95);
+        color: #e8edf7;
+    }
+    
+    .return-modal-content h2 {
+        color: #164f90;
+        margin-top: 0;
+        margin-bottom: 1.5rem;
+        font-size: 1.8rem;
+    }
+    
+    body.dark-mode .return-modal-content h2 {
+        color: #87ceeb;
+    }
+    
+    .return-modal-content p {
+        color: #333;
+        font-size: 1.1rem;
+        margin-bottom: 2rem;
+        line-height: 1.6;
+    }
+    
+    body.dark-mode .return-modal-content p {
+        color: #e8edf7;
+    }
+    
+    .return-btn-group {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    
+    .return-btn {
+        padding: 0.75rem 2rem;
+        font-size: 1rem;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: all 0.3s ease;
+    }
+    
+    .return-btn-home {
+        background-color: #164f90;
+        color: #ffffff;
+    }
+    
+    .return-btn-home:hover {
+        background-color: #c8c9c7;
+        color: #164f90;
+        transform: scale(1.05);
+    }
+    
+    .return-btn-stay {
+        background-color: #c8c9c7;
+        color: #164f90;
+    }
+    
+    .return-btn-stay:hover {
+        background-color: #164f90;
+        color: #ffffff;
+        transform: scale(1.05);
+    }
+    
+    .return-home-btn-floating {
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        padding: 1rem 1.5rem;
+        background-color: #164f90;
+        color: #ffffff;
+        border: none;
+        border-radius: 50px;
+        cursor: pointer;
+        font-size: 1rem;
+        font-weight: bold;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
+        z-index: 1000;
+    }
+    
+    body.dark-mode .return-home-btn-floating {
+        background-color: #87ceeb;
+        color: #164f90;
+    }
+    
+    .return-home-btn-floating:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-50px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .page-header h1 {
+            font-size: 1.8rem;
+        }
+        
+        .content-wrapper {
+            padding: 1.5rem;
+        }
+        
+        .return-home-btn-floating {
+            bottom: 1rem;
+            right: 1rem;
+            padding: 0.75rem 1rem;
+            font-size: 0.9rem;
+        }
+    }
+</style>
+
+<script>
+    function openReturnModal() {
+        const modal = document.getElementById('returnModal');
+        modal.classList.add('show');
+    }
+    
+    function closeReturnModal() {
+        const modal = document.getElementById('returnModal');
+        modal.classList.remove('show');
+    }
+    
+    window.onclick = function(event) {
+        const modal = document.getElementById('returnModal');
+        if (event.target == modal) {
+            modal.classList.remove('show');
+        }
+    }
+</script>
+{% endblock %}
+
+{% block content %}
+<!-- Return Home Modal -->
+<div id="returnModal" class="return-modal">
+    <div class="return-modal-content">
+        <h2>Ready to Go Back?</h2>
+        <p>Would you like to return to the home page?</p>
+        <div class="return-btn-group">
+            <button class="return-btn return-btn-home" onclick="window.location.href='{% url 'home' %}';">Return Home</button>
+            <button class="return-btn return-btn-stay" onclick="closeReturnModal();">Stay Here</button>
+        </div>
+    </div>
+</div>
+
+<!-- Floating Return Button -->
+<button class="return-home-btn-floating" onclick="openReturnModal();">← Return Home</button>
+
+<div class="page-container">
+    <div class="content-wrapper">
+        <div class="page-header">
+            <h1>Chapter Membership</h1>
+            <p>Join Nu Gamma Sigma Chapter</p>
+        </div>
+        
+        <div class="page-content">
+            <p>Welcome to the Chapter Membership page. Learn about joining and membership information for Nu Gamma Sigma Chapter.</p>
+            
+            <h2>Basic Eligibility Requirements</h2>
+            <div class="eligibility-section">
+                <p><strong>Membership in Phi Beta Sigma Fraternity, Inc.</strong> is divided into two main categories: <strong>Collegiate</strong> (members currently attending colleges and universities), and <strong>Alumni</strong> (members who have completed their undergraduate education).</p>
+                
+                <h3>Collegiate Membership</h3>
+                <p>Membership in Phi Beta Sigma Fraternity is limited to college men who are actively working toward obtaining a baccalaureate degree at a recognized college or university. Potential candidates should have:</p>
+                <ul>
+                    <li>Completed at least one grading period</li>
+                    <li>Obtained a minimum of a 2.5 cumulative GPA based on a four-point scale</li>
+                </ul>
+                
+                <h3>Alumni Membership</h3>
+                <p>Membership in Phi Beta Sigma Fraternity is limited to professional men who have earned a baccalaureate degree or other degree from a recognized college or university.</p>
+                
+                <h3>General Eligibility Requirements</h3>
+                <ul>
+                    <li>Candidates of Phi Beta Sigma Fraternity <strong>cannot hold active or previous membership in another intercollegiate fraternity</strong>, other than an honorary or professional fraternity.</li>
+                    <li>Candidates for membership in Phi Beta Sigma Fraternity must apply to a chapter in the region where they reside, based upon the terms and conditions outlined in the Fraternity's membership intake and development process.</li>
+                    <li><strong>Nu Gamma Sigma Chapter is an Alumni Chapter</strong> and expects applicants to meet the requirements for Alumni Status.</li>
+                </ul>
+            </div>
+            
+            <h2>Membership Requirements</h2>
+            <p>Outline the requirements for joining Phi Beta Sigma and Nu Gamma Sigma Chapter...</p>
+            
+            <h2>The Pledge Process</h2>
+            <p>Describe the pledge process and what potential members can expect...</p>
+            
+            <h2>Active Member Benefits</h2>
+            <p>Share the benefits and opportunities available to active members...</p>
+            
+            <h2>Get Involved</h2>
+            <p>Provide information on how interested individuals can get involved with the chapter...</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

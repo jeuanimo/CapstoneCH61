@@ -1,0 +1,335 @@
+/* ============================================================================
+   PAGES.CSS - Styles for Pages App Pages (Home, About, etc.)
+   ============================================================================
+   Import this stylesheet in page templates along with base.css
+   ========================================================================== */
+
+/* ============================================================================
+   HOME PAGE STYLES
+   ========================================================================== */
+
+.home-container {
+    text-align: center;
+    padding: 2rem;
+    min-height: 70vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.home-content {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.home-title {
+    font-size: 3rem;
+    font-weight: 800;
+    color: var(--primary-color);
+    margin-bottom: 1.5rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.home-subtitle {
+    font-size: 1.5rem;
+    color: var(--secondary-color);
+    margin-bottom: 2rem;
+    font-weight: 600;
+}
+
+.home-description {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: #555;
+    margin-bottom: 2.5rem;
+    text-align: center;
+}
+
+.home-actions {
+    display: flex;
+    gap: 1.5rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.home-actions .btn {
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    min-width: 150px;
+}
+
+/* Dark Mode Home */
+body.dark-mode .home-title {
+    color: #9ec5ff;
+}
+
+body.dark-mode .home-subtitle {
+    color: #b0b8c4;
+}
+
+body.dark-mode .home-description {
+    color: #c5d3e0;
+}
+
+/* ============================================================================
+   ABOUT PAGE STYLES
+   ========================================================================== */
+
+.about-container {
+    display: flex;
+    gap: 2rem;
+    margin-top: 2rem;
+    align-items: flex-start;
+}
+
+.about-left {
+    flex: 0 0 40%;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding-top: 2rem;
+}
+
+.about-right {
+    flex: 0 0 60%;
+}
+
+.photo-circle {
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 5px solid var(--primary-color);
+    box-shadow: 0 4px 15px rgba(22, 79, 144, 0.3);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.photo-circle:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(22, 79, 144, 0.4);
+}
+
+.photo-placeholder {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, var(--secondary-color) 0%, var(--background-light) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 8rem;
+    color: var(--primary-color);
+}
+
+.profile-photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.about-card {
+    background-color: var(--background-light);
+    border: 2px solid var(--primary-color);
+    border-radius: 8px;
+    padding: 2rem;
+    box-shadow: 0 4px 10px rgba(22, 79, 144, 0.15);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.about-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 15px rgba(22, 79, 144, 0.25);
+}
+
+.about-card p {
+    margin-bottom: 1.5rem;
+    line-height: 1.8;
+    text-align: justify;
+    color: #333;
+}
+
+.about-card p:last-child {
+    margin-bottom: 0;
+}
+
+/* Dark Mode About */
+body.dark-mode .about-card {
+    background-color: #0f172a;
+    border-color: #9ec5ff;
+    color: #e8edf7;
+}
+
+body.dark-mode .photo-placeholder {
+    background: linear-gradient(135deg, #232d39 0%, #0f172a 100%);
+    color: #9ec5ff;
+}
+
+/* Responsive About */
+@media (max-width: 768px) {
+    .about-container {
+        flex-direction: column;
+    }
+
+    .about-left,
+    .about-right {
+        flex: 0 0 100%;
+    }
+
+    .photo-circle {
+        width: 250px;
+        height: 250px;
+    }
+
+    .photo-placeholder {
+        font-size: 6rem;
+    }
+}
+
+/* ============================================================================
+   EXPERIENCE PAGE STYLES
+   ========================================================================== */
+
+.experience-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.experience-card {
+    background-color: var(--background-light);
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    padding: 2rem;
+    text-align: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.experience-card:hover {
+    transform: translateY(-10px);
+    border-color: var(--primary-color);
+    box-shadow: 0 6px 20px rgba(22, 79, 144, 0.3);
+}
+
+.card-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 1.5rem;
+    background-color: var(--primary-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.experience-card:hover .card-icon {
+    background-color: var(--background-light);
+    border: 3px solid var(--primary-color);
+}
+
+.card-icon i {
+    font-size: 2.5rem;
+    color: var(--text-light);
+    transition: color 0.3s ease;
+}
+
+.experience-card:hover .card-icon i {
+    color: var(--primary-color);
+}
+
+.experience-card h3 {
+    color: var(--primary-color);
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+    min-height: 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.experience-card p {
+    color: #333;
+    line-height: 1.6;
+    font-size: 0.95rem;
+    text-align: center;
+}
+
+.experience-card h4 {
+    color: var(--primary-color);
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.experience-card .location {
+    color: var(--secondary-color);
+    font-size: 0.9rem;
+    font-style: italic;
+    margin-bottom: 0.25rem;
+}
+
+.experience-card .dates {
+    color: var(--primary-color);
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.experience-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    text-align: left;
+}
+
+.experience-list li {
+    color: #333;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin-bottom: 0.5rem;
+    padding-left: 1.5rem;
+    position: relative;
+}
+
+.experience-list li:before {
+    content: "▪";
+    color: var(--primary-color);
+    font-weight: bold;
+    position: absolute;
+    left: 0;
+}
+
+/* Dark Mode Experience */
+body.dark-mode .experience-card {
+    background-color: #0f172a;
+    border-color: #1f2937;
+}
+
+body.dark-mode .experience-card h3,
+body.dark-mode .experience-card h4,
+body.dark-mode .experience-card .dates {
+    color: #9ec5ff;
+}
+
+body.dark-mode .experience-card p,
+body.dark-mode .experience-list li {
+    color: #e8edf7;
+}
+
+/* Responsive Experience */
+@media (max-width: 768px) {
+    .experience-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    .experience-card h3 {
+        min-height: auto;
+    }
+}
