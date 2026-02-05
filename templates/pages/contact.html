@@ -1,150 +1,292 @@
 {% extends "base.html" %}
 
-{% block title %}Contact Me - Capstone CH61{% endblock %}
+{% load static %}
+
+{% block title %}Contact Us - Phi Beta Sigma Fraternity, Inc. | Nu Gamma Sigma Chapter{% endblock %}
 
 {% block css %}
-<link rel="stylesheet" href="{% static 'css/auth-forms.css' %}">
-{% endblock %}
-
-{% block content %}
-<div class="contact-container">
-    <div class="contact-header">
-        <h1 class="contact-title">Get In Touch</h1>
-        <p class="contact-subtitle">Let's start a conversation</p>
-    </div>
-    
-    <div class="contact-wrapper">
-        <div class="contact-info">
-            <div class="info-block">
-                <i class="fas fa-envelope"></i>
-                <h3>Email</h3>
-                <p><a href="mailto:contact@example.com">contact@example.com</a></p>
-            </div>
-            <div class="info-block">
-                <i class="fas fa-phone"></i>
-                <h3>Phone</h3>
-                <p><a href="tel:+1234567890">+1 (234) 567-890</a></p>
-            </div>
-            <div class="info-block">
-                <i class="fas fa-map-marker-alt"></i>
-                <h3>Location</h3>
-                <p>City, Country</p>
-            </div>
-        </div>
-        
-        <form class="contact-form" method="post" action="{% url 'contact' %}">
-            {% csrf_token %}
-            
-            <div class="form-group">
-                <label for="name" class="form-label">Name</label>
-                <input type="text" id="name" name="name" class="form-control" required 
-                       placeholder="Your name" maxlength="100">
-            </div>
-            
-            <div class="form-group">
-                <label for="email" class="form-label">Email</label>
-                <input type="email" id="email" name="email" class="form-control" required 
-                       placeholder="your@email.com" maxlength="100">
-            </div>
-            
-            <div class="form-group">
-                <label for="subject" class="form-label">Subject</label>
-                <input type="text" id="subject" name="subject" class="form-control" required 
-                       placeholder="Message subject" maxlength="200">
-            </div>
-            
-            <div class="form-group">
-                <label for="message" class="form-label">Message</label>
-                <textarea id="message" name="message" class="form-control" required rows="5" 
-                          placeholder="Your message here..." maxlength="2000"></textarea>
-            </div>
-            
-            <button type="submit" class="btn btn-primary btn-lg">Send Message</button>
-        </form>
-    </div>
-</div>
-
 <style>
+    html, body {
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+    }
+    
     .contact-container {
-        padding: 4rem 0;
+        width: 100vw;
+        margin-left: calc(-50vw + 50%);
+        padding: 2rem 1rem;
+        min-height: calc(100vh - 210px);
+        background-image: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)), url('{% static 'img/ngs.jpg' %}');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: scroll;
+        box-sizing: border-box;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    body.dark-mode .contact-container {
+        background-image: linear-gradient(rgba(11, 16, 32, 0.95), rgba(11, 16, 32, 0.95)), url('{% static 'img/ngs.jpg' %}');
+    }
+    
+    .contact-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 8px;
+        padding: 2.5rem;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15), 0 0 15px rgba(255, 255, 255, 0.8);
+        max-width: 600px;
+        width: 100%;
+    }
+    
+    body.dark-mode .contact-card {
+        background: rgba(26, 42, 74, 0.95);
     }
     
     .contact-header {
         text-align: center;
-        margin-bottom: 4rem;
+        margin-bottom: 2rem;
+        border-bottom: 3px solid #164f90;
+        padding-bottom: 1rem;
     }
     
-    .contact-title {
-        font-size: 3rem;
-        color: var(--primary-color);
-        margin-bottom: 0.5rem;
+    body.dark-mode .contact-header {
+        border-bottom-color: #87ceeb;
     }
     
-    .contact-subtitle {
-        font-size: 1.3rem;
-        color: var(--text-color-muted);
+    .contact-header h1 {
+        color: #164f90;
+        font-size: 2rem;
+        margin: 0 0 0.5rem 0;
     }
     
-    .contact-wrapper {
-        display: grid;
-        grid-template-columns: 1fr 2fr;
-        gap: 3rem;
-        max-width: 900px;
-        margin: 0 auto;
+    body.dark-mode .contact-header h1 {
+        color: #87ceeb;
     }
     
-    .contact-info {
-        display: flex;
-        flex-direction: column;
-        gap: 2rem;
-    }
-    
-    .info-block {
-        padding: 1.5rem;
-        background: var(--bg-secondary);
-        border-radius: 4px;
-        border-left: 4px solid var(--primary-color);
-    }
-    
-    .info-block i {
-        font-size: 1.5rem;
-        color: var(--primary-color);
-        margin-bottom: 0.5rem;
-    }
-    
-    .info-block h3 {
-        margin: 0.5rem 0;
-        color: var(--primary-color);
-    }
-    
-    .info-block p {
+    .contact-header p {
+        color: #666;
+        font-size: 1rem;
         margin: 0;
-        color: var(--text-color);
     }
     
-    .info-block a {
-        color: var(--primary-color);
+    body.dark-mode .contact-header p {
+        color: #b0b8c8;
+    }
+    
+    .security-notice {
+        background-color: #e3f2fd;
+        color: #1565c0;
+        padding: 0.75rem;
+        border-radius: 4px;
+        font-size: 0.85rem;
+        margin-bottom: 1.5rem;
+        border-left: 4px solid #1565c0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    body.dark-mode .security-notice {
+        background-color: #1a2a3a;
+        color: #87ceeb;
+        border-left-color: #87ceeb;
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-group label {
+        display: block;
+        color: #164f90;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
+    }
+    
+    .form-group label .required {
+        color: #d32f2f;
+        margin-left: 0.25rem;
+    }
+    
+    body.dark-mode .form-group label {
+        color: #87ceeb;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid #c8c9c7;
+        border-radius: 4px;
+        font-size: 1rem;
+        transition: border-color 0.3s ease;
+        box-sizing: border-box;
+        font-family: inherit;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: #164f90;
+        box-shadow: 0 0 0 0.2rem rgba(22, 79, 144, 0.25);
+    }
+    
+    body.dark-mode .form-control {
+        background-color: #0f172a;
+        border-color: #2a3a5a;
+        color: #e8edf7;
+    }
+    
+    body.dark-mode .form-control:focus {
+        border-color: #87ceeb;
+        box-shadow: 0 0 0 0.2rem rgba(135, 206, 235, 0.25);
+    }
+    
+    textarea.form-control {
+        resize: vertical;
+        min-height: 150px;
+    }
+    
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+    
+    .btn {
+        flex: 1;
+        padding: 0.875rem;
+        border: none;
+        border-radius: 4px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        text-align: center;
+        display: inline-block;
+    }
+    
+    .btn-submit {
+        background-color: #164f90;
+        color: #ffffff;
+    }
+    
+    .btn-submit:hover {
+        background-color: #0d3a6b;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    
+    .btn-cancel {
+        background-color: #d32f2f;
+        color: #ffffff;
+    }
+    
+    .btn-cancel:hover {
+        background-color: #b71c1c;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         text-decoration: none;
     }
     
-    .info-block a:hover {
-        text-decoration: underline;
-    }
-    
-    .contact-form {
-        display: flex;
-        flex-direction: column;
-        gap: 1.5rem;
+    .btn:active {
+        transform: translateY(0);
     }
     
     @media (max-width: 768px) {
-        .contact-wrapper {
-            grid-template-columns: 1fr;
+        .contact-card {
+            padding: 1.5rem;
         }
         
-        .contact-title {
-            font-size: 2rem;
+        .contact-header h1 {
+            font-size: 1.5rem;
+        }
+        
+        .form-actions {
+            flex-direction: column;
         }
     }
 </style>
+{% endblock %}
+
+{% block content %}
+<div class="contact-container">
+    <div class="contact-card">
+        <div class="contact-header">
+            <h1>Contact Us</h1>
+            <p>We'd love to hear from you</p>
+        </div>
+        
+        <div class="security-notice">
+            <i class="fas fa-shield-alt"></i>
+            <span>This form is protected by CSRF security. Your information is encrypted and secure.</span>
+        </div>
+        
+        <form method="POST" action="{% url 'contact' %}">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="name">
+                    Name
+                    <span class="required">*</span>
+                </label>
+                <input 
+                    type="text" 
+                    id="name" 
+                    name="name" 
+                    class="form-control" 
+                    required 
+                    maxlength="100"
+                    placeholder="Enter your full name"
+                    value="{{ request.POST.name|default:'' }}"
+                >
+            </div>
+            
+            <div class="form-group">
+                <label for="email">
+                    Email Address
+                    <span class="required">*</span>
+                </label>
+                <input 
+                    type="email" 
+                    id="email" 
+                    name="email" 
+                    class="form-control" 
+                    required 
+                    maxlength="100"
+                    placeholder="your.email@example.com"
+                    value="{{ request.POST.email|default:'' }}"
+                >
+            </div>
+            
+            <div class="form-group">
+                <label for="message">
+                    Message
+                    <span class="required">*</span>
+                </label>
+                <textarea 
+                    id="message" 
+                    name="message" 
+                    class="form-control" 
+                    required 
+                    maxlength="2000"
+                    placeholder="Enter your message here..."
+                >{{ request.POST.message|default:'' }}</textarea>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn btn-submit">
+                    <i class="fas fa-paper-plane"></i> Submit
+                </button>
+                <a href="{% url 'home' %}" class="btn btn-cancel">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
 {% endblock %}

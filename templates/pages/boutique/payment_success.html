@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load math_filters %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Success Message -->
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="alert alert-success" role="alert" style="background-color: #d4edda; border-color: #c3e6cb; padding: 30px; border-radius: 8px; text-align: center;">
+                <h2 style="color: #155724; margin-bottom: 20px;">✓ Payment Successful!</h2>
+                <p style="color: #155724; font-size: 1.1em; margin: 0;">
+                    Thank you for your purchase. Your order has been confirmed.
+                </p>
+            </div>
+
+            <!-- Order Details -->
+            <div class="card mt-4" style="border: 1px solid #dee2e6;">
+                <div class="card-body">
+                    <h5 class="card-title" style="color: #1a1a2e; margin-bottom: 25px;">Order Details</h5>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <p style="color: #6c757d; margin: 0;">
+                                <strong>Order Number:</strong><br>
+                                <span style="color: #1a1a2e; font-size: 1.1em;">#{{ order.id }}</span>
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <p style="color: #6c757d; margin: 0;">
+                                <strong>Order Date:</strong><br>
+                                <span style="color: #1a1a2e;">{{ order.created_at|date:"M d, Y \a\t g:i A" }}</span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <!-- Shipping Information -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <p style="color: #6c757d; margin: 0;">
+                                <strong>Shipping Address:</strong>
+                            </p>
+                            <p style="color: #1a1a2e; margin: 5px 0;">
+                                {{ order.address }}<br>
+                                {{ order.city }}, {{ order.state }} {{ order.zip_code }}
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <p style="color: #6c757d; margin: 0;">
+                                <strong>Email:</strong><br>
+                                <span style="color: #1a1a2e;">{{ order.email }}</span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <!-- Order Items -->
+                    <h6 style="color: #1a1a2e; margin-bottom: 20px;">Items Ordered:</h6>
+                    <table class="table" style="border: none; margin: 0;">
+                        <thead style="background-color: #f8f9fa;">
+                            <tr>
+                                <th style="color: #1a1a2e; border-bottom: 1px solid #dee2e6;">Product</th>
+                                <th style="color: #1a1a2e; border-bottom: 1px solid #dee2e6; text-align: right;">Qty</th>
+                                <th style="color: #1a1a2e; border-bottom: 1px solid #dee2e6; text-align: right;">Price</th>
+                                <th style="color: #1a1a2e; border-bottom: 1px solid #dee2e6; text-align: right;">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in order.orderitem_set.all %}
+                            <tr>
+                                <td style="color: #1a1a2e; padding: 12px 0; border-bottom: 1px solid #f0f0f0;">
+                                    {{ item.product.name }}
+                                    {% if item.size %}<br><small style="color: #6c757d;">Size: {{ item.size }}</small>{% endif %}
+                                    {% if item.color %}<br><small style="color: #6c757d;">Color: {{ item.color }}</small>{% endif %}
+                                </td>
+                                <td style="color: #1a1a2e; padding: 12px 0; border-bottom: 1px solid #f0f0f0; text-align: right;">
+                                    {{ item.quantity }}
+                                </td>
+                                <td style="color: #1a1a2e; padding: 12px 0; border-bottom: 1px solid #f0f0f0; text-align: right;">
+                                    ${{ item.price }}
+                                </td>
+                                <td style="color: #1a1a2e; padding: 12px 0; border-bottom: 1px solid #f0f0f0; text-align: right; font-weight: bold;">
+                                    ${{ item.price|mul:item.quantity }}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+
+                    <hr>
+
+                    <!-- Order Total -->
+                    <div style="text-align: right; padding: 20px 0;">
+                        <div style="display: flex; justify-content: flex-end; margin-bottom: 10px;">
+                            <span style="color: #6c757d; margin-right: 20px;">Subtotal:</span>
+                            <span style="color: #1a1a2e; font-weight: 500; min-width: 100px; text-align: right;">${{ order.total_price }}</span>
+                        </div>
+                        <div style="display: flex; justify-content: flex-end; margin-bottom: 10px;">
+                            <span style="color: #6c757d; margin-right: 20px;">Shipping:</span>
+                            <span style="color: #1a1a2e; font-weight: 500; min-width: 100px; text-align: right;">TBD</span>
+                        </div>
+                        <div style="display: flex; justify-content: flex-end; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 2px solid #dee2e6;">
+                            <span style="color: #6c757d; margin-right: 20px;">Tax:</span>
+                            <span style="color: #1a1a2e; font-weight: 500; min-width: 100px; text-align: right;">TBD</span>
+                        </div>
+                        <div style="display: flex; justify-content: flex-end;">
+                            <span style="color: #1a1a2e; font-weight: bold; font-size: 1.3em; margin-right: 20px;">Total:</span>
+                            <span style="color: #28a745; font-weight: bold; font-size: 1.3em; min-width: 100px; text-align: right;">${{ order.total_price }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Next Steps -->
+            <div class="alert alert-info mt-4" style="background-color: #d1ecf1; border-color: #bee5eb;">
+                <h6 style="color: #0c5460; margin-bottom: 15px;">What's Next?</h6>
+                <ul style="margin: 0; padding-left: 20px; color: #0c5460;">
+                    <li>You'll receive an order confirmation email shortly</li>
+                    <li>Your order will be processed and shipped within 5-7 business days</li>
+                    <li>You can track your order status in your account</li>
+                </ul>
+            </div>
+
+            <!-- Action Buttons -->
+            <div style="display: flex; flex-direction: column; gap: 15px; margin-top: 30px;">
+                <a href="{% url 'order_history' %}" class="btn btn-dark" style="background-color: #1a1a2e; border-color: #1a1a2e; padding: 12px; text-align: center; text-decoration: none;">
+                    View All Orders
+                </a>
+                <a href="{% url 'shop_home' %}" class="btn btn-outline-dark" style="border-color: #1a1a2e; color: #1a1a2e; padding: 12px; text-align: center; text-decoration: none;">
+                    Continue Shopping
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .alert {
+        border-radius: 8px;
+    }
+
+    @media (max-width: 768px) {
+        .row {
+            padding: 0 15px;
+        }
+
+        table {
+            font-size: 0.9em;
+        }
+    }
+</style>
+{% endblock %}

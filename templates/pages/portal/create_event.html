@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Event - Member Portal{% endblock %}
+
+{% block content %}
+<style>
+    body.dark-mode .card {
+        background-color: #1a2a4a;
+        color: #e8edf7;
+    }
+    body.dark-mode .form-control,
+    body.dark-mode .form-select {
+        background-color: #0b1020;
+        color: #e8edf7;
+        border-color: #2a4a7a;
+    }
+    body.dark-mode .form-control:focus,
+    body.dark-mode .form-select:focus {
+        background-color: #0b1020;
+        color: #e8edf7;
+        border-color: #4a7aba;
+    }
+    body.dark-mode label {
+        color: #e8edf7;
+    }
+    body.dark-mode .form-text {
+        color: #b0b8c8;
+    }
+    body.dark-mode .alert-info {
+        background-color: #1a3a5a;
+        color: #e8edf7;
+        border-color: #2a4a7a;
+    }
+</style>
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card" style="box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-calendar-plus"></i> Create New Event
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {{ form.non_field_errors }}
+                        </div>
+                        {% endif %}
+
+                        <!-- Title Field -->
+                        <div class="mb-3">
+                            {{ form.title.label_tag }}
+                            {{ form.title }}
+                            {% if form.title.errors %}
+                            <div class="text-danger">
+                                {{ form.title.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Event Type Field -->
+                        <div class="mb-3">
+                            {{ form.event_type.label_tag }}
+                            {{ form.event_type }}
+                            {% if form.event_type.errors %}
+                            <div class="text-danger">
+                                {{ form.event_type.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Description Field -->
+                        <div class="mb-3">
+                            {{ form.description.label_tag }}
+                            {{ form.description }}
+                            {% if form.description.errors %}
+                            <div class="text-danger">
+                                {{ form.description.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Start Date Field -->
+                        <div class="mb-3">
+                            {{ form.start_date.label_tag }}
+                            {{ form.start_date }}
+                            {% if form.start_date.errors %}
+                            <div class="text-danger">
+                                {{ form.start_date.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- End Date Field -->
+                        <div class="mb-3">
+                            {{ form.end_date.label_tag }}
+                            {{ form.end_date }}
+                            <small class="form-text text-muted">
+                                Optional - leave blank for single-day events
+                            </small>
+                            {% if form.end_date.errors %}
+                            <div class="text-danger">
+                                {{ form.end_date.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Location Field -->
+                        <div class="mb-3">
+                            {{ form.location.label_tag }}
+                            {{ form.location }}
+                            {% if form.location.errors %}
+                            <div class="text-danger">
+                                {{ form.location.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Image Field -->
+                        <div class="mb-3">
+                            {{ form.image.label_tag }}
+                            {{ form.image }}
+                            <small class="form-text text-muted">
+                                Optional - add a promotional image for the event
+                            </small>
+                            {% if form.image.errors %}
+                            <div class="text-danger">
+                                {{ form.image.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'events' %}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-calendar-plus"></i> Create Event
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Help Text -->
+            <div class="mt-4">
+                <div class="alert alert-info">
+                    <h5><i class="fas fa-info-circle"></i> Officer Only</h5>
+                    <p class="mb-0">
+                        Only chapter officers can create events. Events will appear on the chapter calendar 
+                        and can be used to organize photos by selecting the event when uploading.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

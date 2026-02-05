@@ -1,0 +1,164 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - Boutique{% endblock %}
+
+{% block content %}
+<style>
+    body.dark-mode .card {
+        background-color: #1a2a4a;
+        color: #e8edf7;
+    }
+    body.dark-mode .form-control,
+    body.dark-mode .form-select {
+        background-color: #0b1020;
+        color: #e8edf7;
+        border-color: #2a4a7a;
+    }
+    body.dark-mode .form-control:focus,
+    body.dark-mode .form-select:focus {
+        background-color: #0b1020;
+        color: #e8edf7;
+        border-color: #4a7aba;
+    }
+    body.dark-mode label {
+        color: #e8edf7;
+    }
+    body.dark-mode .form-text {
+        color: #b0b8c8;
+    }
+</style>
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card" style="box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-box"></i> {{ title }}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {{ form.non_field_errors }}
+                        </div>
+                        {% endif %}
+
+                        <!-- Product Name -->
+                        <div class="mb-3">
+                            {{ form.name.label_tag }}
+                            {{ form.name }}
+                            {% if form.name.errors %}
+                            <div class="text-danger">
+                                {{ form.name.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Description -->
+                        <div class="mb-3">
+                            {{ form.description.label_tag }}
+                            {{ form.description }}
+                            {% if form.description.errors %}
+                            <div class="text-danger">
+                                {{ form.description.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Category -->
+                        <div class="mb-3">
+                            {{ form.category.label_tag }}
+                            {{ form.category }}
+                            {% if form.category.errors %}
+                            <div class="text-danger">
+                                {{ form.category.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Price -->
+                        <div class="mb-3">
+                            {{ form.price.label_tag }}
+                            {{ form.price }}
+                            {% if form.price.errors %}
+                            <div class="text-danger">
+                                {{ form.price.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Inventory -->
+                        <div class="mb-3">
+                            {{ form.inventory.label_tag }}
+                            {{ form.inventory }}
+                            {% if form.inventory.errors %}
+                            <div class="text-danger">
+                                {{ form.inventory.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Sizes -->
+                        <div class="mb-3">
+                            {{ form.sizes.label_tag }}
+                            {{ form.sizes }}
+                            <small class="form-text text-muted">
+                                Enter sizes separated by commas (e.g., S,M,L,XL)
+                            </small>
+                            {% if form.sizes.errors %}
+                            <div class="text-danger">
+                                {{ form.sizes.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Colors -->
+                        <div class="mb-3">
+                            {{ form.colors.label_tag }}
+                            {{ form.colors }}
+                            <small class="form-text text-muted">
+                                Enter colors separated by commas (e.g., Black,White,Blue)
+                            </small>
+                            {% if form.colors.errors %}
+                            <div class="text-danger">
+                                {{ form.colors.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Image -->
+                        <div class="mb-3">
+                            {{ form.image.label_tag }}
+                            {% if product and product.image %}
+                            <div class="mb-2">
+                                <img src="{{ product.image.url }}" alt="{{ product.name }}" style="max-height: 200px;" class="img-fluid rounded">
+                            </div>
+                            {% endif %}
+                            {{ form.image }}
+                            {% if form.image.errors %}
+                            <div class="text-danger">
+                                {{ form.image.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'shop_home' %}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Save Product
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

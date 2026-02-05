@@ -270,6 +270,41 @@ body.dark-mode .card {
     box-shadow: 0 6px 14px rgba(0, 0, 0, 0.35);
 }
 
+body.dark-mode .card-header {
+    background-color: #1f2937 !important;
+    border-color: #374151;
+    color: #e8edf7;
+}
+
+body.dark-mode .card-body {
+    background-color: #0f172a;
+    color: #e8edf7;
+}
+
+/* Table Styling in Dark Mode */
+body.dark-mode .table {
+    color: #e8edf7;
+    border-color: #374151;
+}
+
+body.dark-mode .table thead {
+    background-color: #1f2937;
+    color: #e8edf7;
+}
+
+body.dark-mode .table thead th {
+    border-color: #374151;
+    background-color: #1f2937;
+}
+
+body.dark-mode .table tbody tr {
+    border-color: #374151;
+}
+
+body.dark-mode .table tbody tr:hover {
+    background-color: #1a2a4a !important;
+}
+
 /* ============================================================================
    FORMS AND INPUTS
    ========================================================================== */
@@ -459,6 +494,55 @@ body.dark-mode .alert-success {
     text-align: right;
 }
 
+/* Text Color Utilities */
+.text-danger {
+    color: #d32f2f;
+}
+
+body.dark-mode .text-danger {
+    color: #ff6b6b;
+}
+
+.text-success {
+    color: #388e3c;
+}
+
+body.dark-mode .text-success {
+    color: #7cda6e;
+}
+
+.text-warning {
+    color: #e65100;
+}
+
+body.dark-mode .text-warning {
+    color: #ffa500;
+}
+
+.text-info {
+    color: #1565c0;
+}
+
+body.dark-mode .text-info {
+    color: #4a9eff;
+}
+
+.text-muted {
+    color: #6c757d;
+}
+
+body.dark-mode .text-muted {
+    color: #9ca3af;
+}
+
+.text-light {
+    color: #f8f9fa;
+}
+
+body.dark-mode .text-light {
+    color: #e8edf7;
+}
+
 .bg-primary {
     background-color: var(--primary-color);
     color: var(--text-light);
@@ -466,6 +550,16 @@ body.dark-mode .alert-success {
 
 .bg-secondary {
     background-color: var(--secondary-color);
+}
+
+.bg-light {
+    background-color: #f8f9fa;
+    color: #000;
+}
+
+body.dark-mode .bg-light {
+    background-color: #1f2937;
+    color: #e8edf7;
 }
 
 /* Spacing Utilities */

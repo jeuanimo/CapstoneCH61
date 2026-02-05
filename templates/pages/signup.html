@@ -1,0 +1,386 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block title %}Sign Up - Phi Beta Sigma Fraternity, Inc. | Nu Gamma Sigma Chapter{% endblock %}
+
+{% block css %}
+<style>
+    html, body {
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+    }
+    
+    .signup-container {
+        width: 100vw;
+        margin-left: calc(-50vw + 50%);
+        padding: 2rem 1rem;
+        min-height: calc(100vh - 210px);
+        background-image: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)), url('{% static 'img/ngs.jpg' %}');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: scroll;
+        box-sizing: border-box;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    body.dark-mode .signup-container {
+        background-image: linear-gradient(rgba(11, 16, 32, 0.95), rgba(11, 16, 32, 0.95)), url('{% static 'img/ngs.jpg' %}');
+    }
+    
+    .signup-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 8px;
+        padding: 2.5rem;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15), 0 0 15px rgba(255, 255, 255, 0.8);
+        max-width: 500px;
+        width: 100%;
+    }
+    
+    body.dark-mode .signup-card {
+        background: rgba(26, 42, 74, 0.95);
+    }
+    
+    .signup-header {
+        text-align: center;
+        margin-bottom: 2rem;
+        border-bottom: 3px solid #164f90;
+        padding-bottom: 1rem;
+    }
+    
+    body.dark-mode .signup-header {
+        border-bottom-color: #87ceeb;
+    }
+    
+    .signup-header h1 {
+        color: #164f90;
+        font-size: 2rem;
+        margin: 0 0 0.5rem 0;
+    }
+    
+    body.dark-mode .signup-header h1 {
+        color: #87ceeb;
+    }
+    
+    .signup-header p {
+        color: #666;
+        font-size: 1rem;
+        margin: 0;
+    }
+    
+    body.dark-mode .signup-header p {
+        color: #b0b8c8;
+    }
+    
+    .security-notice {
+        background-color: #e3f2fd;
+        color: #1565c0;
+        padding: 0.75rem;
+        border-radius: 4px;
+        font-size: 0.85rem;
+        margin-bottom: 1.5rem;
+        border-left: 4px solid #1565c0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    body.dark-mode .security-notice {
+        background-color: #1a2a3a;
+        color: #87ceeb;
+        border-left-color: #87ceeb;
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-group label {
+        display: block;
+        color: #164f90;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
+    }
+    
+    body.dark-mode .form-group label {
+        color: #87ceeb;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid #c8c9c7;
+        border-radius: 4px;
+        font-size: 1rem;
+        transition: border-color 0.3s ease;
+        box-sizing: border-box;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: #164f90;
+        box-shadow: 0 0 0 0.2rem rgba(22, 79, 144, 0.25);
+    }
+    
+    body.dark-mode .form-control {
+        background-color: #0f172a;
+        border-color: #2a3a5a;
+        color: #e8edf7;
+    }
+    
+    body.dark-mode .form-control:focus {
+        border-color: #87ceeb;
+        box-shadow: 0 0 0 0.2rem rgba(135, 206, 235, 0.25);
+    }
+    
+    .help-text {
+        font-size: 0.85rem;
+        color: #666;
+        margin-top: 0.5rem;
+        line-height: 1.4;
+    }
+    
+    body.dark-mode .help-text {
+        color: #b0b8c8;
+    }
+    
+    .help-text ul {
+        margin: 0.5rem 0 0 1.5rem;
+        padding: 0;
+    }
+    
+    .help-text li {
+        margin-bottom: 0.25rem;
+    }
+    
+    .errorlist {
+        list-style: none;
+        padding: 0;
+        margin: 0.5rem 0 0 0;
+        color: #d32f2f;
+        font-size: 0.9rem;
+    }
+    
+    .errorlist li {
+        margin-bottom: 0.25rem;
+    }
+    
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+    
+    .btn {
+        flex: 1;
+        padding: 0.875rem;
+        border: none;
+        border-radius: 4px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        text-align: center;
+        display: inline-block;
+    }
+    
+    .btn-submit {
+        background-color: #164f90;
+        color: #ffffff;
+    }
+    
+    .btn-submit:hover {
+        background-color: #0d3a6b;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    
+    .btn-cancel {
+        background-color: #c8c9c7;
+        color: #164f90;
+    }
+    
+    .btn-cancel:hover {
+        background-color: #a8a9a7;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        text-decoration: none;
+    }
+    
+    .btn:active {
+        transform: translateY(0);
+    }
+    
+    .login-link {
+        text-align: center;
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #c8c9c7;
+        color: #666;
+    }
+    
+    body.dark-mode .login-link {
+        border-top-color: #2a3a5a;
+        color: #b0b8c8;
+    }
+    
+    .login-link a {
+        color: #164f90;
+        font-weight: 600;
+        text-decoration: none;
+    }
+    
+    .login-link a:hover {
+        text-decoration: underline;
+    }
+    
+    body.dark-mode .login-link a {
+        color: #87ceeb;
+    }
+    
+    @media (max-width: 768px) {
+        .signup-card {
+            padding: 1.5rem;
+        }
+        
+        .signup-header h1 {
+            font-size: 1.5rem;
+        }
+        
+        .form-actions {
+            flex-direction: column;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="signup-container">
+    <div class="signup-card">
+        <div class="signup-header">
+            <h1>Create Account</h1>
+            <p>Join Nu Gamma Sigma Chapter</p>
+        </div>
+        
+        <div class="security-notice">
+            <i class="fas fa-shield-alt"></i>
+            <span>Your information is protected with industry-standard encryption and security measures.</span>
+        </div>
+        
+        <form method="POST" action="{% url 'signup' %}">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="invitation_code">
+                    Invitation Code <span style="color: #d32f2f;">*</span>
+                </label>
+                <input type="text" 
+                       id="invitation_code" 
+                       name="invitation_code" 
+                       class="form-input" 
+                       placeholder="Enter your invitation code"
+                       required>
+                <div class="help-text">
+                    You must have a valid invitation code to create an account. Contact chapter leadership if you need an invitation.
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">
+                    Email <span style="color: #d32f2f;">*</span>
+                </label>
+                <input type="email" 
+                       id="email" 
+                       name="email" 
+                       class="form-input" 
+                       placeholder="Enter your email address"
+                       required>
+                <div class="help-text">
+                    Must match the email associated with your invitation code.
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="id_username">
+                    Username <span style="color: #d32f2f;">*</span>
+                </label>
+                {{ form.username }}
+                <div class="help-text">
+                    <strong>IMPORTANT:</strong> If your account was already created by an admin, use the EXACT username they gave you. Otherwise, choose your own username.
+                </div>
+                {% if form.username.errors %}
+                <ul class="errorlist">
+                    {% for error in form.username.errors %}
+                    <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="id_password1">
+                    Password
+                </label>
+                {{ form.password1 }}
+                {% if form.password1.help_text %}
+                <div class="help-text">{{ form.password1.help_text }}</div>
+                {% endif %}
+                {% if form.password1.errors %}
+                <ul class="errorlist">
+                    {% for error in form.password1.errors %}
+                    <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="id_password2">
+                    Confirm Password
+                </label>
+                {{ form.password2 }}
+                {% if form.password2.help_text %}
+                <div class="help-text">{{ form.password2.help_text }}</div>
+                {% endif %}
+                {% if form.password2.errors %}
+                <ul class="errorlist">
+                    {% for error in form.password2.errors %}
+                    <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn btn-submit">
+                    <i class="fas fa-user-plus"></i> Create Account
+                </button>
+                <a href="{% url 'home' %}" class="btn btn-cancel">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+            </div>
+        </form>
+        
+        <div class="login-link">
+            Already have an account? <a href="{% url 'login' %}">Log in here</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Add form-control class to Django form fields
+    document.addEventListener('DOMContentLoaded', function() {
+        const inputs = document.querySelectorAll('input[type="text"], input[type="password"]');
+        inputs.forEach(input => {
+            input.classList.add('form-control');
+        });
+    });
+</script>
+{% endblock %}

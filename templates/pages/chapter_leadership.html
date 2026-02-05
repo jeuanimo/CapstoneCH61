@@ -13,7 +13,7 @@
         overflow-x: hidden;
     }
     
-    .page-container {
+    .leadership-container {
         width: 100vw;
         margin-left: calc(-50vw + 50%);
         padding: 2rem 1rem;
@@ -26,17 +26,17 @@
         box-sizing: border-box;
     }
     
-    body.dark-mode .page-container {
+    body.dark-mode .leadership-container {
         background-image: linear-gradient(rgba(11, 16, 32, 0.95), rgba(11, 16, 32, 0.95)), url('{% static 'img/ngs.jpg' %}');
     }
     
     .content-wrapper {
-        max-width: 1000px;
+        max-width: 1200px;
         margin: 0 auto;
         background: rgba(255, 255, 255, 0.95);
         border-radius: 8px;
         padding: 2rem;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15), 0 0 15px rgba(255, 255, 255, 0.8);
     }
     
     body.dark-mode .content-wrapper {
@@ -46,292 +46,215 @@
     
     .page-header {
         text-align: center;
-        margin-bottom: 2rem;
+        margin-bottom: 3rem;
         border-bottom: 3px solid #164f90;
         padding-bottom: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
     }
     
     .page-header h1 {
         color: #164f90;
         font-size: 2.5rem;
-        margin: 0 0 0.5rem 0;
+        margin: 0;
     }
     
     body.dark-mode .page-header h1 {
-        color: #e8edf7;
-    }
-    
-    .page-header p {
-        color: #666;
-        font-size: 1.1rem;
-        margin: 0;
-    }
-    
-    body.dark-mode .page-header p {
-        color: #b0b8c8;
-    }
-    
-    .page-content {
-        font-size: 1rem;
-        line-height: 1.8;
-        color: #333;
-    }
-    
-    body.dark-mode .page-content {
-        color: #e8edf7;
-    }
-    
-    .page-content h2 {
-        color: #164f90;
-        margin-top: 2rem;
-        margin-bottom: 1rem;
-    }
-    
-    body.dark-mode .page-content h2 {
         color: #87ceeb;
+        border-bottom-color: #87ceeb;
     }
     
-    .page-content p {
-        margin-bottom: 1.5rem;
-    }
-    
-    .officers-section {
-        margin-top: 2rem;
-        margin-bottom: 3rem;
-    }
-    
-    .officers-section h2 {
-        color: #164f90;
-        border-bottom: 2px solid #c8c9c7;
-        padding-bottom: 0.75rem;
-        margin-bottom: 1.5rem;
-    }
-    
-    body.dark-mode .officers-section h2 {
-        color: #87ceeb;
-        border-bottom-color: #164f90;
-    }
-    
-    .officer-card {
+    .admin-actions {
         display: flex;
-        gap: 1.5rem;
-        margin-bottom: 2rem;
-        padding: 1.5rem;
+        gap: 0.5rem;
+    }
+    
+    .btn-add {
+        background-color: #164f90;
+        color: #ffffff;
+        padding: 0.75rem 1.5rem;
+        border-radius: 4px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .btn-add:hover {
+        background-color: #0d3a6b;
+        text-decoration: none;
+        color: #ffffff;
+    }
+    
+    .leadership-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin-top: 2rem;
+    }
+    
+    .leader-card {
         background: #f9f9f9;
-        border-radius: 6px;
-        align-items: flex-start;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
     
-    body.dark-mode .officer-card {
-        background: rgba(11, 16, 32, 0.6);
+    .leader-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25);
     }
     
-    .officer-image {
-        flex: 0 0 30%;
-        min-width: 150px;
+    body.dark-mode .leader-card {
+        background: #1a2a4a;
     }
     
-    .officer-image-placeholder {
+    .leader-image {
         width: 100%;
-        aspect-ratio: 3/4;
-        background: linear-gradient(135deg, #c8c9c7 0%, #e0e0e0 100%);
-        border-radius: 6px;
+        height: 300px;
+        background: linear-gradient(135deg, #164f90 0%, #c8c9c7 100%);
         display: flex;
         align-items: center;
         justify-content: center;
-        color: #999;
-        font-size: 0.9rem;
-        text-align: center;
-        padding: 1rem;
-        box-sizing: border-box;
-        border: 2px dashed #164f90;
+        overflow: hidden;
     }
     
-    body.dark-mode .officer-image-placeholder {
-        background: linear-gradient(135deg, #164f90 0%, #0d2d5c 100%);
-        border-color: #87ceeb;
-        color: #87ceeb;
-    }
-    
-    .officer-image img {
+    .leader-image img {
         width: 100%;
-        height: auto;
-        border-radius: 6px;
+        height: 100%;
         object-fit: cover;
     }
     
-    .officer-info {
-        flex: 0 0 70%;
+    .leader-image i {
+        font-size: 5rem;
+        color: rgba(255, 255, 255, 0.5);
     }
     
-    .officer-name {
-        font-size: 1.3rem;
-        font-weight: bold;
+    .leader-info {
+        padding: 1.5rem;
+    }
+    
+    .leader-position {
         color: #164f90;
-        margin: 0 0 0.25rem 0;
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 0.5rem;
     }
     
-    body.dark-mode .officer-name {
+    body.dark-mode .leader-position {
         color: #87ceeb;
     }
     
-    .officer-title {
-        font-size: 1rem;
-        color: #666;
-        font-style: italic;
+    .leader-name {
+        color: #164f90;
+        font-size: 1.5rem;
+        font-weight: 700;
         margin: 0 0 1rem 0;
     }
     
-    body.dark-mode .officer-title {
+    body.dark-mode .leader-name {
+        color: #e8edf7;
+    }
+    
+    .leader-bio {
+        color: #333;
+        line-height: 1.6;
+        margin-bottom: 1rem;
+    }
+    
+    body.dark-mode .leader-bio {
         color: #b0b8c8;
     }
     
-    .officer-bio {
-        font-size: 0.95rem;
-        line-height: 1.6;
-        color: #333;
-        margin: 0;
+    .leader-contact {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid #e0e0e0;
     }
     
-    body.dark-mode .officer-bio {
-        color: #e8edf7;
+    body.dark-mode .leader-contact {
+        border-top-color: #2a3a5a;
     }
     
-    .return-modal {
-        display: none;
-        position: fixed;
-        z-index: 2000;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.5);
-        animation: fadeIn 0.3s ease;
-    }
-    
-    .return-modal.show {
+    .leader-contact a {
+        color: #164f90;
+        text-decoration: none;
+        font-size: 0.9rem;
         display: flex;
         align-items: center;
-        justify-content: center;
+        gap: 0.5rem;
     }
     
-    .return-modal-content {
-        background-color: #ffffff;
-        padding: 3rem 2rem;
-        border-radius: 8px;
-        max-width: 500px;
-        text-align: center;
-        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-        animation: slideDown 0.3s ease;
+    .leader-contact a:hover {
+        text-decoration: underline;
     }
     
-    body.dark-mode .return-modal-content {
-        background-color: rgba(26, 42, 74, 0.95);
-        color: #e8edf7;
-    }
-    
-    .return-modal-content h2 {
-        color: #164f90;
-        margin-top: 0;
-        margin-bottom: 1.5rem;
-        font-size: 1.8rem;
-    }
-    
-    body.dark-mode .return-modal-content h2 {
+    body.dark-mode .leader-contact a {
         color: #87ceeb;
     }
     
-    .return-modal-content p {
-        color: #333;
-        font-size: 1.1rem;
-        margin-bottom: 2rem;
-        line-height: 1.6;
-    }
-    
-    body.dark-mode .return-modal-content p {
-        color: #e8edf7;
-    }
-    
-    .return-btn-group {
+    .leader-actions {
         display: flex;
-        gap: 1rem;
-        justify-content: center;
-        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid #e0e0e0;
     }
     
-    .return-btn {
-        padding: 0.75rem 2rem;
-        font-size: 1rem;
-        border: none;
+    body.dark-mode .leader-actions {
+        border-top-color: #2a3a5a;
+    }
+    
+    .btn-edit, .btn-delete {
+        flex: 1;
+        padding: 0.5rem;
         border-radius: 4px;
-        cursor: pointer;
-        font-weight: bold;
+        text-decoration: none;
+        font-weight: 600;
+        text-align: center;
         transition: all 0.3s ease;
+        font-size: 0.85rem;
     }
     
-    .return-btn-home {
+    .btn-edit {
         background-color: #164f90;
         color: #ffffff;
     }
     
-    .return-btn-home:hover {
-        background-color: #c8c9c7;
-        color: #164f90;
-        transform: scale(1.05);
-    }
-    
-    .return-btn-stay {
-        background-color: #c8c9c7;
-        color: #164f90;
-    }
-    
-    .return-btn-stay:hover {
-        background-color: #164f90;
+    .btn-edit:hover {
+        background-color: #0d3a6b;
         color: #ffffff;
-        transform: scale(1.05);
+        text-decoration: none;
     }
     
-    .return-home-btn-floating {
-        position: fixed;
-        bottom: 2rem;
-        right: 2rem;
-        padding: 1rem 1.5rem;
-        background-color: #164f90;
+    .btn-delete {
+        background-color: #d32f2f;
         color: #ffffff;
-        border: none;
-        border-radius: 50px;
-        cursor: pointer;
-        font-size: 1rem;
-        font-weight: bold;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        transition: all 0.3s ease;
-        z-index: 1000;
     }
     
-    body.dark-mode .return-home-btn-floating {
-        background-color: #87ceeb;
-        color: #164f90;
+    .btn-delete:hover {
+        background-color: #b71c1c;
+        color: #ffffff;
+        text-decoration: none;
     }
     
-    .return-home-btn-floating:hover {
-        transform: scale(1.1);
-        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    .no-leaders {
+        text-align: center;
+        padding: 3rem;
+        color: #666;
     }
     
-    @keyframes fadeIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
-    }
-    
-    @keyframes slideDown {
-        from {
-            opacity: 0;
-            transform: translateY(-50px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
+    body.dark-mode .no-leaders {
+        color: #b0b8c8;
     }
     
     @media (max-width: 768px) {
@@ -339,256 +262,93 @@
             font-size: 1.8rem;
         }
         
-        .content-wrapper {
-            padding: 1.5rem;
-        }
-        
-        .officer-card {
-            flex-direction: column;
-            gap: 1rem;
-        }
-        
-        .officer-image {
-            flex: 0 0 auto;
-            min-width: 100%;
-        }
-        
-        .officer-info {
-            flex: 0 0 auto;
-            min-width: 100%;
-        }
-        
-        .return-home-btn-floating {
-            bottom: 1rem;
-            right: 1rem;
-            padding: 0.75rem 1rem;
-            font-size: 0.9rem;
+        .leadership-grid {
+            grid-template-columns: 1fr;
         }
     }
 </style>
-
-<script>
-    function openReturnModal() {
-        const modal = document.getElementById('returnModal');
-        modal.classList.add('show');
-    }
-    
-    function closeReturnModal() {
-        const modal = document.getElementById('returnModal');
-        modal.classList.remove('show');
-    }
-    
-    window.onclick = function(event) {
-        const modal = document.getElementById('returnModal');
-        if (event.target == modal) {
-            modal.classList.remove('show');
-        }
-    }
-</script>
 {% endblock %}
 
 {% block content %}
-<!-- Return Home Modal -->
-<div id="returnModal" class="return-modal">
-    <div class="return-modal-content">
-        <h2>Ready to Go Back?</h2>
-        <p>Would you like to return to the home page?</p>
-        <div class="return-btn-group">
-            <button class="return-btn return-btn-home" onclick="window.location.href='{% url 'home' %}';">Return Home</button>
-            <button class="return-btn return-btn-stay" onclick="closeReturnModal();">Stay Here</button>
-        </div>
-    </div>
-</div>
-
-<!-- Floating Return Button -->
-<button class="return-home-btn-floating" onclick="openReturnModal();">← Return Home</button>
-
-<div class="page-container">
+<div class="leadership-container">
     <div class="content-wrapper">
         <div class="page-header">
             <h1>Chapter Leadership</h1>
-            <p>Meet the Leaders of Nu Gamma Sigma Chapter</p>
+            {% if user.is_authenticated and user.is_staff or user.is_authenticated and user.memberprofile and user.memberprofile.is_officer %}
+            <div class="admin-actions">
+                <a href="{% url 'add_leadership' %}" class="btn-add">
+                    <i class="fas fa-plus"></i> Add Leader
+                </a>
+                <a href="{% url 'import_officers' %}" class="btn-add" style="margin-left: 10px; background-color: #28a745;">
+                    <i class="fas fa-file-csv"></i> Import CSV
+                </a>
+            </div>
+            {% endif %}
         </div>
         
-        <div class="page-content">
-            
-            <!-- Elected Officers Section -->
-            <div class="officers-section">
-                <h2>Elected Officers (Executive Board)</h2>
-                
-                <!-- President -->
-                <div class="officer-card">
-                    <div class="officer-image">
-                        <div class="officer-image-placeholder">[President Photo]</div>
+        {% if leaders %}
+            <div class="leadership-grid">
+                {% for leader_data in leaders %}
+                    <div class="leader-card">
+                        <div class="leader-image">
+                            {% if leader_data.person.profile_image %}
+                                <img src="{{ leader_data.person.profile_image.url }}" alt="{{ leader_data.person.full_name }}">
+                            {% else %}
+                                <i class="fas fa-user-circle"></i>
+                            {% endif %}
+                        </div>
+                        <div class="leader-info">
+                            <div class="leader-position">
+                                {% for pos in leader_data.positions %}
+                                    <span class="badge badge-primary">{{ pos.get_position_title }}</span>
+                                    {% if not forloop.last %}<br>{% endif %}
+                                {% endfor %}
+                            </div>
+                            <h2 class="leader-name">{{ leader_data.person.full_name }}</h2>
+                            {% if leader_data.person.bio %}
+                                <p class="leader-bio">{{ leader_data.person.bio }}</p>
+                            {% endif %}
+                            {% if leader_data.person.email or leader_data.person.phone %}
+                                <div class="leader-contact">
+                                    {% if leader_data.person.email %}
+                                        <a href="mailto:{{ leader_data.person.email }}">
+                                            <i class="fas fa-envelope"></i> {{ leader_data.person.email }}
+                                        </a>
+                                    {% endif %}
+                            {% if user.is_authenticated and user.is_staff or user.is_authenticated and user.memberprofile and user.memberprofile.is_officer %}
+                                <div class="leader-actions">
+                                    <a href="{% url 'upload_leader_photo' leader_data.person.pk %}" class="btn-edit" style="background-color: #28a745;">
+                                        <i class="fas fa-camera"></i> Photo
+                                    </a>
+                                    <a href="{% url 'edit_leadership' leader_data.positions.0.pk %}" class="btn-edit">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </a>
+                                    <a href="{% url 'delete_leadership' leader_data.positions.0.pk %}" class="btn-delete" onclick="return confirm('Are you sure you want to delete {{ leader_data.person.full_name }}?');">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </a>
+                                </div>
+                            {% endif %}
+                                    {% if leader_data.person.phone %}
+                                        <a href="tel:{{ leader_data.person.phone }}">
+                                            <i class="fas fa-phone"></i> {{ leader_data.person.phone }}
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                        </div>
                     </div>
-                    <div class="officer-info">
-                        <p class="officer-name">President</p>
-                        <p class="officer-title">Chief Executive Officer</p>
-                        <p class="officer-bio">The chief executive who presides over meetings and represents the chapter. Add a short bio here.</p>
-                    </div>
-                </div>
-                
-                <!-- First Vice President -->
-                <div class="officer-card">
-                    <div class="officer-image">
-                        <div class="officer-image-placeholder">[First VP Photo]</div>
-                    </div>
-                    <div class="officer-info">
-                        <p class="officer-name">First Vice President</p>
-                        <p class="officer-title">Internal Affairs</p>
-                        <p class="officer-bio">Manages internal affairs, presides over committees, and holds members accountable. Add a short bio here.</p>
-                    </div>
-                </div>
-                
-                <!-- Second Vice President -->
-                <div class="officer-card">
-                    <div class="officer-image">
-                        <div class="officer-image-placeholder">[Second VP Photo]</div>
-                    </div>
-                    <div class="officer-info">
-                        <p class="officer-name">Second Vice President</p>
-                        <p class="officer-title">External Affairs</p>
-                        <p class="officer-bio">Oversees external affairs and often coordinates with undergraduate chapters or outside organizations. Add a short bio here.</p>
-                    </div>
-                </div>
-                
-                <!-- Secretary -->
-                <div class="officer-card">
-                    <div class="officer-image">
-                        <div class="officer-image-placeholder">[Secretary Photo]</div>
-                    </div>
-                    <div class="officer-info">
-                        <p class="officer-name">Secretary</p>
-                        <p class="officer-title">Recording & Corresponding Secretary</p>
-                        <p class="officer-bio">Responsible for meeting minutes, chapter records, and official communications. Add a short bio here.</p>
-                    </div>
-                </div>
-                
-                <!-- Treasurer -->
-                <div class="officer-card">
-                    <div class="officer-image">
-                        <div class="officer-image-placeholder">[Treasurer Photo]</div>
-                    </div>
-                    <div class="officer-info">
-                        <p class="officer-name">Treasurer</p>
-                        <p class="officer-title">Financial Officer</p>
-                        <p class="officer-bio">Manages chapter funds, budgets, and financial reporting. Add a short bio here.</p>
-                    </div>
-                </div>
-                
-                <!-- Financial Secretary -->
-                <div class="officer-card">
-                    <div class="officer-image">
-                        <div class="officer-image-placeholder">[Financial Secretary Photo]</div>
-                    </div>
-                    <div class="officer-info">
-                        <p class="officer-name">Financial Secretary</p>
-                        <p class="officer-title">Dues & Membership Finance</p>
-                        <p class="officer-bio">Collects dues and maintains membership financial records. Add a short bio here.</p>
-                    </div>
-                </div>
+                {% endfor %}
             </div>
-            
-            <!-- Appointed/Functional Officers Section -->
-            <div class="officers-section">
-                <h2>Appointed/Functional Officers</h2>
-                
-                <!-- Director of Bigger and Better Business -->
-                <div class="officer-card">
-                    <div class="officer-image">
-                        <div class="officer-image-placeholder">[BBB Director Photo]</div>
-                    </div>
-                    <div class="officer-info">
-                        <p class="officer-name">Director of Bigger and Better Business</p>
-                        <p class="officer-title">National Program Head</p>
-                        <p class="officer-bio">Leads the Bigger and Better Business initiative, focusing on economic empowerment and business development. Add a short bio here.</p>
-                    </div>
-                </div>
-                
-                <!-- Director of Education -->
-                <div class="officer-card">
-                    <div class="officer-image">
-                        <div class="officer-image-placeholder">[Education Director Photo]</div>
-                    </div>
-                    <div class="officer-info">
-                        <p class="officer-name">Director of Education</p>
-                        <p class="officer-title">National Program Head</p>
-                        <p class="officer-bio">Oversees educational initiatives and academic excellence programs for the chapter. Add a short bio here.</p>
-                    </div>
-                </div>
-                
-                <!-- Director of Social Action -->
-                <div class="officer-card">
-                    <div class="officer-image">
-                        <div class="officer-image-placeholder">[Social Action Director Photo]</div>
-                    </div>
-                    <div class="officer-info">
-                        <p class="officer-name">Director of Social Action</p>
-                        <p class="officer-title">National Program Head</p>
-                        <p class="officer-bio">Manages social action and community service programs for positive social change. Add a short bio here.</p>
-                    </div>
-                </div>
-                
-                <!-- Director of Sigma Beta Club -->
-                <div class="officer-card">
-                    <div class="officer-image">
-                        <div class="officer-image-placeholder">[Sigma Beta Club Director Photo]</div>
-                    </div>
-                    <div class="officer-info">
-                        <p class="officer-name">Director of Sigma Beta Club</p>
-                        <p class="officer-title">Youth Development Program Head</p>
-                        <p class="officer-bio">Leads the Sigma Beta Club program dedicated to youth mentorship and development. Add a short bio here.</p>
-                    </div>
-                </div>
-                
-                <!-- Sergeant-at-Arms -->
-                <div class="officer-card">
-                    <div class="officer-image">
-                        <div class="officer-image-placeholder">[Sergeant-at-Arms Photo]</div>
-                    </div>
-                    <div class="officer-info">
-                        <p class="officer-name">Sergeant-at-Arms</p>
-                        <p class="officer-title">Order & Discipline</p>
-                        <p class="officer-bio">Maintains order during meetings. Add a short bio here.</p>
-                    </div>
-                </div>
-                
-                <!-- Parliamentarian -->
-                <div class="officer-card">
-                    <div class="officer-image">
-                        <div class="officer-image-placeholder">[Parliamentarian Photo]</div>
-                    </div>
-                    <div class="officer-info">
-                        <p class="officer-name">Parliamentarian</p>
-                        <p class="officer-title">Rules & Procedures</p>
-                        <p class="officer-bio">Ensures meetings follow Robert's Rules of Order and the chapter's bylaws. Add a short bio here.</p>
-                    </div>
-                </div>
-                
-                <!-- Chaplain -->
-                <div class="officer-card">
-                    <div class="officer-image">
-                        <div class="officer-image-placeholder">[Chaplain Photo]</div>
-                    </div>
-                    <div class="officer-info">
-                        <p class="officer-name">Chaplain</p>
-                        <p class="officer-title">Spiritual Guidance</p>
-                        <p class="officer-bio">Provides spiritual guidance and leads invocations. Add a short bio here.</p>
-                    </div>
-                </div>
-                
-                <!-- Director of Publicity -->
-                <div class="officer-card">
-                    <div class="officer-image">
-                        <div class="officer-image-placeholder">[Publicity/PR Photo]</div>
-                    </div>
-                    <div class="officer-info">
-                        <p class="officer-name">Director of Publicity/Public Relations</p>
-                        <p class="officer-title">Communications & Media</p>
-                        <p class="officer-bio">Manages the chapter's image and media. Add a short bio here.</p>
-                    </div>
-                </div>
+        {% else %}
+            <div class="no-leaders">
+                <p>No leadership information available at this time.</p>
             </div>
+        {% endif %}
+        
+        <div style="text-align: center; margin-top: 2rem; padding-top: 2rem; border-top: 2px solid #164f90;">
+            <a href="{% url 'home' %}" class="btn-add" style="display: inline-block; text-decoration: none;">
+                <i class="fas fa-arrow-left"></i> Back to Home
+            </a>
         </div>
     </div>
 </div>

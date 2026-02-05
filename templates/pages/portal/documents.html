@@ -1,0 +1,445 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Documents - Nu Gamma Sigma{% endblock %}
+
+{% block content %}
+<div class="portal-page">
+    <div class="portal-header">
+        <h1><i class="fas fa-folder"></i> Documents</h1>
+        <p>Access chapter documents and resources</p>
+        {% if is_officer %}
+        <a href="{% url 'create_document' %}" class="btn btn-primary" style="margin-top: 1rem;">
+            <i class="fas fa-plus"></i> Upload Document
+        </a>
+        {% endif %}
+    </div>
+
+    <!-- Search and Filter Section -->
+    <div class="filters-section">
+        <form method="get" class="filter-form">
+            <div class="search-box">
+                <input type="text" name="search" class="form-control" placeholder="Search documents..." value="{{ search_query }}">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-search"></i> Search
+                </button>
+            </div>
+            
+            <div class="category-filter">
+                <label>Filter by Category:</label>
+                <select name="category" class="form-select" onchange="this.form.submit()">
+                    <option value="">All Categories</option>
+                    {% for value, label in categories %}
+                    <option value="{{ value }}" {% if selected_category == value %}selected{% endif %}>
+                        {{ label }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            {% if selected_category or search_query %}
+            <a href="{% url 'documents_view' %}" class="btn btn-secondary">
+                <i class="fas fa-times"></i> Clear Filters
+            </a>
+            {% endif %}
+        </form>
+    </div>
+
+    <!-- Documents Table by Category -->
+    {% if documents_by_category %}
+        {% for category_key, category_docs in documents_by_category.items %}
+        <div class="category-section">
+            <h2 class="category-title">
+                <i class="fas fa-folder-open"></i> 
+                {% for value, label in categories %}
+                    {% if value == category_key %}{{ label }}{% endif %}
+                {% endfor %}
+                <span class="badge">{{ category_docs|length }}</span>
+            </h2>
+            
+            <div class="table-responsive">
+                <table class="documents-table">
+                    <thead>
+                        <tr>
+                            <th>Document Title</th>
+                            <th>Description</th>
+                            <th>Uploaded By</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for document in category_docs %}
+                        <tr>
+                            <td>
+                                <div class="document-title">
+                                    <i class="fas fa-file-alt"></i>
+                                    <strong>{{ document.title }}</strong>
+                                    {% if document.requires_officer %}
+                                    <span class="badge badge-officer">Officer Only</span>
+                                    {% endif %}
+                                    {% if document.is_public %}
+                                    <span class="badge badge-public">Public</span>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td class="description-cell">
+                                {{ document.description|truncatewords:20|default:"No description" }}
+                            </td>
+                            <td>
+                                <div class="uploader-info">
+                                    <i class="fas fa-user"></i>
+                                    {{ document.uploaded_by.get_full_name|default:document.uploaded_by.username }}
+                                </div>
+                            </td>
+                            <td>
+                                <div class="date-info">
+                                    <i class="fas fa-calendar"></i>
+                                    {{ document.created_at|date:"M d, Y" }}
+                                </div>
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <a href="{{ document.file.url }}" download class="btn btn-sm btn-primary" title="Download">
+                                        <i class="fas fa-download"></i>
+                                    </a>
+                                    <a href="{{ document.file.url }}" target="_blank" class="btn btn-sm btn-secondary" title="View">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    {% if is_officer %}
+                                    <a href="{% url 'edit_document' document.id %}" class="btn btn-sm btn-warning" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="empty-state">
+            <i class="fas fa-folder-open"></i>
+            <p>No documents found.</p>
+            {% if search_query or selected_category %}
+            <p class="small">Try adjusting your filters or search terms.</p>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
+
+<style>
+    .portal-page {
+        padding: 2rem 0;
+    }
+
+    .portal-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .portal-header h1 {
+        color: #164f90;
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .portal-header p {
+        color: #666;
+        font-size: 1.1rem;
+    }
+
+    /* Filters Section */
+    .filters-section {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
+
+    .filter-form {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        align-items: flex-end;
+    }
+
+    .search-box {
+        flex: 2;
+        min-width: 250px;
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .search-box input {
+        flex: 1;
+    }
+
+    .category-filter {
+        flex: 1;
+        min-width: 200px;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .category-filter label {
+        font-weight: 600;
+        color: #333;
+        font-size: 0.9rem;
+    }
+
+    /* Category Sections */
+    .category-section {
+        margin-bottom: 3rem;
+    }
+
+    .category-title {
+        color: #164f90;
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 3px solid #2a7dd4;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .category-title .badge {
+        background: #2a7dd4;
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+
+    /* Table Styles */
+    .table-responsive {
+        overflow-x: auto;
+    }
+
+    .documents-table {
+        width: 100%;
+        background: white;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .documents-table thead {
+        background: linear-gradient(135deg, #2a7dd4, #164f90);
+        color: white;
+    }
+
+    .documents-table th {
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .documents-table tbody tr {
+        border-bottom: 1px solid #e0e0e0;
+        transition: background-color 0.2s;
+    }
+
+    .documents-table tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+
+    .documents-table td {
+        padding: 1rem;
+        vertical-align: middle;
+    }
+
+    .document-title {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .document-title i {
+        color: #2a7dd4;
+        font-size: 1.1rem;
+    }
+
+    .document-title strong {
+        color: #164f90;
+    }
+
+    .badge-officer {
+        background: #dc3545;
+        color: white;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.7rem;
+        font-weight: 600;
+    }
+
+    .badge-public {
+        background: #28a745;
+        color: white;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.7rem;
+        font-weight: 600;
+    }
+
+    .description-cell {
+        color: #555;
+        font-size: 0.9rem;
+        max-width: 300px;
+    }
+
+    .uploader-info,
+    .date-info {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #666;
+        font-size: 0.9rem;
+    }
+
+    .uploader-info i,
+    .date-info i {
+        color: #2a7dd4;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .btn-sm {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.85rem;
+        border-radius: 6px;
+    }
+
+    .btn-sm i {
+        font-size: 0.9rem;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #999;
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        color: #ccc;
+    }
+
+    .empty-state .small {
+        font-size: 0.9rem;
+        color: #bbb;
+        margin-top: 0.5rem;
+    }
+
+    /* Dark Mode */
+    body.dark-mode .portal-header h1 {
+        color: #87ceeb;
+    }
+
+    body.dark-mode .portal-header p {
+        color: #b0b8c8;
+    }
+
+    body.dark-mode .filters-section {
+        background: #1a2a4a;
+        box-shadow: 0 2px 10px rgba(135, 206, 235, 0.2);
+    }
+
+    body.dark-mode .category-filter label {
+        color: #b0b8c8;
+    }
+
+    body.dark-mode .form-control,
+    body.dark-mode .form-select {
+        background-color: #0b1020;
+        color: #e8edf7;
+        border-color: #2a4a7a;
+    }
+
+    body.dark-mode .form-control:focus,
+    body.dark-mode .form-select:focus {
+        background-color: #0f1830;
+        color: #e8edf7;
+        border-color: #4a7abd;
+    }
+
+    body.dark-mode .category-title {
+        color: #87ceeb;
+        border-bottom-color: #5ca3d6;
+    }
+
+    body.dark-mode .documents-table {
+        background: #1a2a4a;
+        box-shadow: 0 2px 10px rgba(135, 206, 235, 0.2);
+    }
+
+    body.dark-mode .documents-table thead {
+        background: linear-gradient(135deg, #2a4a7a, #1a3a6a);
+    }
+
+    body.dark-mode .documents-table tbody tr {
+        border-bottom-color: #2a4a7a;
+    }
+
+    body.dark-mode .documents-table tbody tr:hover {
+        background-color: #0f1830;
+    }
+
+    body.dark-mode .document-title strong {
+        color: #87ceeb;
+    }
+
+    body.dark-mode .description-cell,
+    body.dark-mode .uploader-info,
+    body.dark-mode .date-info {
+        color: #b0b8c8;
+    }
+
+    body.dark-mode .uploader-info i,
+    body.dark-mode .date-info i,
+    body.dark-mode .document-title i {
+        color: #5ca3d6;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .filter-form {
+            flex-direction: column;
+        }
+
+        .search-box,
+        .category-filter {
+            width: 100%;
+        }
+
+        .documents-table {
+            font-size: 0.85rem;
+        }
+
+        .documents-table th,
+        .documents-table td {
+            padding: 0.75rem 0.5rem;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+        }
+    }
+</style>
+{% endblock %}

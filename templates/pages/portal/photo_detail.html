@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+{% load custom_filters %}
+
+{% block title %}Photo - Member Portal{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <!-- Photo Display -->
+        <div class="col-md-8">
+            <div class="card" style="box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);">
+                <img src="{{ photo.image.url }}" class="card-img-top" alt="{{ photo.caption }}">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <h5 class="card-title">
+                                <i class="fas fa-user-circle"></i> {{ photo.uploaded_by.get_full_name|default:photo.uploaded_by.username }}
+                            </h5>
+                            <p class="text-muted small mb-0">
+                                <i class="fas fa-clock"></i> {{ photo.created_at|date:"F d, Y at g:i A" }}
+                            </p>
+                        </div>
+                        <div>
+                            <button class="btn btn-sm btn-outline-danger like-btn" data-photo-id="{{ photo.id }}">
+                                <i class="fas fa-heart{% if not user_liked %}-o{% endif %}"></i>
+                                <span class="like-count">{{ photo.like_count }}</span>
+                            </button>
+                            {% if photo.uploaded_by == user or user.is_staff %}
+                            <a href="{% url 'edit_photo' photo.id %}" class="btn btn-sm btn-outline-primary ms-2">
+                                <i class="fas fa-edit"></i> Edit
+                            </a>
+                            <a href="{% url 'delete_photo' photo.id %}" class="btn btn-sm btn-outline-danger ms-2" onclick="return confirm('Are you sure you want to delete this photo?');">
+                                <i class="fas fa-trash"></i> Delete
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    {% if photo.caption %}
+                    <p class="card-text">{{ photo.caption }}</p>
+                    {% endif %}
+
+                    {% if photo.album %}
+                    <p class="mb-1">
+                        <span class="badge bg-primary">
+                            <i class="fas fa-folder"></i> {{ photo.album.title }}
+                        </span>
+                    </p>
+                    {% endif %}
+
+                    {% if photo.event %}
+                    <p class="mb-1">
+                        <span class="badge bg-success">
+                            <i class="fas fa-calendar"></i> {{ photo.event.title }}
+                        </span>
+                    </p>
+                    {% endif %}
+
+                    {% if photo.tags %}
+                    <p class="mb-1">
+                        {% for tag in photo.tags|split:"," %}
+                        <span class="badge bg-secondary">#{{ tag|strip }}</span>
+                        {% endfor %}
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Comments Section -->
+            <div class="card mt-3" style="box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-comments"></i> Comments ({{ comments.count }})
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <!-- Add Comment Form -->
+                    <form method="post" class="mb-4">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <textarea class="form-control" name="comment_content" rows="2" placeholder="Add a comment..." required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-sm">
+                            <i class="fas fa-paper-plane"></i> Post Comment
+                        </button>
+                    </form>
+
+                    <!-- Comments List -->
+                    {% if comments %}
+                    <div class="comments-list">
+                        {% for comment in comments %}
+                        <div class="comment mb-3 p-3 border-bottom">
+                            <div class="d-flex justify-content-between">
+                                <strong>
+                                    <i class="fas fa-user"></i> {{ comment.author.get_full_name|default:comment.author.username }}
+                                </strong>
+                                <small class="text-muted">{{ comment.created_at|timesince }} ago</small>
+                            </div>
+                            <p class="mb-0 mt-2">{{ comment.content }}</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted text-center mb-0">
+                        <i class="fas fa-comment-slash"></i> No comments yet. Be the first to comment!
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-md-4">
+            <div class="card" style="box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);">
+                <div class="card-header">
+                    <h5 class="mb-0">Actions</h5>
+                </div>
+                <div class="card-body">
+                    <a href="{% url 'photo_gallery' %}" class="btn btn-outline-primary w-100 mb-2">
+                        <i class="fas fa-arrow-left"></i> Back to Gallery
+                    </a>
+                    <a href="{{ photo.image.url }}" download class="btn btn-outline-success w-100 mb-2">
+                        <i class="fas fa-download"></i> Download Photo
+                    </a>
+                    <a href="{% url 'upload_photo' %}" class="btn btn-outline-info w-100">
+                        <i class="fas fa-upload"></i> Upload New Photo
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Like button functionality
+document.querySelectorAll('.like-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const photoId = this.dataset.photoId;
+        const likeIcon = this.querySelector('i');
+        const likeCount = this.querySelector('.like-count');
+        
+        fetch(`/pages/portal/photos/${photoId}/like/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            likeCount.textContent = data.like_count;
+            if (data.liked) {
+                likeIcon.classList.remove('fa-heart-o');
+                likeIcon.classList.add('fa-heart');
+            } else {
+                likeIcon.classList.remove('fa-heart');
+                likeIcon.classList.add('fa-heart-o');
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

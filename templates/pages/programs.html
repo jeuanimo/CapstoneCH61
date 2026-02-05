@@ -1,9 +1,40 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}Programs - Phi Beta Sigma Fraternity, Inc. | Nu Gamma Sigma Chapter{% endblock %}
 
 {% block css %}
 <link rel="stylesheet" href="{% static 'css/pages.css' %}">
+<style>
+    .btn-learn-more {
+        display: inline-block;
+        margin-top: 1rem;
+        padding: 0.75rem 1.5rem;
+        background-color: #164f90;
+        color: #ffffff;
+        text-decoration: none;
+        border-radius: 4px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-learn-more:hover {
+        background-color: #0d3a6b;
+        color: #ffffff;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    
+    body.dark-mode .btn-learn-more {
+        background-color: #87ceeb;
+        color: #0b1020;
+    }
+    
+    body.dark-mode .btn-learn-more:hover {
+        background-color: #5fb3d9;
+        color: #0b1020;
+    }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -15,19 +46,28 @@
 
     <div class="events-grid">
         <div class="event-card">
-            <h3>Scholarship & Education</h3>
+            <h3>Bigger & Better Business</h3>
             <div class="event-meta">Year-round</div>
-            <p>Academic mentorship, scholarship awareness, and educational workshops.</p>
+            <p>Economic empowerment through entrepreneurship, financial literacy, and business development.</p>
+            <a href="{% url 'program_business' %}" class="btn-learn-more">Learn More</a>
         </div>
         <div class="event-card">
-            <h3>Leadership Development</h3>
+            <h3>Social Action</h3>
             <div class="event-meta">Ongoing</div>
-            <p>Programs that cultivate leadership, professionalism, and civic responsibility.</p>
+            <p>Advocacy and community engagement addressing social justice and civic responsibility.</p>
+            <a href="{% url 'program_social_action' %}" class="btn-learn-more">Learn More</a>
         </div>
         <div class="event-card">
-            <h3>Community Service</h3>
-            <div class="event-meta">Ongoing</div>
-            <p>Volunteer initiatives focused on local community impact and outreach.</p>
+            <h3>Education</h3>
+            <div class="event-meta">Year-round</div>
+            <p>Academic excellence through mentorship, scholarships, and educational initiatives.</p>
+            <a href="{% url 'program_education' %}" class="btn-learn-more">Learn More</a>
+        </div>
+        <div class="event-card">
+            <h3>Sigma Beta Club</h3>
+            <div class="event-meta">Youth Program</div>
+            <p>Mentoring young men through character development and leadership training.</p>
+            <a href="{% url 'program_sigma_beta' %}" class="btn-learn-more">Learn More</a>
         </div>
     </div>
 </div>

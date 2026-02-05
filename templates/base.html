@@ -6,6 +6,8 @@
 
     <title>{% block title %}Capstone CH61{% endblock %}</title>
     {% load static %}
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{% static 'img/PBS_Seal_2019_Color.png' %}">
     <!-- Global CSS - Load in order -->
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
     <link rel="stylesheet" href="{% static 'css/navbar.css' %}">
@@ -58,7 +60,7 @@
     </div>
 
     <!-- Main Navigation -->
-    <nav class="navbar">
+    <nav class="navbar" aria-label="Main navigation">
         <div class="container">
             <div class="navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav">
@@ -77,20 +79,135 @@
                     <li class="nav-item {% if request.resolver_match.url_name == 'contact' %}active{% endif %}">
                         <a href="{% url 'contact' %}" class="nav-link">Contact Us</a>
                     </li>
+                    {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a href="{% url 'logout' %}" class="nav-link">Logout</a>
+                    </li>
+                    {% else %}
+                    <li class="nav-item {% if request.resolver_match.url_name == 'login' %}active{% endif %}">
+                        <a href="{% url 'login' %}" class="nav-link">Login</a>
+                    </li>
+                    <li class="nav-item {% if request.resolver_match.url_name == 'signup' %}active{% endif %}">
+                        <a href="{% url 'signup' %}" class="nav-link">Sign Up</a>
+                    </li>
+                    {% endif %}
                 </ul>
             </div>
         </div>
     </nav>
 
+    <!-- Member Portal Navigation -->
+    {% if user.is_authenticated %}
+    <nav class="portal-navbar" aria-label="Member portal navigation">
+        <div class="container">
+            <div class="portal-navbar-header">
+                <i class="fas fa-users-cog"></i>
+                <span>Member Portal</span>
+            </div>
+            <div class="portal-nav">
+                <a href="{% url 'portal_dashboard' %}" class="portal-nav-link {% if request.resolver_match.url_name == 'portal_dashboard' %}active{% endif %}">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="{% url 'member_roster' %}" class="portal-nav-link {% if request.resolver_match.url_name == 'member_roster' %}active{% endif %}">
+                    <i class="fas fa-users"></i>
+                    <span>Roster</span>
+                </a>
+                <a href="{% url 'announcements_view' %}" class="portal-nav-link {% if request.resolver_match.url_name == 'announcements_view' %}active{% endif %}">
+                    <i class="fas fa-bullhorn"></i>
+                    <span>Announcements</span>
+                </a>
+                <a href="{% url 'messages_inbox' %}" class="portal-nav-link {% if request.resolver_match.url_name == 'messages_inbox' %}active{% endif %}">
+                    <i class="fas fa-envelope"></i>
+                    <span>Messages</span>
+                </a>
+                <a href="{% url 'photo_gallery' %}" class="portal-nav-link {% if request.resolver_match.url_name == 'photo_gallery' %}active{% endif %}">
+                    <i class="fas fa-images"></i>
+                    <span>Photos</span>
+                </a>
+                <a href="{% url 'documents_view' %}" class="portal-nav-link {% if request.resolver_match.url_name == 'documents_view' %}active{% endif %}">
+                    <i class="fas fa-folder"></i>
+                    <span>Documents</span>
+                </a>
+                <a href="{% url 'dues_view' %}" class="portal-nav-link {% if request.resolver_match.url_name == 'dues_view' %}active{% endif %}">
+                    <i class="fas fa-dollar-sign"></i>
+                    <span>Dues</span>
+                </a>
+                <a href="{% url 'attendance_view' %}" class="portal-nav-link {% if request.resolver_match.url_name == 'attendance_view' %}active{% endif %}">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Attendance</span>
+                </a>
+                {% if user.is_staff or user.member_profile.is_officer %}
+                <a href="{% url 'manage_attendance' %}" class="portal-nav-link admin-link {% if request.resolver_match.url_name == 'manage_attendance' %}active{% endif %}">
+                    <i class="fas fa-clipboard-list"></i>
+                    <span>Manage Attendance</span>
+                </a>
+                <a href="{% url 'dues_and_payments' %}" class="portal-nav-link admin-link {% if request.resolver_match.url_name == 'dues_and_payments' %}active{% endif %}">
+                    <i class="fas fa-money-bill-wave"></i>
+                    <span>Manage Dues</span>
+                </a>
+                <a href="{% url 'shop_home' %}" class="portal-nav-link admin-link {% if request.resolver_match.url_name == 'shop_home' %}active{% endif %}">
+                    <i class="fas fa-shopping-bag"></i>
+                    <span>Boutique</span>
+                </a>
+                {% endif %}
+                {% if user.is_staff %}
+                <a href="{% url 'manage_invitations' %}" class="portal-nav-link admin-link {% if request.resolver_match.url_name == 'manage_invitations' %}active{% endif %}">
+                    <i class="fas fa-ticket-alt"></i>
+                    <span>Invitations</span>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+    {% endif %}
+
     <!-- Messages/Alerts -->
     {% if messages %}
     <div class="container mt-3">
         {% for message in messages %}
-        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert" style="display: none;">
             {{ message }}
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
         {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Success Modal -->
+    {% if messages %}
+    <div class="modal-overlay" id="messageModal">
+        <div class="modal-content" style="max-height: 80vh; overflow-y: auto;">
+            <div class="modal-header">
+                {% with first_message=messages.0 %}
+                {% if first_message.tags == 'success' %}
+                <i class="fas fa-check-circle modal-icon-success"></i>
+                <h2>Success!</h2>
+                {% elif first_message.tags == 'warning' %}
+                <i class="fas fa-exclamation-triangle modal-icon-warning"></i>
+                <h2>Notice</h2>
+                {% elif first_message.tags == 'error' %}
+                <i class="fas fa-times-circle modal-icon-error"></i>
+                <h2>Error</h2>
+                {% elif first_message.tags == 'info' %}
+                <i class="fas fa-info-circle modal-icon-info"></i>
+                <h2>Information</h2>
+                {% else %}
+                <i class="fas fa-info-circle modal-icon-info"></i>
+                <h2>Notice</h2>
+                {% endif %}
+                {% endwith %}
+                <button type="button" class="btn-close" onclick="closeMessageModal()" style="position: absolute; top: 10px; right: 10px; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #666;">&times;</button>
+            </div>
+            <div class="modal-body">
+                {% for message in messages %}
+                <p {% if message.tags == 'error' %}style="color: #dc3545;"{% elif message.tags == 'success' %}style="color: #28a745;"{% elif message.tags == 'warning' %}style="color: #ffc107;"{% endif %}>{{ message|safe }}</p>
+                {% endfor %}
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn" onclick="closeMessageModal()">Close</button>
+            </div>
+        </div>
     </div>
     {% endif %}
 
@@ -119,7 +236,209 @@
         if (localStorage.getItem('theme') === 'dark') {
             document.body.classList.add('dark-mode');
         }
+
+
+
+        // Modal functionality for Django messages
+        function closeMessageModal() {
+            const modal = document.getElementById('messageModal');
+            if (modal) {
+                modal.style.display = 'none';
+                // Remove modal from DOM to prevent issues
+                modal.remove();
+            }
+        }
+
+        // Show modal on page load if messages exist
+        window.addEventListener('DOMContentLoaded', function() {
+            const modal = document.getElementById('messageModal');
+            if (modal) {
+                modal.style.display = 'flex';
+            }
+        });
+
+        // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+            const modal = document.getElementById('messageModal');
+            if (modal && event.target === modal) {
+                closeMessageModal();
+            }
+        });
+        
+        // Allow ESC key to close modal
+        window.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeMessageModal();
+            }
+        });
+        window.addEventListener('click', function(event) {
+            const modal = document.getElementById('messageModal');
+            if (event.target === modal) {
+                closeMessageModal();
+            }
+        });
+
+        // Also allow Escape key to close modal
+        window.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                const modal = document.getElementById('messageModal');
+                if (modal && modal.style.display === 'flex') {
+                    closeMessageModal();
+                }
+            }
+        });
     </script>
+
+    <style>
+        /* Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: 12px;
+            padding: 0;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        body.dark-mode .modal-content {
+            background-color: #1a2a4a;
+            color: #e8edf7;
+        }
+
+        .modal-header {
+            padding: 2rem;
+            text-align: center;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        body.dark-mode .modal-header {
+            border-bottom-color: #2a3a5a;
+        }
+
+        .modal-header i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .modal-icon-success {
+            color: #4caf50;
+        }
+
+        .modal-icon-warning {
+            color: #ff9800;
+        }
+
+        .modal-icon-error {
+            color: #f44336;
+        }
+
+        .modal-icon-info {
+            color: #2196f3;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.75rem;
+            color: #164f90;
+        }
+
+        body.dark-mode .modal-header h2 {
+            color: #87ceeb;
+        }
+
+        .modal-body {
+            padding: 2rem;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            text-align: center;
+        }
+
+        .modal-body p {
+            margin: 0;
+            color: #333;
+        }
+
+        body.dark-mode .modal-body p {
+            color: #b0b8c8;
+        }
+
+        .modal-footer {
+            padding: 1.5rem 2rem;
+            text-align: center;
+            border-top: 2px solid #f0f0f0;
+        }
+
+        body.dark-mode .modal-footer {
+            border-top-color: #2a3a5a;
+        }
+
+        .modal-btn {
+            background-color: #164f90;
+            color: white;
+            border: none;
+            padding: 0.75rem 2.5rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .modal-btn:hover {
+            background-color: #0d3a6b;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(22, 79, 144, 0.3);
+        }
+
+        .modal-btn:active {
+            transform: translateY(0);
+        }
+
+        @media (max-width: 768px) {
+            .modal-content {
+                width: 95%;
+            }
+
+            .modal-header h2 {
+                font-size: 1.5rem;
+            }
+
+            .modal-body {
+                font-size: 1rem;
+            }
+        }
+    </style>
 
     {% block js %} {% endblock %}
 </body>

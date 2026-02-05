@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+{% block title %}Upload Leadership Photo - Member Portal{% endblock %}
+
+{% block content %}
+<style>
+    body.dark-mode .card {
+        background-color: #1a2a4a;
+        color: #e8edf7;
+    }
+    body.dark-mode .form-control {
+        background-color: #0b1020;
+        color: #e8edf7;
+        border-color: #2a4a7a;
+    }
+    body.dark-mode .alert-info {
+        background-color: #1a3a5a;
+        color: #e8edf7;
+        border-color: #2a4a7a;
+    }
+    .photo-preview {
+        max-width: 300px;
+        margin: 20px auto;
+    }
+    .photo-preview img {
+        max-height: 300px;
+        border-radius: 10px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+    }
+</style>
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card" style="box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-image"></i> Upload Leadership Photo
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <h5 class="text-center mb-4">{{ leader.full_name }}</h5>
+                    <p class="text-center text-muted">{{ leader.get_position_title }}</p>
+
+                    <!-- Current Photo Preview -->
+                    {% if leader.profile_image %}
+                    <div class="photo-preview text-center">
+                        <p class="text-muted mb-2">Current Photo:</p>
+                        <img src="{{ leader.profile_image.url }}" alt="{{ leader.full_name }}" class="img-fluid rounded">
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info text-center">
+                        <i class="fas fa-info-circle"></i> No photo uploaded yet
+                    </div>
+                    {% endif %}
+
+                    <!-- Upload Form -->
+                    <form method="post" enctype="multipart/form-data" class="mt-4">
+                        {% csrf_token %}
+                        
+                        <div class="mb-4">
+                            <label for="profile_image" class="form-label">Select Photo</label>
+                            <input type="file" class="form-control" id="profile_image" name="profile_image" accept="image/*" required>
+                            <small class="form-text text-muted d-block mt-2">
+                                <i class="fas fa-info-circle"></i> Recommended: Square image (e.g., 500x500px or larger)
+                            </small>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'chapter_leadership' %}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-upload"></i> Upload Photo
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Guidelines -->
+                    <div class="alert alert-info mt-4">
+                        <h6><i class="fas fa-lightbulb"></i> Photo Guidelines:</h6>
+                        <ul class="mb-0">
+                            <li>Use a professional headshot or portrait photo</li>
+                            <li>Square format works best (1:1 aspect ratio)</li>
+                            <li>Minimum 300x300 pixels, recommended 500x500 or larger</li>
+                            <li>Supported formats: JPG, PNG, GIF, WebP</li>
+                            <li>Clear face visible with good lighting</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

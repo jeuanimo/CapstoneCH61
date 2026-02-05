@@ -1,0 +1,166 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 style="color: #1a1a2e; margin-bottom: 10px;">📦 Import Products</h1>
+    <p style="color: #6c757d; margin-bottom: 30px;">Admin: Import merchandise from CSV file</p>
+
+    <div class="row">
+        <!-- Upload Form -->
+        <div class="col-md-8">
+            <div class="card" style="border: 1px solid #dee2e6;">
+                <div class="card-body">
+                    <h5 class="card-title" style="color: #1a1a2e; margin-bottom: 25px;">Upload CSV File</h5>
+
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+
+                        <!-- CSV File Input -->
+                        <div class="mb-3">
+                            <label for="{{ form.csv_file.id_for_label }}" class="form-label" style="color: #1a1a2e; font-weight: 500;">Select CSV File</label>
+                            <div class="input-group">
+                                <input type="file" class="form-control" id="{{ form.csv_file.id_for_label }}" name="csv_file" accept=".csv" required style="border-color: #1a1a2e;">
+                            </div>
+                            <small class="form-text" style="color: #6c757d; display: block; margin-top: 10px;">
+                                Maximum file size: 5MB. Format: CSV with columns for name, category, price, etc.
+                            </small>
+                            {% if form.csv_file.errors %}
+                            <div class="alert alert-danger mt-2" role="alert">
+                                {% for error in form.csv_file.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Images ZIP Input (Optional) -->
+                        <div class="mb-3">
+                            <label for="{{ form.images_zip.id_for_label }}" class="form-label" style="color: #1a1a2e; font-weight: 500;">📸 Images ZIP File (Optional)</label>
+                            <div class="input-group">
+                                <input type="file" class="form-control" id="{{ form.images_zip.id_for_label }}" name="images_zip" accept=".zip" style="border-color: #1a1a2e;">
+                            </div>
+                            <small class="form-text" style="color: #6c757d; display: block; margin-top: 10px;">
+                                Optional: Upload a ZIP file containing product images. Maximum size: 50MB.
+                            </small>
+                            {% if form.images_zip.errors %}
+                            <div class="alert alert-danger mt-2" role="alert">
+                                {% for error in form.images_zip.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Submit Button -->
+                        <button type="submit" class="btn btn-dark" style="background-color: #1a1a2e; border-color: #1a1a2e; padding: 10px 30px; font-weight: 500;">
+                            Import Products
+                        </button>
+                    </form>
+
+                    <!-- Error Messages -->
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger mt-4" role="alert">
+                        <h6>Import Errors:</h6>
+                        {% for error in form.non_field_errors %}
+                            <p style="margin: 5px 0;">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- CSV Format Guide -->
+            <div class="card mt-4" style="border: 1px solid #dee2e6;">
+                <div class="card-body">
+                    <h5 class="card-title" style="color: #1a1a2e; margin-bottom: 20px;">📋 CSV Format Guide</h5>
+                    
+                    <h6 style="color: #1a1a2e; margin-bottom: 10px;">Required Columns:</h6>
+                    <ul style="color: #6c757d; margin-bottom: 20px;">
+                        <li><strong>name</strong> - Product name (e.g., "Phi Beta Sigma T-Shirt")</li>
+                        <li><strong>category</strong> - Must be one of: apparel, accessories, drinkware, other</li>
+                        <li><strong>price</strong> - Price in dollars (e.g., 19.99)</li>
+                    </ul>
+
+                    <h6 style="color: #1a1a2e; margin-bottom: 10px;">Optional Columns:</h6>
+                    <ul style="color: #6c757d; margin-bottom: 20px;">
+                        <li><strong>description</strong> - Product description</li>
+                        <li><strong>inventory</strong> - Number of units in stock (default: 100)</li>
+                        <li><strong>sizes</strong> - Comma-separated sizes (e.g., "XS, S, M, L, XL")</li>
+                        <li><strong>colors</strong> - Comma-separated colors (e.g., "Black, White, Red")</li>
+                        <li><strong>image_url</strong> - Direct URL to product image (downloaded automatically)</li>
+                        <li><strong>image_path</strong> - Path inside ZIP file (e.g., "images/tshirt.jpg")</li>
+                    </ul>
+
+                    <h6 style="color: #1a1a2e; margin-bottom: 10px;">📸 Adding Images:</h6>
+                    <p style="color: #6c757d; margin-bottom: 10px;">
+                        <strong>Option 1: Image URLs</strong> - Add an <code>image_url</code> column with direct image links. Images are downloaded automatically.
+                    </p>
+                    <p style="color: #6c757d; margin-bottom: 20px;">
+                        <strong>Option 2: ZIP File</strong> - Create a ZIP file with your images, add an <code>image_path</code> column with file paths (e.g., "images/product.jpg"), and upload both files together.
+                    </p>
+
+                    <h6 style="color: #1a1a2e; margin-bottom: 10px;">Example CSV with Images:</h6>
+                    <div style="background-color: #f8f9fa; padding: 15px; border-radius: 4px; overflow-x: auto; font-family: monospace; font-size: 0.9em; color: #333;">
+                        <pre style="margin: 0; white-space: pre-wrap; word-wrap: break-word;">name,category,price,description,inventory,sizes,colors,image_url
+"Phi Beta Sigma T-Shirt",apparel,19.99,"Classic fraternity tee",100,"S, M, L, XL","Black, White, Navy",https://example.com/tshirt.jpg
+"Chapter Hat",apparel,24.99,"Embroidered baseball cap",50,"One Size","Black, Navy",https://example.com/hat.jpg
+"Tumbler",drinkware,14.99,"Insulated travel mug",75,"16oz, 20oz","Black, Burgundy",https://example.com/tumbler.jpg
+
+---OR use image_path with ZIP file---
+
+name,category,price,description,inventory,sizes,colors,image_path
+"Phi Beta Sigma T-Shirt",apparel,19.99,"Classic fraternity tee",100,"S, M, L, XL","Black, White, Navy",images/tshirt.jpg
+"Chapter Hat",apparel,24.99,"Embroidered baseball cap",50,"One Size","Black, Navy",images/hat.jpg
+"Tumbler",drinkware,14.99,"Insulated travel mug",75,"16oz, 20oz","Black, Burgundy",images/tumbler.jpg</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar Info -->
+        <div class="col-md-4">
+            <!-- Recent Imports -->
+            <div class="card mb-4" style="border: 1px solid #dee2e6;">
+                <div class="card-body">
+                    <h5 class="card-title" style="color: #1a1a2e; margin-bottom: 20px;">📊 Import Statistics</h5>
+                    <div style="text-align: center;">
+                        <p style="margin: 0; color: #6c757d; font-size: 0.9em;">Total Products</p>
+                        <p style="margin: 10px 0 0 0; color: #1a1a2e; font-size: 2em; font-weight: bold;">{{ total_products }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tips -->
+            <div class="card" style="border: 1px solid #dee2e6;">
+                <div class="card-body">
+                    <h5 class="card-title" style="color: #1a1a2e; margin-bottom: 15px;">💡 Tips</h5>
+                    <ul style="font-size: 0.9em; color: #6c757d; margin: 0; padding-left: 20px;">
+                        <li style="margin-bottom: 10px;">Use Excel or Google Sheets to create your CSV file</li>
+                        <li style="margin-bottom: 10px;">Ensure all required columns are present</li>
+                        <li style="margin-bottom: 10px;">Products with the same name won't be duplicated</li>
+                        <li style="margin-bottom: 10px;">Check category names carefully for typos</li>
+                        <li>Maximum file size is 5MB</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    @media (max-width: 768px) {
+        .col-md-4 {
+            margin-top: 30px;
+        }
+
+        pre {
+            font-size: 0.8em !important;
+        }
+    }
+</style>
+{% endblock %}

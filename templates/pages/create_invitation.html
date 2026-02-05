@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Invitation - Admin{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card" style="box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);">
+                <div class="card-header">
+                    <h3 class="mb-0">Create New Invitation Code</h3>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-4">
+                        Create an invitation code for a prospective member. They will need this code to sign up.
+                    </p>
+
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email Address *</label>
+                            <input type="email" 
+                                   class="form-control" 
+                                   id="email" 
+                                   name="email" 
+                                   placeholder="member@example.com"
+                                   required>
+                            <div class="form-text">The email address the new member will use to sign up.</div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="first_name" class="form-label">First Name</label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="first_name" 
+                                       name="first_name" 
+                                       placeholder="John">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="last_name" class="form-label">Last Name</label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="last_name" 
+                                       name="last_name" 
+                                       placeholder="Doe">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="member_number" class="form-label">National Member Number</label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="member_number" 
+                                   name="member_number" 
+                                   placeholder="e.g., PBS123456">
+                            <div class="form-text">
+                                Optional: National Phi Beta Sigma member number from 
+                                <a href="https://members.phibetasigma1914.org/" target="_blank">members.phibetasigma1914.org</a>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="notes" class="form-label">Notes (Internal)</label>
+                            <textarea class="form-control" 
+                                      id="notes" 
+                                      name="notes" 
+                                      rows="3"
+                                      placeholder="Additional information about this invitation..."></textarea>
+                            <div class="form-text">Internal notes - not visible to the member.</div>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            <strong>Note:</strong> A unique invitation code will be automatically generated. 
+                            The code will be displayed after creation and you can share it with the member.
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane"></i> Create Invitation
+                            </button>
+                            <a href="{% url 'manage_invitations' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

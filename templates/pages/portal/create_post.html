@@ -1,0 +1,226 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{% if editing %}Edit{% else %}Create{% endif %} Post - Nu Gamma Sigma{% endblock %}
+
+{% block content %}
+<div class="portal-page">
+    <div class="portal-header">
+        <h1><i class="fas fa-edit"></i> {% if editing %}Edit{% else %}Create New{% endif %} Post</h1>
+        <p>Share announcements and updates with your brothers</p>
+    </div>
+
+    <div class="create-post-container">
+        <form method="post" class="post-form">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="{{ form.title.id_for_label }}">Post Title *</label>
+                {{ form.title }}
+                {% if form.title.errors %}
+                <div class="error-message">{{ form.title.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.content.id_for_label }}">Post Content *</label>
+                {{ form.content }}
+                {% if form.content.errors %}
+                <div class="error-message">{{ form.content.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.priority.id_for_label }}">Priority Level</label>
+                {{ form.priority }}
+                {% if form.priority.errors %}
+                <div class="error-message">{{ form.priority.errors }}</div>
+                {% endif %}
+                <small class="form-text">Select the importance level of this announcement</small>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-paper-plane"></i> {% if editing %}Update{% else %}Publish{% endif %} Post
+                </button>
+                <a href="{% if editing %}{% url 'my_posts' %}{% else %}{% url 'portal_dashboard' %}{% endif %}" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .portal-page {
+        padding: 2rem 0;
+    }
+
+    .portal-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    .portal-header h1 {
+        color: #164f90;
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .portal-header p {
+        color: #666;
+        font-size: 1.1rem;
+    }
+
+    .create-post-container {
+        max-width: 800px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 12px;
+        padding: 2.5rem;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .post-form {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .form-group label {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 0.5rem;
+        font-size: 1.05rem;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: border-color 0.3s;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #2a7dd4;
+    }
+
+    textarea.form-control {
+        resize: vertical;
+        min-height: 200px;
+        font-family: inherit;
+    }
+
+    select.form-control {
+        cursor: pointer;
+    }
+
+    .form-text {
+        display: block;
+        margin-top: 0.5rem;
+        font-size: 0.85rem;
+        color: #666;
+    }
+
+    .error-message {
+        color: #dc3545;
+        font-size: 0.875rem;
+        margin-top: 0.5rem;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: 1rem;
+    }
+
+    .btn {
+        padding: 0.75rem 2rem;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #2a7dd4, #164f90);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(42, 125, 212, 0.4);
+    }
+
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+    }
+
+    .btn-secondary:hover {
+        background: #5a6268;
+    }
+
+    @media (max-width: 768px) {
+        .create-post-container {
+            padding: 1.5rem;
+        }
+        
+        .form-actions {
+            flex-direction: column;
+        }
+        
+        .btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+
+    /* Dark Mode */
+    body.dark-mode .portal-header h1 {
+        color: #87ceeb;
+    }
+
+    body.dark-mode .portal-header p {
+        color: #b0b8c8;
+    }
+
+    body.dark-mode .create-post-container {
+        background: #1a2a4a;
+        box-shadow: 0 0 20px rgba(135, 206, 235, 0.3);
+    }
+
+    body.dark-mode .form-group label {
+        color: #e8eef5;
+    }
+
+    body.dark-mode .form-control {
+        background: #243657;
+        border-color: #2d3e5f;
+        color: #e8eef5;
+    }
+
+    body.dark-mode .form-control:focus {
+        border-color: #87ceeb;
+    }
+
+    body.dark-mode .form-text {
+        color: #b0b8c8;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,207 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ action }} Dues Payment - Member Portal{% endblock %}
+
+{% block content %}
+<style>
+    body.dark-mode .card {
+        background-color: #1a2a4a;
+        color: #e8edf7;
+    }
+    body.dark-mode .form-control,
+    body.dark-mode .form-select {
+        background-color: #0b1020;
+        color: #e8edf7;
+        border-color: #2a4a7a;
+    }
+    body.dark-mode .form-control:focus,
+    body.dark-mode .form-select:focus {
+        background-color: #0b1020;
+        color: #e8edf7;
+        border-color: #4a7aba;
+    }
+    body.dark-mode label {
+        color: #e8edf7;
+    }
+    body.dark-mode .form-text {
+        color: #b0b8c8;
+    }
+</style>
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card" style="box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-money-bill-wave"></i> {{ action }} Dues Payment
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {{ form.non_field_errors }}
+                        </div>
+                        {% endif %}
+
+                        <!-- Member Field -->
+                        <div class="mb-3">
+                            {{ form.member.label_tag }}
+                            {{ form.member }}
+                            {% if form.member.errors %}
+                            <div class="text-danger">
+                                {{ form.member.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Payment Type Field -->
+                        <div class="mb-3">
+                            {{ form.payment_type.label_tag }}
+                            {{ form.payment_type }}
+                            {% if form.payment_type.errors %}
+                            <div class="text-danger">
+                                {{ form.payment_type.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Amount Field -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form.amount.label_tag }}
+                                    {{ form.amount }}
+                                    {% if form.amount.errors %}
+                                    <div class="text-danger">
+                                        {{ form.amount.errors }}
+                                    </div>
+                                    {% endif %}
+                                    <small class="form-text text-muted">Total amount due</small>
+                                </div>
+                            </div>
+
+                            <!-- Amount Paid Field -->
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form.amount_paid.label_tag }}
+                                    {{ form.amount_paid }}
+                                    {% if form.amount_paid.errors %}
+                                    <div class="text-danger">
+                                        {{ form.amount_paid.errors }}
+                                    </div>
+                                    {% endif %}
+                                    <small class="form-text text-muted">Amount already paid</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Description Field -->
+                        <div class="mb-3">
+                            {{ form.description.label_tag }}
+                            {{ form.description }}
+                            {% if form.description.errors %}
+                            <div class="text-danger">
+                                {{ form.description.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Due Date Field -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form.due_date.label_tag }}
+                                    {{ form.due_date }}
+                                    {% if form.due_date.errors %}
+                                    <div class="text-danger">
+                                        {{ form.due_date.errors }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Payment Date Field -->
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form.payment_date.label_tag }}
+                                    {{ form.payment_date }}
+                                    {% if form.payment_date.errors %}
+                                    <div class="text-danger">
+                                        {{ form.payment_date.errors }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Status Field -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form.status.label_tag }}
+                                    {{ form.status }}
+                                    {% if form.status.errors %}
+                                    <div class="text-danger">
+                                        {{ form.status.errors }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Payment Method Field -->
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form.payment_method.label_tag }}
+                                    {{ form.payment_method }}
+                                    {% if form.payment_method.errors %}
+                                    <div class="text-danger">
+                                        {{ form.payment_method.errors }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Transaction ID Field -->
+                        <div class="mb-3">
+                            {{ form.transaction_id.label_tag }}
+                            {{ form.transaction_id }}
+                            {% if form.transaction_id.errors %}
+                            <div class="text-danger">
+                                {{ form.transaction_id.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Notes Field -->
+                        <div class="mb-3">
+                            {{ form.notes.label_tag }}
+                            {{ form.notes }}
+                            {% if form.notes.errors %}
+                            <div class="text-danger">
+                                {{ form.notes.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'dues_and_payments' %}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Save Payment
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

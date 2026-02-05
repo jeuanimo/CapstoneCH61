@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Invitations - Admin{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2>Manage Invitation Codes</h2>
+            <p class="text-muted">Create and manage member signup invitations</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{% url 'create_invitation' %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Create New Invitation
+            </a>
+        </div>
+    </div>
+
+    <!-- Active Invitations -->
+    <div class="card mb-4" style="box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);">
+        <div class="card-header bg-success text-white">
+            <h4 class="mb-0"><i class="fas fa-check-circle"></i> Active Invitations ({{ active_invitations|length }})</h4>
+        </div>
+        <div class="card-body">
+            {% if active_invitations %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Code</th>
+                            <th>Email</th>
+                            <th>Name</th>
+                            <th>Member #</th>
+                            <th>Created</th>
+                            <th>Created By</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for invitation in active_invitations %}
+                        <tr>
+                            <td><code>{{ invitation.code }}</code></td>
+                            <td>{{ invitation.email }}</td>
+                            <td>{{ invitation.first_name }} {{ invitation.last_name }}</td>
+                            <td>{{ invitation.member_number|default:"—" }}</td>
+                            <td>{{ invitation.created_at|date:"M d, Y" }}</td>
+                            <td>{{ invitation.created_by.username|default:"—" }}</td>
+                            <td>
+                                <a href="{% url 'delete_invitation' invitation.pk %}" 
+                                   class="btn btn-sm btn-danger"
+                                   onclick="return confirm('Delete this invitation code?');">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-muted mb-0">No active invitations.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Used Invitations -->
+    <div class="card mb-4" style="box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0"><i class="fas fa-user-check"></i> Used Invitations ({{ used_invitations.count }})</h4>
+        </div>
+        <div class="card-body">
+            {% if used_invitations %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Code</th>
+                            <th>Email</th>
+                            <th>Used By</th>
+                            <th>Used At</th>
+                            <th>Created By</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for invitation in used_invitations %}
+                        <tr>
+                            <td><code>{{ invitation.code }}</code></td>
+                            <td>{{ invitation.email }}</td>
+                            <td>{{ invitation.used_by.username }}</td>
+                            <td>{{ invitation.used_at|date:"M d, Y g:i A" }}</td>
+                            <td>{{ invitation.created_by.username|default:"—" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-muted mb-0">No used invitations.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Expired Invitations -->
+    {% if expired_invitations %}
+    <div class="card" style="box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);">
+        <div class="card-header bg-warning">
+            <h4 class="mb-0"><i class="fas fa-clock"></i> Expired Invitations ({{ expired_invitations|length }})</h4>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Code</th>
+                            <th>Email</th>
+                            <th>Expired At</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for invitation in expired_invitations %}
+                        <tr>
+                            <td><code>{{ invitation.code }}</code></td>
+                            <td>{{ invitation.email }}</td>
+                            <td>{{ invitation.expires_at|date:"M d, Y" }}</td>
+                            <td>
+                                <a href="{% url 'delete_invitation' invitation.pk %}" 
+                                   class="btn btn-sm btn-danger"
+                                   onclick="return confirm('Delete this invitation code?');">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

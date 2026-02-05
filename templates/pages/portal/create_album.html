@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Album - Member Portal{% endblock %}
+
+{% block content %}
+<style>
+    body.dark-mode .card {
+        background-color: #1a2a4a;
+        color: #e8edf7;
+    }
+    body.dark-mode .form-control,
+    body.dark-mode .form-select {
+        background-color: #0b1020;
+        color: #e8edf7;
+        border-color: #2a4a7a;
+    }
+    body.dark-mode .form-control:focus,
+    body.dark-mode .form-select:focus {
+        background-color: #0b1020;
+        color: #e8edf7;
+        border-color: #4a7aba;
+    }
+    body.dark-mode label {
+        color: #e8edf7;
+    }
+    body.dark-mode .form-text {
+        color: #b0b8c8;
+    }
+    body.dark-mode .form-check-input {
+        background-color: #0b1020;
+        border-color: #2a4a7a;
+    }
+    body.dark-mode .form-check-label {
+        color: #e8edf7;
+    }
+    body.dark-mode .alert-info {
+        background-color: #1a3a5a;
+        color: #e8edf7;
+        border-color: #2a4a7a;
+    }
+</style>
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card" style="box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-folder-plus"></i> Create New Album
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {{ form.non_field_errors }}
+                        </div>
+                        {% endif %}
+
+                        <!-- Title Field -->
+                        <div class="mb-3">
+                            {{ form.title.label_tag }}
+                            {{ form.title }}
+                            {% if form.title.errors %}
+                            <div class="text-danger">
+                                {{ form.title.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Description Field -->
+                        <div class="mb-3">
+                            {{ form.description.label_tag }}
+                            {{ form.description }}
+                            {% if form.description.errors %}
+                            <div class="text-danger">
+                                {{ form.description.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Is Public Field -->
+                        <div class="mb-3 form-check">
+                            {{ form.is_public }}
+                            {{ form.is_public.label_tag }}
+                            {% if form.is_public.errors %}
+                            <div class="text-danger">
+                                {{ form.is_public.errors }}
+                            </div>
+                            {% endif %}
+                            <small class="form-text text-muted d-block">
+                                Public albums can be seen by all members. Private albums are only visible to you.
+                            </small>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'photo_gallery' %}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-folder-plus"></i> Create Album
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Help Text -->
+            <div class="mt-4">
+                <div class="alert alert-info">
+                    <h5><i class="fas fa-info-circle"></i> About Albums</h5>
+                    <p class="mb-0">
+                        Albums help you organize your photos into collections. After creating an album, 
+                        you can add photos to it when uploading or by editing existing photos.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

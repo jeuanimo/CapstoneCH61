@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Event - Member Portal{% endblock %}
+
+{% block content %}
+<style>
+    body.dark-mode .card {
+        background-color: #1a2a4a;
+        color: #e8edf7;
+    }
+    body.dark-mode .form-control,
+    body.dark-mode .form-select {
+        background-color: #0b1020;
+        color: #e8edf7;
+        border-color: #2a4a7a;
+    }
+    body.dark-mode .form-control:focus,
+    body.dark-mode .form-select:focus {
+        background-color: #0b1020;
+        color: #e8edf7;
+        border-color: #4a7aba;
+    }
+    body.dark-mode label {
+        color: #e8edf7;
+    }
+    body.dark-mode .form-text {
+        color: #b0b8c8;
+    }
+    body.dark-mode .card-header {
+        border-bottom: 1px solid #2a4a7a;
+    }
+    body.dark-mode .border-danger {
+        border-color: #dc3545 !important;
+    }
+</style>
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card" style="box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);">
+                <div class="card-header bg-warning text-dark">
+                    <h4 class="mb-0">
+                        <i class="fas fa-edit"></i> Edit Event
+                    </h4>
+                </div>
+                <div class="card-body">
+                    {% if event.image %}
+                    <!-- Event Image Preview -->
+                    <div class="text-center mb-4">
+                        <img src="{{ event.image.url }}" alt="{{ event.title }}" class="img-fluid rounded" style="max-height: 200px;">
+                    </div>
+                    {% endif %}
+
+                    <!-- Edit Form -->
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {{ form.non_field_errors }}
+                        </div>
+                        {% endif %}
+
+                        <!-- Title Field -->
+                        <div class="mb-3">
+                            {{ form.title.label_tag }}
+                            {{ form.title }}
+                            {% if form.title.errors %}
+                            <div class="text-danger">
+                                {{ form.title.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Description Field -->
+                        <div class="mb-3">
+                            {{ form.description.label_tag }}
+                            {{ form.description }}
+                            {% if form.description.errors %}
+                            <div class="text-danger">
+                                {{ form.description.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Start Date Field -->
+                        <div class="mb-3">
+                            {{ form.start_date.label_tag }}
+                            {{ form.start_date }}
+                            {% if form.start_date.errors %}
+                            <div class="text-danger">
+                                {{ form.start_date.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- End Date Field -->
+                        <div class="mb-3">
+                            {{ form.end_date.label_tag }}
+                            {{ form.end_date }}
+                            <small class="form-text text-muted">
+                                Optional - leave blank for single-day events
+                            </small>
+                            {% if form.end_date.errors %}
+                            <div class="text-danger">
+                                {{ form.end_date.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Location Field -->
+                        <div class="mb-3">
+                            {{ form.location.label_tag }}
+                            {{ form.location }}
+                            {% if form.location.errors %}
+                            <div class="text-danger">
+                                {{ form.location.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Image Field -->
+                        <div class="mb-3">
+                            {{ form.image.label_tag }}
+                            {{ form.image }}
+                            <small class="form-text text-muted">
+                                {% if event.image %}
+                                Current image shown above. Upload a new image to replace it.
+                                {% else %}
+                                Optional - add a promotional image for the event
+                                {% endif %}
+                            </small>
+                            {% if form.image.errors %}
+                            <div class="text-danger">
+                                {{ form.image.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'events' %}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-warning">
+                                <i class="fas fa-save"></i> Update Event
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Delete Event -->
+            <div class="card mt-3 border-danger" style="box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-exclamation-triangle"></i> Danger Zone
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">Once you delete an event, there is no going back. Please be certain.</p>
+                    <a href="{% url 'delete_event' event.id %}" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this event? This action cannot be undone.');">
+                        <i class="fas fa-trash"></i> Delete Event
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

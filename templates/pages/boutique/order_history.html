@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 style="color: #1a1a2e; margin-bottom: 30px;">📋 Order History</h1>
+
+    {% if orders %}
+    <div class="row">
+        {% for order in orders %}
+        <div class="col-md-6 mb-4">
+            <div class="card" style="border: 1px solid #dee2e6; height: 100%;">
+                <div class="card-body">
+                    <!-- Order Header -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <h5 style="margin: 0; color: #1a1a2e;">Order #{{ order.id }}</h5>
+                        <span class="badge" style="background-color: {% if order.status == 'completed' %}#28a745{% elif order.status == 'shipped' %}#0066cc{% elif order.status == 'pending' %}#ffc107{% else %}#6c757d{% endif %}; padding: 6px 12px; font-size: 0.85em;">
+                            {{ order.get_status_display }}
+                        </span>
+                    </div>
+
+                    <!-- Order Date -->
+                    <p style="color: #6c757d; margin: 10px 0; font-size: 0.9em;">
+                        {{ order.created_at|date:"M d, Y \a\t g:i A" }}
+                    </p>
+
+                    <!-- Items Count -->
+                    <p style="color: #6c757d; margin: 10px 0; font-size: 0.9em;">
+                        <strong>Items:</strong> {{ order.orderitem_set.count }}
+                    </p>
+
+                    <!-- Order Total -->
+                    <div style="margin: 20px 0; padding: 15px 0; border-top: 1px solid #dee2e6; border-bottom: 1px solid #dee2e6;">
+                        <p style="margin: 0; color: #6c757d;">Order Total</p>
+                        <p style="margin: 5px 0 0 0; color: #1a1a2e; font-size: 1.3em; font-weight: bold;">
+                            ${{ order.total_price }}
+                        </p>
+                    </div>
+
+                    <!-- Shipping Info -->
+                    <div style="margin: 15px 0; padding: 15px; background-color: #f8f9fa; border-radius: 4px;">
+                        <p style="margin: 0 0 10px 0; color: #6c757d; font-size: 0.9em;">
+                            <strong>Shipping To:</strong>
+                        </p>
+                        <p style="margin: 0; color: #1a1a2e; font-size: 0.9em;">
+                            {{ order.address }}<br>
+                            {{ order.city }}, {{ order.state }} {{ order.zip_code }}
+                        </p>
+                    </div>
+
+                    <!-- View Details Button -->
+                    <a href="{% url 'order_history' %}" class="btn btn-sm btn-outline-dark" style="border-color: #1a1a2e; color: #1a1a2e; width: 100%; text-decoration: none;">
+                        View Details
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% else %}
+    <div class="alert alert-info" role="alert" style="background-color: #d1ecf1; border-color: #bee5eb;">
+        <h4 class="alert-heading">No Orders Yet</h4>
+        <p>You haven't placed any orders yet. Start shopping to make your first purchase!</p>
+        <a href="{% url 'shop_home' %}" class="btn btn-dark" style="background-color: #1a1a2e; border-color: #1a1a2e; margin-top: 10px;">
+            Start Shopping
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    .badge {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 4px;
+    }
+
+    @media (max-width: 768px) {
+        .col-md-6 {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}

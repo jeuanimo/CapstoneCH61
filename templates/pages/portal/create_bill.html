@@ -1,0 +1,305 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Bill - Dues Management{% endblock %}
+
+{% block content %}
+<style>
+    body.dark-mode .card {
+        background-color: #1a2a4a;
+        color: #e8edf7;
+    }
+    body.dark-mode .form-control,
+    body.dark-mode .form-select {
+        background-color: #0b1020;
+        color: #e8edf7;
+        border-color: #2a4a7a;
+    }
+    body.dark-mode .form-control:focus,
+    body.dark-mode .form-select:focus {
+        background-color: #0b1020;
+        color: #e8edf7;
+        border-color: #4a7aba;
+    }
+    body.dark-mode label {
+        color: #e8edf7;
+    }
+    body.dark-mode .form-text {
+        color: #b0b8c8;
+    }
+    body.dark-mode .alert {
+        background-color: #1a2a4a;
+        border-color: #2a4a7a;
+        color: #e8edf7;
+    }
+    .bill-icon {
+        font-size: 3rem;
+        color: #4a7aba;
+        margin-bottom: 10px;
+    }
+    .quick-amount {
+        display: inline-block;
+        margin: 5px;
+    }
+    .quick-amount button {
+        padding: 5px 12px;
+        font-size: 0.9em;
+    }
+</style>
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Header -->
+            <div class="mb-4">
+                <h1>
+                    <i class="fas fa-file-invoice-dollar"></i> Create Dues Bill
+                </h1>
+                <p class="text-muted">Create a bill for a member to pay their dues</p>
+            </div>
+
+            <div class="card" style="box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-money-bill-wave"></i> Bill Details
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" id="billForm">
+                        {% csrf_token %}
+
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {{ form.non_field_errors }}
+                            </div>
+                        {% endif %}
+
+                        <!-- Send to All Members Checkbox -->
+                        <div class="mb-4 p-3" style="background-color: rgba(76, 175, 80, 0.1); border-radius: 5px; border-left: 4px solid #4CAF50;">
+                            <div class="form-check">
+                                {{ form.send_to_all_members }}
+                                <label class="form-check-label" for="{{ form.send_to_all_members.id_for_label }}">
+                                    <strong><i class="fas fa-users"></i> Send to All Active Members</strong>
+                                </label>
+                                <small class="form-text d-block mt-2">
+                                    Check this box to create this bill for <strong>all</strong> active chapter members at once. Uncheck to select a specific member.
+                                </small>
+                            </div>
+                        </div>
+
+                        <!-- Member Selection (hidden if sending to all) -->
+                        <div id="memberSelectionDiv" class="mb-4">
+                            <label for="{{ form.member.id_for_label }}" class="form-label">
+                                <i class="fas fa-user"></i> <strong>Member</strong>
+                            </label>
+                            {{ form.member }}
+                            {% if form.member.errors %}
+                                <div class="text-danger mt-1">{{ form.member.errors }}</div>
+                            {% endif %}
+                            <small class="form-text">Select the member this bill is for</small>
+                        </div>
+
+                        <!-- Payment Type -->
+                        <div class="mb-4">
+                            <label for="{{ form.payment_type.id_for_label }}" class="form-label">
+                                <i class="fas fa-tag"></i> <strong>Bill Type</strong>
+                            </label>
+                            {{ form.payment_type }}
+                            {% if form.payment_type.errors %}
+                                <div class="text-danger mt-1">{{ form.payment_type.errors }}</div>
+                            {% endif %}
+                            <small class="form-text">What type of bill is this?</small>
+                        </div>
+
+                        <!-- Custom Type (shown when "Other" is selected) -->
+                        <div id="customTypeDiv" class="mb-4" style="display: none;">
+                            <label for="custom_type" class="form-label">
+                                <i class="fas fa-pen"></i> <strong>Specify Custom Bill Type</strong>
+                            </label>
+                            <input type="text" id="custom_type" name="custom_type" class="form-control" 
+                                   placeholder="e.g., Special Assessment, Fundraiser, Equipment Fee">
+                            <small class="form-text">Enter a descriptive name for this bill type for accounting clarity</small>
+                        </div>
+
+                        <!-- Amount -->
+                        <div class="mb-4">
+                            <label for="{{ form.amount.id_for_label }}" class="form-label">
+                                <i class="fas fa-dollar-sign"></i> <strong>Amount Due</strong>
+                            </label>
+                            {{ form.amount }}
+                            {% if form.amount.errors %}
+                                <div class="text-danger mt-1">{{ form.amount.errors }}</div>
+                            {% endif %}
+                            <small class="form-text">Total amount the member owes</small>
+                            
+                            <!-- Quick amount buttons -->
+                            <div class="mt-3">
+                                <small class="d-block mb-2"><strong>Quick set:</strong></small>
+                                <div>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary quick-amount" onclick="setAmount(50)">$50</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary quick-amount" onclick="setAmount(75)">$75</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary quick-amount" onclick="setAmount(100)">$100</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary quick-amount" onclick="setAmount(150)">$150</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary quick-amount" onclick="setAmount(200)">$200</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Due Date -->
+                        <div class="mb-4">
+                            <label for="{{ form.due_date.id_for_label }}" class="form-label">
+                                <i class="fas fa-calendar"></i> <strong>Due Date</strong>
+                            </label>
+                            {{ form.due_date }}
+                            {% if form.due_date.errors %}
+                                <div class="text-danger mt-1">{{ form.due_date.errors }}</div>
+                            {% endif %}
+                            <small class="form-text">When should this bill be paid?</small>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="mb-4">
+                            <label for="{{ form.description.id_for_label }}" class="form-label">
+                                <i class="fas fa-pen"></i> Description
+                            </label>
+                            {{ form.description }}
+                            {% if form.description.errors %}
+                                <div class="text-danger mt-1">{{ form.description.errors }}</div>
+                            {% endif %}
+                            <small class="form-text">Add any notes about this bill (optional)</small>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="d-flex justify-content-between mt-5">
+                            <a href="{% url 'dues_and_payments' %}" class="btn btn-secondary btn-lg">
+                                <i class="fas fa-arrow-left"></i> Back to Dues
+                            </a>
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-save"></i> Create Bill
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Info Section -->
+            <div class="alert alert-info mt-4">
+                <h6><i class="fas fa-info-circle"></i> How It Works</h6>
+                <ol class="mb-0 mt-2">
+                    <li><strong>Single Member:</strong> Select a specific member and create a bill for them</li>
+                    <li><strong>All Members:</strong> Check "Send to All Active Members" to create the same bill for everyone in one action</li>
+                    <li><strong>Bill Created:</strong> Members will see this bill in their dues page</li>
+                    <li><strong>Payment Options:</strong> Members can pay online via Stripe or you can mark as paid manually</li>
+                    <li><strong>Track Status:</strong> View all bills and payment status in the Dues Management page</li>
+                </ol>
+            </div>
+
+            <!-- Permissions -->
+            <div class="card mt-4" style="box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);">
+                <div class="card-header bg-secondary text-white">
+                    <h6 class="mb-0">
+                        <i class="fas fa-lock"></i> Who Can Create Bills?
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <ul class="mb-0">
+                        <li><strong>Admin/Superuser:</strong> Can create and manage all bills</li>
+                        <li><strong>Treasurer:</strong> Can create and manage chapter bills</li>
+                        <li><strong>Financial Secretary:</strong> Can create and track payments</li>
+                        <li><strong>Chapter Officers:</strong> Can create and edit bills</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function setAmount(amount) {
+        document.getElementById('{{ form.amount.id_for_label }}').value = amount;
+        document.getElementById('{{ form.amount.id_for_label }}').focus();
+    }
+
+    // Toggle member selection based on "send to all" checkbox
+    const sendToAllCheckbox = document.getElementById('{{ form.send_to_all_members.id_for_label }}');
+    const memberSelectionDiv = document.getElementById('memberSelectionDiv');
+    const memberSelect = document.getElementById('{{ form.member.id_for_label }}');
+
+    function toggleMemberSelection() {
+        if (sendToAllCheckbox.checked) {
+            memberSelectionDiv.style.display = 'none';
+            memberSelect.required = false;
+        } else {
+            memberSelectionDiv.style.display = 'block';
+            memberSelect.required = true;
+        }
+    }
+
+    // Set initial state
+    toggleMemberSelection();
+
+    // Listen for checkbox changes
+    sendToAllCheckbox.addEventListener('change', toggleMemberSelection);
+
+    // Handle custom type field visibility
+    const paymentTypeSelect = document.getElementById('id_payment_type');
+    const customTypeDiv = document.getElementById('customTypeDiv');
+    
+    if (paymentTypeSelect) {
+        paymentTypeSelect.addEventListener('change', function() {
+            if (this.value === 'other') {
+                customTypeDiv.style.display = 'block';
+                document.getElementById('custom_type').focus();
+            } else {
+                customTypeDiv.style.display = 'none';
+                document.getElementById('custom_type').value = '';
+            }
+        });
+        
+        // Check initial value on page load
+        window.addEventListener('load', function() {
+            if (paymentTypeSelect.value === 'other') {
+                customTypeDiv.style.display = 'block';
+            }
+        });
+    }
+
+    // Set today as default due date if not set
+    window.addEventListener('load', function() {
+        const dueDate = document.getElementById('{{ form.due_date.id_for_label }}');
+        if (!dueDate.value) {
+            const today = new Date();
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 7); // Default to 7 days from now
+            dueDate.value = tomorrow.toISOString().split('T')[0];
+        }
+    });
+
+    // Form validation before submit
+    document.getElementById('billForm').addEventListener('submit', function(e) {
+        const sendToAll = sendToAllCheckbox.checked;
+        const member = memberSelect.value;
+        const amount = document.getElementById('{{ form.amount.id_for_label }}').value;
+        const dueDate = document.getElementById('{{ form.due_date.id_for_label }}').value;
+        const paymentType = document.getElementById('id_payment_type').value;
+        const customType = document.getElementById('custom_type').value.trim();
+
+        if (!amount || !dueDate) {
+            e.preventDefault();
+            alert('Please fill in all required fields: Amount and Due Date');
+            return;
+        }
+
+        if (!sendToAll && !member) {
+            e.preventDefault();
+            alert('Please select a member or check "Send to All Active Members"');
+            return;
+        }
+
+        if (paymentType === 'other' && !customType) {
+            e.preventDefault();
+            alert('Please specify a custom bill type when selecting "Other"');
+            return;
+        }
+    });
+</script>
+{% endblock %}

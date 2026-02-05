@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Education - Programs{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/pages.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="events-container">
+    <div class="events-header">
+        <h1 class="events-title">Education</h1>
+        <p class="events-subtitle">Empowering minds through academic excellence</p>
+    </div>
+
+    <div class="content-section" style="max-width: 1200px; margin: 2rem auto; padding: 2rem; background: rgba(255, 255, 255, 0.95); border-radius: 8px; box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);">
+        
+        <div class="program-overview mb-5">
+            <h2>Program Overview</h2>
+            <p>
+                The Scholarship & Education program is a cornerstone of Nu Gamma Sigma Chapter's commitment to 
+                academic excellence. We believe that education is the key to unlocking individual potential and 
+                creating positive change in our communities.
+            </p>
+        </div>
+
+        <div class="program-initiatives mb-5">
+            <h2>Key Initiatives</h2>
+            
+            <div class="initiative-card mb-4 p-4" style="background: #f8f9fa; border-left: 4px solid #164f90; border-radius: 4px;">
+                <h3><i class="fas fa-graduation-cap"></i> Academic Mentorship</h3>
+                <p>
+                    One-on-one and group mentoring sessions connecting members with students seeking academic 
+                    guidance. We provide tutoring, study skills development, and college preparation support.
+                </p>
+            </div>
+
+            <div class="initiative-card mb-4 p-4" style="background: #f8f9fa; border-left: 4px solid #164f90; border-radius: 4px;">
+                <h3><i class="fas fa-trophy"></i> Scholarship Awareness</h3>
+                <p>
+                    Annual scholarship workshops and information sessions helping students identify and apply 
+                    for educational funding opportunities. We also administer our own chapter scholarship program.
+                </p>
+            </div>
+
+            <div class="initiative-card mb-4 p-4" style="background: #f8f9fa; border-left: 4px solid #164f90; border-radius: 4px;">
+                <h3><i class="fas fa-book-reader"></i> Educational Workshops</h3>
+                <p>
+                    Workshops covering topics such as financial literacy, career readiness, resume building, 
+                    and professional development to prepare students for success beyond the classroom.
+                </p>
+            </div>
+
+            <div class="initiative-card mb-4 p-4" style="background: #f8f9fa; border-left: 4px solid #164f90; border-radius: 4px;">
+                <h3><i class="fas fa-users"></i> Youth Programs</h3>
+                <p>
+                    Partnerships with local schools to provide academic support, motivational speaking, and 
+                    positive role modeling for K-12 students in our community.
+                </p>
+            </div>
+        </div>
+
+        <div class="program-impact mb-5">
+            <h2>Our Impact</h2>
+            <div class="row">
+                <div class="col-md-4 text-center mb-3">
+                    <div class="impact-stat p-4" style="background: #164f90; color: white; border-radius: 8px;">
+                        <h3 style="font-size: 2.5rem; margin-bottom: 0.5rem;">500+</h3>
+                        <p style="margin: 0;">Students Mentored</p>
+                    </div>
+                </div>
+                <div class="col-md-4 text-center mb-3">
+                    <div class="impact-stat p-4" style="background: #164f90; color: white; border-radius: 8px;">
+                        <h3 style="font-size: 2.5rem; margin-bottom: 0.5rem;">$50K+</h3>
+                        <p style="margin: 0;">Scholarships Awarded</p>
+                    </div>
+                </div>
+                <div class="col-md-4 text-center mb-3">
+                    <div class="impact-stat p-4" style="background: #164f90; color: white; border-radius: 8px;">
+                        <h3 style="font-size: 2.5rem; margin-bottom: 0.5rem;">100+</h3>
+                        <p style="margin: 0;">Workshops Conducted</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="get-involved">
+            <h2>Get Involved</h2>
+            <p>
+                Whether you're a student seeking support, a parent looking for resources, or a community member 
+                wanting to contribute, we welcome your participation in our Scholarship & Education programs.
+            </p>
+            <div class="mt-4">
+                <a href="{% url 'contact' %}" class="btn btn-primary me-2">Contact Us</a>
+                <a href="{% url 'chapter_programs' %}" class="btn btn-outline-secondary">Back to Programs</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    body.dark-mode .content-section {
+        background: rgba(26, 42, 74, 0.95) !important;
+        box-shadow: 0 0 15px rgba(135, 206, 235, 0.3) !important;
+    }
+
+    body.dark-mode .initiative-card {
+        background: #0f1a30 !important;
+        color: #b0b8c8 !important;
+    }
+
+    body.dark-mode .initiative-card h3 {
+        color: #87ceeb !important;
+    }
+
+    body.dark-mode .initiative-card h3 i {
+        color: #87ceeb !important;
+    }
+
+    body.dark-mode .impact-stat {
+        background: #2a7dd4 !important;
+    }
+
+    body.dark-mode .program-overview p,
+    body.dark-mode .initiative-card p,
+    body.dark-mode .get-involved p {
+        color: #b0b8c8;
+    }
+
+    body.dark-mode .program-overview h2,
+    body.dark-mode .program-initiatives h2,
+    body.dark-mode .program-impact h2,
+    body.dark-mode .get-involved h2 {
+        color: #87ceeb;
+    }
+
+    body.dark-mode .impact-stat h3,
+    body.dark-mode .impact-stat p {
+        color: white !important;
+    }
+</style>
+{% endblock %}

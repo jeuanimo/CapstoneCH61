@@ -1,0 +1,343 @@
+# Boutique Admin & Officer System - Architecture & Flow
+
+## User Permission Hierarchy
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                      USER PERMISSIONS                            │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                   │
+│  DJANGO STAFF (is_staff = True)                                 │
+│  ├─ Full admin access                                           │
+│  ├─ Add products                                                │
+│  ├─ Edit products                                               │
+│  ├─ Delete products                                             │
+│  ├─ Import CSV                                                  │
+│  ├─ View Django admin                                           │
+│  └─ Manage system settings                                      │
+│                                                                   │
+│  CHAPTER OFFICER (is_officer = True)                            │
+│  ├─ Add products                                                │
+│  ├─ Edit products                                               │
+│  ├─ Delete products                                             │
+│  ├─ Import CSV                                                  │
+│  └─ Manage boutique only                                        │
+│                                                                   │
+│  REGULAR MEMBER (is_staff=False, is_officer=False)             │
+│  ├─ View products                                               │
+│  ├─ Search/filter products                                      │
+│  ├─ Add to cart                                                 │
+│  ├─ Checkout                                                    │
+│  ├─ View order history                                          │
+│  └─ NO ADMIN ACCESS                                             │
+│                                                                   │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+## Feature Access Matrix
+
+```
+┌──────────────────────────────────┬────────┬─────────┬─────────┐
+│ FEATURE                          │ STAFF  │ OFFICER │ MEMBER  │
+├──────────────────────────────────┼────────┼─────────┼─────────┤
+│ View Shop                        │   ✅   │   ✅    │   ✅    │
+│ Add Products                     │   ✅   │   ✅    │   ❌    │
+│ Edit Products                    │   ✅   │   ✅    │   ❌    │
+│ Delete Products                  │   ✅   │   ✅    │   ❌    │
+│ Import CSV                       │   ✅   │   ✅    │   ❌    │
+│ Add to Cart                      │   ✅   │   ✅    │   ✅    │
+│ Checkout                         │   ✅   │   ✅    │   ✅    │
+│ View Django Admin                │   ✅   │   ❌    │   ❌    │
+│ Manage Members                   │   ✅   │   ❌    │   ❌    │
+│ View Order History               │   ✅   │   ✅    │   ✅    │
+└──────────────────────────────────┴────────┴─────────┴─────────┘
+```
+
+## CRUD Operation Flow
+
+```
+                    ┌─────────────────────────┐
+                    │   Boutique Shop Page    │
+                    │   /pages/boutique/      │
+                    └────────────┬────────────┘
+                                 │
+                    ┌────────────┴────────────┐
+                    │                         │
+            ┌───────▼────────┐      ┌────────▼──────┐
+            │ STAFF/OFFICER  │      │  REGULAR USER │
+            │  sees buttons  │      │ no buttons     │
+            └───────┬────────┘      └────────────────┘
+                    │
+        ┌───┬───────┼───────┬───┐
+        │   │       │       │   │
+    ┌───▼─┐│   │   │   │   │   │   │
+    │ ADD │├──┐│   │   │   │   │   │
+    └─────┘│  │   │   │   │   │   │
+        │ ├┤  │   │   │   │   │
+    ┌───▼─┐│  │   │   │   │   │
+    │EDIT │├──┤   │   │   │   │
+    └─────┘│  │   │   │   │   │
+        │ └┤ │   │   │   │
+    ┌───▼───┐│   │   │   │
+    │DELETE │├───┤   │   │
+    └───────┘│   │   │   │
+        │ └───┐   │   │
+    ┌───▼─────┐  │   │
+    │ IMPORT  │  │   │
+    │CSV      │  │   │
+    └─────────┘  │   │
+                 │   │
+         ┌───────▼┐  │
+         │ View  │   │
+         │Product│   │
+         └───────┘   │
+                 │   │
+         ┌───────▼┐  │
+         │  Cart  │  │
+         │Checkout│  │
+         └────────┘  │
+                 │   │
+         ┌───────▼┐  │
+         │ Orders │  │
+         │History │  │
+         └────────┘  │
+                     │
+              ┌──────▼─────┐
+              │ Stripe Pay │
+              └────────────┘
+```
+
+## Database Schema - Officer System
+
+```
+┌────────────────────────────────────────┐
+│       pages_memberprofile             │
+├────────────────────────────────────────┤
+│ id                      [PK]           │
+│ user_id                 [FK:User]      │
+│ member_number           [UNIQUE]       │
+│ status                  [CharField]    │
+│ initiation_date         [DateField]    │
+│ line_name               [CharField]    │
+│ phone                   [CharField]    │
+│ dues_current            [BooleanField] │
+│ is_officer        ✨    [BooleanField] │ ← NEW FIELD
+│ created_at              [DateTimeField]│
+│ updated_at              [DateTimeField]│
+└────────────────────────────────────────┘
+         │
+         │ 1:1 relationship
+         ▼
+┌────────────────────────────────────────┐
+│           auth_user                    │
+├────────────────────────────────────────┤
+│ id                      [PK]           │
+│ username                [UNIQUE]       │
+│ email                   [UNIQUE]       │
+│ is_staff                [BooleanField] │
+│ is_superuser            [BooleanField] │
+└────────────────────────────────────────┘
+         │
+         │ 1:Many relationship
+         ▼
+┌────────────────────────────────────────┐
+│         pages_order                    │
+├────────────────────────────────────────┤
+│ id                      [PK]           │
+│ user_id                 [FK]           │
+│ total_price             [DecimalField] │
+│ status                  [CharField]    │
+│ created_at              [DateTimeField]│
+└────────────────────────────────────────┘
+         │
+         │ 1:Many relationship
+         ▼
+┌────────────────────────────────────────┐
+│       pages_orderitem                  │
+├────────────────────────────────────────┤
+│ id                      [PK]           │
+│ order_id                [FK]           │
+│ product_id              [FK]           │
+│ quantity                [IntegerField] │
+│ price                   [DecimalField] │
+└────────────────────────────────────────┘
+```
+
+## Admin Control Panel Flow
+
+```
+┌─────────────────────────────────────────────────────────┐
+│  SHOP HOME PAGE (/pages/boutique/)                     │
+├─────────────────────────────────────────────────────────┤
+│                                                          │
+│  IF user.is_staff OR user.memberprofile.is_officer:   │
+│  ┌────────────────────────────────────────┐            │
+│  │   ADMIN CONTROL PANEL                  │            │
+│  ├────────────────────────────────────────┤            │
+│  │ [Add Product] [Import CSV]             │            │
+│  └────────────────────────────────────────┘            │
+│                                                          │
+│  ┌────────────────────────────────────────┐            │
+│  │  PRODUCT CARDS                         │            │
+│  ├────────────────────────────────────────┤            │
+│  │ [Product Image]                        │            │
+│  │ Product Name                           │            │
+│  │ $Price                                 │            │
+│  │ [View Details] [Edit] [Delete]         │ ← Admin    │
+│  │                        buttons         │            │
+│  └────────────────────────────────────────┘            │
+│                                                          │
+│  ┌────────────────────────────────────────┐            │
+│  │  CATEGORY FILTER                       │            │
+│  ├────────────────────────────────────────┤            │
+│  │ ☑ All Products                         │            │
+│  │ ☐ Category 1                           │            │
+│  │ ☐ Category 2                           │            │
+│  │ ☐ Category 3                           │            │
+│  └────────────────────────────────────────┘            │
+│                                                          │
+└─────────────────────────────────────────────────────────┘
+```
+
+## Form Flow Diagrams
+
+```
+ADD/EDIT PRODUCT FLOW:
+┌─────────────────────────────────────┐
+│ Click "Add Product" / "Edit"        │
+└────────────────┬────────────────────┘
+                 │
+        ┌────────▼─────────┐
+        │ Check Permissions │
+        │ is_staff OR       │
+        │ is_officer?       │
+        └────┬──────────┬───┘
+          Yes│          │No
+             │      ┌───▼──────────────┐
+             │      │ Permission Denied│
+             │      └──────────────────┘
+             │
+        ┌────▼──────────────────┐
+        │ Display Form          │
+        │ - Name                │
+        │ - Description         │
+        │ - Category            │
+        │ - Price               │
+        │ - Inventory           │
+        │ - Sizes               │
+        │ - Colors              │
+        │ - Image               │
+        └────┬──────────────────┘
+             │
+        ┌────▼──────────┐
+        │ Validate Form │
+        └────┬──────┬───┘
+          Valid│     │Invalid
+             │    ┌──▼──────────┐
+             │    │ Show Errors │
+             │    └─────────────┘
+             │
+        ┌────▼──────────────────┐
+        │ Save to Database      │
+        └────┬──────────────────┘
+             │
+        ┌────▼──────────────────┐
+        │ Show Success Message  │
+        └────┬──────────────────┘
+             │
+        ┌────▼──────────────────┐
+        │ Redirect to           │
+        │ Product Detail        │
+        └───────────────────────┘
+```
+
+```
+DELETE PRODUCT FLOW:
+┌─────────────────────────────────────┐
+│ Click "Delete" on Product           │
+└────────────────┬────────────────────┘
+                 │
+        ┌────────▼─────────┐
+        │ Check Permissions │
+        │ is_staff OR       │
+        │ is_officer?       │
+        └────┬──────────────┬───┐
+          Yes│              │No │
+             │          ┌───▼──▼──────┐
+             │          │Permission    │
+             │          │Denied        │
+             │          └──────────────┘
+             │
+        ┌────▼────────────────────────┐
+        │ Show Confirmation Page      │
+        │ [Product Image]             │
+        │ [Product Details]           │
+        │ [Cancel] [Delete Product]   │
+        └────┬────────────────┬───────┘
+             │                │
+          Cancel        Confirmed
+             │                │
+        ┌────▼──────┐   ┌─────▼────────────┐
+        │ Redirect  │   │ Delete from DB   │
+        │ to Shop   │   └─────┬────────────┘
+        └───────────┘         │
+                         ┌────▼────────────────┐
+                         │ Show Success Message│
+                         └─────┬───────────────┘
+                               │
+                         ┌─────▼───────────────┐
+                         │ Redirect to Shop    │
+                         └─────────────────────┘
+```
+
+## Integration Points
+
+```
+┌─────────────────────────────────────────────────────┐
+│              BOUTIQUE SYSTEM                        │
+├─────────────────────────────────────────────────────┤
+│                                                      │
+│  Models:      Product, Cart, Order,                │
+│               CartItem, OrderItem                  │
+│                                                      │
+│  New Field:   MemberProfile.is_officer             │
+│                                                      │
+│  Views:       13 boutique + 4 new admin views     │
+│                                                      │
+│  Templates:   8 templates + 2 new + 2 updated     │
+│                                                      │
+│  URLs:        10 boutique + 3 new admin URLs      │
+│                                                      │
+│  Admin:       3 admin classes + enhancements       │
+│                                                      │
+│  Permissions: @user_passes_test decorators        │
+│                                                      │
+│  Forms:       BoutiqueImportForm, ProductForm,    │
+│               CheckoutForm                         │
+│                                                      │
+│  Stripe:      Payment processing integration       │
+│                                                      │
+└─────────────────────────────────────────────────────┘
+         │
+         │ Connected to
+         ▼
+┌─────────────────────────────────────────────────────┐
+│            MEMBER PORTAL SYSTEM                     │
+├─────────────────────────────────────────────────────┤
+│  - User authentication                             │
+│  - Member profiles                                 │
+│  - Officer status management                       │
+│  - Permission checks                               │
+│  - Admin interface                                 │
+└─────────────────────────────────────────────────────┘
+```
+
+---
+
+This architecture provides:
+- ✅ Clear permission hierarchy
+- ✅ Secure CRUD operations  
+- ✅ Intuitive user flows
+- ✅ Scalable design
+- ✅ Maintainable code structure
+

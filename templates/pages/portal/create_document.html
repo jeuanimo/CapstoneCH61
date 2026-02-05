@@ -1,0 +1,192 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Upload Document - Nu Gamma Sigma{% endblock %}
+
+{% block content %}
+<style>
+    /* Dark Mode Styles for Forms */
+    body.dark-mode .card {
+        background-color: #1a2a4a;
+        border-color: #2a4a7a;
+    }
+
+    body.dark-mode .card h2 {
+        color: #87ceeb;
+    }
+
+    body.dark-mode .form-label {
+        color: #b0b8c8;
+    }
+
+    body.dark-mode .form-control,
+    body.dark-mode .form-select {
+        background-color: #0b1020;
+        color: #e8edf7;
+        border-color: #2a4a7a;
+    }
+
+    body.dark-mode .form-control:focus,
+    body.dark-mode .form-select:focus {
+        background-color: #0f1830;
+        color: #e8edf7;
+        border-color: #4a7abd;
+        box-shadow: 0 0 0 0.2rem rgba(135, 206, 235, 0.25);
+    }
+
+    body.dark-mode .form-control::placeholder {
+        color: #6b7a94;
+    }
+
+    body.dark-mode .btn-secondary {
+        background-color: #2a4a7a;
+        border-color: #2a4a7a;
+    }
+
+    body.dark-mode .btn-secondary:hover {
+        background-color: #3a5a8a;
+        border-color: #3a5a8a;
+    }
+
+    body.dark-mode .form-check-input {
+        background-color: #0b1020;
+        border-color: #2a4a7a;
+    }
+
+    body.dark-mode .form-check-input:checked {
+        background-color: #4a7abd;
+        border-color: #4a7abd;
+    }
+
+    body.dark-mode .form-check-label {
+        color: #b0b8c8;
+    }
+
+    body.dark-mode .help-text {
+        color: #8a9ab8;
+    }
+</style>
+
+<div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-body p-5">
+                    <h2 class="mb-4 text-center">
+                        <i class="fas fa-upload"></i> Upload Document
+                    </h2>
+
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {{ form.non_field_errors }}
+                            </div>
+                        {% endif %}
+
+                        <div class="mb-3">
+                            <label for="{{ form.title.id_for_label }}" class="form-label">Title *</label>
+                            {{ form.title }}
+                            {% if form.title.errors %}
+                                <div class="text-danger">{{ form.title.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.description.id_for_label }}" class="form-label">Description</label>
+                            {{ form.description }}
+                            {% if form.description.errors %}
+                                <div class="text-danger">{{ form.description.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.category.id_for_label }}" class="form-label">Category *</label>
+                            {{ form.category }}
+                            {% if form.category.errors %}
+                                <div class="text-danger">{{ form.category.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.file.id_for_label }}" class="form-label">File *</label>
+                            {{ form.file }}
+                            <div class="help-text mt-1">Upload PDF, Word, Excel, or other document files</div>
+                            {% if form.file.errors %}
+                                <div class="text-danger">{{ form.file.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                {{ form.is_public }}
+                                <label class="form-check-label" for="{{ form.is_public.id_for_label }}">
+                                    Public Document (visible to all members)
+                                </label>
+                            </div>
+                            {% if form.is_public.errors %}
+                                <div class="text-danger">{{ form.is_public.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="form-check">
+                                {{ form.requires_officer }}
+                                <label class="form-check-label" for="{{ form.requires_officer.id_for_label }}">
+                                    Requires Officer Permission (only officers can access)
+                                </label>
+                            </div>
+                            {% if form.requires_officer.errors %}
+                                <div class="text-danger">{{ form.requires_officer.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'documents_view' %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-upload"></i> Upload Document
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border: none;
+        border-radius: 15px;
+    }
+
+    .card h2 {
+        color: #164f90;
+        font-weight: 600;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #333;
+    }
+
+    .btn {
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        border-radius: 8px;
+    }
+
+    .help-text {
+        font-size: 0.875rem;
+        color: #6c757d;
+    }
+
+    .text-danger {
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+</style>
+{% endblock %}

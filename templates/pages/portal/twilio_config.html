@@ -1,0 +1,239 @@
+{% extends 'base.html' %}
+
+{% block title %}Twilio Configuration - SMS Settings{% endblock %}
+
+{% block content %}
+<style>
+    body.dark-mode .card {
+        background-color: #1a2a4a;
+        color: #e8edf7;
+    }
+    body.dark-mode .form-control,
+    body.dark-mode .form-select {
+        background-color: #0b1020;
+        color: #e8edf7;
+        border-color: #2a4a7a;
+    }
+    body.dark-mode .form-control:focus,
+    body.dark-mode .form-select:focus {
+        background-color: #0b1020;
+        color: #e8edf7;
+        border-color: #4a7aba;
+    }
+    body.dark-mode label {
+        color: #e8edf7;
+    }
+    body.dark-mode .form-text {
+        color: #b0b8c8;
+    }
+    body.dark-mode .alert {
+        background-color: #1a2a4a;
+        border-color: #2a4a7a;
+        color: #e8edf7;
+    }
+    .alert-info {
+        background-color: rgba(13, 202, 240, 0.1);
+        border-color: #0dcaf0;
+        color: #e8edf7;
+    }
+    body.dark-mode .list-group-item {
+        background-color: #0b1020;
+        border-color: #2a4a7a;
+        color: #e8edf7;
+    }
+</style>
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Header -->
+            <div class="mb-4">
+                <h1>
+                    <i class="fas fa-mobile-alt"></i> Twilio SMS Configuration
+                </h1>
+                <p class="text-muted">Configure Twilio API credentials to enable SMS alerts for chapter announcements and messages</p>
+            </div>
+
+            <!-- Status Alert -->
+            {% if config.is_active %}
+                <div class="alert alert-success">
+                    <i class="fas fa-check-circle"></i> <strong>SMS Alerts Enabled</strong> - SMS functionality is active
+                    {% if config.is_test_mode %}
+                        <span class="badge bg-warning ms-2">Test Mode - SMS Logged Only</span>
+                    {% else %}
+                        <span class="badge bg-success ms-2">Live Mode - SMS Sent</span>
+                    {% endif %}
+                </div>
+            {% else %}
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i> <strong>SMS Alerts Disabled</strong> - Configure and enable SMS alerts below
+                </div>
+            {% endif %}
+
+            <!-- Configuration Form -->
+            <div class="card mb-4" style="box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-cog"></i> API Configuration
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+
+                        <!-- Account SID -->
+                        <div class="mb-3">
+                            <label for="{{ form.account_sid.id_for_label }}" class="form-label">
+                                <i class="fas fa-key"></i> Twilio Account SID
+                            </label>
+                            {{ form.account_sid }}
+                            {% if form.account_sid.errors %}
+                                <div class="text-danger mt-1">{{ form.account_sid.errors }}</div>
+                            {% endif %}
+                            <small class="form-text">Found in your Twilio Console (Project Settings)</small>
+                        </div>
+
+                        <!-- Auth Token -->
+                        <div class="mb-3">
+                            <label for="{{ form.auth_token.id_for_label }}" class="form-label">
+                                <i class="fas fa-lock"></i> Twilio Auth Token
+                            </label>
+                            {{ form.auth_token }}
+                            {% if form.auth_token.errors %}
+                                <div class="text-danger mt-1">{{ form.auth_token.errors }}</div>
+                            {% endif %}
+                            <small class="form-text">Keep this secure! Your auth token will be encrypted in production.</small>
+                        </div>
+
+                        <!-- Twilio Phone Number -->
+                        <div class="mb-3">
+                            <label for="{{ form.twilio_phone_number.id_for_label }}" class="form-label">
+                                <i class="fas fa-phone"></i> Twilio Phone Number
+                            </label>
+                            {{ form.twilio_phone_number }}
+                            {% if form.twilio_phone_number.errors %}
+                                <div class="text-danger mt-1">{{ form.twilio_phone_number.errors }}</div>
+                            {% endif %}
+                            <small class="form-text">Your Twilio phone number that will be used to send SMS (e.g., +12025555555)</small>
+                        </div>
+
+                        <hr>
+
+                        <!-- Enable/Disable SMS -->
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" id="{{ form.is_active.id_for_label }}" name="is_active" class="form-check-input" 
+                                {% if config.is_active %}checked{% endif %}>
+                            <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
+                                <i class="fas fa-power-off"></i> <strong>Enable SMS Alerts</strong>
+                            </label>
+                            <small class="form-text d-block mt-1">Check this box to activate SMS alert functionality. Members must also opt-in individually.</small>
+                        </div>
+
+                        <!-- Test Mode -->
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" id="{{ form.is_test_mode.id_for_label }}" name="is_test_mode" class="form-check-input" 
+                                {% if config.is_test_mode %}checked{% endif %}>
+                            <label class="form-check-label" for="{{ form.is_test_mode.id_for_label }}">
+                                <i class="fas fa-flask"></i> <strong>Test Mode</strong>
+                            </label>
+                            <small class="form-text d-block mt-1">In test mode, SMS messages are logged but not sent. Useful for testing without incurring charges.</small>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{% url 'home' %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Back
+                            </a>
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-save"></i> Save Configuration
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Help Section -->
+            <div class="card" style="box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-question-circle"></i> How to Set Up Twilio
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <ol class="list-group list-group-flush">
+                        <li class="list-group-item">
+                            <strong>Create Twilio Account</strong>
+                            <p class="mt-2">Go to <a href="https://www.twilio.com/" target="_blank" rel="noopener">twilio.com</a> and sign up for an account</p>
+                        </li>
+                        <li class="list-group-item">
+                            <strong>Get Your Credentials</strong>
+                            <p class="mt-2">In your Twilio Console (Project Settings), copy your:</p>
+                            <ul>
+                                <li>Account SID</li>
+                                <li>Auth Token</li>
+                            </ul>
+                        </li>
+                        <li class="list-group-item">
+                            <strong>Get Your Phone Number</strong>
+                            <p class="mt-2">Purchase or claim a Twilio phone number from the phone numbers section</p>
+                        </li>
+                        <li class="list-group-item">
+                            <strong>Enter Credentials Here</strong>
+                            <p class="mt-2">Paste your credentials above and save</p>
+                        </li>
+                        <li class="list-group-item">
+                            <strong>Test Mode First</strong>
+                            <p class="mt-2">Start with Test Mode enabled to verify everything works before sending real SMS</p>
+                        </li>
+                        <li class="list-group-item">
+                            <strong>Enable Live Mode</strong>
+                            <p class="mt-2">Once verified, uncheck Test Mode and check Enable SMS Alerts to go live</p>
+                        </li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- SMS Features -->
+            <div class="card mt-4" style="box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-star"></i> SMS Features Available
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-bell"></i> Announcements</h6>
+                            <p>Members opt-in to receive SMS alerts for chapter announcements</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-envelope"></i> Direct Messages</h6>
+                            <p>Members opt-in to receive SMS when they receive direct messages</p>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-calendar"></i> Event Alerts</h6>
+                            <p>Members opt-in to receive SMS for upcoming chapter events</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-money-bill"></i> Dues Reminders</h6>
+                            <p>Members opt-in to receive SMS reminders for dues payments</p>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-moon"></i> Quiet Hours</h6>
+                            <p>Members can set quiet hours (e.g., 10 PM - 8 AM) to not receive SMS</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-search"></i> SMS Logs</h6>
+                            <p>View all SMS sent/failed with delivery status and timestamps</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

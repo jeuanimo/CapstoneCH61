@@ -1,0 +1,709 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Bigger & Better Business - Nu Gamma Sigma{% endblock %}
+
+{% block css %}
+<style>
+    .program-hero {
+        background: linear-gradient(135deg, #164f90 0%, #1e3a5f 100%);
+        color: white;
+        padding: 4rem 2rem;
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    .program-hero h1 {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        font-weight: 700;
+        color: white !important;
+    }
+
+    .program-hero h1 i {
+        color: white !important;
+    }
+
+    .program-hero p {
+        font-size: 1.2rem;
+        max-width: 800px;
+        margin: 0 auto;
+        opacity: 0.95;
+    }
+
+    .program-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 2rem 4rem;
+        display: grid;
+        grid-template-columns: 30% 70%;
+        gap: 2rem;
+    }
+
+    /* Carousel Styles */
+    .carousel-panel {
+        position: sticky;
+        top: 100px;
+        height: fit-content;
+    }
+
+    .carousel-container {
+        background: white;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    body.dark-mode .carousel-container {
+        background: #1a2a4a;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+    }
+
+    .carousel-image-wrapper {
+        position: relative;
+        width: 100%;
+        padding-bottom: 100%;
+        overflow: hidden;
+        background: #e0e0e0;
+    }
+
+    body.dark-mode .carousel-image-wrapper {
+        background: #0b1020;
+    }
+
+    .carousel-image-container {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
+
+    .carousel-image {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        opacity: 0;
+        transition: opacity 0.5s ease;
+    }
+
+    .carousel-image.active {
+        opacity: 1;
+    }
+
+    .photo-actions {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        display: flex;
+        gap: 0.5rem;
+        z-index: 10;
+    }
+
+    .photo-action-btn {
+        background: rgba(22, 79, 144, 0.9);
+        color: white;
+        border: none;
+        border-radius: 4px;
+        padding: 0.5rem 0.75rem;
+        cursor: pointer;
+        font-size: 1rem;
+        text-decoration: none;
+        transition: background 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .photo-action-btn:hover {
+        background: #164f90;
+    }
+
+    .photo-action-btn.delete-btn:hover {
+        background: #d32f2f;
+    }
+
+    .carousel-info {
+        padding: 1.5rem;
+        text-align: center;
+        border-top: 1px solid #e0e0e0;
+    }
+
+    body.dark-mode .carousel-info {
+        border-top-color: #2a4a7a;
+    }
+
+    .carousel-caption {
+        font-size: 0.9rem;
+        color: #666;
+        margin-bottom: 1rem;
+        line-height: 1.4;
+    }
+
+    body.dark-mode .carousel-caption {
+        color: #b0b8c8;
+    }
+
+    .carousel-controls {
+        display: flex;
+        justify-content: center;
+        gap: 0.5rem;
+        margin: 1rem 0;
+        flex-wrap: wrap;
+    }
+
+    .carousel-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #ddd;
+        cursor: pointer;
+        transition: background 0.3s;
+    }
+
+    body.dark-mode .carousel-dot {
+        background: #2a4a7a;
+    }
+
+    .carousel-dot.active {
+        background: #164f90;
+    }
+
+    body.dark-mode .carousel-dot.active {
+        background: #87ceeb;
+    }
+
+    .carousel-counter {
+        font-size: 0.85rem;
+        color: #999;
+        margin-top: 1rem;
+    }
+
+    body.dark-mode .carousel-counter {
+        color: #7a8aaa;
+    }
+
+    .admin-panel {
+        background: #f0f4f8;
+        padding: 1rem;
+        border-radius: 4px;
+        margin-top: 1rem;
+        font-size: 0.9rem;
+    }
+
+    body.dark-mode .admin-panel {
+        background: #0f172a;
+        border: 1px solid #2a4a7a;
+    }
+
+    .admin-panel h4 {
+        margin: 0 0 0.5rem 0;
+        color: #164f90;
+    }
+
+    body.dark-mode .admin-panel h4 {
+        color: #87ceeb;
+    }
+
+    .admin-panel p {
+        margin: 0 0 0.5rem 0;
+        color: #666;
+    }
+
+    body.dark-mode .admin-panel p {
+        color: #b0b8c8;
+    }
+
+    .upload-btn {
+        display: inline-block;
+        background: #164f90;
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        text-decoration: none;
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+        transition: background 0.3s;
+    }
+
+    .upload-btn:hover {
+        background: #1e3a5f;
+    }
+
+    body.dark-mode .upload-btn {
+        background: #4a7aba;
+    }
+
+    body.dark-mode .upload-btn:hover {
+        background: #5a8aca;
+    }
+
+    .content-panel {
+        background: white;
+        padding: 2rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    body.dark-mode .content-panel {
+        background: #0f172a;
+        color: #e8edf7;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+    }
+
+    .program-section {
+        margin-bottom: 3rem;
+    }
+
+    .program-section h2 {
+        color: #164f90;
+        font-size: 2rem;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 3px solid #164f90;
+    }
+
+    body.dark-mode .program-section h2 {
+        color: #87ceeb;
+        border-bottom-color: #87ceeb;
+    }
+
+    .program-section p {
+        line-height: 1.8;
+        color: #333;
+        margin-bottom: 1rem;
+    }
+
+    body.dark-mode .program-section p {
+        color: #b0b8c8;
+    }
+
+    .initiatives-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin: 2rem 0;
+    }
+
+    .initiative-card {
+        background: white;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 1.5rem;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    body.dark-mode .initiative-card {
+        background: #1a2a4a;
+        border-color: #2a3a5a;
+    }
+
+    .initiative-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    }
+
+    .initiative-card i {
+        font-size: 2rem;
+        color: #164f90;
+        margin-bottom: 1rem;
+    }
+
+    body.dark-mode .initiative-card i {
+        color: #87ceeb;
+    }
+
+    .initiative-card h3 {
+        color: #164f90;
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+    }
+
+    body.dark-mode .initiative-card h3 {
+        color: #87ceeb;
+    }
+
+    .initiative-card p {
+        color: #555;
+        font-size: 0.95rem;
+        line-height: 1.6;
+    }
+
+    body.dark-mode .initiative-card p {
+        color: #b0b8c8;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 1.5rem;
+        margin: 2rem 0;
+        text-align: center;
+    }
+
+    .stat-card {
+        background: linear-gradient(135deg, #164f90 0%, #1e3a5f 100%);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 8px;
+    }
+
+    .stat-card .number {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-card .label {
+        font-size: 0.9rem;
+        opacity: 0.9;
+    }
+
+    .back-button {
+        display: inline-block;
+        margin-bottom: 1rem;
+        color: #164f90;
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    body.dark-mode .back-button {
+        color: #87ceeb;
+    }
+
+    .back-button:hover {
+        text-decoration: underline;
+    }
+
+    .back-button i {
+        margin-right: 0.5rem;
+    }
+
+    ul {
+        list-style: none;
+        padding-left: 0;
+    }
+
+    ul li {
+        padding: 0.5rem 0;
+        padding-left: 2rem;
+        position: relative;
+        line-height: 1.6;
+        color: #333;
+    }
+
+    body.dark-mode ul li {
+        color: #b0b8c8;
+    }
+
+    ul li:before {
+        content: "✓";
+        position: absolute;
+        left: 0;
+        color: #164f90;
+        font-weight: bold;
+        font-size: 1.2rem;
+    }
+
+    body.dark-mode ul li:before {
+        color: #87ceeb;
+    }
+
+    .cta-section {
+        background: linear-gradient(135deg, #164f90 0%, #1e3a5f 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 8px;
+        text-align: center;
+        margin: 3rem 0 0 0;
+    }
+
+    .cta-section h2 {
+        color: white;
+        border: none;
+        margin-top: 0;
+    }
+
+    .cta-section p {
+        color: rgba(255, 255, 255, 0.9);
+    }
+
+    .btn-primary {
+        background: white;
+        color: #164f90;
+        padding: 0.8rem 2rem;
+        border: none;
+        border-radius: 4px;
+        font-size: 1rem;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+        transition: background 0.3s ease;
+        font-weight: 600;
+    }
+
+    .btn-primary:hover {
+        background: #f0f0f0;
+    }
+
+    @media (max-width: 1024px) {
+        .program-container {
+            grid-template-columns: 1fr;
+        }
+
+        .carousel-panel {
+            position: relative;
+            top: auto;
+            margin-bottom: 2rem;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .initiatives-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .program-hero h1 {
+            font-size: 1.8rem;
+        }
+
+        .program-section h2 {
+            font-size: 1.5rem;
+        }
+
+        .initiatives-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .carousel-panel {
+            max-width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="program-hero">
+    <h1><i class="fas fa-briefcase"></i> Bigger & Better Business</h1>
+    <p>Empowering our community through entrepreneurship, financial literacy, and economic development</p>
+</div>
+
+<div class="program-container">
+    <!-- Left Panel: Photo Carousel -->
+    <div class="carousel-panel">
+        <div class="carousel-container">
+            <div class="carousel-image-wrapper">
+                {% if photos %}
+                    {% for photo in photos %}
+                        <div class="carousel-image-container">
+                            <img src="{{ photo.image.url }}" alt="{{ photo.caption }}" class="carousel-image {% if forloop.first %}active{% endif %}" data-index="{{ forloop.counter0 }}" data-photo-id="{{ photo.id }}">
+                            {% if is_officer and request.user == photo.uploaded_by %}
+                            <div class="photo-actions">
+                                <a href="{% url 'edit_program_photo' photo.id %}" class="photo-action-btn edit-btn" title="Edit caption">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{% url 'delete_program_photo' photo.id %}" class="photo-action-btn delete-btn" title="Delete photo">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #164f90 0%, #1e3a5f 100%); display: flex; align-items: center; justify-content: center; color: white;">
+                        <div style="text-align: center;">
+                            <i class="fas fa-image" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                            <p>Event photos coming soon!</p>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="carousel-info">
+                {% if photos %}
+                    <p class="carousel-caption" id="carousel-caption">{{ photos.0.caption }}</p>
+                    <div class="carousel-controls">
+                        {% for photo in photos %}
+                            <div class="carousel-dot {% if forloop.first %}active{% endif %}" onclick="showSlide({{ forloop.counter0 }})"></div>
+                        {% endfor %}
+                    </div>
+                    <div class="carousel-counter" id="carousel-counter">1 / {{ photos|length }}</div>
+                {% else %}
+                    <p class="carousel-caption">Showcase your program activities here</p>
+                {% endif %}
+            </div>
+
+            <!-- Officer Photo Upload Panel -->
+            {% if is_officer %}
+            <div class="admin-panel">
+                <h4><i class="fas fa-camera"></i> Add Program Photos</h4>
+                <form method="post" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 0.75rem;">
+                    {% csrf_token %}
+                    <div>
+                        <input type="file" name="photo_upload" accept="image/*" required style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
+                    </div>
+                    <div>
+                        <input type="text" name="caption" placeholder="Photo caption (optional)" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-size: 0.9rem;">
+                    </div>
+                    <button type="submit" class="upload-btn" style="width: 100%; cursor: pointer;">
+                        <i class="fas fa-upload"></i> Upload Photo
+                    </button>
+                </form>
+            </div>
+            {% else %}
+            <div class="admin-panel">
+                <h4><i class="fas fa-info-circle"></i> About This Program</h4>
+                <p>Officers can upload photos to showcase program activities in this carousel.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Right Panel: Content -->
+    <div class="content-panel">
+        <a href="{% url 'chapter_programs' %}" class="back-button">
+            <i class="fas fa-arrow-left"></i> Back to Programs
+        </a>
+
+        <div class="program-section">
+            <h2>Program Overview</h2>
+            <p>
+                The Bigger & Better Business program is dedicated to fostering economic empowerment and financial independence 
+                within our community. Through workshops, mentorship, and networking opportunities, we equip our members and 
+                community partners with the tools and knowledge needed to build successful businesses and achieve financial stability.
+            </p>
+            <p>
+                Our program focuses on creating pathways to wealth creation, promoting entrepreneurship, and developing the 
+                business acumen necessary to thrive in today's competitive marketplace. We believe that economic empowerment 
+                is fundamental to community advancement and individual success.
+            </p>
+        </div>
+
+        <div class="program-section">
+            <h2>Key Initiatives</h2>
+            <div class="initiatives-grid">
+                <div class="initiative-card">
+                    <i class="fas fa-lightbulb"></i>
+                    <h3>Entrepreneurship Development</h3>
+                    <p>Supporting aspiring entrepreneurs through business planning workshops and startup mentorship.</p>
+                </div>
+
+                <div class="initiative-card">
+                    <i class="fas fa-chart-line"></i>
+                    <h3>Financial Literacy</h3>
+                    <p>Providing education on personal finance, investment strategies, and wealth building.</p>
+                </div>
+
+                <div class="initiative-card">
+                    <i class="fas fa-handshake"></i>
+                    <h3>Professional Networking</h3>
+                    <p>Connecting members with business leaders and industry professionals through networking events.</p>
+                </div>
+
+                <div class="initiative-card">
+                    <i class="fas fa-users"></i>
+                    <h3>Business Mentorship</h3>
+                    <p>Pairing aspiring business owners with experienced entrepreneurs for guidance and support.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="program-section">
+            <h2>Program Components</h2>
+            <ul>
+                <li>Monthly business workshops covering startup basics to advanced strategies</li>
+                <li>Quarterly networking mixers with local business owners</li>
+                <li>One-on-one mentorship matching program</li>
+                <li>Financial literacy seminars on investing and wealth management</li>
+                <li>Annual business plan competition with seed funding</li>
+                <li>Access to business development resources</li>
+            </ul>
+        </div>
+
+        <div class="program-section">
+            <h2>Impact & Results</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="number">150+</div>
+                    <div class="label">Workshops Conducted</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number">75+</div>
+                    <div class="label">Businesses Started</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number">300+</div>
+                    <div class="label">Members Trained</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number">$500K+</div>
+                    <div class="label">Capital Raised</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="cta-section">
+            <h2>Get Involved</h2>
+            <p>
+                Ready to take your business ideas to the next level? Join our Bigger & Better Business program 
+                and gain access to the resources, mentorship, and network you need to succeed.
+            </p>
+            <a href="{% url 'contact' %}" class="btn-primary">
+                <i class="fas fa-envelope"></i> Contact Us to Learn More
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.carousel-image');
+    const totalSlides = slides.length;
+
+    function showSlide(n) {
+        if (!totalSlides) return;
+        
+        if (n >= totalSlides) {
+            currentSlide = 0;
+        } else if (n < 0) {
+            currentSlide = totalSlides - 1;
+        } else {
+            currentSlide = n;
+        }
+
+        slides.forEach(slide => slide.classList.remove('active'));
+        slides[currentSlide].classList.add('active');
+
+        document.querySelectorAll('.carousel-dot').forEach((dot, index) => {
+            dot.classList.toggle('active', index === currentSlide);
+        });
+
+        const captionElement = document.getElementById('carousel-caption');
+        if (captionElement && slides[currentSlide].alt) {
+            captionElement.textContent = slides[currentSlide].alt;
+        }
+
+        const counterElement = document.getElementById('carousel-counter');
+        if (counterElement) {
+            counterElement.textContent = (currentSlide + 1) + ' / ' + totalSlides;
+        }
+    }
+
+    // Auto-advance carousel every 5 seconds
+    {% if photos %}
+    setInterval(() => {
+        showSlide(currentSlide + 1);
+    }, 5000);
+    {% endif %}
+</script>
+{% endblock %}

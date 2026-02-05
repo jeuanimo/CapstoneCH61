@@ -1,0 +1,193 @@
+{% extends 'base.html' %}
+
+{% block title %}Payment Checkout - Member Portal{% endblock %}
+
+{% block content %}
+<style>
+    body.dark-mode .card {
+        background-color: #1a2a4a;
+        color: #e8edf7;
+    }
+    #card-element {
+        border: 1px solid #ced4da;
+        border-radius: 0.25rem;
+        padding: 0.75rem;
+        font-size: 1rem;
+    }
+    body.dark-mode #card-element {
+        border-color: #2a4a7a;
+        background-color: #0b1020;
+        color: #e8edf7;
+    }
+    .stripe-badge {
+        display: inline-block;
+        margin-top: 1rem;
+    }
+</style>
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card" style="box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-lock"></i> Secure Payment
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <!-- Order Summary -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">Order Summary</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row mb-3">
+                                <div class="col-6"><strong>Payment Type:</strong></div>
+                                <div class="col-6">{{ payment.get_payment_type_display }}</div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-6"><strong>Description:</strong></div>
+                                <div class="col-6">{{ payment.description }}</div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-6"><strong>Total Amount Due:</strong></div>
+                                <div class="col-6">${{ payment.amount|floatformat:2 }}</div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-6"><strong>Amount Already Paid:</strong></div>
+                                <div class="col-6">${{ payment.amount_paid|floatformat:2 }}</div>
+                            </div>
+                            <hr>
+                            <div class="row">
+                                <div class="col-6"><strong style="font-size: 1.2rem;">Amount to Pay:</strong></div>
+                                <div class="col-6" style="font-size: 1.2rem; font-weight: bold; color: #28a745;">
+                                    ${{ amount|floatformat:2 }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Payment Form -->
+                    <form id="payment-form">
+                        {% csrf_token %}
+
+                        <div class="mb-3">
+                            <label for="cardholder-name" class="form-label">Full Name</label>
+                            <input 
+                                type="text" 
+                                class="form-control" 
+                                id="cardholder-name" 
+                                placeholder="Name on card"
+                                required
+                            >
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="card-element" class="form-label">Card Details</label>
+                            <div id="card-element" class="form-control"></div>
+                            <div id="card-errors" class="text-danger mt-2"></div>
+                        </div>
+
+                        <!-- Payment Status Messages -->
+                        <div id="payment-result" class="mt-3"></div>
+
+                        <!-- Submit Button -->
+                        <button 
+                            type="submit" 
+                            id="submit-btn" 
+                            class="btn btn-primary w-100 mt-3"
+                            disabled
+                        >
+                            <i class="fas fa-lock"></i> Pay ${{ amount|floatformat:2 }}
+                        </button>
+                    </form>
+
+                    <!-- Stripe Badge -->
+                    <div class="text-center mt-4">
+                        <small class="text-muted">
+                            Payments secured by <strong>Stripe</strong>
+                        </small>
+                    </div>
+
+                    <!-- Back Button -->
+                    <div class="mt-4">
+                        <a href="{% url 'dues_view' %}" class="btn btn-secondary btn-sm">
+                            <i class="fas fa-arrow-left"></i> Back to Dues
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+    // Initialize Stripe
+    const stripe = Stripe('{{ stripe_public_key }}');
+    const elements = stripe.elements();
+    const cardElement = elements.create('card');
+    cardElement.mount('#card-element');
+
+    // Handle card errors
+    cardElement.on('change', function(event) {
+        const displayError = document.getElementById('card-errors');
+        if (event.error) {
+            displayError.textContent = event.error.message;
+        } else {
+            displayError.textContent = '';
+        }
+    });
+
+    // Handle form submission
+    document.getElementById('payment-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const submitBtn = document.getElementById('submit-btn');
+        const cardholderName = document.getElementById('cardholder-name').value;
+        
+        if (!cardholderName) {
+            alert('Please enter cardholder name');
+            return;
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+
+        try {
+            // Confirm payment with Stripe
+            const {error, paymentIntent} = await stripe.confirmCardPayment('{{ client_secret }}', {
+                payment_method: {
+                    card: cardElement,
+                    billing_details: {
+                        name: cardholderName
+                    }
+                }
+            });
+
+            if (error) {
+                // Payment failed
+                document.getElementById('card-errors').textContent = error.message;
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-lock"></i> Pay ${{ amount|floatformat:2 }}';
+            } else if (paymentIntent.status === 'succeeded') {
+                // Payment succeeded
+                window.location.href = '/pages/portal/payment-success/{{ stripe_payment.id }}/';
+            } else {
+                // Payment pending or requires action
+                window.location.href = '/pages/portal/payment-success/{{ stripe_payment.id }}/';
+            }
+        } catch (error) {
+            document.getElementById('card-errors').textContent = 'Payment processing error: ' + error.message;
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-lock"></i> Pay ${{ amount|floatformat:2 }}';
+        }
+    });
+
+    // Enable submit button when card is ready
+    cardElement.on('ready', function() {
+        document.getElementById('submit-btn').disabled = false;
+    });
+</script>
+
+{% endblock %}

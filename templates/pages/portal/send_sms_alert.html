@@ -1,0 +1,203 @@
+{% extends 'base.html' %}
+
+{% block title %}Send SMS Alert - Admin Portal{% endblock %}
+
+{% block content %}
+<style>
+    body.dark-mode .card {
+        background-color: #1a2a4a;
+        color: #e8edf7;
+    }
+    body.dark-mode .form-control,
+    body.dark-mode .form-select {
+        background-color: #0b1020;
+        color: #e8edf7;
+        border-color: #2a4a7a;
+    }
+    body.dark-mode .form-control:focus,
+    body.dark-mode .form-select:focus {
+        background-color: #0b1020;
+        color: #e8edf7;
+        border-color: #4a7aba;
+    }
+    body.dark-mode label {
+        color: #e8edf7;
+    }
+    body.dark-mode .form-text {
+        color: #b0b8c8;
+    }
+    .preview-box {
+        background-color: rgba(74, 122, 186, 0.1);
+        border: 1px solid #4a7aba;
+        padding: 15px;
+        border-radius: 5px;
+        margin-top: 10px;
+    }
+    body.dark-mode .preview-box {
+        background-color: rgba(74, 122, 186, 0.2);
+    }
+</style>
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card" style="box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-paper-plane"></i> Send SMS Alert
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-4">
+                        Send SMS alerts to members who have opted in to receive notifications. 
+                        Remember to respect member preferences and quiet hours.
+                    </p>
+
+                    <form method="post">
+                        {% csrf_token %}
+
+                        <!-- Alert Type -->
+                        <div class="mb-3">
+                            <label for="alert_type" class="form-label">
+                                <i class="fas fa-tag"></i> Alert Type
+                            </label>
+                            <select id="alert_type" name="alert_type" class="form-select">
+                                {% for value, label in alert_types %}
+                                    <option value="{{ value }}">{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                            <small class="form-text">What type of alert is this?</small>
+                        </div>
+
+                        <!-- Recipient Type -->
+                        <div class="mb-3">
+                            <label for="recipient_type" class="form-label">
+                                <i class="fas fa-users"></i> Send To
+                            </label>
+                            <select id="recipient_type" name="recipient_type" class="form-select">
+                                {% for value, label in recipient_types %}
+                                    <option value="{{ value }}">{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                            <small class="form-text">Select which members to send this alert to</small>
+                        </div>
+
+                        <!-- Message Content -->
+                        <div class="mb-3">
+                            <label for="message_content" class="form-label">
+                                <i class="fas fa-message"></i> Message
+                            </label>
+                            <textarea id="message_content" name="message_content" class="form-control" 
+                                    rows="6" placeholder="Enter your SMS message here..." 
+                                    maxlength="1000" required></textarea>
+                            <small class="form-text">
+                                <span id="char-count">0</span> / 1000 characters
+                                <br>
+                                <i class="fas fa-info-circle"></i> SMS messages are typically limited to 160 characters for a single message. 
+                                Longer messages may be split into multiple SMS segments.
+                            </small>
+                        </div>
+
+                        <!-- Preview Box -->
+                        <div class="preview-box">
+                            <strong><i class="fas fa-eye"></i> Message Preview:</strong>
+                            <div id="message-preview" class="mt-2" style="min-height: 40px; word-wrap: break-word;">
+                                <em class="text-muted">Your message will appear here...</em>
+                            </div>
+                            <small class="d-block mt-2">
+                                Length: <strong id="preview-length">0</strong> characters
+                                (<span id="sms-segments">1</span> SMS segment<span id="segment-plural">s</span>)
+                            </small>
+                        </div>
+
+                        <!-- Confirmation -->
+                        <div class="alert alert-warning mt-4">
+                            <i class="fas fa-exclamation-triangle"></i> <strong>Please Review Before Sending</strong>
+                            <ul class="mb-0 mt-2">
+                                <li>Check that your message is clear and concise</li>
+                                <li>Verify the recipient type is correct</li>
+                                <li>Only members who opted-in will receive this message</li>
+                                <li>Messages sent cannot be recalled</li>
+                            </ul>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{% url 'home' %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary btn-lg" id="submit-btn">
+                                <i class="fas fa-paper-plane"></i> Send SMS Alert
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Info Section -->
+            <div class="card mt-4" style="box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-question-circle"></i> SMS Guidelines
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-check"></i> Best Practices</h6>
+                            <ul>
+                                <li>Keep messages short and clear</li>
+                                <li>Include relevant details (dates, times, locations)</li>
+                                <li>Use proper formatting for readability</li>
+                                <li>Avoid sending during quiet hours</li>
+                                <li>Don't spam members with too many alerts</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-info-circle"></i> SMS Segmentation</h6>
+                            <ul>
+                                <li>1-160 characters = 1 SMS</li>
+                                <li>161-306 characters = 2 SMS</li>
+                                <li>307-459 characters = 3 SMS</li>
+                                <li>460-612 characters = 4 SMS</li>
+                                <li>Each SMS segment may be charged separately</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Character counter and SMS segmentation calculator
+    const messageInput = document.getElementById('message_content');
+    const charCount = document.getElementById('char-count');
+    const messagePreview = document.getElementById('message-preview');
+    const previewLength = document.getElementById('preview-length');
+    const smsSegments = document.getElementById('sms-segments');
+    const segmentPlural = document.getElementById('segment-plural');
+
+    messageInput.addEventListener('input', function() {
+        const length = this.value.length;
+        charCount.textContent = length;
+        previewLength.textContent = length;
+        messagePreview.textContent = this.value || 'Your message will appear here...';
+        
+        // Calculate SMS segments (160 chars per segment for basic ASCII)
+        const segments = Math.max(1, Math.ceil(length / 160));
+        smsSegments.textContent = segments;
+        segmentPlural.textContent = segments === 1 ? '' : 's';
+    });
+
+    // Disable submit if message is empty
+    document.querySelector('form').addEventListener('submit', function(e) {
+        if (!messageInput.value.trim()) {
+            e.preventDefault();
+            alert('Please enter a message before sending.');
+            messageInput.focus();
+        }
+    });
+</script>
+{% endblock %}

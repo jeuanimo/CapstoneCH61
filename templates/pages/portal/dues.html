@@ -1,0 +1,263 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dues Payments - Nu Gamma Sigma{% endblock %}
+
+{% block content %}
+<div class="portal-page">
+    <div class="portal-header">
+        <h1><i class="fas fa-dollar-sign"></i> Dues Payments</h1>
+        <p>Track your membership dues and payment history</p>
+    </div>
+
+    {% if member_profile %}
+    <div class="dues-summary">
+        <div class="summary-card">
+            <i class="fas fa-receipt"></i>
+            <div>
+                <h3>{{ dues_payments|length }}</h3>
+                <p>Total Payments</p>
+            </div>
+        </div>
+        <div class="summary-card">
+            <i class="fas fa-check-circle"></i>
+            <div>
+                <h3>{{ member_profile.get_status_display }}</h3>
+                <p>Membership Status</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="dues-table-container">
+        <h2>Payment History</h2>
+        {% if dues_payments %}
+        <table class="dues-table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Amount</th>
+                    <th>Semester</th>
+                    <th>Method</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for payment in dues_payments %}
+                <tr>
+                    <td>{{ payment.payment_date|date:"M d, Y" }}</td>
+                    <td>${{ payment.amount }}</td>
+                    <td>{{ payment.semester }}</td>
+                    <td>{{ payment.get_payment_method_display }}</td>
+                    <td>
+                        <span class="status-badge {% if payment.is_verified %}verified{% else %}pending{% endif %}">
+                            {% if payment.is_verified %}
+                            <i class="fas fa-check-circle"></i> Verified
+                            {% else %}
+                            <i class="fas fa-clock"></i> Pending
+                            {% endif %}
+                        </span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-receipt"></i>
+            <p>No payment records found.</p>
+        </div>
+        {% endif %}
+    </div>
+    {% else %}
+    <div class="alert-box">
+        <i class="fas fa-exclamation-triangle"></i>
+        <p>No member profile found. Please contact the chapter administrator.</p>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    .portal-page {
+        padding: 2rem 0;
+    }
+
+    .portal-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    .portal-header h1 {
+        color: #164f90;
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .portal-header p {
+        color: #666;
+        font-size: 1.1rem;
+    }
+
+    .dues-summary {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 2rem;
+        margin-bottom: 3rem;
+    }
+
+    .summary-card {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+    }
+
+    .summary-card i {
+        font-size: 3rem;
+        color: #164f90;
+    }
+
+    .summary-card h3 {
+        color: #164f90;
+        font-size: 2rem;
+        margin: 0;
+    }
+
+    .summary-card p {
+        color: #666;
+        margin: 0;
+    }
+
+    .dues-table-container {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+    }
+
+    .dues-table-container h2 {
+        color: #164f90;
+        font-size: 1.8rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .dues-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .dues-table thead {
+        background: linear-gradient(135deg, #2a7dd4, #164f90);
+        color: white;
+    }
+
+    .dues-table th {
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.9rem;
+        letter-spacing: 0.5px;
+    }
+
+    .dues-table td {
+        padding: 1rem;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .dues-table tbody tr:hover {
+        background: #f5f6f7;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 0.4rem 1rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .status-badge.verified {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .status-badge.pending {
+        background: #fff3cd;
+        color: #856404;
+    }
+
+    .status-badge i {
+        margin-right: 0.25rem;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #999;
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        color: #ccc;
+    }
+
+    .alert-box {
+        background: white;
+        border-left: 5px solid #ffc107;
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+    }
+
+    .alert-box i {
+        font-size: 2.5rem;
+        color: #ffc107;
+    }
+
+    .alert-box p {
+        color: #666;
+        font-size: 1.1rem;
+        margin: 0;
+    }
+
+    /* Dark Mode */
+    body.dark-mode .portal-header h1,
+    body.dark-mode .dues-table-container h2,
+    body.dark-mode .summary-card h3 {
+        color: #87ceeb;
+    }
+
+    body.dark-mode .portal-header p,
+    body.dark-mode .summary-card p,
+    body.dark-mode .alert-box p {
+        color: #b0b8c8;
+    }
+
+    body.dark-mode .summary-card,
+    body.dark-mode .dues-table-container,
+    body.dark-mode .alert-box {
+        background: #1a2a4a;
+        box-shadow: 0 0 20px rgba(135, 206, 235, 0.3);
+    }
+
+    body.dark-mode .summary-card i {
+        color: #87ceeb;
+    }
+
+    body.dark-mode .dues-table td {
+        border-bottom-color: #2a3a5a;
+        color: #e8edf7;
+    }
+
+    body.dark-mode .dues-table tbody tr:hover {
+        background: #0f1a30;
+    }
+</style>
+{% endblock %}

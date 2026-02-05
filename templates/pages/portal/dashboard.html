@@ -1,0 +1,269 @@
+{% extends 'base.html' %}
+
+{% block title %}Member Portal - Dashboard{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1>Welcome to the Member Portal, {% if user.get_full_name %}{{ user.get_full_name }}{% else %}{{ user.username }}{% endif %}!</h1>
+            <p class="text-muted">Your central hub for chapter activities and communications</p>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-center" style="box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);">
+                <div class="card-body">
+                    <h3 class="text-primary">{{ unread_count }}</h3>
+                    <p class="mb-0">Unread Messages</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center" style="box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);">
+                <div class="card-body">
+                    <h3 class="text-success">{{ total_points }}</h3>
+                    <p class="mb-0">Points Earned</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center" style="box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);">
+                <div class="card-body">
+                    <h3 class="text-info">{{ total_events }}</h3>
+                    <p class="mb-0">Events Attended</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center" style="box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);">
+                <div class="card-body">
+                    <h3 class="text-warning">{{ total_dues }}</h3>
+                    <p class="mb-0">Dues Payments</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Portal Features Grid -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <a href="{% url 'member_roster' %}" class="text-decoration-none">
+                <div class="card h-100 text-center portal-card" style="box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);">
+                    <div class="card-body">
+                        <i class="fas fa-users fa-4x mb-3 text-primary"></i>
+                        <h4>Member Roster</h4>
+                        <p class="text-muted">View all active members and their profiles</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a href="{% url 'announcements_view' %}" class="text-decoration-none">
+                <div class="card h-100 text-center portal-card {% if unread_announcements > 0 %}new-posts-card{% endif %}" style="box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);">
+                    <div class="card-body">
+                        <i class="fas fa-bullhorn fa-4x mb-3 text-success"></i>
+                        <h4>Announcements</h4>
+                        <p class="text-muted">Stay updated with chapter news</p>
+                        {% if unread_announcements > 0 %}
+                        <span class="badge bg-success pulse-badge">{{ unread_announcements }} new post{{ unread_announcements|pluralize }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a href="{% url 'messages_inbox' %}" class="text-decoration-none">
+                <div class="card h-100 text-center portal-card" style="box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);">
+                    <div class="card-body">
+                        <i class="fas fa-envelope fa-4x mb-3 text-info"></i>
+                        <h4>Messages</h4>
+                        <p class="text-muted">Chat with other members</p>
+                        {% if unread_count > 0 %}
+                        <span class="badge bg-danger">{{ unread_count }} new</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a href="{% url 'photo_gallery' %}" class="text-decoration-none">
+                <div class="card h-100 text-center portal-card" style="box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);">
+                    <div class="card-body">
+                        <i class="fas fa-images fa-4x mb-3 text-warning"></i>
+                        <h4>Photo Gallery</h4>
+                        <p class="text-muted">Share and view member photos</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a href="{% url 'documents_view' %}" class="text-decoration-none">
+                <div class="card h-100 text-center portal-card" style="box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);">
+                    <div class="card-body">
+                        <i class="fas fa-folder fa-4x mb-3 text-danger"></i>
+                        <h4>Documents</h4>
+                        <p class="text-muted">Access chapter documents and files</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a href="{% url 'dues_view' %}" class="text-decoration-none">
+                <div class="card h-100 text-center portal-card" style="box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);">
+                    <div class="card-body">
+                        <i class="fas fa-dollar-sign fa-4x mb-3 text-success"></i>
+                        <h4>Dues & Payments</h4>
+                        <p class="text-muted">Track your financial obligations</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a href="{% url 'create_post' %}" class="text-decoration-none">
+                <div class="card h-100 text-center portal-card" style="box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);">
+                    <div class="card-body">
+                        <i class="fas fa-edit fa-4x mb-3 text-primary"></i>
+                        <h4>Create Post</h4>
+                        <p class="text-muted">Share announcements with brothers</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a href="{% url 'my_posts' %}" class="text-decoration-none">
+                <div class="card h-100 text-center portal-card" style="box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);">
+                    <div class="card-body">
+                        <i class="fas fa-newspaper fa-4x mb-3 text-secondary"></i>
+                        <h4>My Posts</h4>
+                        <p class="text-muted">Manage your announcements</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card" style="box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);">
+                <div class="card-header">
+                    <h4 class="mb-0"><i class="fas fa-bolt"></i> Quick Actions</h4>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex gap-2 flex-wrap">
+                        <a href="{% url 'edit_own_profile' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-user-edit"></i> Edit Profile
+                        </a>
+                        <a href="{% url 'create_post' %}" class="btn btn-outline-success">
+                            <i class="fas fa-plus"></i> Create Post
+                        </a>
+                        <a href="{% url 'upload_photo' %}" class="btn btn-outline-warning">
+                            <i class="fas fa-upload"></i> Upload Photos
+                        </a>
+                        <a href="{% url 'member_profile' user.username %}" class="btn btn-outline-info">
+                            <i class="fas fa-eye"></i> View My Profile
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Announcements -->
+    {% if recent_announcements %}
+    <div class="card" style="box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);">
+        <div class="card-header">
+            <h4 class="mb-0">
+                Recent Announcements
+                {% if unread_announcements > 0 %}
+                <span class="badge bg-success pulse-badge ms-2">{{ unread_announcements }} new</span>
+                {% endif %}
+            </h4>
+        </div>
+        <div class="card-body">
+            {% for announcement in recent_announcements %}
+            <div class="mb-3 pb-3 {% if not forloop.last %}border-bottom{% endif %} {% if announcement.is_new %}new-announcement-item{% endif %}">
+                <div class="d-flex justify-content-between align-items-start">
+                    <h5>
+                        {% if announcement.is_new %}<span class="new-indicator"></span>{% endif %}
+                        {% if announcement.is_pinned %}<i class="fas fa-thumbtack text-warning"></i>{% endif %}
+                        {{ announcement.title }}
+                        <span class="badge bg-{{ announcement.priority }}">{{ announcement.get_priority_display }}</span>
+                        {% if announcement.is_new %}<span class="badge bg-success ms-1">NEW</span>{% endif %}
+                    </h5>
+                    <small class="text-muted">{{ announcement.publish_date|date:"M d, Y" }}</small>
+                </div>
+                <p class="mb-1">{{ announcement.content|truncatewords:30 }}</p>
+                <small class="text-muted">
+                    <i class="fas fa-user"></i> {{ announcement.author.get_full_name|default:announcement.author.username }}
+                </small>
+            </div>
+            {% endfor %}
+            <a href="{% url 'announcements_view' %}" class="btn btn-primary btn-sm">View All Announcements</a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.portal-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+}
+
+.portal-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0 25px rgba(255, 255, 255, 1) !important;
+}
+
+.new-posts-card {
+    background: linear-gradient(135deg, #ffffff 0%, #e8f8f5 100%);
+    border-left: 4px solid #27ae60 !important;
+}
+
+.pulse-badge {
+    animation: pulse-badge 2s ease-in-out infinite;
+    box-shadow: 0 0 10px rgba(39, 174, 96, 0.5);
+}
+
+@keyframes pulse-badge {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 0 10px rgba(39, 174, 96, 0.5);
+    }
+    50% {
+        transform: scale(1.05);
+        box-shadow: 0 0 20px rgba(39, 174, 96, 0.8);
+    }
+}
+
+.new-announcement-item {
+    background: linear-gradient(135deg, #ffffff 0%, #e8f8f5 100%);
+    border-left: 3px solid #27ae60;
+    padding-left: 15px;
+    margin-left: -15px;
+}
+
+.new-indicator {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background: #27ae60;
+    border-radius: 50%;
+    margin-right: 8px;
+    animation: blink 1s ease-in-out infinite;
+}
+
+@keyframes blink {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.3;
+    }
+}
+</style>
+{% endblock %}

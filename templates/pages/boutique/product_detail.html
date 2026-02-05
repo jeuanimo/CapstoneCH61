@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Breadcrumb Navigation -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'shop_home' %}" style="color: #1a1a2e;">Shop</a></li>
+            <li class="breadcrumb-item active">{{ product.name }}</li>
+        </ol>
+    </nav>
+
+    <!-- Product Details -->
+    <div class="row">
+        <!-- Product Image -->
+        <div class="col-md-6 mb-4">
+            {% if product.image %}
+            <img src="{{ product.image.url }}" alt="{{ product.name }}" class="img-fluid" style="max-height: 500px; object-fit: contain;">
+            {% else %}
+            <div style="height: 500px; background-color: #e9ecef; display: flex; align-items: center; justify-content: center;">
+                <span style="color: #6c757d; font-size: 1.2em;">No Image Available</span>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Product Info & Add to Cart -->
+        <div class="col-md-6">
+            <h1 style="color: #1a1a2e; font-weight: bold;">{{ product.name }}</h1>
+            
+            <div style="margin-bottom: 20px;">
+                <span class="badge" style="background-color: #1a1a2e; font-size: 0.95em; padding: 6px 12px;">{{ product.category|title }}</span>
+            </div>
+
+            <p style="color: #6c757d; line-height: 1.6; margin-bottom: 30px;">{{ product.description }}</p>
+
+            <!-- Price -->
+            <div style="margin-bottom: 30px;">
+                <p style="font-size: 2em; color: #1a1a2e; font-weight: bold;">
+                    ${{ product.price }}
+                </p>
+                <p style="color: #6c757d;">
+                    {% if product.inventory > 5 %}
+                        <span style="color: #28a745;">✓ In Stock ({{ product.inventory }} available)</span>
+                    {% elif product.inventory > 0 %}
+                        <span style="color: #ffc107;">Limited Stock ({{ product.inventory }} left)</span>
+                    {% else %}
+                        <span style="color: #dc3545;">Out of Stock</span>
+                    {% endif %}
+                </p>
+            </div>
+
+            <!-- Add to Cart Form -->
+            {% if product.inventory > 0 %}
+            <form method="POST" action="{% url 'add_to_cart' product.id %}">
+                {% csrf_token %}
+
+                <!-- Quantity -->
+                <div class="mb-3">
+                    <label for="quantity" style="color: #1a1a2e; font-weight: 500;">Quantity:</label>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <input type="number" id="quantity" name="quantity" value="1" min="1" max="{{ product.inventory }}" class="form-control" style="width: 100px; border-color: #1a1a2e;">
+                        <span style="color: #6c757d;">Max: {{ product.inventory }}</span>
+                    </div>
+                </div>
+
+                <!-- Size -->
+                {% if sizes %}
+                <div class="mb-3">
+                    <label for="size" style="color: #1a1a2e; font-weight: 500;">Size:</label>
+                    <select id="size" name="size" class="form-control" style="border-color: #1a1a2e;">
+                        <option value="">-- Select Size --</option>
+                        {% for size in sizes %}
+                        <option value="{{ size }}">{{ size }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% endif %}
+
+                <!-- Color -->
+                {% if colors %}
+                <div class="mb-3">
+                    <label for="color" style="color: #1a1a2e; font-weight: 500;">Color:</label>
+                    <select id="color" name="color" class="form-control" style="border-color: #1a1a2e;">
+                        <option value="">-- Select Color --</option>
+                        {% for color in colors %}
+                        <option value="{{ color }}">{{ color }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% endif %}
+
+                <!-- Buttons -->
+                <div style="display: flex; gap: 15px;">
+                    <button type="submit" class="btn btn-dark" style="flex: 1; background-color: #1a1a2e; border-color: #1a1a2e; padding: 12px; font-weight: 500;">
+                        🛒 Add to Cart
+                    </button>
+                    {% if user.is_staff or user.member_profile.is_officer %}
+                    <a href="{% url 'edit_product' product.id %}" class="btn btn-warning" style="padding: 12px 20px;">
+                        <i class="fas fa-edit"></i> Edit
+                    </a>
+                    <a href="{% url 'delete_product' product.id %}" class="btn btn-danger" style="padding: 12px 20px;">
+                        <i class="fas fa-trash"></i> Delete
+                    </a>
+                    {% endif %}
+                </div>
+            </form>
+            {% else %}
+            <div class="alert alert-danger">
+                This product is currently out of stock.
+            </div>
+            {% endif %}
+
+            <!-- Product Details Section -->
+            <hr style="margin: 40px 0;">
+            <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px;">
+                <h5 style="color: #1a1a2e; margin-bottom: 15px;">Product Details</h5>
+                <ul style="margin: 0; padding-left: 20px; color: #6c757d;">
+                    <li>Category: <strong>{{ product.category|title }}</strong></li>
+                    <li>SKU: <strong>#{{ product.id }}</strong></li>
+                    <li>Availability: <strong>In Stock</strong></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Related Products -->
+    <hr style="margin: 60px 0;">
+    <div class="mt-5 mb-5">
+        <h3 style="color: #1a1a2e; margin-bottom: 30px;">You Might Also Like</h3>
+        <!-- Add related products here if needed -->
+    </div>
+</div>
+
+<style>
+    .badge {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 4px;
+    }
+
+    @media (max-width: 768px) {
+        h1 {
+            font-size: 1.8em !important;
+        }
+
+        .row > div {
+            margin-bottom: 20px;
+        }
+    }
+</style>
+{% endblock %}

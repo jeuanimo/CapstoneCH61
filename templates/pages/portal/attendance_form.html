@@ -1,0 +1,161 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if attendance %}Edit{% else %}Add{% endif %} Attendance - Member Portal{% endblock %}
+
+{% block content %}
+<style>
+    .form-container {
+        max-width: 800px;
+        margin: 3rem auto;
+    }
+    body.dark-mode .card {
+        background-color: #1a2a4a;
+        color: #e8edf7;
+        border-color: #2a4a7a;
+    }
+    body.dark-mode .form-control,
+    body.dark-mode .form-select {
+        background-color: #0d1520;
+        color: #e8edf7;
+        border-color: #2a4a7a;
+    }
+    body.dark-mode .form-label {
+        color: #e8edf7;
+    }
+    body.dark-mode .card-header {
+        background-color: #0f172a;
+        border-color: #2a4a7a;
+    }
+</style>
+
+<div class="form-container">
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">
+                {% if attendance %}
+                <i class="fas fa-edit"></i> Edit Attendance Record
+                {% else %}
+                <i class="fas fa-plus"></i> Add Attendance Record
+                {% endif %}
+            </h4>
+        </div>
+        <div class="card-body">
+            {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
+            {% endif %}
+
+            <form method="post" class="needs-validation">
+                {% csrf_token %}
+
+                {% if not attendance %}
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="event" class="form-label">Event <span class="text-danger">*</span></label>
+                        <select name="event" id="event" class="form-select" required>
+                            <option value="">Select an event...</option>
+                            {% for event in events %}
+                            <option value="{{ event.id }}">
+                                {{ event.title }} ({{ event.start_date|date:"M d, Y" }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="member" class="form-label">Member <span class="text-danger">*</span></label>
+                        <select name="member" id="member" class="form-select" required>
+                            <option value="">Select a member...</option>
+                            {% for member in members %}
+                            <option value="{{ member.id }}">
+                                {{ member.user.get_full_name }} (#{{ member.member_number }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                {% else %}
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Event</label>
+                        <div class="form-control-static">
+                            <strong>{{ attendance.event.title }}</strong>
+                            <br><small class="text-muted">{{ attendance.event.start_date|date:"M d, Y" }}</small>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Member</label>
+                        <div class="form-control-static">
+                            <strong>{{ attendance.member.user.get_full_name }}</strong>
+                            <br><small class="text-muted">#{{ attendance.member.member_number }}</small>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="status" class="form-label">Attendance Status <span class="text-danger">*</span></label>
+                        <select name="status" id="status" class="form-select" required>
+                            {% for value, label in status_choices %}
+                            <option value="{{ value }}" {% if attendance and attendance.status == value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="points" class="form-label">Points Earned</label>
+                        <input type="number" name="points" id="points" class="form-control" 
+                               value="{% if attendance %}{{ attendance.points }}{% else %}0{% endif %}" min="0">
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="form-check">
+                            <input type="checkbox" name="rsvp_status" id="rsvp_status" class="form-check-input" 
+                                   {% if attendance and attendance.rsvp_status %}checked{% endif %}>
+                            <label class="form-check-label" for="rsvp_status">
+                                Member RSVP'd for this event
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="notes" class="form-label">Notes</label>
+                    <textarea name="notes" id="notes" class="form-control" rows="4">{% if attendance %}{{ attendance.notes }}{% endif %}</textarea>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> 
+                        {% if attendance %}Update{% else %}Add{% endif %} Record
+                    </button>
+                    <a href="{% url 'manage_attendance' %}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .form-control-static {
+        padding: 0.375rem 0.75rem;
+        border: 1px solid #dee2e6;
+        border-radius: 0.25rem;
+        background-color: #f8f9fa;
+    }
+    body.dark-mode .form-control-static {
+        border-color: #2a4a7a;
+        background-color: #0d1520;
+        color: #e8edf7;
+    }
+</style>
+{% endblock %}

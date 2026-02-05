@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Photo - Member Portal{% endblock %}
+
+{% block content %}
+<style>
+    body.dark-mode .card {
+        background-color: #1a2a4a;
+        color: #e8edf7;
+    }
+    body.dark-mode .form-control,
+    body.dark-mode .form-select {
+        background-color: #0b1020;
+        color: #e8edf7;
+        border-color: #2a4a7a;
+    }
+    body.dark-mode .form-control:focus,
+    body.dark-mode .form-select:focus {
+        background-color: #0b1020;
+        color: #e8edf7;
+        border-color: #4a7aba;
+    }
+    body.dark-mode label {
+        color: #e8edf7;
+    }
+    body.dark-mode .form-text {
+        color: #b0b8c8;
+    }
+</style>
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card" style="box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-edit"></i> Edit Photo
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <!-- Photo Preview -->
+                    <div class="text-center mb-4">
+                        <img src="{{ photo.image.url }}" alt="{{ photo.caption }}" class="img-fluid rounded" style="max-height: 300px;">
+                    </div>
+
+                    <!-- Edit Form -->
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {{ form.non_field_errors }}
+                        </div>
+                        {% endif %}
+
+                        <!-- Caption Field -->
+                        <div class="mb-3">
+                            {{ form.caption.label_tag }}
+                            {{ form.caption }}
+                            {% if form.caption.errors %}
+                            <div class="text-danger">
+                                {{ form.caption.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Tags Field -->
+                        <div class="mb-3">
+                            {{ form.tags.label_tag }}
+                            {{ form.tags }}
+                            <small class="form-text text-muted">
+                                Separate tags with commas (e.g., event, party, brothers)
+                            </small>
+                            {% if form.tags.errors %}
+                            <div class="text-danger">
+                                {{ form.tags.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Album Field -->
+                        <div class="mb-3">
+                            {{ form.album.label_tag }}
+                            {{ form.album }}
+                            {% if form.album.errors %}
+                            <div class="text-danger">
+                                {{ form.album.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Event Field -->
+                        <div class="mb-3">
+                            {{ form.event.label_tag }}
+                            {{ form.event }}
+                            {% if form.event.errors %}
+                            <div class="text-danger">
+                                {{ form.event.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'photo_detail' photo.id %}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,157 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ message.subject|default:"Message" }} - Nu Gamma Sigma{% endblock %}
+
+{% block content %}
+<div class="portal-page">
+    <div class="page-actions">
+        <a href="{% url 'messages_inbox' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Inbox
+        </a>
+        <a href="{% url 'send_message_to' message.sender.username %}" class="btn btn-primary">
+            <i class="fas fa-reply"></i> Reply
+        </a>
+    </div>
+
+    <div class="message-detail-container">
+        <div class="message-header">
+            <h1>{{ message.subject|default:"(No Subject)" }}</h1>
+            <div class="message-meta">
+                <div class="meta-item">
+                    <strong>From:</strong> {{ message.sender.get_full_name|default:message.sender.username }}
+                </div>
+                <div class="meta-item">
+                    <strong>Date:</strong> {{ message.created_at|date:"F d, Y g:i A" }}
+                </div>
+            </div>
+        </div>
+
+        <div class="message-body">
+            {{ message.content|linebreaks }}
+        </div>
+
+        {% if replies %}
+        <div class="replies-section">
+            <h2><i class="fas fa-comments"></i> Replies</h2>
+            {% for reply in replies %}
+            <div class="reply-item">
+                <div class="reply-header">
+                    <strong>{{ reply.sender.get_full_name|default:reply.sender.username }}</strong>
+                    <span class="reply-date">{{ reply.created_at|date:"M d, Y g:i A" }}</span>
+                </div>
+                <div class="reply-body">
+                    {{ reply.content|linebreaks }}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    .portal-page {
+        padding: 2rem 0;
+    }
+
+    .page-actions {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        justify-content: space-between;
+    }
+
+    .message-detail-container {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+        overflow: hidden;
+    }
+
+    .message-header {
+        background: linear-gradient(135deg, #2a7dd4, #164f90);
+        color: white;
+        padding: 2rem;
+    }
+
+    .message-header h1 {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+    }
+
+    .message-meta {
+        display: flex;
+        gap: 2rem;
+        font-size: 1rem;
+    }
+
+    .meta-item strong {
+        margin-right: 0.5rem;
+    }
+
+    .message-body {
+        padding: 2rem;
+        font-size: 1.1rem;
+        line-height: 1.8;
+        color: #333;
+        border-bottom: 2px solid #ddd;
+    }
+
+    .replies-section {
+        padding: 2rem;
+    }
+
+    .replies-section h2 {
+        color: #164f90;
+        font-size: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .reply-item {
+        border-left: 4px solid #2a7dd4;
+        padding-left: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .reply-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+    }
+
+    .reply-header strong {
+        color: #164f90;
+    }
+
+    .reply-date {
+        color: #999;
+        font-size: 0.9rem;
+    }
+
+    .reply-body {
+        color: #555;
+        line-height: 1.6;
+    }
+
+    /* Dark Mode */
+    body.dark-mode .message-detail-container {
+        background: #1a2a4a;
+        box-shadow: 0 0 20px rgba(135, 206, 235, 0.3);
+    }
+
+    body.dark-mode .message-body {
+        color: #e8edf7;
+        border-bottom-color: #2a3a5a;
+    }
+
+    body.dark-mode .replies-section h2,
+    body.dark-mode .reply-header strong {
+        color: #87ceeb;
+    }
+
+    body.dark-mode .reply-body {
+        color: #b0b8c8;
+    }
+</style>
+{% endblock %}

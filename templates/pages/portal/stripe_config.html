@@ -1,0 +1,240 @@
+{% extends 'base.html' %}
+
+{% block title %}Stripe Configuration - Member Portal{% endblock %}
+
+{% block content %}
+<style>
+    body.dark-mode .card {
+        background-color: #1a2a4a;
+        color: #e8edf7;
+    }
+    body.dark-mode .form-control,
+    body.dark-mode .form-select {
+        background-color: #0b1020;
+        color: #e8edf7;
+        border-color: #2a4a7a;
+    }
+    body.dark-mode .form-control:focus,
+    body.dark-mode .form-select:focus {
+        background-color: #0b1020;
+        color: #e8edf7;
+        border-color: #4a7aba;
+    }
+    body.dark-mode label {
+        color: #e8edf7;
+    }
+    body.dark-mode .form-text {
+        color: #b0b8c8;
+    }
+    .alert-info {
+        background-color: #e7f3ff;
+        border: 1px solid #b3d9ff;
+        color: #004085;
+    }
+    body.dark-mode .alert-info {
+        background-color: #0d2847;
+        border-color: #2a4a7a;
+        color: #b3d9ff;
+    }
+    .stripe-badge {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        background: linear-gradient(135deg, #635bff 0%, #0f5af5 100%);
+        color: white;
+        border-radius: 5px;
+        font-weight: bold;
+        margin: 1rem 0;
+    }
+</style>
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card" style="box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-credit-card"></i> Stripe Payment Configuration
+                    </h4>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                        {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <div class="alert alert-info">
+                        <strong><i class="fas fa-info-circle"></i> Treasurer Only</strong><br>
+                        Only the Treasurer (admin) can configure Stripe payment settings for the chapter.
+                        Keep your Stripe API keys secure and never share them publicly.
+                    </div>
+
+                    {% if config and config.is_active %}
+                    <div class="alert alert-success">
+                        <strong><i class="fas fa-check-circle"></i> Status: Active</strong><br>
+                        Stripe is configured and online payments are {% if config.is_test_mode %}in TEST MODE{% else %}LIVE{% endif %}.
+                    </div>
+                    {% endif %}
+
+                    <form method="post">
+                        {% csrf_token %}
+
+                        <!-- Stripe API Keys -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0"><i class="fas fa-key"></i> Stripe API Keys</h5>
+                            </div>
+                            <div class="card-body">
+                                <p class="text-muted">
+                                    Find your API keys in your <a href="https://dashboard.stripe.com/apikeys" target="_blank">Stripe Dashboard</a>
+                                </p>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            {{ form.stripe_publishable_key.label_tag }}
+                                            {{ form.stripe_publishable_key }}
+                                            {% if form.stripe_publishable_key.errors %}
+                                            <div class="text-danger">{{ form.stripe_publishable_key.errors }}</div>
+                                            {% endif %}
+                                            <small class="form-text text-muted">Starts with pk_</small>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            {{ form.stripe_secret_key.label_tag }}
+                                            {{ form.stripe_secret_key }}
+                                            {% if form.stripe_secret_key.errors %}
+                                            <div class="text-danger">{{ form.stripe_secret_key.errors }}</div>
+                                            {% endif %}
+                                            <small class="form-text text-muted">Starts with sk_</small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    {{ form.stripe_account_id.label_tag }}
+                                    {{ form.stripe_account_id }}
+                                    {% if form.stripe_account_id.errors %}
+                                    <div class="text-danger">{{ form.stripe_account_id.errors }}</div>
+                                    {% endif %}
+                                    <small class="form-text text-muted">Optional: Your Stripe Account ID (starts with acct_)</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Bank Account Information -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0"><i class="fas fa-bank"></i> Bank Account Information</h5>
+                            </div>
+                            <div class="card-body">
+                                <p class="text-muted">
+                                    Store your bank account details for receiving Stripe payouts.
+                                </p>
+
+                                <div class="mb-3">
+                                    {{ form.bank_account_name.label_tag }}
+                                    {{ form.bank_account_name }}
+                                    {% if form.bank_account_name.errors %}
+                                    <div class="text-danger">{{ form.bank_account_name.errors }}</div>
+                                    {% endif %}
+                                    <small class="form-text text-muted">e.g., Nu Gamma Sigma Chapter</small>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            {{ form.bank_account_last_four.label_tag }}
+                                            {{ form.bank_account_last_four }}
+                                            {% if form.bank_account_last_four.errors %}
+                                            <div class="text-danger">{{ form.bank_account_last_four.errors }}</div>
+                                            {% endif %}
+                                            <small class="form-text text-muted">Last 4 digits only for security</small>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            {{ form.bank_routing_number.label_tag }}
+                                            {{ form.bank_routing_number }}
+                                            {% if form.bank_routing_number.errors %}
+                                            <div class="text-danger">{{ form.bank_routing_number.errors }}</div>
+                                            {% endif %}
+                                            <small class="form-text text-muted">9-digit routing number</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Configuration Options -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0"><i class="fas fa-cog"></i> Configuration Options</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        {{ form.is_active }}
+                                        {{ form.is_active.label_tag }}
+                                        <small class="form-text text-muted d-block">
+                                            Enable or disable online payments
+                                        </small>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        {{ form.is_test_mode }}
+                                        {{ form.is_test_mode.label_tag }}
+                                        <small class="form-text text-muted d-block">
+                                            Uncheck to use live keys and accept real payments
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'portal_dashboard' %}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Save Configuration
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Help Section -->
+                    <div class="card mt-4">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0"><i class="fas fa-question-circle"></i> Need Help?</h5>
+                        </div>
+                        <div class="card-body">
+                            <p><strong>Get your Stripe API Keys:</strong></p>
+                            <ol>
+                                <li>Visit <a href="https://dashboard.stripe.com" target="_blank">Stripe Dashboard</a></li>
+                                <li>Go to Developers → API Keys</li>
+                                <li>Copy your Publishable and Secret keys</li>
+                                <li>Paste them here and save</li>
+                            </ol>
+                            <p><strong>Test Mode vs Live Mode:</strong></p>
+                            <ul>
+                                <li><strong>Test Mode:</strong> Use test card numbers (e.g., 4242 4242 4242 4242)</li>
+                                <li><strong>Live Mode:</strong> Process real credit card payments (use live keys)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

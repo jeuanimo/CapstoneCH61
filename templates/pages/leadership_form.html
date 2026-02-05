@@ -1,0 +1,279 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block title %}{{ action }} Leadership - Phi Beta Sigma Fraternity, Inc. | Nu Gamma Sigma Chapter{% endblock %}
+
+{% block css %}
+<style>
+    html, body {
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+    }
+    
+    .form-container {
+        width: 100vw;
+        margin-left: calc(-50vw + 50%);
+        padding: 2rem 1rem;
+        min-height: calc(100vh - 210px);
+        background-image: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)), url('{% static 'img/ngs.jpg' %}');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: scroll;
+        box-sizing: border-box;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    body.dark-mode .form-container {
+        background-image: linear-gradient(rgba(11, 16, 32, 0.95), rgba(11, 16, 32, 0.95)), url('{% static 'img/ngs.jpg' %}');
+    }
+    
+    .form-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 8px;
+        padding: 2.5rem;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15), 0 0 15px rgba(255, 255, 255, 0.8);
+        max-width: 700px;
+        width: 100%;
+    }
+    
+    body.dark-mode .form-card {
+        background: rgba(26, 42, 74, 0.95);
+    }
+    
+    .form-header {
+        text-align: center;
+        margin-bottom: 2rem;
+        border-bottom: 3px solid #164f90;
+        padding-bottom: 1rem;
+    }
+    
+    body.dark-mode .form-header {
+        border-bottom-color: #87ceeb;
+    }
+    
+    .form-header h1 {
+        color: #164f90;
+        font-size: 2rem;
+        margin: 0;
+    }
+    
+    body.dark-mode .form-header h1 {
+        color: #87ceeb;
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-group label {
+        display: block;
+        color: #164f90;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
+    }
+    
+    body.dark-mode .form-group label {
+        color: #87ceeb;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid #c8c9c7;
+        border-radius: 4px;
+        font-size: 1rem;
+        transition: border-color 0.3s ease;
+        box-sizing: border-box;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: #164f90;
+        box-shadow: 0 0 0 0.2rem rgba(22, 79, 144, 0.25);
+    }
+    
+    body.dark-mode .form-control {
+        background-color: #0f172a;
+        border-color: #2a3a5a;
+        color: #e8edf7;
+    }
+    
+    body.dark-mode .form-control:focus {
+        border-color: #87ceeb;
+        box-shadow: 0 0 0 0.2rem rgba(135, 206, 235, 0.25);
+    }
+    
+    .form-check {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .form-check-input {
+        width: 20px;
+        height: 20px;
+    }
+    
+    .errorlist {
+        list-style: none;
+        padding: 0;
+        margin: 0.5rem 0 0 0;
+        color: #d32f2f;
+        font-size: 0.9rem;
+    }
+    
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+    
+    .btn {
+        flex: 1;
+        padding: 0.875rem;
+        border: none;
+        border-radius: 4px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        text-align: center;
+        display: inline-block;
+    }
+    
+    .btn-submit {
+        background-color: #164f90;
+        color: #ffffff;
+    }
+    
+    .btn-submit:hover {
+        background-color: #0d3a6b;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    
+    .btn-cancel {
+        background-color: #c8c9c7;
+        color: #164f90;
+    }
+    
+    .btn-cancel:hover {
+        background-color: #a8a9a7;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        text-decoration: none;
+    }
+    
+    @media (max-width: 768px) {
+        .form-card {
+            padding: 1.5rem;
+        }
+        
+        .form-header h1 {
+            font-size: 1.5rem;
+        }
+        
+        .form-actions {
+            flex-direction: column;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <div class="form-card">
+        <div class="form-header">
+            <h1>{{ action }} Chapter Leadership</h1>
+        </div>
+        
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="{{ form.full_name.id_for_label }}">Full Name *</label>
+                {{ form.full_name }}
+                {% if form.full_name.errors %}
+                    {{ form.full_name.errors }}
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.position.id_for_label }}">Position *</label>
+                {{ form.position }}
+                {% if form.position.errors %}
+                    {{ form.position.errors }}
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.email.id_for_label }}">Email</label>
+                {{ form.email }}
+                {% if form.email.errors %}
+                    {{ form.email.errors }}
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.phone.id_for_label }}">Phone</label>
+                {{ form.phone }}
+                {% if form.phone.errors %}
+                    {{ form.phone.errors }}
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.bio.id_for_label }}">Biography</label>
+                {{ form.bio }}
+                {% if form.bio.errors %}
+                    {{ form.bio.errors }}
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.profile_image.id_for_label }}">Profile Image</label>
+                {{ form.profile_image }}
+                {% if form.profile_image.errors %}
+                    {{ form.profile_image.errors }}
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.display_order.id_for_label }}">Display Order</label>
+                {{ form.display_order }}
+                {% if form.display_order.errors %}
+                    {{ form.display_order.errors }}
+                {% endif %}
+                <small style="color: #666;">Lower numbers appear first (e.g., 1, 2, 3)</small>
+            </div>
+            
+            <div class="form-group">
+                <div class="form-check">
+                    {{ form.is_active }}
+                    <label for="{{ form.is_active.id_for_label }}">Active (Show on website)</label>
+                </div>
+                {% if form.is_active.errors %}
+                    {{ form.is_active.errors }}
+                {% endif %}
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn btn-submit">
+                    <i class="fas fa-save"></i> Save
+                </button>
+                <a href="{% url 'chapter_leadership' %}" class="btn btn-cancel">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

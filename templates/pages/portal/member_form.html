@@ -1,0 +1,324 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }} - Nu Gamma Sigma{% endblock %}
+
+{% block content %}
+<div class="portal-page">
+    <div class="portal-header">
+        <h1><i class="fas fa-user-plus"></i> {{ title }}</h1>
+        <p>{{ action }} member profile information</p>
+    </div>
+
+    <div class="form-container">
+        <form method="post" enctype="multipart/form-data" class="member-form">
+            {% csrf_token %}
+            
+            <div class="form-section">
+                <h2><i class="fas fa-user"></i> User Account Information</h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="id_username">Username *</label>
+                        {{ form.username }}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_email">Email *</label>
+                        {{ form.email }}
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="id_first_name">First Name</label>
+                        {{ form.first_name }}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_last_name">Last Name</label>
+                        {{ form.last_name }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h2><i class="fas fa-id-card"></i> Member Information</h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="id_member_number">Member Number *</label>
+                        {{ form.member_number }}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_status">Status</label>
+                        {{ form.status }}
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="id_initiation_date">Initiation Date</label>
+                        {{ form.initiation_date }}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_line_name">Line Name</label>
+                        {{ form.line_name }}
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="id_line_number">Line Number</label>
+                        {{ form.line_number }}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_phone">Phone</label>
+                        {{ form.phone }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h2><i class="fas fa-ambulance"></i> Emergency Contact</h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="id_emergency_contact_name">Emergency Contact Name</label>
+                        {{ form.emergency_contact_name }}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_emergency_contact_phone">Emergency Contact Phone</label>
+                        {{ form.emergency_contact_phone }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h2><i class="fas fa-info-circle"></i> Additional Information</h2>
+                <div class="form-group full-width">
+                    <label for="id_address">Address</label>
+                    {{ form.address }}
+                </div>
+                <div class="form-group full-width">
+                    <label for="id_bio">Biography</label>
+                    {{ form.bio }}
+                </div>
+                <div class="form-group full-width">
+                    <label for="id_profile_image">Profile Image</label>
+                    {{ form.profile_image }}
+                    {% if member_profile and member_profile.profile_image %}
+                    <div class="current-image">
+                        <p>Current image:</p>
+                        <img src="{{ member_profile.profile_image.url }}" alt="Current profile image">
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="form-group checkbox-group">
+                    {{ form.dues_current }}
+                    <label for="id_dues_current">Dues Current</label>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Save Member
+                </button>
+                <a href="{% url 'member_roster' %}" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .portal-page {
+        padding: 2rem 0;
+    }
+
+    .portal-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    .portal-header h1 {
+        color: #164f90;
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .portal-header p {
+        color: #666;
+        font-size: 1.1rem;
+    }
+
+    .form-container {
+        max-width: 900px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 12px;
+        padding: 3rem;
+        box-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+    }
+
+    .member-form {
+        display: flex;
+        flex-direction: column;
+        gap: 2.5rem;
+    }
+
+    .form-section {
+        border-bottom: 2px solid #ddd;
+        padding-bottom: 2rem;
+    }
+
+    .form-section:last-of-type {
+        border-bottom: none;
+    }
+
+    .form-section h2 {
+        color: #164f90;
+        font-size: 1.5rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .form-group.full-width {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group.checkbox-group {
+        flex-direction: row;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .form-group label {
+        color: #164f90;
+        font-weight: 600;
+        font-size: 1rem;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        padding: 0.75rem;
+        border: 2px solid #ddd;
+        border-radius: 6px;
+        font-size: 1rem;
+        font-family: inherit;
+        transition: border-color 0.2s;
+    }
+
+    .form-group input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: #2a7dd4;
+    }
+
+    .form-group input[readonly] {
+        background: #f5f5f5;
+        cursor: not-allowed;
+    }
+
+    .current-image {
+        margin-top: 1rem;
+        padding: 1rem;
+        background: #f5f6f7;
+        border-radius: 8px;
+    }
+
+    .current-image p {
+        margin-bottom: 0.5rem;
+        color: #666;
+        font-size: 0.9rem;
+    }
+
+    .current-image img {
+        max-width: 200px;
+        border-radius: 8px;
+        border: 2px solid #ddd;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        padding-top: 1rem;
+    }
+
+    @media (max-width: 768px) {
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+
+        .form-container {
+            padding: 2rem 1.5rem;
+        }
+    }
+
+    /* Dark Mode */
+    body.dark-mode .portal-header h1 {
+        color: #87ceeb;
+    }
+
+    body.dark-mode .portal-header p {
+        color: #b0b8c8;
+    }
+
+    body.dark-mode .form-container {
+        background: #1a2a4a;
+        box-shadow: 0 0 20px rgba(135, 206, 235, 0.3);
+    }
+
+    body.dark-mode .form-section {
+        border-bottom-color: #2a3a5a;
+    }
+
+    body.dark-mode .form-section h2,
+    body.dark-mode .form-group label {
+        color: #87ceeb;
+    }
+
+    body.dark-mode .form-group input,
+    body.dark-mode .form-group select,
+    body.dark-mode .form-group textarea {
+        background: #0f1a30;
+        border-color: #2a3a5a;
+        color: #e8edf7;
+    }
+
+    body.dark-mode .form-group input:focus,
+    body.dark-mode .form-group select:focus,
+    body.dark-mode .form-group textarea:focus {
+        border-color: #5ca3d6;
+    }
+
+    body.dark-mode .form-group input[readonly] {
+        background: #0a1324;
+    }
+
+    body.dark-mode .current-image {
+        background: #0f1a30;
+    }
+
+    body.dark-mode .current-image p {
+        color: #b0b8c8;
+    }
+</style>
+{% endblock %}

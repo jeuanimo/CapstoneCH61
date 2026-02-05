@@ -369,6 +369,293 @@ body.dark-mode .nav-item.active .nav-link {
 }
 
 /* ============================================================================
+   DROPDOWN MENU STYLES
+   ========================================================================== */
+
+.nav-item.dropdown {
+    position: relative;
+}
+
+.dropdown-toggle {
+    cursor: pointer;
+    position: relative;
+}
+
+.dropdown-toggle::after {
+    content: '';
+    display: inline-block;
+    margin-left: 0.3rem;
+    vertical-align: middle;
+    border-top: 0.3em solid;
+    border-right: 0.3em solid transparent;
+    border-left: 0.3em solid transparent;
+}
+
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(180deg, #e8edf7 0%, #d8dde8 100%);
+    border: 3px solid #164f90;
+    border-radius: 10px;
+    padding: 1rem;
+    margin-top: 0.5rem;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4),
+                0 0 0 1px rgba(255, 255, 255, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    z-index: 1100;
+    min-width: max-content;
+    max-width: 800px;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    list-style: none;
+}
+
+.dropdown-menu.show {
+    display: flex;
+}
+
+.dropdown-item {
+    color: #ffffff;
+    text-decoration: none;
+    padding: 0.6rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    transition: all 0.2s ease;
+    border-radius: 7px;
+    background: linear-gradient(180deg, #2a7dd4 0%, #1e6bb8 50%, #0f3d6e 100%);
+    border: 1px solid #0a2d52;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.35),
+                0 0 0 1px rgba(255, 255, 255, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.3);
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+    white-space: nowrap;
+}
+
+.dropdown-item:hover {
+    background: linear-gradient(180deg, #3a8be3 0%, #2a7dd4 50%, #15508c 100%);
+    color: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 12px rgba(0, 0, 0, 0.45),
+                0 0 0 1px rgba(255, 255, 255, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.5),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.3);
+}
+
+.dropdown-item i {
+    font-size: 1rem;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+}
+
+.dropdown-divider {
+    height: 3px;
+    margin: 0.5rem 0;
+    background: linear-gradient(90deg, transparent 0%, #164f90 50%, transparent 100%);
+    border: 0;
+    width: 100%;
+    flex-basis: 100%;
+    border-radius: 2px;
+}
+
+.dropdown-header {
+    padding: 0.5rem 0.75rem;
+    margin: 0;
+    font-size: 0.85rem;
+    color: #0f3d6e;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    width: 100%;
+    flex-basis: 100%;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+}
+
+/* Dark Mode Dropdown */
+body.dark-mode .dropdown-menu {
+    background: linear-gradient(180deg, #16243d 0%, #0f1a30 100%);
+    border-color: #1f2e4a;
+}
+
+body.dark-mode .dropdown-item {
+    background: linear-gradient(180deg, #1f3b6a 0%, #112746 100%);
+    color: #e8edf7;
+    border-color: #0a2d52;
+}
+
+body.dark-mode .dropdown-item:hover {
+    background: linear-gradient(180deg, #2a4d8c 0%, #1f3b6a 60%, #112746 100%);
+    color: #ffffff;
+}
+
+body.dark-mode .dropdown-header {
+    color: #9ec5ff;
+}
+
+body.dark-mode .dropdown-divider {
+    background-color: #2a3a5a;
+}
+
+/* ============================================================================
+   PORTAL NAVBAR - HORIZONTAL NAVIGATION UNDER MAIN NAV
+   ========================================================================== */
+
+.portal-navbar {
+    background: linear-gradient(180deg, #1e6bb8 0%, #0f3d6e 100%);
+    padding: 0.35rem 0;
+    border-bottom: 2px solid #0a2d52;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25),
+                inset 0 1px 0 rgba(255, 255, 255, 0.35),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.25);
+}
+
+.portal-navbar .container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.portal-navbar-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.65rem 1rem;
+    background: linear-gradient(180deg, #2a7dd4 0%, #1e6bb8 50%, #0f3d6e 100%);
+    border: 1px solid #0a2d52;
+    border-radius: 6px;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.35),
+                inset 1px 0 0 rgba(255, 255, 255, 0.25),
+                inset -1px 0 0 rgba(0, 0, 0, 0.25);
+    color: var(--text-light);
+    font-weight: 700;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+    white-space: nowrap;
+}
+
+.portal-navbar-header i {
+    font-size: 1.1rem;
+}
+
+.portal-nav {
+    display: flex;
+    gap: 0.35rem;
+    flex-wrap: nowrap;
+    flex: 1;
+    overflow-x: auto;
+}
+
+.portal-nav-link {
+    color: var(--text-light);
+    text-decoration: none;
+    padding: 0.5rem 0.3rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    font-size: 0.6rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.2px;
+    transition: all 0.25s ease;
+    border-radius: 6px;
+    flex: 1;
+    min-width: 0;
+    min-height: 2.7rem;
+    text-align: center;
+    white-space: normal;
+    word-wrap: break-word;
+    line-height: 1.1;
+    background: linear-gradient(180deg, #2a7dd4 0%, #1e6bb8 50%, #0f3d6e 100%);
+    border: 1px solid #0a2d52;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.35),
+                inset 1px 0 0 rgba(255, 255, 255, 0.25),
+                inset -1px 0 0 rgba(0, 0, 0, 0.25);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+}
+
+.portal-nav-link i {
+    font-size: 0.85rem;
+}
+
+.portal-nav-link:hover,
+.portal-nav-link.active {
+    background: linear-gradient(180deg, #3a8be3 0%, #2a7dd4 50%, #15508c 100%);
+    color: var(--text-light);
+    transform: translateY(-1px);
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.5),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.3),
+                inset 1px 0 0 rgba(255, 255, 255, 0.3),
+                inset -1px 0 0 rgba(0, 0, 0, 0.25);
+}
+
+.portal-nav-link.admin-link {
+    background: linear-gradient(180deg, #e89c31 0%, #d68a1f 50%, #b87316 100%);
+    border-color: #8a5a11;
+}
+
+.portal-nav-link.admin-link:hover,
+.portal-nav-link.admin-link.active {
+    background: linear-gradient(180deg, #f5b34a 0%, #e89c31 50%, #c77d1b 100%);
+}
+
+/* Dark Mode Portal Navbar */
+body.dark-mode .portal-navbar {
+    background: linear-gradient(180deg, #0f1f3a 0%, #0a1324 100%);
+    border-bottom: 2px solid #0a2d52;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.45),
+                inset 0 1px 0 rgba(255, 255, 255, 0.15),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.35);
+}
+
+body.dark-mode .portal-navbar-header {
+    background: linear-gradient(180deg, #1f3b6a 0%, #112746 100%);
+    color: #e8edf7;
+    border: 1px solid #0a2d52;
+}
+
+body.dark-mode .portal-nav-link {
+    background: linear-gradient(180deg, #1f3b6a 0%, #112746 100%);
+    border: 1px solid #0a2d52;
+    color: #e8edf7;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.45),
+                inset 0 1px 0 rgba(255, 255, 255, 0.25),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.35);
+}
+
+body.dark-mode .portal-nav-link:hover,
+body.dark-mode .portal-nav-link.active {
+    background: linear-gradient(180deg, #2a4d8c 0%, #1f3b6a 60%, #112746 100%);
+    color: #ffffff;
+}
+
+body.dark-mode .portal-nav-link.admin-link {
+    background: linear-gradient(180deg, #b87316 0%, #9a5f12 100%);
+    border-color: #6d4510;
+}
+
+body.dark-mode .portal-nav-link.admin-link:hover,
+body.dark-mode .portal-nav-link.admin-link.active {
+    background: linear-gradient(180deg, #d68a1f 0%, #b87316 60%, #9a5f12 100%);
+}
+
+/* ============================================================================
    RESPONSIVE NAVBAR
    ========================================================================== */
 
@@ -415,6 +702,26 @@ body.dark-mode .nav-item.active .nav-link {
 
     .brand-wrapper {
         order: 2;
+    }
+
+    /* Portal Navbar Mobile */
+    .portal-navbar .container {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .portal-navbar-header {
+        justify-content: center;
+    }
+
+    .portal-nav {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .portal-nav-link {
+        width: 100%;
+        min-width: auto;
     }
 }
 

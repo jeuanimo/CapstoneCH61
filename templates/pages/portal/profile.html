@@ -1,0 +1,353 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ profile_user.get_full_name }} - Profile{% endblock %}
+
+{% block content %}
+<div class="profile-page">
+    <div class="profile-header">
+        <div class="profile-avatar">
+            {% if member_profile.profile_image %}
+            <img src="{{ member_profile.profile_image.url }}" alt="{{ profile_user.get_full_name }}">
+            {% else %}
+            <div class="avatar-placeholder">
+                <i class="fas fa-user"></i>
+            </div>
+            {% endif %}
+        </div>
+        <div class="profile-details">
+            <h1>{{ profile_user.get_full_name|default:profile_user.username }}</h1>
+            <p class="member-number">Member #{{ member_profile.member_number }}</p>
+            <p class="member-status"><i class="fas fa-circle"></i> {{ member_profile.get_status_display }}</p>
+            {% if member_profile.bio %}
+            <p class="member-bio">{{ member_profile.bio }}</p>
+            {% endif %}
+            <div class="profile-actions">
+                {% if user.is_authenticated and user.username == profile_user.username %}
+                <a href="{% url 'edit_own_profile' %}" class="btn btn-primary">
+                    <i class="fas fa-user-edit"></i> Edit Profile
+                </a>
+                {% else %}
+                <a href="{% url 'send_message_to' profile_user.username %}" class="btn btn-primary">
+                    <i class="fas fa-envelope"></i> Send Message
+                </a>
+                {% endif %}
+                <a href="{% url 'member_roster' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Roster
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="profile-comments">
+        <h2><i class="fas fa-comments"></i> Comments</h2>
+        
+        <form method="post" class="comment-form">
+            {% csrf_token %}
+            <textarea name="comment_content" placeholder="Write a comment..." rows="3" required></textarea>
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-paper-plane"></i> Post Comment
+            </button>
+        </form>
+
+        <div class="comments-list">
+            {% for comment in comments %}
+            <div class="comment">
+                <div class="comment-header">
+                    <strong>{{ comment.author.get_full_name|default:comment.author.username }}</strong>
+                    <span class="comment-date">{{ comment.created_at|date:"M d, Y g:i A" }}</span>
+                </div>
+                <div class="comment-content">
+                    {{ comment.content }}
+                </div>
+                <div class="comment-actions">
+                    <button class="like-btn" data-comment-id="{{ comment.id }}">
+                        <i class="fas fa-thumbs-up"></i> <span class="like-count">{{ comment.likes.count }}</span>
+                    </button>
+                    <button class="reply-btn" onclick="toggleReplyForm({{ comment.id }})">
+                        <i class="fas fa-reply"></i> Reply
+                    </button>
+                </div>
+                
+                <form method="post" class="reply-form" id="reply-form-{{ comment.id }}" style="display: none;">
+                    {% csrf_token %}
+                    <input type="hidden" name="parent_id" value="{{ comment.id }}">
+                    <textarea name="comment_content" placeholder="Write a reply..." rows="2" required></textarea>
+                    <button type="submit" class="btn btn-sm btn-primary">Post Reply</button>
+                </form>
+
+                {% if comment.replies.all %}
+                <div class="replies">
+                    {% for reply in comment.replies.all %}
+                    <div class="comment reply">
+                        <div class="comment-header">
+                            <strong>{{ reply.author.get_full_name|default:reply.author.username }}</strong>
+                            <span class="comment-date">{{ reply.created_at|date:"M d, Y g:i A" }}</span>
+                        </div>
+                        <div class="comment-content">
+                            {{ reply.content }}
+                        </div>
+                        <div class="comment-actions">
+                            <button class="like-btn" data-comment-id="{{ reply.id }}">
+                                <i class="fas fa-thumbs-up"></i> <span class="like-count">{{ reply.likes.count }}</span>
+                            </button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            {% empty %}
+            <p class="empty-state">No comments yet. Be the first to comment!</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleReplyForm(commentId) {
+    const form = document.getElementById('reply-form-' + commentId);
+    form.style.display = form.style.display === 'none' ? 'block' : 'none';
+}
+
+document.querySelectorAll('.like-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const commentId = this.dataset.commentId;
+        fetch(`/portal/comment/${commentId}/like/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            this.querySelector('.like-count').textContent = data.like_count;
+            this.classList.toggle('liked', data.liked);
+        });
+    });
+});
+</script>
+
+<style>
+    .profile-page {
+        padding: 2rem 0;
+    }
+
+    .profile-header {
+        background: white;
+        border-radius: 12px;
+        padding: 3rem;
+        margin-bottom: 3rem;
+        box-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+        display: flex;
+        gap: 3rem;
+        align-items: center;
+    }
+
+    .profile-avatar {
+        width: 200px;
+        height: 200px;
+        border-radius: 50%;
+        overflow: hidden;
+        border: 5px solid #164f90;
+        flex-shrink: 0;
+    }
+
+    .profile-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .avatar-placeholder {
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #2a7dd4, #164f90);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .avatar-placeholder i {
+        font-size: 5rem;
+        color: white;
+    }
+
+    .profile-details h1 {
+        color: #164f90;
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .member-number {
+        color: #666;
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .member-status {
+        color: #27ae60;
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+
+    .member-status i {
+        font-size: 0.6rem;
+        margin-right: 0.5rem;
+    }
+
+    .member-bio {
+        color: #555;
+        font-size: 1.1rem;
+        line-height: 1.6;
+        margin-bottom: 2rem;
+    }
+
+    .profile-actions {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .profile-comments {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+    }
+
+    .profile-comments h2 {
+        color: #164f90;
+        font-size: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .comment-form {
+        margin-bottom: 2rem;
+    }
+
+    .comment-form textarea {
+        width: 100%;
+        padding: 1rem;
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        font-size: 1rem;
+        margin-bottom: 1rem;
+        resize: vertical;
+    }
+
+    .comments-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .comment {
+        border-left: 4px solid #164f90;
+        padding-left: 1.5rem;
+    }
+
+    .comment.reply {
+        margin-left: 3rem;
+        border-color: #2a7dd4;
+    }
+
+    .comment-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+    }
+
+    .comment-header strong {
+        color: #164f90;
+    }
+
+    .comment-date {
+        color: #999;
+        font-size: 0.9rem;
+    }
+
+    .comment-content {
+        color: #333;
+        margin-bottom: 1rem;
+        line-height: 1.6;
+    }
+
+    .comment-actions {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .like-btn, .reply-btn {
+        background: none;
+        border: none;
+        color: #164f90;
+        cursor: pointer;
+        font-size: 0.9rem;
+        padding: 0.25rem 0.5rem;
+        transition: color 0.2s;
+    }
+
+    .like-btn:hover, .reply-btn:hover {
+        color: #2a7dd4;
+    }
+
+    .like-btn.liked {
+        color: #e74c3c;
+    }
+
+    .reply-form {
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .reply-form textarea {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid #ddd;
+        border-radius: 6px;
+        font-size: 0.95rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .replies {
+        margin-top: 1rem;
+    }
+
+    .empty-state {
+        text-align: center;
+        color: #999;
+        padding: 2rem;
+    }
+
+    /* Dark Mode */
+    body.dark-mode .profile-header,
+    body.dark-mode .profile-comments {
+        background: #1a2a4a;
+        box-shadow: 0 0 20px rgba(135, 206, 235, 0.3);
+    }
+
+    body.dark-mode .profile-details h1,
+    body.dark-mode .profile-comments h2,
+    body.dark-mode .comment-header strong {
+        color: #87ceeb;
+    }
+
+    body.dark-mode .member-number,
+    body.dark-mode .member-bio,
+    body.dark-mode .comment-content {
+        color: #b0b8c8;
+    }
+
+    body.dark-mode .comment-form textarea,
+    body.dark-mode .reply-form textarea {
+        background: #0f1a30;
+        border-color: #2a3a5a;
+        color: #e8edf7;
+    }
+
+    body.dark-mode .like-btn,
+    body.dark-mode .reply-btn {
+        color: #87ceeb;
+    }
+</style>
+{% endblock %}

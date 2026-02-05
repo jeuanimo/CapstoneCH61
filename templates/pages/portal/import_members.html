@@ -1,0 +1,404 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Import Members - Nu Gamma Sigma{% endblock %}
+
+{% block content %}
+<div class="portal-page">
+    <div class="portal-header">
+        <h1><i class="fas fa-file-upload"></i> Import Members from CSV</h1>
+        <p>Upload a CSV file to bulk import member profiles</p>
+    </div>
+
+    <div class="import-container">
+        <div class="instructions-section">
+            <h2><i class="fas fa-info-circle"></i> CSV Format Instructions</h2>
+            <p>Your CSV file supports both custom format and International HQ export format.</p>
+            
+            <div class="format-tabs">
+                <h3 class="format-title"><i class="fas fa-building"></i> International HQ Format</h3>
+                <p class="format-description">Import directly from your IHQ member roster export (only 3 fields needed):</p>
+                <div class="column-list">
+                    <div class="column-item required">
+                        <strong>Member#</strong> - Member number from IHQ (required)
+                    </div>
+                    <div class="column-item">
+                        <strong>First Name</strong> - Member's first name (recommended)
+                    </div>
+                    <div class="column-item">
+                        <strong>Last Name</strong> - Member's last name (recommended)
+                    </div>
+                </div>
+                <div class="alert alert-info mt-3">
+                    <i class="fas fa-info-circle"></i> <strong>Note:</strong> Usernames will be auto-generated as "member_[number]". Members can add their email addresses and other details after first login. Other IHQ columns (Chapter Date Paid, Dues Year) will be ignored.
+                </div>
+            </div>
+
+            <div class="format-tabs mt-4">
+                <h3 class="format-title"><i class="fas fa-cog"></i> Custom Format (Full Control)</h3>
+                <p class="format-description">Use these field names for complete control over all member data:</p>
+                <div class="column-list">
+                    <div class="column-item required">
+                        <strong>member_number</strong> - Unique member ID (required)
+                    </div>
+                    <div class="column-item">
+                        <strong>username</strong> - Login username (auto-generated from member_number if not provided)
+                    </div>
+                    <div class="column-item">
+                        <strong>email</strong> - Email address (optional, can be added later)
+                    </div>
+                    <div class="column-item">
+                        <strong>first_name</strong> - First name (optional)
+                    </div>
+                    <div class="column-item">
+                        <strong>last_name</strong> - Last name (optional)
+                    </div>
+                    <div class="column-item">
+                        <strong>status</strong> - active, alumni, inactive, new_member, or suspended (default: active)
+                    </div>
+                    <div class="column-item">
+                        <strong>initiation_date</strong> - Format: YYYY-MM-DD or MM/DD/YYYY (optional)
+                    </div>
+                    <div class="column-item">
+                        <strong>line_name</strong> - Line name (optional)
+                    </div>
+                    <div class="column-item">
+                        <strong>line_number</strong> - Line number (optional)
+                    </div>
+                    <div class="column-item">
+                        <strong>phone</strong> - Phone number (optional)
+                    </div>
+                    <div class="column-item">
+                        <strong>emergency_contact_name</strong> - Emergency contact name (optional)
+                    </div>
+                    <div class="column-item">
+                        <strong>emergency_contact_phone</strong> - Emergency contact phone (optional)
+                    </div>
+                    <div class="column-item">
+                        <strong>address</strong> - Full address (optional)
+                    </div>
+                    <div class="column-item">
+                        <strong>bio</strong> - Member biography (optional)
+                    </div>
+                    <div class="column-item">
+                        <strong>dues_current</strong> - true/false, yes/no, 1/0, paid, current (default: false)
+                    </div>
+                </div>
+            </div>
+
+            <div class="sample-section">
+                <h3><i class="fas fa-file-csv"></i> Sample IHQ CSV</h3>
+                <div class="code-block">
+Member#,First Name,Last Name
+12345,John,Smith
+12346,Mary,Jones
+12347,Bob,Doe
+                </div>
+                
+                <h3 class="mt-4"><i class="fas fa-file-csv"></i> Sample Custom CSV</h3>
+                <div class="code-block">
+member_number,username,email,first_name,last_name,status,initiation_date,dues_current
+12345,jsmith,john.smith@example.com,John,Smith,active,2023-01-15,true
+12346,mjones,mary.jones@example.com,Mary,Jones,active,2023-01-15,yes
+12347,bdoe,bob.doe@example.com,Bob,Doe,new_member,2024-08-20,false
+                </div>
+                <a href="data:text/csv;charset=utf-8,Member%23,First%20Name,Last%20Name%0A" 
+                   download="ihq_member_import_template.csv" 
+                   class="btn btn-secondary me-2">
+                    <i class="fas fa-download"></i> Download IHQ Template
+                </a>
+                <a href="data:text/csv;charset=utf-8,member_number,username,email,first_name,last_name,status,initiation_date,line_name,line_number,phone,emergency_contact_name,emergency_contact_phone,address,bio,dues_current%0A" 
+                   download="custom_member_import_template.csv" 
+                   class="btn btn-secondary">
+                    <i class="fas fa-download"></i> Download Custom Template
+                </a>
+            </div>
+        </div>
+
+        <div class="upload-section">
+            <h2><i class="fas fa-upload"></i> Upload CSV File</h2>
+            <form method="post" enctype="multipart/form-data" class="upload-form">
+                {% csrf_token %}
+                <div class="file-input-wrapper">
+                    <input type="file" name="csv_file" id="csv_file" accept=".csv" required>
+                    <label for="csv_file" class="file-label">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <span>Choose CSV file or drag here</span>
+                    </label>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-upload"></i> Import Members
+                    </button>
+                    <a href="{% url 'member_roster' %}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <div class="notes-section">
+            <h3><i class="fas fa-exclamation-triangle"></i> Important Notes</h3>
+            <ul>
+                <li>All usernames and member numbers must be unique</li>
+                <li>Duplicate entries will be skipped with an error message</li>
+                <li>Random passwords will be generated for all imported users</li>
+                <li>Users should reset their password after first login</li>
+                <li>Make sure your CSV file is UTF-8 encoded</li>
+                <li>Large files may take a few moments to process</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<style>
+    .portal-page {
+        padding: 2rem 0;
+    }
+
+    .portal-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    .portal-header h1 {
+        color: #164f90;
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .portal-header p {
+        color: #666;
+        font-size: 1.1rem;
+    }
+
+    .import-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    .instructions-section,
+    .upload-section,
+    .notes-section {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+    }
+
+    .instructions-section h2,
+    .upload-section h2,
+    .notes-section h3 {
+        color: #164f90;
+        font-size: 1.5rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .instructions-section p {
+        color: #555;
+        margin-bottom: 1.5rem;
+        line-height: 1.6;
+    }
+
+    .column-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 0.75rem;
+        margin-bottom: 2rem;
+    }
+
+    .column-item {
+        padding: 0.75rem 1rem;
+        background: #f5f6f7;
+        border-radius: 6px;
+        border-left: 3px solid #2a7dd4;
+    }
+
+    .column-item.required {
+        border-left-color: #e74c3c;
+        background: #fff5f5;
+    }
+
+    .column-item strong {
+        color: #164f90;
+        font-family: monospace;
+        font-size: 0.95rem;
+    }
+
+    .sample-section {
+        margin-top: 2rem;
+    }
+
+    .sample-section h3 {
+        color: #164f90;
+        font-size: 1.2rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .code-block {
+        background: #2c3e50;
+        color: #ecf0f1;
+        padding: 1.5rem;
+        border-radius: 8px;
+        font-family: monospace;
+        font-size: 0.9rem;
+        overflow-x: auto;
+        margin-bottom: 1rem;
+        white-space: pre;
+        line-height: 1.6;
+    }
+
+    .file-input-wrapper {
+        position: relative;
+        margin-bottom: 2rem;
+    }
+
+    .file-input-wrapper input[type="file"] {
+        position: absolute;
+        opacity: 0;
+        width: 100%;
+        height: 100%;
+        cursor: pointer;
+    }
+
+    .file-label {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 3rem;
+        border: 3px dashed #2a7dd4;
+        border-radius: 12px;
+        background: #f5f6f7;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .file-label:hover {
+        background: #e8edf7;
+        border-color: #164f90;
+    }
+
+    .file-label i {
+        font-size: 3rem;
+        color: #2a7dd4;
+        margin-bottom: 1rem;
+    }
+
+    .file-label span {
+        color: #555;
+        font-size: 1.1rem;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+    }
+
+    .notes-section ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .notes-section li {
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #ddd;
+        color: #555;
+        line-height: 1.6;
+    }
+
+    .notes-section li:last-child {
+        border-bottom: none;
+    }
+
+    .notes-section li:before {
+        content: "⚠️";
+        margin-right: 0.75rem;
+    }
+
+    /* Dark Mode */
+    body.dark-mode .portal-header h1 {
+        color: #87ceeb;
+    }
+
+    body.dark-mode .portal-header p {
+        color: #b0b8c8;
+    }
+
+    body.dark-mode .instructions-section,
+    body.dark-mode .upload-section,
+    body.dark-mode .notes-section {
+        background: #1a2a4a;
+        box-shadow: 0 0 20px rgba(135, 206, 235, 0.3);
+    }
+
+    body.dark-mode .instructions-section h2,
+    body.dark-mode .upload-section h2,
+    body.dark-mode .notes-section h3,
+    body.dark-mode .sample-section h3 {
+        color: #87ceeb;
+    }
+
+    body.dark-mode .instructions-section p,
+    body.dark-mode .notes-section li {
+        color: #b0b8c8;
+    }
+
+    body.dark-mode .column-item {
+        background: #0f1a30;
+        border-left-color: #5ca3d6;
+    }
+
+    body.dark-mode .column-item.required {
+        background: #2a1a1a;
+        border-left-color: #ff6b6b;
+    }
+
+    body.dark-mode .column-item strong {
+        color: #87ceeb;
+    }
+
+    body.dark-mode .file-label {
+        background: #0f1a30;
+        border-color: #5ca3d6;
+    }
+
+    body.dark-mode .file-label:hover {
+        background: #16243d;
+        border-color: #87ceeb;
+    }
+
+    body.dark-mode .file-label span {
+        color: #b0b8c8;
+    }
+
+    body.dark-mode .notes-section li {
+        border-bottom-color: #2a3a5a;
+    }
+</style>
+
+<script>
+    // Show selected file name
+    const fileInput = document.getElementById('csv_file');
+    const fileLabel = document.querySelector('.file-label span');
+    
+    fileInput.addEventListener('change', function(e) {
+        if (e.target.files.length > 0) {
+            fileLabel.textContent = e.target.files[0].name;
+        } else {
+            fileLabel.textContent = 'Choose CSV file or drag here';
+        }
+    });
+</script>
+{% endblock %}

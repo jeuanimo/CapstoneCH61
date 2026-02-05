@@ -36,7 +36,7 @@
         background: rgba(255, 255, 255, 0.95);
         border-radius: 8px;
         padding: 2rem;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15), 0 0 15px rgba(255, 255, 255, 0.8);
     }
     
     body.dark-mode .content-wrapper {
@@ -351,8 +351,9 @@
                         <i class="fas fa-briefcase" style="font-size: 3rem; margin-bottom: 0.5rem; color: #164f90;"></i>
                     </div>
                     <div class="program-card-content">
-                        <h3>Bigger and Better Business</h3>
+                        <h3>Bigger & Better Business</h3>
                         <p>Economic empowerment and business development initiatives</p>
+                        <a href="{% url 'program_business' %}" class="btn btn-primary" style="margin-top: 1rem;">Learn More</a>
                     </div>
                 </div>
                 <div class="program-card">
@@ -362,6 +363,7 @@
                     <div class="program-card-content">
                         <h3>Education</h3>
                         <p>Scholarships and educational advancement programs</p>
+                        <a href="{% url 'program_education' %}" class="btn btn-primary" style="margin-top: 1rem;">Learn More</a>
                     </div>
                 </div>
                 <div class="program-card">
@@ -371,6 +373,7 @@
                     <div class="program-card-content">
                         <h3>Social Action</h3>
                         <p>Community service and social change initiatives</p>
+                        <a href="{% url 'program_social_action' %}" class="btn btn-primary" style="margin-top: 1rem;">Learn More</a>
                     </div>
                 </div>
                 <div class="program-card">
@@ -380,6 +383,7 @@
                     <div class="program-card-content">
                         <h3>Sigma Beta Club</h3>
                         <p>Youth mentoring program for ages 8-18</p>
+                        <a href="{% url 'program_sigma_beta' %}" class="btn btn-primary" style="margin-top: 1rem;">Learn More</a>
                     </div>
                 </div>
             </div>
@@ -421,6 +425,12 @@
                 
                 <p style="margin-top: 1.5rem; font-size: 0.9rem;"><strong>Partners:</strong> American Cancer Society • March of Dimes • Center for Disease Control and Prevention • Boy Scouts of America • Thurgood Marshall College Fund</p>
             </div>
+        </div>
+        
+        <div style="text-align: center; margin-top: 3rem; padding-top: 2rem; border-top: 2px solid #164f90;">
+            <a href="{% url 'home' %}" style="display: inline-block; background-color: #164f90; color: #ffffff; padding: 1rem 2rem; border-radius: 4px; text-decoration: none; font-weight: 600; transition: all 0.3s ease;">
+                <i class="fas fa-arrow-left"></i> Back to Home
+            </a>
         </div>
     </div>
 </div>

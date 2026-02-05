@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+
+{% block title %}Payment Successful - Member Portal{% endblock %}
+
+{% block content %}
+<style>
+    body.dark-mode .card {
+        background-color: #1a2a4a;
+        color: #e8edf7;
+    }
+    .success-icon {
+        font-size: 3rem;
+        color: #28a745;
+        margin: 1rem 0;
+    }
+    .receipt-section {
+        background-color: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 5px;
+        margin: 1.5rem 0;
+    }
+    body.dark-mode .receipt-section {
+        background-color: #0b1020;
+    }
+</style>
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card" style="box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-check-circle"></i> Payment Successful
+                    </h4>
+                </div>
+                <div class="card-body text-center">
+                    <div class="success-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+
+                    <h5>Thank You!</h5>
+                    <p class="text-muted">Your payment has been successfully processed.</p>
+
+                    <!-- Receipt -->
+                    <div class="receipt-section text-start">
+                        <h6><strong>Payment Receipt</strong></h6>
+                        <hr>
+                        
+                        <div class="row mb-2">
+                            <div class="col-6"><strong>Transaction ID:</strong></div>
+                            <div class="col-6">{{ stripe_payment.stripe_payment_intent_id }}</div>
+                        </div>
+
+                        <div class="row mb-2">
+                            <div class="col-6"><strong>Amount Paid:</strong></div>
+                            <div class="col-6">${{ stripe_payment.amount_dollars|floatformat:2 }}</div>
+                        </div>
+
+                        <div class="row mb-2">
+                            <div class="col-6"><strong>Payment Type:</strong></div>
+                            <div class="col-6">{{ stripe_payment.get_payment_type_display }}</div>
+                        </div>
+
+                        <div class="row mb-2">
+                            <div class="col-6"><strong>Payment Method:</strong></div>
+                            <div class="col-6">
+                                {% if stripe_payment.card_brand %}
+                                    {{ stripe_payment.card_brand|title }} ending in {{ stripe_payment.card_last_four }}
+                                {% else %}
+                                    Stripe
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row mb-2">
+                            <div class="col-6"><strong>Date:</strong></div>
+                            <div class="col-6">{{ stripe_payment.completed_at|date:"M d, Y H:i" }}</div>
+                        </div>
+
+                        {% if dues_payment %}
+                        <hr>
+                        <div class="row mb-2">
+                            <div class="col-6"><strong>Dues Status:</strong></div>
+                            <div class="col-6">
+                                {% if dues_payment.status == 'paid' %}
+                                    <span class="badge bg-success">Paid</span>
+                                {% elif dues_payment.status == 'partial' %}
+                                    <span class="badge bg-warning">Partially Paid</span>
+                                {% else %}
+                                    <span class="badge bg-danger">{{ dues_payment.get_status_display }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row mb-2">
+                            <div class="col-6"><strong>Remaining Balance:</strong></div>
+                            <div class="col-6">
+                                {% if dues_payment.balance > 0 %}
+                                    ${{ dues_payment.balance|floatformat:2 }}
+                                {% else %}
+                                    <span class="text-success"><strong>Paid in Full</strong></span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Next Steps -->
+                    <div class="alert alert-info">
+                        <strong><i class="fas fa-info-circle"></i> Next Steps</strong><br>
+                        A confirmation email has been sent to {{ stripe_payment.member.user.email }}. 
+                        You can view your payment history in your account.
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="d-flex gap-2 justify-content-center mt-4">
+                        <a href="{% url 'dues_view' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Back to Dues
+                        </a>
+                        <a href="{% url 'member_profile' stripe_payment.member.user.username %}" class="btn btn-primary">
+                            <i class="fas fa-user"></i> My Profile
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Help Section -->
+            <div class="card mt-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="fas fa-question-circle"></i> Questions?</h5>
+                </div>
+                <div class="card-body">
+                    <p>If you have any questions about your payment, please contact the Treasurer.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
