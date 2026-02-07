@@ -537,7 +537,11 @@
                             <div class="carousel-dot {% if forloop.first %}active{% endif %}" onclick="showSlide({{ forloop.counter0 }})"></div>
                         {% endfor %}
                     </div>
-                    <div class="carousel-counter" id="carousel-counter">1 / {{ photos|length }}</div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem;">
+                        <button class="carousel-nav-btn" onclick="showSlide(currentSlide - 1);" style="background: #164f90; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-size: 0.9rem;">← Prev</button>
+                        <div class="carousel-counter" id="carousel-counter">1 / {{ photos|length }}</div>
+                        <button class="carousel-nav-btn" onclick="showSlide(currentSlide + 1);" style="background: #164f90; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-size: 0.9rem;">Next →</button>
+                    </div>
                 {% else %}
                     <p class="carousel-caption">Showcase your program activities here</p>
                 {% endif %}

@@ -26,10 +26,10 @@
                 <div class="brand-wrapper">
                     <a href="{% url 'home' %}" class="navbar-brand">
                         <div class="brand-text">
-                            <div class="brand-name">Nu Gamma Sigma Chapter</div>
-                            <div class="brand-subtitle">of Phi Beta Sigma Fraternity Incorporated</div>
+                            <div class="brand-name">Phi Beta Sigma Fraternity, Inc</div>
+                            <div class="brand-subtitle">Nu Gamma Sigma Chapter</div>
                         </div>
-                        <img src="{% static 'img/ngs_logo.png' %}" alt="Nu Gamma Sigma Chapter Logo" class="brand-logo">
+                        <img src="{% static 'img/PBS_Seal_2019_Color.png' %}" alt="Phi Beta Sigma Seal" class="brand-logo">
                     </a>
                 </div>
                 <div class="top-actions">
@@ -67,14 +67,17 @@
                     <li class="nav-item {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
                         <a href="{% url 'home' %}" class="nav-link">Home</a>
                     </li>
-                    <li class="nav-item {% if request.resolver_match.url_name == 'events' %}active{% endif %}">
-                        <a href="{% url 'events' %}" class="nav-link">Events</a>
+                    <li class="nav-item {% if request.resolver_match.url_name == 'about' %}active{% endif %}">
+                        <a href="{% url 'about' %}" class="nav-link">About Us</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="https://phibetasigma1914.org/" class="nav-link" target="_blank">Phi Beta Sigma HQ</a>
                     </li>
                     <li class="nav-item {% if request.resolver_match.url_name == 'chapter_programs' %}active{% endif %}">
                         <a href="{% url 'chapter_programs' %}" class="nav-link">Programs</a>
                     </li>
-                    <li class="nav-item {% if request.resolver_match.url_name == 'about' %}active{% endif %}">
-                        <a href="{% url 'about' %}" class="nav-link">About Us</a>
+                    <li class="nav-item {% if request.resolver_match.url_name == 'events' %}active{% endif %}">
+                        <a href="{% url 'events' %}" class="nav-link">Events</a>
                     </li>
                     <li class="nav-item {% if request.resolver_match.url_name == 'contact' %}active{% endif %}">
                         <a href="{% url 'contact' %}" class="nav-link">Contact Us</a>
@@ -84,11 +87,8 @@
                         <a href="{% url 'logout' %}" class="nav-link">Logout</a>
                     </li>
                     {% else %}
-                    <li class="nav-item {% if request.resolver_match.url_name == 'login' %}active{% endif %}">
-                        <a href="{% url 'login' %}" class="nav-link">Login</a>
-                    </li>
-                    <li class="nav-item {% if request.resolver_match.url_name == 'signup' %}active{% endif %}">
-                        <a href="{% url 'signup' %}" class="nav-link">Sign Up</a>
+                    <li class="nav-item {% if request.resolver_match.url_name == 'login' or request.resolver_match.url_name == 'signup' %}active{% endif %}">
+                        <a href="{% url 'login' %}" class="nav-link">Member Login</a>
                     </li>
                     {% endif %}
                 </ul>
@@ -221,9 +221,30 @@
     <!-- Footer -->
     <footer class="footer">
         <div class="container">
-            <p>&copy; 2026 Nu Gamma Sigma Chapter of Phi Beta Sigma Fraternity, Incorporated.</p>
+            <p>&copy; 2026 Phi Beta Sigma Fraternity, Incorporated. Nu Gamma Sigma Chapter</p>
         </div>
     </footer>
+
+    <!-- Session Timeout Warning Modal -->
+    {% if user.is_authenticated %}
+    <div id="sessionTimeoutModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <i class="fas fa-hourglass-end modal-icon-warning"></i>
+                <h2>Session Expiring</h2>
+            </div>
+            <div class="modal-body">
+                <p>Your session will expire in <span id="countdownTimer">1</span> minute due to inactivity.</p>
+                <p>Click "Stay Logged In" to continue working.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn" onclick="resetSessionTimeout()">
+                    <i class="fas fa-check-circle"></i> Stay Logged In
+                </button>
+            </div>
+        </div>
+    </div>
+    {% endif %}
 
     <!-- Theme Toggle Script -->
     <script>
@@ -237,6 +258,94 @@
             document.body.classList.add('dark-mode');
         }
 
+        // Session Timeout Management (10 minutes of inactivity)
+        {% if user.is_authenticated %}
+        let sessionTimeoutHandle;
+        let countdownHandle;
+        const INACTIVITY_TIMEOUT = 10 * 60 * 1000; // 10 minutes in milliseconds
+        const WARNING_TIME = 9 * 60 * 1000; // Show warning at 9 minutes
+
+        function resetSessionTimeout() {
+            // Clear existing timeouts
+            clearTimeout(sessionTimeoutHandle);
+            clearInterval(countdownHandle);
+
+            // Hide the modal if it's showing
+            const modal = document.getElementById('sessionTimeoutModal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+
+            // Set new timeout
+            setSessionTimeout();
+        }
+
+        function setSessionTimeout() {
+            // Auto-logout after inactivity
+            sessionTimeoutHandle = setTimeout(function() {
+                logoutUser();
+            }, INACTIVITY_TIMEOUT);
+
+            // Show warning at 9 minutes
+            setTimeout(function() {
+                showSessionTimeoutWarning();
+            }, WARNING_TIME);
+        }
+
+        function showSessionTimeoutWarning() {
+            const modal = document.getElementById('sessionTimeoutModal');
+            if (modal) {
+                modal.style.display = 'flex';
+                
+                // Start countdown timer (1 minute)
+                let timeLeft = 60;
+                const timerElement = document.getElementById('countdownTimer');
+                
+                countdownHandle = setInterval(function() {
+                    timeLeft--;
+                    if (timerElement) {
+                        timerElement.textContent = timeLeft;
+                    }
+                    
+                    if (timeLeft <= 0) {
+                        clearInterval(countdownHandle);
+                    }
+                }, 1000);
+            }
+        }
+
+        function logoutUser() {
+            // Redirect to logout endpoint
+            window.location.href = '{% url "logout" %}';
+        }
+
+        // Track user activity
+        function resetInactivityTimer() {
+            resetSessionTimeout();
+        }
+
+        // Activity events to track
+        const activityEvents = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
+        
+        activityEvents.forEach(function(event) {
+            document.addEventListener(event, resetInactivityTimer, true);
+        });
+
+        // Initialize session timeout on page load
+        window.addEventListener('DOMContentLoaded', function() {
+            setSessionTimeout();
+        });
+
+        // Allow closing modal by clicking outside (but won't stop logout)
+        const modal = document.getElementById('sessionTimeoutModal');
+        if (modal) {
+            modal.addEventListener('click', function(event) {
+                if (event.target === modal) {
+                    // Don't close modal by clicking outside, but user can click Stay Logged In
+                }
+            });
+        }
+        {% endif %}
 
 
         // Modal functionality for Django messages

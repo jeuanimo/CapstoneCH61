@@ -244,6 +244,62 @@
         border-left-color: #87ceeb;
     }
     
+    .form-tabs {
+        display: flex;
+        gap: 0;
+        margin-bottom: 2rem;
+        border-bottom: 2px solid #e0e0e0;
+    }
+    
+    body.dark-mode .form-tabs {
+        border-bottom-color: #2a3a5a;
+    }
+    
+    .form-tab {
+        flex: 1;
+        padding: 1rem;
+        text-align: center;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        font-size: 1rem;
+        font-weight: 600;
+        color: #999;
+        transition: all 0.3s ease;
+        border-bottom: 3px solid transparent;
+        margin-bottom: -2px;
+    }
+    
+    .form-tab:hover {
+        color: #164f90;
+    }
+    
+    body.dark-mode .form-tab {
+        color: #7a8a9a;
+    }
+    
+    body.dark-mode .form-tab:hover {
+        color: #87ceeb;
+    }
+    
+    .form-tab.active {
+        color: #164f90;
+        border-bottom-color: #164f90;
+    }
+    
+    body.dark-mode .form-tab.active {
+        color: #87ceeb;
+        border-bottom-color: #87ceeb;
+    }
+    
+    .form-section {
+        display: none;
+    }
+    
+    .form-section.active {
+        display: block;
+    }
+    
     @media (max-width: 768px) {
         .login-card {
             padding: 1.5rem;
@@ -260,57 +316,166 @@
 <div class="login-container">
     <div class="login-card">
         <div class="login-header">
-            <h1>Member Login</h1>
-            <p>Sign in to access your account</p>
+            <h1>Member Access</h1>
+            <p>Already registered or ready to join?</p>
         </div>
         
-        {% if form.non_field_errors %}
-        <div class="form-errors">
-            {% for error in form.non_field_errors %}
-                <p>{{ error }}</p>
-            {% endfor %}
+        <!-- Form Tabs -->
+        <div class="form-tabs">
+            <button class="form-tab active" onclick="switchTab('login-form')">Sign In</button>
+            <button class="form-tab" onclick="switchTab('signup-form')">Create Account</button>
         </div>
-        {% endif %}
         
-        <form method="POST" action="{% url 'login' %}">
-            {% csrf_token %}
+        <!-- LOGIN FORM -->
+        <div id="login-form" class="form-section active">
+            {% if form.non_field_errors %}
+            <div class="form-errors">
+                {% for error in form.non_field_errors %}
+                    <p>{{ error }}</p>
+                {% endfor %}
+            </div>
+            {% endif %}
             
-            <div class="form-group">
-                <label for="id_username">Username</label>
-                {{ form.username }}
-                {% if form.username.errors %}
-                    {% for error in form.username.errors %}
-                        <span class="field-error">{{ error }}</span>
-                    {% endfor %}
-                {% endif %}
+            <form method="POST" action="{% url 'login' %}">
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <label for="id_username">Username</label>
+                    {{ form.username }}
+                    {% if form.username.errors %}
+                        {% for error in form.username.errors %}
+                            <span class="field-error">{{ error }}</span>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="id_password">Password</label>
+                    {{ form.password }}
+                    {% if form.password.errors %}
+                        {% for error in form.password.errors %}
+                            <span class="field-error">{{ error }}</span>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                
+                <div class="remember-me">
+                    <input type="checkbox" id="remember" name="remember">
+                    <label for="remember">Keep me logged in</label>
+                </div>
+                
+                <button type="submit" class="btn-login">Sign In</button>
+                
+                <div class="security-note">
+                    <i class="fas fa-shield-alt"></i> Your connection is secure. All data is encrypted.
+                </div>
+            </form>
+        </div>
+        
+        <!-- SIGNUP FORM -->
+        <div id="signup-form" class="form-section">
+            <div style="background-color: #e3f2fd; color: #1565c0; padding: 0.75rem; border-radius: 4px; margin-bottom: 1.5rem; border-left: 4px solid #1565c0; font-size: 0.9rem;">
+                <i class="fas fa-info-circle"></i> To create an account, you'll need an invitation code. Don't have one? <a href="{% url 'contact' %}" style="color: inherit; font-weight: 600;">Contact us</a> to request membership information.
             </div>
             
-            <div class="form-group">
-                <label for="id_password">Password</label>
-                {{ form.password }}
-                {% if form.password.errors %}
-                    {% for error in form.password.errors %}
-                        <span class="field-error">{{ error }}</span>
-                    {% endfor %}
-                {% endif %}
+            {% if signup_form.non_field_errors %}
+            <div class="form-errors">
+                {% for error in signup_form.non_field_errors %}
+                    <p>{{ error }}</p>
+                {% endfor %}
             </div>
+            {% endif %}
             
-            <div class="remember-me">
-                <input type="checkbox" id="remember" name="remember">
-                <label for="remember">Keep me logged in</label>
-            </div>
-            
-            <button type="submit" class="btn-login">Sign In</button>
-            
-            <div class="security-note">
-                <i class="fas fa-shield-alt"></i> Your connection is secure. All data is encrypted.
-            </div>
-        </form>
+            <form method="POST" action="{% url 'signup' %}">
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <label for="id_invitation_code">Invitation Code *</label>
+                    {{ signup_form.invitation_code }}
+                    {% if signup_form.invitation_code.errors %}
+                        {% for error in signup_form.invitation_code.errors %}
+                            <span class="field-error">{{ error }}</span>
+                        {% endfor %}
+                    {% endif %}
+                    <p class="help-text">Enter the invitation code provided to you.</p>
+                </div>
+                
+                <div class="form-group">
+                    <label for="id_email">Email *</label>
+                    <input type="email" id="id_email" name="email" class="form-control" required>
+                    <p class="help-text">Must match your invitation code email.</p>
+                </div>
+                
+                <div class="form-group">
+                    <label for="id_username">Username *</label>
+                    {{ signup_form.username }}
+                    {% if signup_form.username.errors %}
+                        {% for error in signup_form.username.errors %}
+                            <span class="field-error">{{ error }}</span>
+                        {% endfor %}
+                    {% endif %}
+                    {% if signup_form.username.help_text %}
+                        <p class="help-text">{{ signup_form.username.help_text|safe }}</p>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="id_password1">Password *</label>
+                    {{ signup_form.password1 }}
+                    {% if signup_form.password1.errors %}
+                        {% for error in signup_form.password1.errors %}
+                            <span class="field-error">{{ error }}</span>
+                        {% endfor %}
+                    {% endif %}
+                    {% if signup_form.password1.help_text %}
+                        <p class="help-text">{{ signup_form.password1.help_text|safe }}</p>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="id_password2">Confirm Password *</label>
+                    {{ signup_form.password2 }}
+                    {% if signup_form.password2.errors %}
+                        {% for error in signup_form.password2.errors %}
+                            <span class="field-error">{{ error }}</span>
+                        {% endfor %}
+                    {% endif %}
+                    {% if signup_form.password2.help_text %}
+                        <p class="help-text">{{ signup_form.password2.help_text|safe }}</p>
+                    {% endif %}
+                </div>
+                
+                <button type="submit" class="btn-login">Create Account</button>
+                
+                <div class="security-note">
+                    <i class="fas fa-lock"></i> Your account information is secure and encrypted.
+                </div>
+            </form>
+        </div>
         
         <div class="login-footer">
-            <p>Don't have an account? <a href="{% url 'contact' %}">Contact us</a> for membership information.</p>
-            <p><a href="{% url 'home' %}">Return to Home</a></p>
+            <p><a href="{% url 'home' %}">← Return to Home</a></p>
         </div>
     </div>
 </div>
+
+<script>
+    function switchTab(tabId) {
+        // Hide all sections
+        document.querySelectorAll('.form-section').forEach(section => {
+            section.classList.remove('active');
+        });
+        
+        // Deactivate all tabs
+        document.querySelectorAll('.form-tab').forEach(tab => {
+            tab.classList.remove('active');
+        });
+        
+        // Show selected section
+        document.getElementById(tabId).classList.add('active');
+        
+        // Activate corresponding tab
+        event.target.classList.add('active');
+    }
+</script>
 {% endblock %}

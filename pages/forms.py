@@ -1,3 +1,38 @@
+"""
+=============================================================================
+DJANGO FORMS FOR PHI BETA SIGMA FRATERNITY CHAPTER WEBSITE
+=============================================================================
+
+This module contains all forms for user input and data validation:
+
+FORM CATEGORIES:
+1. Contact & Communication
+   - ContactForm: Public contact form for website visitors
+
+2. Member Management
+   - MemberProfileForm: Create/edit member profiles with user account integration
+   - ChapterLeadershipForm: Manage chapter leadership positions
+
+3. Dues & Payments
+   - DuesPaymentForm: Full dues record editing (admin)
+   - CreateBillForm: Simplified bill creation interface (treasurer)
+
+4. Payment Integration
+   - StripeConfigurationForm: Configure Stripe payment processing (treasurer)
+
+5. SMS Notifications
+   - TwilioConfigurationForm: Configure Twilio SMS system (admin)
+   - SMSPreferenceForm: Allow members to opt-in/out of SMS alerts
+
+All forms use crispy_forms for Bootstrap styling and include:
+- Input validation methods (clean_fieldname)
+- Custom error messages for user guidance
+- Appropriate widgets (TextInput, Select, DateInput, etc.)
+- Security best practices (CSRF protection, secure field handling)
+
+=============================================================================
+"""
+
 from django import forms
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Submit, Field

@@ -1,3 +1,78 @@
+"""
+=============================================================================
+DJANGO VIEWS FOR PHI BETA SIGMA FRATERNITY CHAPTER WEBSITE
+=============================================================================
+
+This module contains all view functions and classes that handle HTTP requests
+and render responses for the chapter website.
+
+VIEW CATEGORIES:
+
+1. AUTHENTICATION & PUBLIC PAGES
+   - home_view: Landing page with upcoming events
+   - about: Chapter information
+   - contact: Contact form and email handling
+   - events: Event calendar with filtering
+   - login_view, logout_view: User authentication
+   - signup_view: New member registration with invitation codes
+
+2. MEMBER PORTAL (Requires @login_required)
+   - member_portal: Main dashboard with announcements
+   - member_search: Search for other members
+   - member_profile: View individual member profiles
+   - my_profile: Edit own profile information
+   
+3. OFFICER FEATURES (Requires @user_passes_test for officer status)
+   - member_management: Admin list of all members (CRUD)
+   - add_member, edit_member, delete_member: Member administration
+   - dues_and_payments: View and manage member dues
+   - manage_attendance: Track event attendance with filtering
+   - add_attendance, edit_attendance, delete_attendance: Attendance CRUD
+   - manage_announcements: Post and manage chapter announcements
+   - manage_documents: Upload and manage chapter documents
+
+4. E-COMMERCE BOUTIQUE
+   - shop_home: Main boutique page
+   - shop_product_detail: Individual product view
+   - add_to_cart, remove_from_cart: Shopping cart management
+   - checkout, place_order: Order processing
+   - process_payment: Stripe payment integration
+
+5. PHOTO/MEDIA MANAGEMENT
+   - program_<type>: Display program photos by category
+   - edit_program_photo, delete_program_photo: Photo management
+   - my_album: User's personal photo albums
+   - create_album, add_photos: Album management
+
+6. COMMUNICATION
+   - inbox, send_message: Direct messaging between members
+   - announcements: View chapter-wide announcements
+
+7. PAYMENT INTEGRATION
+   - stripe_configuration: Treasurer-only Stripe setup
+   - dues_payment_view: Pay dues via Stripe
+   - process_payment: Handle Stripe webhooks
+
+8. SMS/NOTIFICATIONS
+   - sms_preference_settings: Member SMS preference management
+   - send_announcement_sms: Send SMS alerts to opted-in members
+
+PERMISSION SYSTEM:
+- Public views: No authentication required (home, about, events, contact)
+- Member views: @login_required decorator
+- Officer views: @user_passes_test(is_officer_or_staff) decorator
+- Admin views: @user_passes_test(lambda u: u.is_staff) decorator
+
+COMMON PATTERNS:
+- List views: Support filtering/searching via GET parameters
+- Create/Edit views: Handle both GET (form display) and POST (form submission)
+- Delete views: Require GET confirmation, POST performs deletion
+- Permission checks: Validate user.is_staff or user.member_profile.is_officer
+- Messages: Use django.contrib.messages for user feedback
+
+=============================================================================
+"""
+
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.db.models import Q, Sum
@@ -123,8 +198,16 @@ def home_view(request):
         start_date__gte=now
     ).order_by('start_date')[:5]  # Limit to next 5 events
     
+    # Get recent program photos for carousel
+    # Only show photos from the four main program pages
+    program_types = ['business', 'education', 'social_action', 'sigma_beta_club']
+    carousel_photos = Photo.objects.filter(
+        event__event_type__in=program_types
+    ).select_related('uploaded_by', 'event').order_by('-created_at')[:8]
+    
     context = {
-        'upcoming_events': upcoming_events
+        'upcoming_events': upcoming_events,
+        'carousel_photos': carousel_photos
     }
     
     return render(request, 'pages/home.html', context)
@@ -259,11 +342,17 @@ def program_business(request):
     # Handle photo upload for officers
     if request.method == 'POST' and is_officer:
         if 'photo_upload' in request.FILES:
+            # Get or create a default business event
+            event, _ = Event.objects.get_or_create(
+                event_type='business',
+                defaults={'title': 'Business Program', 'start_date': timezone.now(), 'end_date': timezone.now()}
+            )
             photo = Photo(
                 uploaded_by=request.user,
                 image=request.FILES['photo_upload'],
                 caption=request.POST.get('caption', ''),
-                tags='business'  # Auto-tag as business
+                tags='business',  # Auto-tag as business
+                event=event  # Link to business event
             )
             photo.save()
             messages.success(request, 'Photo uploaded successfully!')
@@ -288,11 +377,17 @@ def program_social_action(request):
     # Handle photo upload for officers
     if request.method == 'POST' and is_officer:
         if 'photo_upload' in request.FILES:
+            # Get or create a default social action event
+            event, _ = Event.objects.get_or_create(
+                event_type='social_action',
+                defaults={'title': 'Social Action Program', 'start_date': timezone.now(), 'end_date': timezone.now()}
+            )
             photo = Photo(
                 uploaded_by=request.user,
                 image=request.FILES['photo_upload'],
                 caption=request.POST.get('caption', ''),
-                tags='social'  # Auto-tag as social
+                tags='social',  # Auto-tag as social
+                event=event  # Link to social action event
             )
             photo.save()
             messages.success(request, 'Photo uploaded successfully!')
@@ -317,11 +412,17 @@ def program_education(request):
     # Handle photo upload for officers
     if request.method == 'POST' and is_officer:
         if 'photo_upload' in request.FILES:
+            # Get or create a default education event
+            event, _ = Event.objects.get_or_create(
+                event_type='education',
+                defaults={'title': 'Education Program', 'start_date': timezone.now(), 'end_date': timezone.now()}
+            )
             photo = Photo(
                 uploaded_by=request.user,
                 image=request.FILES['photo_upload'],
                 caption=request.POST.get('caption', ''),
-                tags='education'  # Auto-tag as education
+                tags='education',  # Auto-tag as education
+                event=event  # Link to education event
             )
             photo.save()
             messages.success(request, 'Photo uploaded successfully!')
@@ -346,11 +447,17 @@ def program_sigma_beta(request):
     # Handle photo upload for officers
     if request.method == 'POST' and is_officer:
         if 'photo_upload' in request.FILES:
+            # Get or create a default sigma beta club event
+            event, _ = Event.objects.get_or_create(
+                event_type='sigma_beta_club',
+                defaults={'title': 'Sigma Beta Club Program', 'start_date': timezone.now(), 'end_date': timezone.now()}
+            )
             photo = Photo(
                 uploaded_by=request.user,
                 image=request.FILES['photo_upload'],
                 caption=request.POST.get('caption', ''),
-                tags='sigma beta'  # Auto-tag as sigma beta
+                tags='sigma beta',  # Auto-tag as sigma beta
+                event=event  # Link to sigma beta club event
             )
             photo.save()
             messages.success(request, 'Photo uploaded successfully!')
@@ -531,34 +638,45 @@ def contact(request):
     return render(request, 'pages/contact.html')
 
 def login_view(request):
-    """Custom login view with security logging"""
+    """Custom login view with security logging and signup option"""
     if request.user.is_authenticated:
         return redirect('home')
     
     if request.method == 'POST':
-        form = AuthenticationForm(request, data=request.POST)
-        if form.is_valid():
-            username = form.cleaned_data.get('username')
-            password = form.cleaned_data.get('password')
-            user = authenticate(request, username=username, password=password)
-            if user is not None:
-                login(request, user)
-                logger.info(f"Successful login for user: {username}")
-                messages.success(request, f"Welcome back, {username}!")
-                
-                next_url = request.GET.get('next', 'home')
-                # Validate redirect URL to prevent open redirect vulnerability
-                if not is_safe_redirect_url(next_url):
-                    next_url = 'home'
-                return redirect(next_url)
+        # Determine if this is a login or signup request
+        if 'invitation_code' in request.POST:
+            # This is a signup request
+            signup_form = InvitationSignupForm(request.POST)
+            return _handle_signup_post(request, signup_form)
         else:
-            logger.warning(f"Failed login attempt for username: {request.POST.get('username', 'unknown')}")
-            messages.error(request, "Invalid username or password.")
+            # This is a login request
+            form = AuthenticationForm(request, data=request.POST)
+            if form.is_valid():
+                username = form.cleaned_data.get('username')
+                password = form.cleaned_data.get('password')
+                user = authenticate(request, username=username, password=password)
+                if user is not None:
+                    login(request, user)
+                    logger.info(f"Successful login for user: {username}")
+                    messages.success(request, f"Welcome back, {username}!")
+                    
+                    next_url = request.GET.get('next', 'home')
+                    # Validate redirect URL to prevent open redirect vulnerability
+                    if not is_safe_redirect_url(next_url):
+                        next_url = 'home'
+                    return redirect(next_url)
+            else:
+                logger.warning(f"Failed login attempt for username: {request.POST.get('username', 'unknown')}")
+                messages.error(request, "Invalid username or password.")
     else:
         form = AuthenticationForm()
     
+    # Always pass signup_form for the signup tab
+    signup_form = InvitationSignupForm()
+    
     context = {
         'form': form,
+        'signup_form': signup_form,
     }
     return render(request, 'pages/login.html', context)
 
@@ -2728,6 +2846,43 @@ def delete_dues_payment(request, pk):
         'payment': payment,
     }
     return render(request, 'pages/portal/dues_payment_confirm_delete.html', context)
+
+
+@login_required
+@user_passes_test(lambda u: u.is_staff or (hasattr(u, 'member_profile') and u.member_profile.is_officer))
+def bulk_delete_dues_payments(request):
+    """Bulk delete multiple dues/payment entries (officers only)"""
+    if request.method == 'POST':
+        payment_ids = request.POST.getlist('payment_ids')
+        
+        if not payment_ids:
+            messages.warning(request, "No payments selected for deletion.")
+            return redirect('dues_and_payments')
+        
+        try:
+            # Get all payments to delete
+            payments_to_delete = DuesPayment.objects.filter(pk__in=payment_ids)
+            count = payments_to_delete.count()
+            
+            # Create log message with details
+            details = []
+            for payment in payments_to_delete:
+                details.append(f"{payment.member.user.get_full_name()} - {payment.get_payment_type_display()} - ${payment.amount}")
+            
+            # Delete all payments
+            payments_to_delete.delete()
+            
+            # Log the bulk deletion
+            logger.info(f"Bulk deleted {count} dues payments by {request.user.username}. Details: {'; '.join(details)}")
+            messages.success(request, f"Successfully deleted {count} bill{'s' if count != 1 else ''}.")
+        
+        except Exception as e:
+            logger.error(f"Error bulk deleting dues payments: {str(e)}")
+            messages.error(request, f"Error deleting bills: {str(e)}")
+        
+        return redirect('dues_and_payments')
+    
+    return redirect('dues_and_payments')
 
 
 @login_required

@@ -46,6 +46,16 @@
         color: #e8edf7;
         border-color: #2a4a7a;
     }
+    
+    /* Hidden CSRF token for bulk operations */
+    #csrfTokenContainer {
+        display: none;
+    }
+
+        background-color: #0d1520;
+        color: #e8edf7;
+        border-color: #2a4a7a;
+    }
     body.dark-mode .form-label {
         color: #e8edf7;
     }
@@ -145,6 +155,11 @@
         border-left: 4px solid #ff6b6b;
     }</style>
 
+<!-- Hidden CSRF token for bulk delete operations -->
+<div id="csrfTokenContainer">
+    {% csrf_token %}
+</div>
+
 <div class="container my-5">
     <div class="row mb-4">
         <div class="col-md-12">
@@ -238,13 +253,19 @@
 
     <!-- Payments Table -->
     <div class="card">
-        <div class="card-header bg-primary text-white">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
             <h5 class="mb-0"><i class="fas fa-list"></i> Payment Records ({{ payments|length }})</h5>
+            {% if payments %}
+            <button type="button" class="btn btn-sm btn-danger" id="bulkDeleteBtn" onclick="bulkDeleteBills()" style="display: none;">
+                <i class="fas fa-trash"></i> Delete Selected
+            </button>
+            {% endif %}
         </div>
         <div class="table-responsive">
-            <table class="table table-striped table-hover mb-0">
+            <table class="table table-striped table-hover mb-0" id="paymentsTable">
                 <thead class="table-light">
                     <tr>
+                        {% if payments %}<th style="width: 30px;"><input type="checkbox" id="selectAllCheckbox" onclick="toggleAllCheckboxes(this)"></th>{% endif %}
                         <th>Member</th>
                         <th>Payment Type</th>
                         <th>Amount</th>
@@ -259,6 +280,7 @@
                     {% if payments %}
                         {% for payment in payments %}
                         <tr>
+                            <td><input type="checkbox" class="payment-checkbox" value="{{ payment.id }}" onchange="updateBulkDeleteButton()"></td>
                             <td>
                                 <strong>{{ payment.member.user.get_full_name }}</strong><br>
                                 <small class="text-muted">#{{ payment.member.member_number }}</small>
@@ -289,7 +311,7 @@
                                     <i class="fas fa-edit"></i>
                                 </a>
                                 <a href="{% url 'delete_dues_payment' payment.id %}" class="btn btn-sm btn-danger"
-                                   onclick="return confirm('Are you sure?')">
+                                   onclick="return confirm('Are you sure you want to delete this bill?')">
                                     <i class="fas fa-trash"></i>
                                 </a>
                             </td>
@@ -297,7 +319,7 @@
                         {% endfor %}
                     {% else %}
                         <tr>
-                            <td colspan="8" class="text-center py-4 text-muted">
+                            <td colspan="9" class="text-center py-4 text-muted">
                                 <i class="fas fa-inbox"></i> No payment records found.
                             </td>
                         </tr>
@@ -307,5 +329,61 @@
         </div>
     </div>
 </div>
+
+<script>
+    function toggleAllCheckboxes(checkbox) {
+        const allCheckboxes = document.querySelectorAll('.payment-checkbox');
+        allCheckboxes.forEach(cb => cb.checked = checkbox.checked);
+        updateBulkDeleteButton();
+    }
+
+    function updateBulkDeleteButton() {
+        const checkedBoxes = document.querySelectorAll('.payment-checkbox:checked');
+        const bulkDeleteBtn = document.getElementById('bulkDeleteBtn');
+        if (bulkDeleteBtn) {
+            bulkDeleteBtn.style.display = checkedBoxes.length > 0 ? 'block' : 'none';
+        }
+    }
+
+    function bulkDeleteBills() {
+        const checkedBoxes = document.querySelectorAll('.payment-checkbox:checked');
+        if (checkedBoxes.length === 0) {
+            alert('Please select at least one bill to delete.');
+            return;
+        }
+
+        const count = checkedBoxes.length;
+        const confirmMsg = count === 1 
+            ? 'Are you sure you want to delete this bill? This action cannot be undone.'
+            : `Are you sure you want to delete all ${count} selected bills? This action cannot be undone.`;
+
+        if (!confirm(confirmMsg)) {
+            return;
+        }
+
+        // Create a form with hidden inputs for each checked bill
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '{% url "bulk_delete_dues_payments" %}';
+
+        // Add CSRF token
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+        if (csrfToken) {
+            form.appendChild(csrfToken.cloneNode(true));
+        }
+
+        // Add payment IDs
+        checkedBoxes.forEach(checkbox => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'payment_ids';
+            input.value = checkbox.value;
+            form.appendChild(input);
+        });
+
+        document.body.appendChild(form);
+        form.submit();
+    }
+</script>
 
 {% endblock %}

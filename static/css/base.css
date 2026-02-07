@@ -240,6 +240,52 @@ body.dark-mode a {
     width: 100%;
 }
 
+.btn-info {
+    background-color: #17a2b8;
+    color: var(--text-light);
+    border: 1px solid #138496;
+}
+
+.btn-info:hover {
+    background-color: #138496;
+    transform: translateY(-2px);
+}
+
+.btn-outline-primary {
+    background-color: transparent;
+    color: var(--primary-color);
+    border: 1px solid var(--primary-color);
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--primary-color);
+    color: var(--text-light);
+    transform: translateY(-2px);
+}
+
+.btn-outline-danger {
+    background-color: transparent;
+    color: var(--error-color);
+    border: 1px solid var(--error-color);
+}
+
+.btn-outline-danger:hover {
+    background-color: var(--error-color);
+    color: var(--text-light);
+    transform: translateY(-2px);
+}
+
+.btn-group {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.btn-group-sm .btn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.875rem;
+}
+
 /* ============================================================================
    CARDS AND SECTIONS
    ========================================================================== */
