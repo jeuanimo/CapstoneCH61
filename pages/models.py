@@ -623,8 +623,15 @@ class StripeConfiguration(models.Model):
         return f"Stripe Config - {self.treasurer.get_full_name()} (Test Mode: {self.is_test_mode})"
     
     def get_secret_key(self):
-        """Return the secret key (in production should be encrypted)"""
-        # TODO: Implement encryption using django-cryptography or similar
+        """Return the secret key (production environments should use encrypted storage)
+        
+        Note: For production deployment, implement one of:
+        1. Use django-encrypted-model-fields package for field-level encryption
+        2. Store in environment variables with RabbitMQ/Vault
+        3. Use AWS Secrets Manager or similar cloud secret management
+        """
+        # WARNING: Keys stored in plaintext in development only
+        # Production: Use encrypted field storage or key management service
         return self.stripe_secret_key
 
 

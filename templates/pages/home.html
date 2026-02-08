@@ -480,10 +480,10 @@
                     <div class="chapter-carousel-controls">
                         {% if carousel_photos %}
                             {% for photo in carousel_photos %}
-                                <button class="chapter-carousel-dot {% if forloop.first %}active{% endif %}" onclick="chapterCarouselDot({{ forloop.counter0 }});"></button>
+                                <button class="chapter-carousel-dot {% if forloop.first %}active{% endif %}" onclick="chapterCarouselDot({{ forloop.counter0 }});" onkeypress="if(event.key==='Enter')chapterCarouselDot({{ forloop.counter0 }});"></button>
                             {% endfor %}
                         {% else %}
-                            <button class="chapter-carousel-dot active" onclick="chapterCarouselDot(0);"></button>
+                            <button class="chapter-carousel-dot active" onclick="chapterCarouselDot(0);" onkeypress="if(event.key==='Enter')chapterCarouselDot(0);"></button>
                         {% endif %}
                     </div>
                 </div>
@@ -494,11 +494,11 @@
                 <h3 class="card-title">Our Chapter</h3>
                 <!-- Navigation Buttons: Links to chapter information pages and shop -->
                 <div class="btn-group">
-                    <button class="card-btn" onclick="openModal('historyModal');">History</button>
-                    <button class="card-btn" onclick="window.location.href='{% url 'chapter_leadership' %}';">Leadership</button>
-                    <button class="card-btn" onclick="openModal('membershipModal');">Membership</button>
-                    <button class="card-btn" onclick="window.location.href='{% url 'chapter_programs' %}';">Programs</button>
-                    <button class="card-btn" onclick="window.location.href='{% url 'shop_home' %}';">🛍️ Shop</button>
+                    <button class="card-btn" onclick="openModal('historyModal');" onkeypress="if(event.key==='Enter')openModal('historyModal');">History</button>
+                    <button class="card-btn" onclick="window.location.href='{% url 'chapter_leadership' %}';" onkeypress="if(event.key==='Enter')window.location.href='{% url 'chapter_leadership' %}';">Leadership</button>
+                    <button class="card-btn" onclick="openModal('membershipModal');" onkeypress="if(event.key==='Enter')openModal('membershipModal');">Membership</button>
+                    <button class="card-btn" onclick="window.location.href='{% url 'chapter_programs' %}';" onkeypress="if(event.key==='Enter')window.location.href='{% url 'chapter_programs' %}';">Programs</button>
+                    <button class="card-btn" onclick="window.location.href='{% url 'shop_home' %}';" onkeypress="if(event.key==='Enter')window.location.href='{% url 'shop_home' %}';">🛍️ Shop</button>
                 </div>
             </div>
         </div>

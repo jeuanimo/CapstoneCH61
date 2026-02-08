@@ -5,16 +5,15 @@
 ### 1. **CRITICAL: Hardcoded Secret Key** ⚠️
 **Severity:** Critical (Security Hotspot)  
 **File:** `config/settings.py` (Line 26)  
-**Issue:** SECRET_KEY is hardcoded with a default value in the code.
+**Issue:** SECRET_KEY must come from environment variables
 
 ```python
-# CURRENT (INSECURE):
-SECRET_KEY = config('SECRET_KEY', default='django-insecure-q+bdk+^nw8te#(ja-nmw&2eidh(_t8jc%-8!=k0gqf7=!#5299')
+# SECURE APPROACH:
+SECRET_KEY = config('SECRET_KEY')  # Required - no default fallback
+
+# For local dev only, add to .env:
+# SECRET_KEY=your-dev-key-here
 ```
-
-**Risk:** If the `.env` file is not set, the application falls back to a hardcoded key that is visible in the repository.
-
-**Fix:** Remove the default and enforce environment variable requirement.
 
 ---
 

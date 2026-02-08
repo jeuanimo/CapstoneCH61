@@ -130,6 +130,11 @@ TAG_SIGMA_BETA = 'sigma beta'
 
 # Date format constants
 DATE_FORMATS = ['%Y-%m-%d', '%m/%d/%Y', '%Y/%m/%d']
+DATE_FORMATS_SHORT = ['%Y-%m-%d', '%m/%d/%Y']rect the errors below.'
+TAG_SIGMA_BETA = 'sigma beta'
+
+# Date format constants
+DATE_FORMATS = ['%Y-%m-%d', '%m/%d/%Y', '%Y/%m/%d']
 DATE_FORMATS_SHORT = ['%Y-%m-%d', '%m/%d/%Y']
 
 
@@ -1640,43 +1645,39 @@ def _validate_csv_row(row, row_num):
     # Check for duplicate username
     if username and User.objects.filter(username=username).exists():
         errors.append(f"Row {row_num}: Username '{username}' already exists but member number is different")
-        return username, email, member_number, errors, False
+        return DATE_FORMATS_SHORTnumber, errors, False
     
     return username, email, member_number, errors, False
 
 
 def _parse_initiation_date(date_str, row_num, username):
-    """Parse initiation date from CSV and return (date, error)"""
+    """Parse inDATE_FORMATS_SHORTnd return (date, error)"""
     if not date_str.strip():
         return None, None
-
-    for fmt in DATE_FORMATS_SHORT:
+    
+    for fmt in ['%Y-%m-%d', '%m/%d/%Y']:
         try:
             return datetime.strptime(date_str.strip(), fmt).date(), None
         except ValueError:
             continue
-
-    return None, f"Row {row_num}: Invalid date format for '{username}'. Use YYYY-MM-DD or MM/DD/YYYY"
-
-
-def _extract_name_from_row_for_member(row):
-    """Extract and normalize first and last name from CSV row"""
-    first_name = (row.get('first_name', '').strip() or
-                 row.get('First Name', '').strip() or
+    
+    rerst_name = (row.get('first_name', '').strip() or 
+                 row.get('First Name', '').strip() or 
                  row.get('FIRST_NAME', '').strip())
-    last_name = (row.get('last_name', '').strip() or
-                row.get('Last Name', '').strip() or
+    last_name = (row.get('last_name', '').strip() or 
+                row.get('Last Name', '').strip() or 
                 row.get('LAST_NAME', '').strip())
-
+    
+    # Handle IHQ textbox format - extract name from textbox7
     if (not first_name or not last_name) and row.get('textbox7'):
         textbox7_lines = row.get('textbox7', '').strip().split('\n')
-        if textbox7_lines:
+        if textbox7_lines and len(textbox7_lines) > 0:
             name_parts = textbox7_lines[0].strip().split()
             if not first_name and name_parts:
                 first_name = name_parts[0]
             if not last_name and len(name_parts) > 1:
                 last_name = ' '.join(name_parts[1:])
-
+    
     return first_name, last_name
 
 
@@ -1692,21 +1693,31 @@ def _determine_member_status(member_number):
 
 def _create_member_from_row(row, username, email, member_number, initiation_date):
     """Create user and member profile from CSV row"""
+    # Extract name using helper function
     first_name, last_name = _extract_name_from_row_for_member(row)
-
+    
+    # Create user (email can be empty)
     user = User.objects.create_user(
         username=username,
-        email=email or '',
+        email=email or '',  # Empty string if no email
         first_name=first_name,
         last_name=last_name,
         password=User.objects.make_random_password()
     )
-
+    
+    # Determine member status and dues_current
     status, dues_current = _determine_member_status(member_number)
-
+    
+    # Allow custom status from CSV to override
     if row.get('status', '').strip():
         status = row.get('status', '').strip()
-
+        auto_status = 'financial'
+        dues_current = True  # All imported members are financial
+    
+    # Allow custom status from CSV to override, or use auto-detected status
+    status = row.get('status', '').strip() or auto_status
+    
+    # Create member profile
     MemberProfile.objects.create(
         user=user,
         member_number=member_number,
@@ -1721,9 +1732,6 @@ def _create_member_from_row(row, username, email, member_number, initiation_date
         bio=row.get('bio', '').strip(),
         dues_current=dues_current
     )
-
-    return user
-
 
 
 def _process_csv_row(row, row_num):
@@ -1847,14 +1855,13 @@ def import_members(request):
 # ============================================================================
 # OFFICER IMPORT FUNCTIONS
 # ============================================================================
-
-
+DATE_FORMATS
 def _parse_officer_date(date_str):
     """Parse date from CSV (returns None if empty or invalid)"""
     if not date_str or not date_str.strip():
         return None
     
-    for fmt in DATE_FORMATS:
+    for fmt in ['%Y-%m-%d', '%m/%d/%Y', '%Y/%m/%d']:
         try:
             return datetime.strptime(date_str.strip(), fmt).date()
         except ValueError:
@@ -1872,7 +1879,7 @@ def _extract_officer_full_name(row):
     if not full_name and row.get('textbox7'):
         textbox7_lines = row.get('textbox7', '').strip().split('\n')
         if textbox7_lines and textbox7_lines[0].strip():
-            full_name = textbox7_lines[0].strip()
+            fulDATE_FORMATS
             # Remove "Bro. " prefix if present
             if full_name.startswith('Bro. '):
                 full_name = full_name[5:]
@@ -1919,47 +1926,36 @@ def _extract_officer_contact_info(row):
 def _validate_officer_csv_row(row, row_num):
     """Validate a single officer CSV row and return (data_dict, errors, should_skip)"""
     errors = []
-
+    
     # Extract fields using helper functions
     full_name = _extract_officer_full_name(row)
     position = _extract_officer_position(row)
     email, phone = _extract_officer_contact_info(row)
-
+    
     # Skip vacant positions
     if 'Vacant Position' in full_name or not full_name:
         return None, [], True
-
+    
     # Validate required fields
     if not position:
         errors.append(f"Row {row_num}: Position is required")
         return None, errors, False
-
-    # Check for duplicates - skip if same person in same position
-    if ChapterLeadership.objects.filter(full_name=full_name, position=position, is_active=True).exists():
-        return None, [], True
-
-    data = {
-        'full_name': full_name,
-        'position': position,
-        'email': email,
-        'phone': phone,
-        'bio': row.get('bio', '').strip() or row.get('Bio', '').strip() or row.get('BIO', '').strip(),
+    
         'position_custom': row.get('position_custom', '').strip(),
         'display_order': row.get('display_order', '').strip() or '0',
     }
-
+    
     return data, errors, False
 
 
-
-def _create_officer_from_row(data):
-    """Create ChapterLeadership record from validated data"""
-    # Map common position names to model choices
-    position_map = {
-        'president': 'president',
-        '1st vice president': 'vice_president_1st',
+def _parse_officer_date(date_str):
+    """Parse date from CSV (returns None if empty or invalid)"""
+    if not date_str or not date_str.strip():
+        return None
+    
+    f   '1st vice president': 'vice_president_1st',
         '2nd vice president': 'vice_president_2nd',
-        'vice president': 'vice_president_1st',
+        'vice president': 'vice_president_1st',  # Default to 1st if not specified
         'vp': 'vice_president_1st',
         'secretary': 'secretary',
         'financial secretary': 'secretary',
@@ -1968,65 +1964,34 @@ def _create_officer_from_row(data):
         'chaplain': 'chaplain',
         'historian': 'historian',
         'sergeant at arms': 'sergeant_at_arms',
-        'board member': 'board_member',
-        'board': 'board_member',
-    }
-
-    position_lower = data['position'].lower()
-    position_value = position_map.get(position_lower, 'other')
-
-    position_custom = ''
-    if position_value == 'other':
-        position_custom = data['position']
-    elif data.get('position_custom'):
-        position_custom = data['position_custom']
-
-    try:
-        display_order = int(data.get('display_order', 0))
-    except (ValueError, TypeError):
-        display_order = 0
-
-    ChapterLeadership.objects.create(
+     
+    officer = ChapterLeadership.objects.create(
         full_name=data['full_name'],
         position=position_value,
         position_custom=position_custom,
-        email=data.get('email', ''),
-        phone=data.get('phone', ''),
-        bio=data.get('bio', ''),
-        display_order=display_order,
+        email=data['email'],
+        phone=data['phone'],
+        bio=data['bio'],
+        display_order=data['display_order'],
         is_active=True,
     )
-    return True, [], False
-
-
+    return officer
 
 
 def _process_officer_csv_row(row, row_num):
-    """Process a single officer CSV row and return (success, errors, skipped)"""
-    errors = []
-
+    """Process a single officer CSV row"""
     # Validate row
-    data, validation_errors, should_skip = _validate_officer_csv_row(row, row_num)
-
-    # Skip if duplicate or vacant
+    data, errors, should_skip = _validate_officer_csv_row(row, row_num)
+    
     if should_skip:
-        return False, [], True
-
-    # Return validation errors
-    if validation_errors:
-        return False, validation_errors, False
-
-    if not data:
-        errors.append(f"Row {row_num}: Could not parse officer data")
+        return True, [], True
+    
+    if errors:
         return False, errors, False
-
-    # Create officer record
-    try:
-        _create_officer_from_row(data)
-        return True, [], False
-    except Exception as e:
-        errors.append(f"Row {row_num}: Error creating officer - {str(e)}")
-        return False, errors, False
+    
+    # Create officer
+    _create_officer_from_row(data)
+    return True, [], False
 
 
 def _process_officer_csv_file(csv_reader):
@@ -3448,7 +3413,7 @@ def setup_twilio_config(request):
             return redirect('twilio_config')
     else:
         form = TwilioConfigurationForm(instance=config)
-
+    _
     context = {
         'form': form,
         'config': config,
@@ -3499,55 +3464,45 @@ def update_sms_preferences(request):
 
 @login_required
 @user_passes_test(_is_admin)
-
-
-def _get_sms_recipients(recipient_type):
-    """Get SMS preferences based on recipient type filter"""
-    filter_map = {
-        'announcements': {'receive_announcements': True, 'opted_in': True},
-        'dues_reminders': {'receive_dues_reminders': True, 'opted_in': True},
-        'event_alerts': {'receive_event_alerts': True, 'opted_in': True},
-    }
-    filters = filter_map.get(recipient_type, {'opted_in': True})
-    return SMSPreference.objects.filter(**filters)
-
-
-def _send_sms_to_recipients(preferences, message_content, alert_type):
-    """Send SMS to all recipients and return (sent_count, failed_count)"""
-    sent_count = 0
-    failed_count = 0
-
-    for pref in preferences:
-        if not pref.phone_number:
-            continue
-        success = _send_sms(
-            phone_number=pref.phone_number,
-            message_body=message_content,
-            sms_type=alert_type,
-            triggered_by='admin_manual',
-            member=pref.member,
-        )
-        if success:
-            sent_count += 1
-        else:
-            failed_count += 1
-
-    return sent_count, failed_count
-
-
 def send_sms_alert(request):
     """Admin view to manually send SMS alerts to members"""
     if request.method == 'POST':
         alert_type = request.POST.get('alert_type', 'announcement')
         message_content = request.POST.get('message_content', '')
-        recipient_type = request.POST.get('recipient_type', 'opted_in')
+        recipient_type = request.POST.get('recipient_type', 'opted_in')  # opted_in or specific_type
         
         if not message_content:
             messages.error(request, 'Please enter a message.')
             return redirect('send_sms_alert')
         
-        preferences = _get_sms_recipients(recipient_type)
-        sent_count, failed_count = _send_sms_to_recipients(preferences, message_content, alert_type)
+        # Get eligible recipients based on preferences
+        if recipient_type == 'opted_in':
+            preferences = SMSPreference.objects.filter(opted_in=True)
+        elif recipient_type == 'announcements':
+            preferences = SMSPreference.objects.filter(receive_announcements=True, opted_in=True)
+        elif recipient_type == 'dues_reminders':
+            preferences = SMSPreference.objects.filter(receive_dues_reminders=True, opted_in=True)
+        elif recipient_type == 'event_alerts':
+            preferences = SMSPreference.objects.filter(receive_event_alerts=True, opted_in=True)
+        else:
+            preferences = SMSPreference.objects.filter(opted_in=True)
+        
+        sent_count = 0
+        failed_count = 0
+        
+        for pref in preferences:
+            if pref.phone_number:
+                success = _send_sms(
+                    phone_number=pref.phone_number,
+                    message_body=message_content,
+                    sms_type=alert_type,
+                    triggered_by='admin_manual',
+                    member=pref.member,
+                )
+                if success:
+                    sent_count += 1
+                else:
+                    failed_count += 1
         
         messages.success(request, f'SMS alerts sent to {sent_count} members. ({failed_count} failed)')
         return redirect('send_sms_alert')
@@ -3603,7 +3558,7 @@ def shop_home(request):
 
 def product_detail(request, pk):
     """Display product details"""
-    product = get_object_or_404(Product, pk=pk)
+    produc__object_or_404(Product, pk=pk)
     
     context = {
         'product': product,
@@ -3810,88 +3765,6 @@ def order_history(request):
 
 @login_required
 @user_passes_test(is_officer_or_staff)
-
-def _extract_images_from_zip(images_zip):
-    """Extract images from ZIP file and return dict of filename -> bytes"""
-    import zipfile
-    images_dict = {}
-    with zipfile.ZipFile(images_zip) as zip_ref:
-        for file_info in zip_ref.filelist:
-            if not file_info.is_dir():
-                images_dict[file_info.filename] = zip_ref.read(file_info.filename)
-    return images_dict
-
-
-def _save_product_image_from_zip(product, image_path, images_dict):
-    """Save product image from ZIP file data"""
-    if image_path not in images_dict:
-        return
-    from django.core.files.base import ContentFile
-    _, ext = os.path.splitext(image_path)
-    filename = f"{product.name.replace(' ', '_')}{ext}"
-    product.image.save(filename, ContentFile(images_dict[image_path]), save=True)
-
-
-def _save_product_image_from_url(product, image_url):
-    """Download and save product image from URL"""
-    import requests as http_requests
-    response = http_requests.get(image_url, timeout=10)
-    if response.status_code != 200:
-        return
-    from django.core.files.base import ContentFile
-    from urllib.parse import urlparse
-    parsed_url = urlparse(image_url)
-    _, ext = os.path.splitext(parsed_url.path)
-    if not ext:
-        ext = '.jpg'
-    filename = f"{product.name.replace(' ', '_')}{ext}"
-    product.image.save(filename, ContentFile(response.content), save=True)
-
-
-def _attach_product_image(product, product_data, images_dict):
-    """Attach image to product from ZIP or URL"""
-    if product_data.get('image_path') and images_dict:
-        _save_product_image_from_zip(product, product_data['image_path'], images_dict)
-    elif product_data.get('image_url'):
-        try:
-            _save_product_image_from_url(product, product_data['image_url'])
-        except Exception:
-            pass  # Image download failed, but product was created
-
-
-def _create_single_product(product_data, images_dict):
-    """Create a single product from data dict. Returns True if created, False if existed."""
-    product, created = Product.objects.get_or_create(
-        name=product_data['name'],
-        defaults={
-            'description': product_data.get('description', ''),
-            'category': product_data['category'],
-            'price': Decimal(str(product_data['price'])),
-            'inventory': int(product_data.get('inventory', 100)),
-            'sizes': product_data.get('sizes', ''),
-            'colors': product_data.get('colors', ''),
-        }
-    )
-    _attach_product_image(product, product_data, images_dict)
-    return created
-
-
-def _import_products_from_csv(products_data, images_dict):
-    """Import products from parsed CSV data. Returns (created_count, error_count)."""
-    created_count = 0
-    error_count = 0
-
-    for product_data in products_data:
-        try:
-            if _create_single_product(product_data, images_dict):
-                created_count += 1
-        except Exception:
-            error_count += 1
-
-    return created_count, error_count
-
-
-
 def import_products(request):
     """Admin/Officer view to import products from CSV with optional images"""
     if request.method == 'POST':
@@ -3899,17 +3772,74 @@ def import_products(request):
         if form.is_valid():
             products_data = form.parse_csv()
             images_zip = form.cleaned_data.get('images_zip')
-
+            
+            # Extract images from ZIP if provided
             images_dict = {}
             if images_zip:
+                import zipfile
                 try:
-                    images_dict = _extract_images_from_zip(images_zip)
+                    with zipfile.ZipFile(images_zip) as zip_ref:
+                        for file_info in zip_ref.filelist:
+                            if not file_info.is_dir():
+                                images_dict[file_info.filename] = zip_ref.read(file_info.filename)
                 except Exception as e:
                     messages.error(request, f'Error extracting images: {str(e)}')
                     return render(request, 'pages/boutique/import_products.html', {'form': form})
-
-            created_count, error_count = _import_products_from_csv(products_data, images_dict)
-
+            
+            created_count = 0
+            error_count = 0
+            
+            for product_data in products_data:
+                try:
+                    product, created = Product.objects.get_or_create(
+                        name=product_data['name'],
+                        defaults={
+                            'description': product_data.get('description', ''),
+                            'category': product_data['category'],
+                            'price': Decimal(str(product_data['price'])),
+                            'inventory': int(product_data.get('inventory', 100)),
+                            'sizes': product_data.get('sizes', ''),
+                            'colors': product_data.get('colors', ''),
+                        }
+                    )
+                    
+                    # Handle image from image_path (ZIP file)
+                    if product_data.get('image_path') and images_dict:
+                        image_path = product_data['image_path']
+                        if image_path in images_dict:
+                            from django.core.files.base import ContentFile
+                            # Get file extension
+                            _, ext = os.path.splitext(image_path)
+                            filename = f"{product.name.replace(' ', '_')}{ext}"
+                            product.image.save(filename, ContentFile(images_dict[image_path]), save=True)
+                    
+                    # Handle image from image_url (download from internet)
+                    elif product_data.get('image_url'):
+                        image_url = product_data['image_url']
+                        try:
+                            import requests
+                            response = requests.get(image_url, timeout=10)
+                            if response.status_code == 200:
+                                from django.core.files.base import ContentFile
+                                # Get file extension from URL
+                                from urllib.parse import urlparse
+                                parsed_url = urlparse(image_url)
+                                _, ext = os.path.splitext(parsed_url.path)
+                                if not ext:
+                                    ext = '.jpg'  # Default to jpg
+                                filename = f"{product.name.replace(' ', '_')}{ext}"
+                                product.image.save(filename, ContentFile(response.content), save=True)
+                        except Exception as e:
+                            # Image download failed, but product was created
+                            pass
+                    
+                    if created:
+                        created_count += 1
+                
+                except Exception as e:
+                    error_count += 1
+                    continue
+            
             if error_count > 0:
                 messages.warning(request, f'Imported {created_count} new products with {error_count} errors.')
             else:
@@ -3990,96 +3920,107 @@ def delete_product(request, pk):
 # ============================================================================
 
 @login_required
-
-def _categorize_members_by_hq(hq_member_numbers):
-    """Categorize members into those on/off the HQ list"""
-    all_members = MemberProfile.objects.all()
-    members_to_mark = []
-    members_in_hq = []
-
-    for member_profile in all_members:
-        if member_profile.member_number not in hq_member_numbers:
-            members_to_mark.append(member_profile)
-        else:
-            members_in_hq.append(member_profile)
-
-    return all_members, members_to_mark, members_in_hq
-
-
-def _mark_members_non_financial(members_to_mark, reason):
-    """Mark members as non-financial with 90-day countdown, send emails. Returns (marked_count, email_sent_count)."""
-    from pages.email_utils import send_dues_reminder_email
-    marked_count = 0
-    email_sent_count = 0
-
-    for member_profile in members_to_mark:
-        member_profile.status = 'non_financial'
-        member_profile.dues_current = False
-        member_profile.marked_for_removal_date = timezone.now()
-        member_profile.removal_reason = reason
-        member_profile.save()
-        marked_count += 1
-
-        if send_dues_reminder_email(member_profile):
-            email_sent_count += 1
-
-    return marked_count, email_sent_count
-
-
-def _build_sync_context(form, hq_member_numbers, all_members, members_to_mark, members_in_hq, csv_errors, is_preview, **extra):
-    """Build context dict for sync_members template"""
-    context = {
-        'form': form,
-        'hq_member_count': len(hq_member_numbers),
-        'local_member_count': all_members.count(),
-        'members_to_mark': members_to_mark,
-        'members_in_hq': members_in_hq,
-        'csv_errors': csv_errors,
-        'is_preview': is_preview,
-    }
-    context.update(extra)
-    return context
-
-
-
 def sync_members_with_hq(request):
     """Sync members with international HQ member list - mark as non-financial for dues collection"""
     from pages.forms_sync import MemberSyncForm
-
+    
     if request.method == 'POST':
         form = MemberSyncForm(request.POST, request.FILES)
         if form.is_valid():
             try:
+                # Parse member numbers from CSV
                 hq_member_numbers, csv_errors = form.parse_member_numbers()
-                all_members, members_to_mark, members_in_hq = _categorize_members_by_hq(hq_member_numbers)
-
-                # Preview mode
+                
+                # Find members NOT in the new HQ list (they need to pay dues)
+                all_members = MemberProfile.objects.all()
+                members_to_mark = []  # NOT in the new HQ list - need to pay dues
+                members_in_hq = []  # In the new HQ list - keep as is
+                
+                for member_profile in all_members:
+                    if member_profile.member_number not in hq_member_numbers:
+                        members_to_mark.append(member_profile)
+                    else:
+                        members_in_hq.append(member_profile)
+                
+                # If preview request, show what would be marked
                 if request.POST.get('preview') == 'on':
-                    context = _build_sync_context(form, hq_member_numbers, all_members, members_to_mark, members_in_hq, csv_errors, is_preview=True)
-                    return render(request, SYNC_MEMBERS_TEMPLATE, context)
-
-                # Execute sync
+                    context = {
+                        'form': form,
+                        'hq_member_count': len(hq_member_numbers),
+                        'local_member_count': all_members.count(),
+                        'members_to_mark': members_to_mark,
+                        'members_in_hq': members_in_hq,
+                        'csv_errors': csv_errors,
+                        'is_preview': True,
+                    }
+                    return render(request, 'pages/portal/sync_members.html', context)
+                
+                # Execute the action - mark members NOT in HQ list as non-financial with 90-day countdown
+                from django.utils import timezone
+                from pages.email_utils import send_dues_reminder_email
+                marked_count = 0
+                email_sent_count = 0
+                
+                # Mark members who are NOT on the current HQ list as non-financial with 90-day countdown
                 reason = f"Not on current International HQ member list (sync on {timezone.now().strftime('%Y-%m-%d')}). Member must verify status and pay national and local dues within 90 days."
-                marked_count, email_sent_count = _mark_members_non_financial(members_to_mark, reason)
-
-                messages.warning(request, f'Marked {marked_count} member(s) as non-financial with 90-day countdown. They must pay dues or lose access to the member portal.')
-                messages.info(request, f'Email reminders sent to {email_sent_count} member(s). Members will also see a notification on the portal dashboard.')
-                logger.info(f"Member sync performed by {request.user.username}: Marked {marked_count} NOT on HQ list as non-financial, {len(members_in_hq)} on HQ list kept as-is, HQ_List={len(hq_member_numbers)}, Emails sent: {email_sent_count}")
-
-                context = _build_sync_context(form, hq_member_numbers, all_members, [], members_in_hq, csv_errors, is_preview=False, marked_count=marked_count, in_hq_count=len(members_in_hq), grace_period=True)
-                return render(request, SYNC_MEMBERS_TEMPLATE, context)
-
+                
+                for member_profile in members_to_mark:
+                    # Mark as non-financial
+                    member_profile.status = 'non_financial'
+                    member_profile.dues_current = False
+                    
+                    # Start 90-day countdown for dues payment
+                    member_profile.marked_for_removal_date = timezone.now()
+                    member_profile.removal_reason = reason
+                    member_profile.save()
+                    marked_count += 1
+                    
+                    # Send email notification to member
+                    if send_dues_reminder_email(member_profile):
+                        email_sent_count += 1
+                
+                messages.warning(
+                    request,
+                    f'Marked {marked_count} member(s) as non-financial with 90-day countdown. They must pay dues or lose access to the member portal.'
+                )
+                messages.info(
+                    request,
+                    f'Email reminders sent to {email_sent_count} member(s). Members will also see a notification on the portal dashboard.'
+                )
+                
+                # Log the action
+                logger.info(
+                    f"Member sync performed by {request.user.username}: "
+                    f"Marked {marked_count} NOT on HQ list as non-financial, {len(members_in_hq)} on HQ list kept as-is, HQ_List={len(hq_member_numbers)}, "
+                    f"Emails sent: {email_sent_count}"
+                )
+                SYNC_MEMBERS_TEMPLATESYNC_MEMBERS_TEMPLATE
+                # Show summary
+                context = {
+                    'form': form,
+                    'hq_member_count': len(hq_member_numbers),
+                    'local_member_count': all_members.count(),
+                    'members_to_mark': [],
+                    'members_in_hq': members_in_hq,
+                    'csv_errors': csv_errors,
+                    'is_preview': False,
+                    'marked_count': marked_count,
+                    'in_hq_count': len(members_in_hq),
+                    'grace_period': True,
+                }
+                return render(request, 'pages/portal/sync_members.html', context)
+            
             except Exception as e:
                 messages.error(request, f'Error processing sync: {str(e)}')
                 logger.error(f"Member sync error: {str(e)}")
     else:
         form = MemberSyncForm()
-
+    
     context = {
         'form': form,
         'total_members': MemberProfile.objects.count(),
     }
-    return render(request, SYNC_MEMBERS_TEMPLATE, context)
+    return render(request, 'pages/portal/sync_members.html', context)
 
 
 @login_required
@@ -4108,6 +4049,7 @@ def view_marked_members(request):
                     'member': member,
                     'days_remaining': days_remaining,
                 })
+    SYNC_MEMBERS_TEMPLATE
     context = {
         'marked_members': marked_members,
         'at_risk': at_risk,
@@ -4119,7 +4061,7 @@ def view_marked_members(request):
 
 @login_required
 def send_member_email(request):
-    """Send bulk email to members."""
+    """Send bulk email to mSYNC_MEMBERS_TEMPLATE
     from pages.forms import BulkEmailForm
     from pages.email_utils import send_bulk_email_to_members
     
