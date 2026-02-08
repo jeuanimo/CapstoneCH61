@@ -439,9 +439,9 @@
             <div class="card-content">
                 <h3 class="card-title">International Headquarters</h3>
                 <div class="btn-group">
-                    <button class="card-btn" onclick="window.open('https://phibetasigma1914.org/about-history/', '_blank', 'width=1000,height=800,menubar=no,toolbar=no');">History</button>
-                    <button class="card-btn" onclick="window.open('https://phibetasigma1914.org/leadership/presidents-message/', '_blank', 'width=1000,height=800,menubar=no,toolbar=no');">Leadership</button>
-                    <button class="card-btn" onclick="window.open('https://phibetasigma1914.org/about/sigma-membership/', '_blank', 'width=1000,height=800,menubar=no,toolbar=no');">Membership</button>
+                    <button class="card-btn" data-popup-url="https://phibetasigma1914.org/about-history/">History</button>
+                    <button class="card-btn" data-popup-url="https://phibetasigma1914.org/leadership/presidents-message/">Leadership</button>
+                    <button class="card-btn" data-popup-url="https://phibetasigma1914.org/about/sigma-membership/">Membership</button>
                 </div>
             </div>
         </div>
@@ -455,9 +455,9 @@
                 <div class="chapter-carousel-container">
                     <div class="chapter-carousel-wrapper">
                         {% if carousel_photos %}
-                            {% for photo in carousel_photos %}
+                            {% for slide_item in carousel_photos %}
                                 <div class="chapter-carousel-slide {% if forloop.first %}active{% endif %}">
-                                    <img src="{{ photo.image.url }}" alt="{{ photo.caption }}">
+                                    <img src="{{ slide_item.image.url }}" alt="Chapter slide: {{ slide_item.caption|default:'fraternity event' }}">
                                 </div>
                             {% endfor %}
                         {% else %}
@@ -472,18 +472,18 @@
                         {% endif %}
                         
                         <!-- Carousel Navigation Arrows -->
-                        <button class="chapter-carousel-prev" onclick="chapterCarouselPrev();">❮</button>
-                        <button class="chapter-carousel-next" onclick="chapterCarouselNext();">❯</button>
+                        <button class="chapter-carousel-prev" id="chapter-carousel-prev">❮</button>
+                        <button class="chapter-carousel-next" id="chapter-carousel-next">❯</button>
                     </div>
                     
                     <!-- Carousel Indicator Dots -->
                     <div class="chapter-carousel-controls">
                         {% if carousel_photos %}
                             {% for photo in carousel_photos %}
-                                <button class="chapter-carousel-dot {% if forloop.first %}active{% endif %}" onclick="chapterCarouselDot({{ forloop.counter0 }});" onkeypress="if(event.key==='Enter')chapterCarouselDot({{ forloop.counter0 }});"></button>
+                                <button class="chapter-carousel-dot {% if forloop.first %}active{% endif %}" data-dot-index="{{ forloop.counter0 }}"></button>
                             {% endfor %}
                         {% else %}
-                            <button class="chapter-carousel-dot active" onclick="chapterCarouselDot(0);" onkeypress="if(event.key==='Enter')chapterCarouselDot(0);"></button>
+                            <button class="chapter-carousel-dot active" data-dot-index="0"></button>
                         {% endif %}
                     </div>
                 </div>
@@ -494,11 +494,11 @@
                 <h3 class="card-title">Our Chapter</h3>
                 <!-- Navigation Buttons: Links to chapter information pages and shop -->
                 <div class="btn-group">
-                    <button class="card-btn" onclick="openModal('historyModal');" onkeypress="if(event.key==='Enter')openModal('historyModal');">History</button>
-                    <button class="card-btn" onclick="window.location.href='{% url 'chapter_leadership' %}';" onkeypress="if(event.key==='Enter')window.location.href='{% url 'chapter_leadership' %}';">Leadership</button>
-                    <button class="card-btn" onclick="openModal('membershipModal');" onkeypress="if(event.key==='Enter')openModal('membershipModal');">Membership</button>
-                    <button class="card-btn" onclick="window.location.href='{% url 'chapter_programs' %}';" onkeypress="if(event.key==='Enter')window.location.href='{% url 'chapter_programs' %}';">Programs</button>
-                    <button class="card-btn" onclick="window.location.href='{% url 'shop_home' %}';" onkeypress="if(event.key==='Enter')window.location.href='{% url 'shop_home' %}';">🛍️ Shop</button>
+                    <button class="card-btn" data-modal-target="historyModal">History</button>
+                    <button class="card-btn" data-nav-url="{% url 'chapter_leadership' %}">Leadership</button>
+                    <button class="card-btn" data-modal-target="membershipModal">Membership</button>
+                    <button class="card-btn" data-nav-url="{% url 'chapter_programs' %}">Programs</button>
+                    <button class="card-btn" data-nav-url="{% url 'shop_home' %}">🛍️ Shop</button>
                 </div>
             </div>
         </div>
@@ -510,7 +510,7 @@
             <div class="card-content">
                 <h3 class="card-title">Calendar of Events</h3>
                 <div class="btn-group">
-                    <button class="card-btn" onclick="openModal('calendarModal');">View Calendar</button>
+                    <button class="card-btn" data-modal-target="calendarModal">View Calendar</button>
                 </div>
             </div>
         </div>
@@ -522,7 +522,7 @@
     <div class="modal-content">
         <div class="modal-header">
             <h2>About The Nu Gamma Sigma Chapter</h2>
-            <button class="modal-close" onclick="closeModal('historyModal')">Close</button>
+            <button class="modal-close" data-modal-close="historyModal">Close</button>
         </div>
         <div class="modal-body">
             <p>The <strong>Nu Gamma Sigma Chapter</strong> of Phi Beta Sigma Fraternity, Inc. proudly serves the Belleville, Illinois area and the surrounding communities throughout St. Clair County and Madison County, Illinois. Chartered on <strong>May 21, 2002</strong>, the chapter was established to extend Sigma's mission beyond the collegiate environment by delivering meaningful service, leadership development, and mentorship throughout the Metro East region.</p>
@@ -544,7 +544,7 @@
     <div class="modal-content">
         <div class="modal-header">
             <h2>Chapter Leadership</h2>
-            <button class="modal-close" onclick="closeModal('leadershipModal')">Close</button>
+            <button class="modal-close" data-modal-close="leadershipModal">Close</button>
         </div>
         <div class="modal-body">
             <p>Welcome to the Chapter Leadership section. Learn about the current and past leadership of Nu Gamma Sigma Chapter.</p>
@@ -566,7 +566,7 @@
     <div class="modal-content">
         <div class="modal-header">
             <h2>Chapter Membership</h2>
-            <button class="modal-close" onclick="closeModal('membershipModal')">Close</button>
+            <button class="modal-close" data-modal-close="membershipModal">Close</button>
         </div>
         <div class="modal-body">
             <h3>Basic Eligibility Requirements</h3>
@@ -603,7 +603,7 @@
     <div class="modal-content">
         <div class="modal-header">
             <h2>Calendar of Events</h2>
-            <button class="modal-close" onclick="closeModal('calendarModal')">Close</button>
+            <button class="modal-close" data-modal-close="calendarModal">Close</button>
         </div>
         <div class="modal-body">
             <div style="margin-bottom: 1.5rem;">
@@ -681,6 +681,43 @@
                 event.target.classList.remove('show');
                 document.body.style.overflow = 'auto';
             }
+        });
+
+        // Attach event listeners for popup URL buttons
+        document.querySelectorAll('[data-popup-url]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                window.open(btn.dataset.popupUrl, '_blank', 'width=1000,height=800,menubar=no,toolbar=no');
+            });
+        });
+
+        // Attach event listeners for modal open buttons
+        document.querySelectorAll('[data-modal-target]').forEach(btn => {
+            btn.addEventListener('click', () => openModal(btn.dataset.modalTarget));
+        });
+
+        // Attach event listeners for modal close buttons
+        document.querySelectorAll('[data-modal-close]').forEach(btn => {
+            btn.addEventListener('click', () => closeModal(btn.dataset.modalClose));
+        });
+
+        // Attach event listeners for navigation buttons
+        document.querySelectorAll('[data-nav-url]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                window.location.href = btn.dataset.navUrl;
+            });
+        });
+
+        // Attach event listeners for chapter carousel prev/next
+        const chPrev = document.getElementById('chapter-carousel-prev');
+        const chNext = document.getElementById('chapter-carousel-next');
+        if (chPrev) chPrev.addEventListener('click', chapterCarouselPrev);
+        if (chNext) chNext.addEventListener('click', chapterCarouselNext);
+
+        // Attach event listeners for chapter carousel dots
+        document.querySelectorAll('.chapter-carousel-dot').forEach(dot => {
+            dot.addEventListener('click', () => {
+                chapterCarouselDot(parseInt(dot.dataset.dotIndex, 10));
+            });
         });
     });
     

@@ -201,7 +201,7 @@
                 <h2>Notice</h2>
                 {% endif %}
                 {% endwith %}
-                <button type="button" class="btn-close" onclick="closeMessageModal()" style="position: absolute; top: 10px; right: 10px; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #666;">&times;</button>
+                <button type="button" class="btn-close" id="messageModalCloseX" style="position: absolute; top: 10px; right: 10px; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #666;">&times;</button>
             </div>
             <div class="modal-body">
                 {% for message in messages %}
@@ -209,7 +209,7 @@
                 {% endfor %}
             </div>
             <div class="modal-footer">
-                <button class="modal-btn" onclick="closeMessageModal()">Close</button>
+                <button class="modal-btn" id="messageModalCloseBtn">Close</button>
             </div>
         </div>
     </div>
@@ -242,7 +242,7 @@
                 <p>Click "Stay Logged In" to continue working.</p>
             </div>
             <div class="modal-footer">
-                <button class="modal-btn" onclick="resetSessionTimeout()">
+                <button class="modal-btn" id="sessionStayBtn">
                     <i class="fas fa-check-circle"></i> Stay Logged In
                 </button>
             </div>
@@ -252,6 +252,28 @@
 
     <!-- Theme Toggle Script -->
     <script>
+        // Global confirm dialog handler for data-confirm attributes
+        document.addEventListener('click', function(e) {
+            const el = e.target.closest('[data-confirm]');
+            if (el) {
+                if (!confirm(el.dataset.confirm)) {
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                }
+            }
+        });
+
+        // Global confirm handler for forms with data-confirm
+        document.addEventListener('submit', function(e) {
+            const form = e.target.closest('form[data-confirm]');
+            if (form) {
+                if (!confirm(form.dataset.confirm)) {
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                }
+            }
+        });
+
         document.getElementById('themeToggle').addEventListener('click', function() {
             document.body.classList.toggle('dark-mode');
             localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
@@ -368,6 +390,16 @@
             if (modal) {
                 modal.style.display = 'flex';
             }
+
+            // Attach close handlers for message modal
+            const closeX = document.getElementById('messageModalCloseX');
+            const closeBtn = document.getElementById('messageModalCloseBtn');
+            if (closeX) closeX.addEventListener('click', closeMessageModal);
+            if (closeBtn) closeBtn.addEventListener('click', closeMessageModal);
+
+            // Attach session stay button handler
+            const stayBtn = document.getElementById('sessionStayBtn');
+            if (stayBtn) stayBtn.addEventListener('click', resetSessionTimeout);
         });
 
         // Close modal when clicking outside

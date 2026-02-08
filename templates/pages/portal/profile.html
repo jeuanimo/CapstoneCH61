@@ -64,7 +64,7 @@
                     <button class="like-btn" data-comment-id="{{ comment.id }}">
                         <i class="fas fa-thumbs-up"></i> <span class="like-count">{{ comment.likes.count }}</span>
                     </button>
-                    <button class="reply-btn" onclick="toggleReplyForm({{ comment.id }})">
+                    <button class="reply-btn" data-reply-toggle="{{ comment.id }}">
                         <i class="fas fa-reply"></i> Reply
                     </button>
                 </div>
@@ -109,6 +109,13 @@ function toggleReplyForm(commentId) {
     const form = document.getElementById('reply-form-' + commentId);
     form.style.display = form.style.display === 'none' ? 'block' : 'none';
 }
+
+// Attach reply button listeners
+document.querySelectorAll('[data-reply-toggle]').forEach(btn => {
+    btn.addEventListener('click', () => {
+        toggleReplyForm(btn.dataset.replyToggle);
+    });
+});
 
 document.querySelectorAll('.like-btn').forEach(btn => {
     btn.addEventListener('click', function() {

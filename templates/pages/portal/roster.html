@@ -80,7 +80,7 @@
                         <a href="{% url 'edit_member' member.pk %}" class="btn btn-warning btn-sm" title="Edit">
                             <i class="fas fa-edit"></i>
                         </a>
-                        <a href="{% url 'delete_member' member.pk %}" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this member? This will also delete their user account.');" title="Delete">
+                        <a href="{% url 'delete_member' member.pk %}" class="btn btn-danger btn-sm" data-confirm="Are you sure you want to delete this member? This will also delete their user account." title="Delete">
                             <i class="fas fa-trash"></i>
                         </a>
                         {% endif %}

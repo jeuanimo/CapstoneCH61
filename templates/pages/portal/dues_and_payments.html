@@ -256,7 +256,7 @@
         <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
             <h5 class="mb-0"><i class="fas fa-list"></i> Payment Records ({{ payments|length }})</h5>
             {% if payments %}
-            <button type="button" class="btn btn-sm btn-danger" id="bulkDeleteBtn" onclick="bulkDeleteBills()" style="display: none;">
+            <button type="button" class="btn btn-sm btn-danger" id="bulkDeleteBtn" style="display: none;">
                 <i class="fas fa-trash"></i> Delete Selected
             </button>
             {% endif %}
@@ -266,7 +266,7 @@
                 <caption class="sr-only">Dues and payment records</caption>
                 <thead class="table-light">
                     <tr>
-                        {% if payments %}<th style="width: 30px;"><input type="checkbox" id="selectAllCheckbox" aria-label="Select all payments" onclick="toggleAllCheckboxes(this)"></th>{% endif %}
+                        {% if payments %}<th style="width: 30px;"><input type="checkbox" id="selectAllCheckbox" aria-label="Select all payments"></th>{% endif %}
                         <th>Member</th>
                         <th>Payment Type</th>
                         <th>Amount</th>
@@ -281,7 +281,7 @@
                     {% if payments %}
                         {% for payment in payments %}
                         <tr>
-                            <td><input type="checkbox" class="payment-checkbox" aria-label="Select payment" value="{{ payment.id }}" onchange="updateBulkDeleteButton()"></td>
+                            <td><input type="checkbox" class="payment-checkbox" aria-label="Select payment" value="{{ payment.id }}"></td>
                             <td>
                                 <strong>{{ payment.member.user.get_full_name }}</strong><br>
                                 <small class="text-muted">#{{ payment.member.member_number }}</small>
@@ -312,7 +312,7 @@
                                     <i class="fas fa-edit"></i>
                                 </a>
                                 <a href="{% url 'delete_dues_payment' payment.id %}" class="btn btn-sm btn-danger"
-                                   onclick="return confirm('Are you sure you want to delete this bill?')">
+                                   data-confirm="Are you sure you want to delete this bill?">
                                     <i class="fas fa-trash"></i>
                                 </a>
                             </td>
@@ -385,6 +385,17 @@
         document.body.appendChild(form);
         form.submit();
     }
+
+    // Attach event listeners
+    const bulkBtn = document.getElementById('bulkDeleteBtn');
+    if (bulkBtn) bulkBtn.addEventListener('click', bulkDeleteBills);
+
+    const selectAllCb = document.getElementById('selectAllCheckbox');
+    if (selectAllCb) selectAllCb.addEventListener('click', function() { toggleAllCheckboxes(this); });
+
+    document.querySelectorAll('.payment-checkbox').forEach(cb => {
+        cb.addEventListener('change', updateBulkDeleteButton);
+    });
 </script>
 
 {% endblock %}

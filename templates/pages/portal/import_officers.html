@@ -138,7 +138,7 @@
 
                         <!-- Download Template Button -->
                         <div class="text-center mt-3">
-                            <button class="btn btn-outline-primary" onclick="downloadTemplate()">
+                            <button class="btn btn-outline-primary" id="downloadTemplateBtn">
                                 <i class="fas fa-download"></i> Download CSV Template
                             </button>
                         </div>
@@ -181,6 +181,9 @@ function downloadTemplate() {
     link.click();
     document.body.removeChild(link);
 }
+
+const dlBtn = document.getElementById('downloadTemplateBtn');
+if (dlBtn) dlBtn.addEventListener('click', downloadTemplate);
 </script>
 
 {% endblock %}

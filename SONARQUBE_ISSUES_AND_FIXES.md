@@ -68,7 +68,7 @@ next_url = request.GET.get('next', 'home')
 
 Change this:
 ```python
-SECRET_KEY = config('SECRET_KEY', default='django-insecure-q+bdk+^nw8te#(ja-nmw&2eidh(_t8jc%-8!=k0gqf7=!#5299')
+SECRET_KEY = config('SECRET_KEY', default='<REDACTED>')
 ```
 
 To this:

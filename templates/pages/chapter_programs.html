@@ -410,17 +410,17 @@
                         <img src="https://tmcf.org/wp-content/uploads/logo-tmcf-300x96.png" alt="Thurgood Marshall College Fund">
                     </div>
                     
-                    <button class="carousel-prev" onclick="prevSlide();">❮</button>
-                    <button class="carousel-next" onclick="nextSlide();">❯</button>
+                    <button class="carousel-prev" id="carousel-prev">❮</button>
+                    <button class="carousel-next" id="carousel-next">❯</button>
                 </div>
                 
                 <div class="carousel-dots">
-                    <button class="dot" onclick="currentDot(0);" tabindex="0" role="tab" aria-selected="true"></button>
-                    <button class="dot" onclick="currentDot(1);" tabindex="0" role="tab" aria-selected="false"></button>
-                    <button class="dot" onclick="currentDot(2);" tabindex="0" role="tab" aria-selected="false"></button>
-                    <button class="dot" onclick="currentDot(3);" tabindex="0" role="tab" aria-selected="false"></button>
-                    <button class="dot" onclick="currentDot(4);" tabindex="0" role="tab" aria-selected="false"></button>
-                    <button class="dot" onclick="currentDot(5);" tabindex="0" role="tab" aria-selected="false"></button>
+                    <button class="dot" data-dot-index="0" tabindex="0" role="tab" aria-selected="true"></button>
+                    <button class="dot" data-dot-index="1" tabindex="0" role="tab" aria-selected="false"></button>
+                    <button class="dot" data-dot-index="2" tabindex="0" role="tab" aria-selected="false"></button>
+                    <button class="dot" data-dot-index="3" tabindex="0" role="tab" aria-selected="false"></button>
+                    <button class="dot" data-dot-index="4" tabindex="0" role="tab" aria-selected="false"></button>
+                    <button class="dot" data-dot-index="5" tabindex="0" role="tab" aria-selected="false"></button>
                 </div>
                 
                 <p style="margin-top: 1.5rem; font-size: 0.9rem;"><strong>Partners:</strong> American Cancer Society • March of Dimes • Center for Disease Control and Prevention • Boy Scouts of America • Thurgood Marshall College Fund</p>
@@ -480,9 +480,26 @@
     
     // Initialize carousel when DOM is ready
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initCarousel);
+        document.addEventListener('DOMContentLoaded', function() {
+            initCarousel();
+            attachCarouselListeners();
+        });
     } else {
         initCarousel();
+        attachCarouselListeners();
+    }
+
+    function attachCarouselListeners() {
+        const prevBtn = document.getElementById('carousel-prev');
+        const nextBtn = document.getElementById('carousel-next');
+        if (prevBtn) prevBtn.addEventListener('click', prevSlide);
+        if (nextBtn) nextBtn.addEventListener('click', nextSlide);
+
+        document.querySelectorAll('.dot[data-dot-index]').forEach(dot => {
+            dot.addEventListener('click', () => {
+                currentDot(parseInt(dot.dataset.dotIndex, 10));
+            });
+        });
     }
 </script>
 {% endblock %}

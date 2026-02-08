@@ -322,8 +322,8 @@
         
         <!-- Form Tabs -->
         <div class="form-tabs">
-            <button class="form-tab active" onclick="switchTab('login-form')">Sign In</button>
-            <button class="form-tab" onclick="switchTab('signup-form')">Create Account</button>
+            <button class="form-tab active" data-tab-target="login-form">Sign In</button>
+            <button class="form-tab" data-tab-target="signup-form">Create Account</button>
         </div>
         
         <!-- LOGIN FORM -->
@@ -473,9 +473,14 @@
         
         // Show selected section
         document.getElementById(tabId).classList.add('active');
-        
-        // Activate corresponding tab
-        event.target.classList.add('active');
     }
+
+    // Attach tab button listeners
+    document.querySelectorAll('.form-tab[data-tab-target]').forEach(tab => {
+        tab.addEventListener('click', function() {
+            switchTab(this.dataset.tabTarget);
+            this.classList.add('active');
+        });
+    });
 </script>
 {% endblock %}

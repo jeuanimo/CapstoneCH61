@@ -27,7 +27,7 @@
             
             <div class="category-filter">
                 <label>Filter by Category:</label>
-                <select name="category" class="form-select" onchange="this.form.submit()">
+                <select name="category" class="form-select" id="categoryFilter">
                     <option value="">All Categories</option>
                     {% for value, label in categories %}
                     <option value="{{ value }}" {% if selected_category == value %}selected{% endif %}>
@@ -35,6 +35,11 @@
                     </option>
                     {% endfor %}
                 </select>
+                <script>
+                    document.getElementById('categoryFilter').addEventListener('change', function() {
+                        this.form.submit();
+                    });
+                </script>
             </div>
             
             {% if selected_category or search_query %}

@@ -68,7 +68,7 @@
                             <i class="fab fa-cc-stripe"></i> Pay with Stripe
                         </a>
                         {% endif %}
-                        <a href="{% url 'delete_dues_payment' payment.id %}" class="btn-action delete-btn" title="Delete this bill" onclick="return confirm('Are you sure you want to delete this bill? This action cannot be undone.');">
+                        <a href="{% url 'delete_dues_payment' payment.id %}" class="btn-action delete-btn" title="Delete this bill" data-confirm="Are you sure you want to delete this bill? This action cannot be undone.">
                             <i class="fas fa-trash-alt"></i>
                         </a>
                     </td>

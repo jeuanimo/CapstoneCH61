@@ -135,11 +135,11 @@
                             <div class="mt-3">
                                 <small class="d-block mb-2"><strong>Quick set:</strong></small>
                                 <div>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary quick-amount" onclick="setAmount(50)">$50</button>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary quick-amount" onclick="setAmount(75)">$75</button>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary quick-amount" onclick="setAmount(100)">$100</button>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary quick-amount" onclick="setAmount(150)">$150</button>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary quick-amount" onclick="setAmount(200)">$200</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary quick-amount" data-amount="50">$50</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary quick-amount" data-amount="75">$75</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary quick-amount" data-amount="100">$100</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary quick-amount" data-amount="150">$150</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary quick-amount" data-amount="200">$200</button>
                                 </div>
                             </div>
                         </div>
@@ -218,6 +218,13 @@
         document.getElementById('{{ form.amount.id_for_label }}').value = amount;
         document.getElementById('{{ form.amount.id_for_label }}').focus();
     }
+
+    // Attach quick amount button listeners
+    document.querySelectorAll('.quick-amount[data-amount]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            setAmount(parseInt(btn.dataset.amount, 10));
+        });
+    });
 
     // Toggle member selection based on "send to all" checkbox
     const sendToAllCheckbox = document.getElementById('{{ form.send_to_all_members.id_for_label }}');

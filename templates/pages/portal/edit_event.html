@@ -158,7 +158,7 @@
                 </div>
                 <div class="card-body">
                     <p class="text-muted">Once you delete an event, there is no going back. Please be certain.</p>
-                    <a href="{% url 'delete_event' event.id %}" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this event? This action cannot be undone.');">
+                    <a href="{% url 'delete_event' event.id %}" class="btn btn-danger" data-confirm="Are you sure you want to delete this event? This action cannot be undone.">
                         <i class="fas fa-trash"></i> Delete Event
                     </a>
                 </div>
