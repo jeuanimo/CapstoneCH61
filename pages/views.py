@@ -92,6 +92,7 @@ from .forms_profile import (
     EditPhotoForm, CreateAlbumForm, CreateEventForm, DocumentForm
 )
 from .forms_boutique import BoutiqueImportForm, ProductForm, CheckoutForm
+from .decorators import is_officer_or_staff
 from datetime import datetime, timedelta
 import calendar
 from django.contrib.auth import login, logout, authenticate
@@ -845,7 +846,7 @@ def signup_view(request):
     return render(request, SIGNUP_TEMPLATE, {'form': form})
 
 @login_required
-@user_passes_test(lambda u: u.is_staff or (hasattr(u, 'member_profile') and u.member_profile.is_officer))
+@user_passes_test(is_officer_or_staff)
 def add_leadership(request):
     """Add new chapter leadership member (admin/officers only)"""
     if request.method == 'POST':
@@ -867,7 +868,7 @@ def add_leadership(request):
     return render(request, 'pages/leadership_form.html', context)
 
 @login_required
-@user_passes_test(lambda u: u.is_staff or (hasattr(u, 'member_profile') and u.member_profile.is_officer))
+@user_passes_test(is_officer_or_staff)
 def edit_leadership(request, pk):
     """Edit chapter leadership member (admin/officers only)"""
     leader = get_object_or_404(ChapterLeadership, pk=pk)
@@ -892,7 +893,7 @@ def edit_leadership(request, pk):
     return render(request, 'pages/leadership_form.html', context)
 
 @login_required
-@user_passes_test(lambda u: u.is_staff or (hasattr(u, 'member_profile') and u.member_profile.is_officer))
+@user_passes_test(is_officer_or_staff)
 def delete_leadership(request, pk):
     """Delete chapter leadership member (admin/officers only)"""
     leader = get_object_or_404(ChapterLeadership, pk=pk)
@@ -904,7 +905,7 @@ def delete_leadership(request, pk):
 
 
 @login_required
-@user_passes_test(lambda u: u.is_staff or (hasattr(u, 'member_profile') and u.member_profile.is_officer))
+@user_passes_test(is_officer_or_staff)
 def upload_leader_photo(request, pk):
     """Upload or update leader's profile photo (admin/officers only)"""
     leader = get_object_or_404(ChapterLeadership, pk=pk)
@@ -2022,7 +2023,7 @@ def _process_officer_csv_file(csv_reader):
 
 
 @login_required
-@user_passes_test(lambda u: u.is_staff or (hasattr(u, 'member_profile') and u.member_profile.is_officer))
+@user_passes_test(is_officer_or_staff)
 def import_officers(request):
     """Import officers from CSV file (admin/officers only)"""
     if request.method != 'POST' or not request.FILES.get('csv_file'):
@@ -2481,7 +2482,7 @@ def attendance_view(request):
 
 
 @login_required
-@user_passes_test(lambda u: u.is_staff or (hasattr(u, 'member_profile') and u.member_profile.is_officer))
+@user_passes_test(is_officer_or_staff)
 def manage_attendance(request):
     """Officer view to manage event attendance records"""
     # Get filter parameters
@@ -2526,7 +2527,7 @@ def manage_attendance(request):
 
 
 @login_required
-@user_passes_test(lambda u: u.is_staff or (hasattr(u, 'member_profile') and u.member_profile.is_officer))
+@user_passes_test(is_officer_or_staff)
 def add_attendance(request):
     """Officer view to add attendance record"""
     if request.method == 'POST':
@@ -2583,7 +2584,7 @@ def add_attendance(request):
 
 
 @login_required
-@user_passes_test(lambda u: u.is_staff or (hasattr(u, 'member_profile') and u.member_profile.is_officer))
+@user_passes_test(is_officer_or_staff)
 def edit_attendance(request, pk):
     """Officer view to edit attendance record"""
     attendance = get_object_or_404(EventAttendance, pk=pk)
@@ -2606,7 +2607,7 @@ def edit_attendance(request, pk):
 
 
 @login_required
-@user_passes_test(lambda u: u.is_staff or (hasattr(u, 'member_profile') and u.member_profile.is_officer))
+@user_passes_test(is_officer_or_staff)
 def delete_attendance(request, pk):
     """Officer view to delete attendance record"""
     attendance = get_object_or_404(EventAttendance, pk=pk)
@@ -3058,7 +3059,7 @@ def _is_financial_officer(user):
 
 
 @login_required
-@user_passes_test(lambda u: u.is_staff or (hasattr(u, 'member_profile') and u.member_profile.is_officer))
+@user_passes_test(is_officer_or_staff)
 def bulk_delete_dues_payments(request):
     """Bulk delete multiple dues/payment entries (officers only)"""
     if request.method == 'POST':
@@ -3095,7 +3096,7 @@ def bulk_delete_dues_payments(request):
 
 
 @login_required
-@user_passes_test(lambda u: u.is_staff or (hasattr(u, 'member_profile') and u.member_profile.is_officer))
+@user_passes_test(is_officer_or_staff)
 def member_dues_summary(request):
     """View dues summary for all members (officers only)"""
     # Get all members with their payment summaries
@@ -3140,7 +3141,7 @@ def member_dues_summary(request):
 # ============================================================================
 
 @login_required
-@user_passes_test(lambda u: u.is_staff or (hasattr(u, 'member_profile') and u.member_profile.is_officer))
+@user_passes_test(is_officer_or_staff)
 def setup_stripe_config(request):
     """Configure Stripe payment settings (Treasurer/Admin only)"""
     try:
@@ -3774,7 +3775,7 @@ def order_history(request):
 
 
 @login_required
-@user_passes_test(lambda u: u.is_staff or (hasattr(u, 'member_profile') and u.member_profile.is_officer))
+@user_passes_test(is_officer_or_staff)
 def import_products(request):
     """Admin/Officer view to import products from CSV with optional images"""
     if request.method == 'POST':
@@ -3865,7 +3866,7 @@ def import_products(request):
 
 
 @login_required
-@user_passes_test(lambda u: u.is_staff or (hasattr(u, 'member_profile') and u.member_profile.is_officer))
+@user_passes_test(is_officer_or_staff)
 def add_product(request):
     """Admin/Officer view to add a new product"""
     if request.method == 'POST':
@@ -3885,7 +3886,7 @@ def add_product(request):
 
 
 @login_required
-@user_passes_test(lambda u: u.is_staff or (hasattr(u, 'member_profile') and u.member_profile.is_officer))
+@user_passes_test(is_officer_or_staff)
 def edit_product(request, pk):
     """Admin/Officer view to edit a product"""
     product = get_object_or_404(Product, pk=pk)
@@ -3908,7 +3909,7 @@ def edit_product(request, pk):
 
 
 @login_required
-@user_passes_test(lambda u: u.is_staff or (hasattr(u, 'member_profile') and u.member_profile.is_officer))
+@user_passes_test(is_officer_or_staff)
 def delete_product(request, pk):
     """Admin/Officer view to delete a product"""
     product = get_object_or_404(Product, pk=pk)
