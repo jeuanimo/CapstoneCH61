@@ -11,6 +11,19 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+def is_officer_or_staff(user):
+    """
+    Check if a user is an officer or staff member.
+    
+    Args:
+        user: Django User instance
+    
+    Returns:
+        bool: True if user is staff or has officer member_profile
+    """
+    return user.is_staff or (hasattr(user, 'member_profile') and user.member_profile.is_officer)
+
+
 def officer_required(view_func):
     """
     Decorator to restrict view access to chapter officers and staff only.

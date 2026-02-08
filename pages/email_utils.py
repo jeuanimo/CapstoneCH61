@@ -43,7 +43,7 @@ def send_dues_reminder_email(member_profile):
         try:
             html_message = render_to_string('pages/emails/dues_reminder.html', context)
             plain_message = strip_tags(html_message)
-        except:
+        except Exception:
             plain_message = f"""
 Hello {context['member_name']},
 
@@ -111,7 +111,7 @@ def send_announcement_email(title, content, recipient_emails):
         try:
             html_message = render_to_string('pages/emails/announcement.html', context)
             plain_message = strip_tags(html_message)
-        except:
+        except Exception:
             plain_message = f"""
 {title}
 
@@ -165,7 +165,7 @@ def send_payment_confirmation_email(member_profile, payment_amount, payment_date
             from datetime import datetime
             try:
                 payment_date = datetime.strptime(payment_date, "%Y-%m-%d").date()
-            except:
+            except (ValueError, TypeError):
                 pass
         
         context = {
@@ -182,7 +182,7 @@ def send_payment_confirmation_email(member_profile, payment_amount, payment_date
         try:
             html_message = render_to_string('pages/emails/payment_confirmation.html', context)
             plain_message = strip_tags(html_message)
-        except:
+        except Exception:
             plain_message = f"""
 Hello {context['member_name']},
 

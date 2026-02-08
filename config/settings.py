@@ -350,149 +350,16 @@ CONTACT_EMAIL = config('CONTACT_EMAIL', default='nugammasigma@example.com')     
 
 
 
-# Password validation
-# https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
-
-AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-        'OPTIONS': {
-            'min_length': 8,
-        }
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
-]
-
-# Django Axes Configuration (Brute Force Protection)
-AXES_FAILURE_LIMIT = 5  # Lock account after 5 failed attempts
-AXES_COOLOFF_TIME = 1  # Lockout for 1 hour (in hours)
-AXES_RESET_ON_SUCCESS = True  # Reset failed attempts on successful login
-AXES_LOCKOUT_TEMPLATE = None  # Use default error message
-AXES_LOCKOUT_PARAMETERS = [['username', 'ip_address']]  # Track by both
-AXES_VERBOSE = True  # Enable detailed logging
-AXES_ENABLE_ADMIN = True  # Allow staff to reset lockouts in admin
 
 
-# Internationalization
-# https://docs.djangoproject.com/en/6.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+# ====================== LOGIN/LOGOUT CONFIGURATION ======================
 
-TIME_ZONE = 'UTC'
+LOGIN_URL = 'login'                    # Redirect unauthenticated users to login page
+LOGIN_REDIRECT_URL = 'home'            # After successful login, redirect to home
+LOGOUT_REDIRECT_URL = 'home'           # After logout, redirect to home
 
-USE_I18N = True
+# ====================== DEFAULT FIELD CONFIGURATION ======================
 
-USE_TZ = True
-
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/6.0/howto/static-files/
-
-STATIC_URL = 'static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles' # Production static files
-STATICFILES_DIRS = [BASE_DIR / 'static'] # Development static files
-
-
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media' # Uploaded media files save location
-
-
-# Logging configuration for security events
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'formatters': {
-        'verbose': {
-            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
-            'style': '{',
-        },
-        'simple': {
-            'format': '{levelname} {asctime} {message}',
-            'style': '{',
-        },
-    },
-    'filters': {
-        'require_debug_false': {
-            '()': 'django.utils.log.RequireDebugFalse',
-        },
-        'require_debug_true': {
-            '()': 'django.utils.log.RequireDebugTrue',
-        },
-    },
-    'handlers': {
-        'console': {
-            'level': 'INFO',
-            'class': 'logging.StreamHandler',
-            'formatter': 'simple',
-        },
-        'file': {
-            'level': 'WARNING',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': BASE_DIR / 'logs' / 'django.log',
-            'maxBytes': 1024 * 1024 * 5,  # 5 MB
-            'backupCount': 5,
-            'formatter': 'verbose',
-        },
-        'security_file': {
-            'level': 'WARNING',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': BASE_DIR / 'logs' / 'security.log',
-            'maxBytes': 1024 * 1024 * 5,  # 5 MB
-            'backupCount': 10,
-            'formatter': 'verbose',
-        },
-    },
-    'loggers': {
-        'django': {
-            'handlers': ['console', 'file'],
-            'level': 'INFO',
-            'propagate': False,
-        },
-        'django.security': {
-            'handlers': ['security_file'],
-            'level': 'WARNING',
-            'propagate': False,
-        },
-        'pages': {
-            'handlers': ['console', 'file'],
-            'level': 'INFO',
-            'propagate': False,
-        },
-        'axes': {
-            'handlers': ['console', 'security_file'],
-            'level': 'WARNING',
-            'propagate': False,
-        },
-    },
-}
-
-# Login/Logout redirects
-LOGIN_URL = 'login'
-LOGIN_REDIRECT_URL = 'home'
-LOGOUT_REDIRECT_URL = 'home'
-
-# Media files (uploads)
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
-
-# Default primary key field type
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-# Email Configuration
-EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
-EMAIL_HOST = config('EMAIL_HOST', default='smtp.gmail.com')
-EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
-EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
-EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
-EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
-DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='noreply@nugammasigma.org')
-CONTACT_EMAIL = config('CONTACT_EMAIL', default='nugammasigma@example.com')
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'    # Use BigAutoField for primary keys (supports large IDs)
 

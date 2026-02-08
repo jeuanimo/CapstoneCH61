@@ -95,7 +95,7 @@ from .forms_boutique import BoutiqueImportForm, ProductForm, CheckoutForm
 from datetime import datetime, timedelta
 import calendar
 from django.contrib.auth import login, logout, authenticate
-from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required, user_passes_test
 import logging
@@ -115,10 +115,8 @@ from urllib.parse import urlparse
 import csv
 import io
 from twilio.rest import Client
-import os
 import stripe
 import json
-from decimal import Decimal
 
 # Template constants
 SIGNUP_TEMPLATE = 'pages/signup.html'
