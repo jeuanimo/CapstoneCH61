@@ -1,0 +1,638 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Sync Members with HQ - Chapter Portal{% endblock %}
+
+{% block content %}
+<div style="padding: 2rem 0;">
+    <div class="container">
+        <div style="margin-bottom: 2rem;">
+            <h1 style="color: #1a1a2e; margin-bottom: 0.5rem;">
+                <i class="fas fa-sync-alt"></i> Sync Members with International HQ
+            </h1>
+            <p style="color: #6c757d; margin: 0;">
+                Members NOT on the new imported HQ list will be marked as non-financial with 90-day countdown to pay dues
+            </p>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <!-- Stats Summary -->
+        {% if total_members %}
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+            <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #164f90;">
+                <p style="color: #6c757d; margin: 0 0 0.5rem 0; font-size: 0.9rem;">Total Members in System</p>
+                <p style="color: #1a1a2e; margin: 0; font-size: 2rem; font-weight: bold;">{{ total_members }}</p>
+            </div>
+            {% if hq_member_count %}
+            <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #ffc107;">
+                <p style="color: #6c757d; margin: 0 0 0.5rem 0; font-size: 0.9rem;">Members in HQ List</p>
+                <p style="color: #1a1a2e; margin: 0; font-size: 2rem; font-weight: bold;">{{ hq_member_count }}</p>
+            </div>
+            {% endif %}
+            {% if marked_count %}
+            <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #ffc107;">
+                <p style="color: #6c757d; margin: 0 0 0.5rem 0; font-size: 0.9rem;">Members Marked as Non-Financial</p>
+                <p style="color: #1a1a2e; margin: 0; font-size: 2rem; font-weight: bold;">{{ marked_count }}</p>
+            </div>
+            {% endif %}
+            {% if in_hq_count %}
+            <div style="background: #d4edda; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #28a745;">
+                <p style="color: #155724; margin: 0 0 0.5rem 0; font-size: 0.9rem;">On HQ List (Unchanged)</p>
+                <p style="color: #28a745; margin: 0; font-size: 2rem; font-weight: bold;">{{ in_hq_count }}</p>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+            <!-- LEFT COLUMN: Upload Form -->
+            <div style="background: white; padding: 2rem; border-radius: 8px; border: 1px solid #dee2e6;">
+                <h3 style="color: #1a1a2e; margin-bottom: 1.5rem;">
+                    <i class="fas fa-file-upload"></i> Upload HQ Member List
+                </h3>
+
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+
+                    <!-- CSV File Input -->
+                    <div style="margin-bottom: 1.5rem;">
+                        <label for="{{ form.csv_file.id_for_label }}" style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #1a1a2e;">
+                            CSV File
+                        </label>
+                        <input type="file" class="form-control" id="{{ form.csv_file.id_for_label }}" 
+                               name="csv_file" accept=".csv" required style="border-color: #1a1a2e;">
+                        <small style="color: #6c757d; display: block; margin-top: 0.5rem;">
+                            Required columns: Member# or Member Number
+                        </small>
+                        {% if form.csv_file.errors %}
+                            <div style="color: #dc3545; margin-top: 0.5rem;">
+                                {% for error in form.csv_file.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Confirmation Checkbox -->
+                    <div style="margin-bottom: 1.5rem; padding: 1rem; background: #fff3cd; border-radius: 6px; border-left: 4px solid #ffc107;">
+                        <div style="display: flex; align-items: start; gap: 0.75rem;">
+                            <input type="checkbox" class="form-check-input" id="{{ form.confirm.id_for_label }}" 
+                                   name="confirm" required style="margin-top: 0.25rem;">
+                            <label for="{{ form.confirm.id_for_label }}" style="margin-bottom: 0; cursor: pointer; flex: 1; color: #856404;">
+                                <strong>I understand members NOT on the HQ list will be marked as non-financial with 90-day countdown to pay dues</strong>
+                            </label>
+                        </div>
+                        {% if form.confirm.errors %}
+                            <div style="color: #dc3545; margin-top: 0.5rem;">
+                                {% for error in form.confirm.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Buttons -->
+                    <div style="display: flex; gap: 0.75rem;">
+                        <button type="submit" name="preview" value="on" class="btn btn-outline-primary" 
+                                style="flex: 1; border-color: #164f90; color: #164f90;">
+                            <i class="fas fa-eye"></i> Preview Changes
+                        </button>
+                        <button type="submit" class="btn btn-warning" style="flex: 1;" 
+                                onclick="return confirm('Are you sure? Members in the HQ list will be marked as non-financial.');">
+                            <i class="fas fa-check"></i> Execute Sync
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- RIGHT COLUMN: Information -->
+            <div>
+                <div style="background: #e7f3ff; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #164f90; margin-bottom: 1.5rem;">
+                    <h4 style="color: #164f90; margin-bottom: 1rem;">
+                        <i class="fas fa-info-circle"></i> How It Works
+                    </h4>
+                    <ol style="color: #164f90; margin: 0; padding-left: 1.5rem;">
+                        <li style="margin-bottom: 0.75rem;">
+                            Export your current member list from International HQ
+                        </li>
+                        <li style="margin-bottom: 0.75rem;">
+                            Upload the CSV file here
+                        </li>
+                        <li style="margin-bottom: 0.75rem;">
+                            Click "<strong>Preview Changes</strong>" to see who will be marked
+                        </li>
+                        <li style="margin-bottom: 0.75rem;">
+                            Click "<strong>Execute Sync</strong>" to mark them
+                        </li>
+                        <li>
+                            Members will see notification to pay dues (90-day countdown)
+                        </li>
+                    </ol>
+                </div>
+
+                <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; border: 1px solid #dee2e6;">
+                    <h4 style="color: #1a1a2e; margin-bottom: 1rem;">
+                        <i class="fas fa-cog"></i> What Happens Next
+                    </h4>
+                    
+                    <div style="margin-bottom: 1rem;">
+                        <strong style="color: #1a1a2e;">Members NOT on HQ List</strong>
+                        <p style="color: #6c757d; margin: 0.5rem 0 0 0; font-size: 0.9rem;">
+                            ✅ Marked as "non-financial"<br>
+                            ⏰ 90-day countdown started<br>
+                            📧 See warning on dashboard<br>
+                            💰 Must pay dues to restore access
+                        </p>
+                    </div>
+
+                    <div>
+                        <strong style="color: #28a745;">Members on HQ List</strong>
+                        <p style="color: #6c757d; margin: 0.5rem 0 0 0; font-size: 0.9rem;">
+                            ✅ No changes made<br>
+                            ✅ Keep current status<br>
+                            ✅ No countdown
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Preview / Results Section -->
+        {% if is_preview or members_to_mark or marked_count %}
+        <div style="background: white; padding: 2rem; border-radius: 8px; border: 1px solid #dee2e6;">
+            <h3 style="color: #1a1a2e; margin-bottom: 1.5rem;">
+                <i class="fas fa-list"></i> 
+                {% if is_preview %}
+                    Preview: Members to be Marked as Non-Financial
+                {% else %}
+                    Results: {{ marked_count }} member(s) marked as non-financial
+                {% endif %}
+            </h3>
+
+            {% if csv_errors %}
+            <div style="background: #fff3cd; padding: 1rem; border-radius: 6px; margin-bottom: 1.5rem; border-left: 4px solid #ffc107;">
+                <strong style="color: #856404;">CSV Processing Notes:</strong>
+                <ul style="color: #856404; margin: 0.5rem 0 0 0;">
+                    {% for error in csv_errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            {% if members_to_mark or is_preview %}
+            <h4 style="color: #ffc107; margin-bottom: 1rem;">
+                <i class="fas fa-exclamation-circle"></i> Members NOT on HQ List (To Be Marked)
+            </h4>
+            <div style="overflow-x: auto; margin-bottom: 2rem;">
+                <table style="width: 100%; font-size: 0.9rem;">
+                    <thead>
+                        <tr style="border-bottom: 2px solid #dee2e6;">
+                            <th style="padding: 0.75rem; text-align: left; color: #1a1a2e;">Name</th>
+                            <th style="padding: 0.75rem; text-align: left; color: #1a1a2e;">Member #</th>
+                            <th style="padding: 0.75rem; text-align: left; color: #1a1a2e;">Current Status</th>
+                            <th style="padding: 0.75rem; text-align: left; color: #1a1a2e;">New Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for member in members_to_mark %}
+                        <tr style="border-bottom: 1px solid #dee2e6;">
+                            <td style="padding: 0.75rem; color: #555;">
+                                {{ member.user.get_full_name|default:member.user.username }}
+                            </td>
+                            <td style="padding: 0.75rem; color: #555;">
+                                {{ member.member_number }}
+                            </td>
+                            <td style="padding: 0.75rem; color: #555;">
+                                {{ member.get_status_display }}
+                            </td>
+                            <td style="padding: 0.75rem;">
+                                <span style="background: #fff3cd; padding: 0.25rem 0.75rem; border-radius: 12px; color: #856404; font-weight: bold;">
+                                    Non-Financial
+                                </span>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" style="padding: 1rem; color: #6c757d; text-align: center;">
+                                No members to mark (all on HQ list)
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endif %}
+
+            {% if members_in_hq %}
+            <h4 style="color: #28a745; margin-bottom: 1rem;" style="margin-bottom: 1rem;">
+                <i class="fas fa-check-circle"></i> Members on HQ List (No Changes)
+            </h4>
+            <p style="color: #6c757d; margin-bottom: 1rem;">
+                These members will be kept as-is with no changes
+            </p>
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; font-size: 0.9rem;">
+                    <thead>
+                        <tr style="border-bottom: 2px solid #dee2e6;">
+                            <th style="padding: 0.75rem; text-align: left; color: #28a745;">Name</th>
+                            <th style="padding: 0.75rem; text-align: left; color: #28a745;">Member #</th>
+                            <th style="padding: 0.75rem; text-align: left; color: #28a745;">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for member in members_in_hq %}
+                        <tr style="border-bottom: 1px solid #dee2e6;">
+                            <td style="padding: 0.75rem; color: #555;">
+                                {{ member.user.get_full_name|default:member.user.username }}
+                            </td>
+                            <td style="padding: 0.75rem; color: #555;">
+                                {{ member.member_number }}
+                            </td>
+                            <td style="padding: 0.75rem; color: #555;">
+                                {{ member.get_status_display }}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="3" style="padding: 1rem; color: #6c757d; text-align: center;">
+                                All system members are NOT on HQ list (all marked)
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- Back Button -->
+        <div style="margin-top: 2rem;">
+            <a href="{% url 'member_roster' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Roster
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+    @media (max-width: 768px) {
+        [style*="display: grid; grid-template-columns: 1fr 1fr"] {
+            display: grid !important;
+            grid-template-columns: 1fr !important;
+        }
+
+        [style*="grid-template-columns: repeat(auto-fit"] {
+            grid-template-columns: 1fr !important;
+        }
+    }
+
+    body.dark-mode .btn-outline-primary {
+        border-color: #87ceeb !important;
+        color: #87ceeb !important;
+    }
+
+    body.dark-mode [style*="background: white"] {
+        background: #1a2a4a !important;
+        border-color: #2a3a5a !important;
+    }
+
+    body.dark-mode h1, body.dark-mode h3, body.dark-mode h4 {
+        color: #87ceeb !important;
+    }
+
+    body.dark-mode [style*="color: #1a1a2e"] {
+        color: #87ceeb !important;
+    }
+
+    body.dark-mode [style*="color: #555"] {
+        color: #b0b8c8 !important;
+    }
+
+    body.dark-mode table {
+        border-color: #2a3a5a !important;
+    }
+
+    body.dark-mode tr:not(:first-child) {
+        border-color: #2a3a5a !important;
+    }
+
+    body.dark-mode th {
+        color: #87ceeb !important;
+    }
+
+    body.dark-mode td {
+        color: #b0b8c8 !important;
+    }
+</style>
+{% endblock %}
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <!-- Stats Summary -->
+        {% if total_members %}
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+            <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #164f90;">
+                <p style="color: #6c757d; margin: 0 0 0.5rem 0; font-size: 0.9rem;">Total Members in System</p>
+                <p style="color: #1a1a2e; margin: 0; font-size: 2rem; font-weight: bold;">{{ total_members }}</p>
+            </div>
+            {% if hq_member_count %}
+            <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #28a745;">
+                <p style="color: #6c757d; margin: 0 0 0.5rem 0; font-size: 0.9rem;">Members in HQ List</p>
+                <p style="color: #1a1a2e; margin: 0; font-size: 2rem; font-weight: bold;">{{ hq_member_count }}</p>
+            </div>
+            {% endif %}
+            {% if members_to_remove %}
+            <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #dc3545;">
+                <p style="color: #6c757d; margin: 0 0 0.5rem 0; font-size: 0.9rem;">Members NOT in HQ</p>
+                <p style="color: #1a1a2e; margin: 0; font-size: 2rem; font-weight: bold;">{{ members_to_remove|length }}</p>
+            </div>
+            {% endif %}
+            {% if removed_count %}
+            <div style="background: #d4edda; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #28a745;">
+                <p style="color: #155724; margin: 0 0 0.5rem 0; font-size: 0.9rem;">Members {{ action }}</p>
+                <p style="color: #28a745; margin: 0; font-size: 2rem; font-weight: bold;">{{ removed_count }}</p>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+            <!-- LEFT COLUMN: Upload Form -->
+            <div style="background: white; padding: 2rem; border-radius: 8px; border: 1px solid #dee2e6;">
+                <h3 style="color: #1a1a2e; margin-bottom: 1.5rem;">
+                    <i class="fas fa-file-upload"></i> Upload HQ Member List
+                </h3>
+
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+
+                    <!-- CSV File Input -->
+                    <div style="margin-bottom: 1.5rem;">
+                        <label for="{{ form.csv_file.id_for_label }}" style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #1a1a2e;">
+                            CSV File
+                        </label>
+                        <input type="file" class="form-control" id="{{ form.csv_file.id_for_label }}" 
+                               name="csv_file" accept=".csv" required style="border-color: #1a1a2e;">
+                        <small style="color: #6c757d; display: block; margin-top: 0.5rem;">
+                            Required columns: Member# or Member Number
+                        </small>
+                        {% if form.csv_file.errors %}
+                            <div style="color: #dc3545; margin-top: 0.5rem;">
+                                {% for error in form.csv_file.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Buttons -->
+                    <div style="display: flex; gap: 0.75rem;">
+                        <button type="submit" name="preview" value="on" class="btn btn-outline-primary" 
+                                style="flex: 1; border-color: #164f90; color: #164f90;">
+                            <i class="fas fa-eye"></i> Preview Changes
+                        </button>
+                        <button type="submit" class="btn btn-warning" style="flex: 1;" 
+                                onclick="return confirm('Are you sure? Members NOT on the HQ list will be marked as non-financial.');">
+                            <i class="fas fa-check"></i> Execute Sync
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- RIGHT COLUMN: Information -->
+            <div>
+                <div style="background: #e7f3ff; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #164f90; margin-bottom: 1.5rem;">
+                    <h4 style="color: #164f90; margin-bottom: 1rem;">
+                        <i class="fas fa-info-circle"></i> How It Works
+                    </h4>
+                    <ol style="color: #164f90; margin: 0; padding-left: 1.5rem;">
+                        <li style="margin-bottom: 0.75rem;">
+                            Export your current member list from International HQ
+                        </li>
+                        <li style="margin-bottom: 0.75rem;">
+                            Upload the CSV file here
+                        </li>
+                        <li style="margin-bottom: 0.75rem;">
+                            Click "<strong>Preview Changes</strong>" to see who will be marked
+                        </li>
+                        <li style="margin-bottom: 0.75rem;">
+                            Click "<strong>Execute Sync</strong>" to mark them
+                        </li>
+                        <li>
+                            Members will see notification to pay dues (90-day countdown)
+                        </li>
+                    </ol>
+                </div>
+
+                <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; border: 1px solid #dee2e6;">
+                    <h4 style="color: #1a1a2e; margin-bottom: 1rem;">
+                        <i class="fas fa-cog"></i> What Happens Next
+                    </h4>
+                    
+                    <div style="margin-bottom: 1rem;">
+                        <strong style="color: #1a1a2e;">Members NOT on HQ List</strong>
+                        <p style="color: #6c757d; margin: 0.5rem 0 0 0; font-size: 0.9rem;">
+                            ✅ Marked as "non-financial"<br>
+                            ⏰ 90-day countdown started<br>
+                            📧 See warning on dashboard<br>
+                            💰 Must pay dues to restore access
+                        </p>
+                    </div>
+
+                    <div>
+                        <strong style="color: #28a745;">Members on HQ List</strong>
+                        <p style="color: #6c757d; margin: 0.5rem 0 0 0; font-size: 0.9rem;">
+                            ✅ No changes made<br>
+                            ✅ Keep current status<br>
+                            ✅ No countdown
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Preview / Results Section -->
+        {% if is_preview or members_to_mark or marked_count %}
+        <div style="background: white; padding: 2rem; border-radius: 8px; border: 1px solid #dee2e6;">
+            <h3 style="color: #1a1a2e; margin-bottom: 1.5rem;">
+                <i class="fas fa-list"></i> 
+                {% if is_preview %}
+                    Preview: Members to be Marked as Non-Financial
+                {% else %}
+                    Results: {{ marked_count }} member(s) marked as non-financial
+                {% endif %}
+            </h3>
+
+            {% if csv_errors %}
+            <div style="background: #fff3cd; padding: 1rem; border-radius: 6px; margin-bottom: 1.5rem; border-left: 4px solid #ffc107;">
+                <strong style="color: #856404;">CSV Processing Notes:</strong>
+                <ul style="color: #856404; margin: 0.5rem 0 0 0;">
+                    {% for error in csv_errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            {% if members_to_mark or is_preview %}
+            <h4 style="color: #ffc107; margin-bottom: 1rem;">
+                <i class="fas fa-exclamation-circle"></i> Members NOT on HQ List (To Be Marked)
+            </h4>
+            <div style="overflow-x: auto; margin-bottom: 2rem;">
+                <table style="width: 100%; font-size: 0.9rem;">
+                    <thead>
+                        <tr style="border-bottom: 2px solid #dee2e6;">
+                            <th style="padding: 0.75rem; text-align: left; color: #1a1a2e;">Name</th>
+                            <th style="padding: 0.75rem; text-align: left; color: #1a1a2e;">Member #</th>
+                            <th style="padding: 0.75rem; text-align: left; color: #1a1a2e;">Current Status</th>
+                            <th style="padding: 0.75rem; text-align: left; color: #1a1a2e;">New Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for member in members_to_mark %}
+                        <tr style="border-bottom: 1px solid #dee2e6;">
+                            <td style="padding: 0.75rem; color: #555;">
+                                {{ member.user.get_full_name|default:member.user.username }}
+                            </td>
+                            <td style="padding: 0.75rem; color: #555;">
+                                {{ member.member_number }}
+                            </td>
+                            <td style="padding: 0.75rem; color: #555;">
+                                {{ member.get_status_display }}
+                            </td>
+                            <td style="padding: 0.75rem;">
+                                <span style="background: #fff3cd; padding: 0.25rem 0.75rem; border-radius: 12px; color: #856404; font-weight: bold;">
+                                    Non-Financial
+                                </span>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" style="padding: 1rem; color: #6c757d; text-align: center;">
+                                No members to mark (all on HQ list)
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endif %}
+
+            {% if members_in_hq %}
+            <h4 style="color: #28a745; margin-bottom: 1rem;">
+                <i class="fas fa-check-circle"></i> Members on HQ List (No Changes)
+            </h4>
+            <p style="color: #6c757d; margin-bottom: 1rem;">
+                These members will be kept as-is with no changes
+            </p>
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; font-size: 0.9rem;">
+                    <thead>
+                        <tr style="border-bottom: 2px solid #dee2e6;">
+                            <th style="padding: 0.75rem; text-align: left; color: #28a745;">Name</th>
+                            <th style="padding: 0.75rem; text-align: left; color: #28a745;">Member #</th>
+                            <th style="padding: 0.75rem; text-align: left; color: #28a745;">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for member in members_in_hq %}
+                        <tr style="border-bottom: 1px solid #dee2e6;">
+                            <td style="padding: 0.75rem; color: #555;">
+                                {{ member.user.get_full_name|default:member.user.username }}
+                            </td>
+                            <td style="padding: 0.75rem; color: #555;">
+                                {{ member.member_number }}
+                            </td>
+                            <td style="padding: 0.75rem; color: #555;">
+                                {{ member.get_status_display }}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="3" style="padding: 1rem; color: #6c757d; text-align: center;">
+                                All system members are NOT on HQ list (all marked)
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- Back Button -->
+        <div style="margin-top: 2rem;">
+            <a href="{% url 'member_roster' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Roster
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+    @media (max-width: 768px) {
+        [style*="display: grid; grid-template-columns: 1fr 1fr"] {
+            display: grid !important;
+            grid-template-columns: 1fr !important;
+        }
+
+        [style*="grid-template-columns: repeat(auto-fit"] {
+            grid-template-columns: 1fr !important;
+        }
+    }
+
+    body.dark-mode .btn-outline-primary {
+        border-color: #87ceeb !important;
+        color: #87ceeb !important;
+    }
+
+    body.dark-mode [style*="background: white"] {
+        background: #1a2a4a !important;
+        border-color: #2a3a5a !important;
+    }
+
+    body.dark-mode h1, body.dark-mode h3, body.dark-mode h4 {
+        color: #87ceeb !important;
+    }
+
+    body.dark-mode [style*="color: #1a1a2e"] {
+        color: #87ceeb !important;
+    }
+
+    body.dark-mode [style*="color: #555"] {
+        color: #b0b8c8 !important;
+    }
+
+    body.dark-mode table {
+        border-color: #2a3a5a !important;
+    }
+
+    body.dark-mode tr:not(:first-child) {
+        border-color: #2a3a5a !important;
+    }
+
+    body.dark-mode th {
+        color: #87ceeb !important;
+    }
+
+    body.dark-mode td {
+        color: #b0b8c8 !important;
+    }
+</style>
+{% endblock %}

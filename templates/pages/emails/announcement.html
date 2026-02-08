@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title|default:"Chapter Announcement" }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f9f9f9;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 0;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #164f90 0%, #0f3a6f 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+        .header p {
+            margin: 0;
+            font-size: 0.95rem;
+            opacity: 0.9;
+        }
+        .content {
+            padding: 2rem;
+        }
+        .announcement-title {
+            font-size: 1.5rem;
+            color: #1a1a2e;
+            margin: 0 0 1rem 0;
+            border-bottom: 2px solid #164f90;
+            padding-bottom: 0.75rem;
+        }
+        .announcement-date {
+            font-size: 0.85rem;
+            color: #999;
+            margin-bottom: 1.5rem;
+        }
+        .announcement-body {
+            color: #555;
+            line-height: 1.8;
+            margin: 1.5rem 0;
+        }
+        .announcement-body p {
+            margin-bottom: 1rem;
+        }
+        .announcement-body ul,
+        .announcement-body ol {
+            margin-bottom: 1rem;
+        }
+        .announcement-body li {
+            margin-bottom: 0.5rem;
+        }
+        .highlight-box {
+            background: #e7f3ff;
+            border-left: 4px solid #164f90;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            border-radius: 4px;
+        }
+        .action-button {
+            display: inline-block;
+            background: #164f90;
+            color: white;
+            padding: 0.75rem 2rem;
+            text-decoration: none;
+            border-radius: 4px;
+            margin: 1rem 0;
+            font-weight: bold;
+            text-align: center;
+        }
+        .action-button:hover {
+            background: #0f3a6f;
+        }
+        .footer {
+            background-color: #f9f9f9;
+            padding: 1.5rem;
+            text-align: center;
+            font-size: 0.85rem;
+            color: #666;
+            border-top: 1px solid #eee;
+        }
+        .footer-links {
+            margin: 1rem 0 0 0;
+        }
+        .footer-links a {
+            color: #164f90;
+            text-decoration: none;
+            margin: 0 1rem;
+        }
+        .chapter-info {
+            font-size: 0.9rem;
+            color: #999;
+            margin-bottom: 0.5rem;
+        }
+        strong {
+            color: #1a1a2e;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- Header -->
+    <div class="header">
+        <h1>Phi Beta Sigma Fraternity</h1>
+        <p>Nu Gamma Sigma Chapter</p>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+        <h2 class="announcement-title">{{ title|default:"Chapter Announcement" }}</h2>
+        <div class="announcement-date">
+            Sent on {{ announcement_date|default:"today" }}
+        </div>
+
+        <div class="announcement-body">
+            {{ content_html|safe|default:"<p>Please refer to the chapter portal for more details.</p>" }}
+        </div>
+
+        <!-- Portal Link -->
+        {% if include_portal_link %}
+        <div style="text-align: center; margin: 1.5rem 0;">
+            <a href="{{ portal_url }}" class="action-button">Visit Chapter Portal</a>
+        </div>
+        {% endif %}
+
+        <!-- Response Instructions (if needed) -->
+        {% if response_instructions %}
+        <div class="highlight-box">
+            <strong>Action Required:</strong><br>
+            {{ response_instructions }}
+        </div>
+        {% endif %}
+
+        <!-- RSVP Link (if event) -->
+        {% if event_url %}
+        <div class="highlight-box">
+            {% if is_event %}
+                <a href="{{ event_url }}" class="action-button" style="display: block; text-align: center;">RSVP for This Event</a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <div class="chapter-info">
+            Phi Beta Sigma Fraternity, Inc.<br>
+            Nu Gamma Sigma Chapter
+        </div>
+        <p style="margin: 1rem 0 0 0;">
+            This is an automated message. Please do not reply to this email.<br>
+            For inquiries, contact your chapter officers.
+        </p>
+        <div class="footer-links">
+            <a href="{{ portal_url }}">Chapter Portal</a> |
+            <a href="{{ contact_email|default:"mailto:nugammasigma@example.com" }}">Contact Officers</a>
+        </div>
+    </div>
+</div>
+</body>
+</html>

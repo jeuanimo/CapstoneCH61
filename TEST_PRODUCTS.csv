@@ -1,0 +1,7 @@
+name,category,price,description,inventory,sizes,colors,image_url
+"Phi Beta Sigma Classic T-Shirt",apparel,24.99,"Premium quality cotton t-shirt with fraternity colors",100,"S, M, L, XL, 2XL","Black, White, Navy, Maroon",https://via.placeholder.com/300x300/000000/FFFFFF?text=PBS+Classic+Tee
+"Sigma Beta Club Polo",apparel,34.99,"Professional polo shirt perfect for meetings and events",75,"S, M, L, XL","Navy, White, Black",https://via.placeholder.com/300x300/001f3f/FFFFFF?text=Sigma+Beta+Polo
+"Chapter Embroidered Cap",accessories,19.99,"Adjustable baseball cap with chapter emblem",50,"One Size","Black, Navy, White, Maroon",https://via.placeholder.com/300x300/1a1a2e/FFFFFF?text=PBS+Cap
+"Stainless Steel Tumbler",drinkware,22.99,"Double-wall insulated tumbler keeps drinks hot or cold",80,"16oz, 20oz, 24oz","Black, Silver, White, Stainless",https://via.placeholder.com/300x300/708090/FFFFFF?text=PBS+Tumbler
+"Fraternity Hoodie",apparel,49.99,"Comfortable fleece hoodie with chapter design",60,"S, M, L, XL, 2XL","Black, Navy, Maroon, White",https://via.placeholder.com/300x300/8B0000/FFFFFF?text=PBS+Hoodie
+"Logo Backpack",accessories,39.99,"Durable backpack perfect for classes and events",45,"One Size","Black, Navy, Maroon",https://via.placeholder.com/300x300/2c3e50/FFFFFF?text=PBS+Backpack

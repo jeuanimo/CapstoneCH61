@@ -46,7 +46,11 @@
                     </div>
                     {% if user.is_authenticated %}
                     <div class="user-badge">
-                        <i class="fas fa-user-circle"></i>
+                        {% if user.member_profile.profile_image %}
+                            <img src="{{ user.member_profile.profile_image.url }}" alt="{{ user.username }}" class="profile-pic">
+                        {% else %}
+                            <i class="fas fa-user-circle"></i>
+                        {% endif %}
                         <span class="username">{{ user.username }}</span>
                     </div>
                     {% endif %}

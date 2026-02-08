@@ -112,6 +112,30 @@
                 </div>
             </div>
 
+            <!-- Admin Actions Section -->
+            <div class="form-section admin-actions-section">
+                <h2><i class="fas fa-shield-alt"></i> Officer Actions</h2>
+                <div style="background: #fff3cd; padding: 1rem; border-radius: 6px; border-left: 4px solid #ffc107; margin-bottom: 1rem;">
+                    <p style="color: #856404; font-size: 0.9rem; margin: 0;">
+                        <strong>Manual Marking:</strong> Check the box below to immediately mark this member as non-financial. 
+                        They will lose document access and see a 90-day countdown on their dashboard.
+                    </p>
+                </div>
+                <div class="form-group checkbox-group" style="background: #f0f0f0; padding: 1rem; border-radius: 6px; border: 2px solid #dc3545;">
+                    {{ form.mark_non_financial }}
+                    <label for="id_mark_non_financial" style="color: #dc3545; font-weight: bold;">{{ form.mark_non_financial.label_tag }}</label>
+                </div>
+                <p style="color: #666; font-size: 0.85rem; margin-top: 0.75rem;">
+                    <i class="fas fa-info-circle"></i> This action will:
+                </p>
+                <ul style="color: #666; font-size: 0.85rem; margin: 0.5rem 0 0 1.5rem;">
+                    <li>Set member status to Non-Financial</li>
+                    <li>Start 90-day countdown for dues payment</li>
+                    <li>Remove document access immediately</li>
+                    <li>Display warning banner on member dashboard</li>
+                </ul>
+            </div>
+
             <div class="form-actions">
                 <button type="submit" class="btn btn-primary">
                     <i class="fas fa-save"></i> Save Member
@@ -167,6 +191,13 @@
 
     .form-section:last-of-type {
         border-bottom: none;
+    }
+
+    .admin-actions-section {
+        background: #f8f9fa;
+        padding: 2rem !important;
+        border-radius: 8px;
+        border-left: 4px solid #dc3545;
     }
 
     .form-section h2 {
@@ -318,6 +349,23 @@
     }
 
     body.dark-mode .current-image p {
+        color: #b0b8c8;
+    }
+
+    body.dark-mode .admin-actions-section {
+        background: #0f1a30;
+        border-left-color: #ff6b6b;
+    }
+
+    body.dark-mode .admin-actions-section h2 {
+        color: #ff6b6b;
+    }
+
+    body.dark-mode .admin-actions-section p {
+        color: #b0b8c8;
+    }
+
+    body.dark-mode .admin-actions-section ul {
         color: #b0b8c8;
     }
 </style>

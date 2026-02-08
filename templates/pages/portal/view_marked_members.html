@@ -1,0 +1,208 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Members Marked for Removal - Chapter Portal{% endblock %}
+
+{% block content %}
+<div style="padding: 2rem 0;">
+    <div class="container">
+        <div style="margin-bottom: 2rem;">
+            <h1 style="color: #1a1a2e; margin-bottom: 0.5rem;">
+                <i class="fas fa-clock"></i> Members in 90-Day Grace Period
+            </h1>
+            <p style="color: #6c757d; margin: 0;">
+                Monitor members marked for removal - they have 90 days to resolve their status
+            </p>
+        </div>
+
+        <!-- Summary Stats -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+            <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #ffc107;">
+                <p style="color: #6c757d; margin: 0 0 0.5rem 0; font-size: 0.9rem;">Total Marked for Removal</p>
+                <p style="color: #1a1a2e; margin: 0; font-size: 2rem; font-weight: bold;">{{ total_marked }}</p>
+            </div>
+            <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #ffc107;">
+                <p style="color: #6c757d; margin: 0 0 0.5rem 0; font-size: 0.9rem;">In Grace Period (30+ days)</p>
+                <p style="color: #1a1a2e; margin: 0; font-size: 2rem; font-weight: bold;">{{ at_risk|length }}</p>
+            </div>
+            <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #dc3545;">
+                <p style="color: #6c757d; margin: 0 0 0.5rem 0; font-size: 0.9rem;">Expiring Soon (&lt;30 days)</p>
+                <p style="color: #dc3545; margin: 0; font-size: 2rem; font-weight: bold;">{{ expiring_soon|length }}</p>
+            </div>
+        </div>
+
+        <!-- Expiring Soon -->
+        {% if expiring_soon %}
+        <div style="background: #fff3cd; padding: 2rem; border-radius: 8px; border-left: 4px solid #ff6b6b; margin-bottom: 2rem;">
+            <h3 style="color: #856404; margin-bottom: 1.5rem;">
+                <i class="fas fa-exclamation-circle"></i> Expiring Soon (Less than 30 Days)
+            </h3>
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; font-size: 0.9rem;">
+                    <thead>
+                        <tr style="border-bottom: 2px solid #ffeaa7;">
+                            <th style="padding: 0.75rem; text-align: left; color: #856404;">Name</th>
+                            <th style="padding: 0.75rem; text-align: left; color: #856404;">Member #</th>
+                            <th style="padding: 0.75rem; text-align: left; color: #856404;">Days Remaining</th>
+                            <th style="padding: 0.75rem; text-align: left; color: #856404;">Marked Date</th>
+                            <th style="padding: 0.75rem; text-align: left; color: #856404;">Reason</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in expiring_soon %}
+                        <tr style="border-bottom: 1px solid #ffeaa7;">
+                            <td style="padding: 0.75rem; color: #556270;">
+                                <strong>{{ item.member.get_full_name }}</strong>
+                            </td>
+                            <td style="padding: 0.75rem; color: #556270;">
+                                {{ item.member.member_number }}
+                            </td>
+                            <td style="padding: 0.75rem; color: #ff6b6b; font-weight: bold;">
+                                {{ item.days_remaining }} days
+                            </td>
+                            <td style="padding: 0.75rem; color: #556270; font-size: 0.85rem;">
+                                {{ item.member.marked_for_removal_date|date:"M d, Y" }}
+                            </td>
+                            <td style="padding: 0.75rem; color: #556270; font-size: 0.85rem;">
+                                {{ item.member.removal_reason }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- At Risk (30+ days) -->
+        {% if at_risk %}
+        <div style="background: white; padding: 2rem; border-radius: 8px; border: 1px solid #dee2e6;">
+            <h3 style="color: #1a1a2e; margin-bottom: 1.5rem;">
+                <i class="fas fa-user-clock"></i> In Grace Period (30+ Days Remaining)
+            </h3>
+            <p style="color: #6c757d; margin-bottom: 1.5rem;">
+                These members have time to resolve their status
+            </p>
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; font-size: 0.9rem;">
+                    <thead>
+                        <tr style="border-bottom: 2px solid #dee2e6;">
+                            <th style="padding: 0.75rem; text-align: left; color: #1a1a2e;">Name</th>
+                            <th style="padding: 0.75rem; text-align: left; color: #1a1a2e;">Member #</th>
+                            <th style="padding: 0.75rem; text-align: left; color: #1a1a2e;">Days Remaining</th>
+                            <th style="padding: 0.75rem; text-align: left; color: #1a1a2e;">Marked Date</th>
+                            <th style="padding: 0.75rem; text-align: left; color: #1a1a2e;">Reason</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in at_risk %}
+                        <tr style="border-bottom: 1px solid #dee2e6;">
+                            <td style="padding: 0.75rem; color: #555;">
+                                {{ item.member.get_full_name }}
+                            </td>
+                            <td style="padding: 0.75rem; color: #555;">
+                                {{ item.member.member_number }}
+                            </td>
+                            <td style="padding: 0.75rem; color: #164f90; font-weight: bold;">
+                                {{ item.days_remaining }} days
+                            </td>
+                            <td style="padding: 0.75rem; color: #555; font-size: 0.85rem;">
+                                {{ item.member.marked_for_removal_date|date:"M d, Y" }}
+                            </td>
+                            <td style="padding: 0.75rem; color: #555; font-size: 0.85rem;">
+                                {{ item.member.removal_reason }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if not marked_members %}
+        <div style="background: #d4edda; padding: 2rem; border-radius: 8px; border-left: 4px solid #28a745;">
+            <h3 style="color: #155724; margin-bottom: 0.5rem;">
+                <i class="fas fa-check-circle"></i> No Members in Grace Period
+            </h3>
+            <p style="color: #155724; margin: 0;">
+                All members are in good standing with HQ!
+            </p>
+        </div>
+        {% endif %}
+
+        <!-- Admin Info -->
+        <div style="background: #e7f3ff; padding: 2rem; border-radius: 8px; border-left: 4px solid #164f90; margin-top: 2rem;">
+            <h4 style="color: #164f90; margin-bottom: 1rem;">
+                <i class="fas fa-info-circle"></i> How to Resolve Member Status
+            </h4>
+            <ul style="color: #164f90; margin: 0; padding-left: 1.5rem;">
+                <li style="margin-bottom: 0.75rem;">
+                    <strong>Update HQ List:</strong> If member should be in the system, request their addition from International HQ
+                </li>
+                <li style="margin-bottom: 0.75rem;">
+                    <strong>Clear Dues:</strong> Members can also keep access by paying outstanding national and local dues
+                </li>
+                <li style="margin-bottom: 0.75rem;">
+                    <strong>Manual Override:</strong> Edit the member profile and clear the "marked_for_removal_date" field to restore
+                </li>
+                <li>
+                    <strong>Auto-Removal:</strong> After 90 days, run: <code>python manage.py remove_expired_members</code>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Back Button -->
+        <div style="margin-top: 2rem;">
+            <a href="{% url 'member_roster' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Roster
+            </a>
+            <a href="{% url 'sync_members' %}" class="btn btn-primary">
+                <i class="fas fa-sync"></i> Run Sync Again
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+    @media (max-width: 768px) {
+        [style*="display: grid; grid-template-columns: repeat(auto-fit"] {
+            grid-template-columns: 1fr !important;
+        }
+
+        table {
+            font-size: 0.8rem !important;
+        }
+
+        th, td {
+            padding: 0.5rem !important;
+        }
+    }
+
+    body.dark-mode [style*="background: white"],
+    body.dark-mode [style*="background: #f8f9fa"] {
+        background: #1a2a4a !important;
+    }
+
+    body.dark-mode h1, body.dark-mode h3, body.dark-mode h4,
+    body.dark-mode [style*="color: #1a1a2e"] {
+        color: #87ceeb !important;
+    }
+
+    body.dark-mode [style*="color: #555"],
+    body.dark-mode [style*="color: #6c757d"] {
+        color: #b0b8c8 !important;
+    }
+
+    body.dark-mode table, body.dark-mode tr {
+        border-color: #2a3a5a !important;
+    }
+
+    body.dark-mode code {
+        background: #2c3e50 !important;
+        color: #ecf0f1 !important;
+        padding: 2px 6px;
+        border-radius: 3px;
+    }
+</style>
+{% endblock %}

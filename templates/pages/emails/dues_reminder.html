@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dues Payment Required</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f9f9f9;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 0;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #164f90 0%, #0f3a6f 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+        .header p {
+            margin: 0;
+            font-size: 0.95rem;
+            opacity: 0.9;
+        }
+        .content {
+            padding: 2rem;
+        }
+        .greeting {
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+            color: #1a1a2e;
+        }
+        .countdown-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 4px;
+        }
+        .countdown-box .days {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #856404;
+            text-align: center;
+        }
+        .countdown-box .label {
+            text-align: center;
+            color: #666;
+            margin-top: 0.5rem;
+            font-size: 0.95rem;
+        }
+        .message-section {
+            margin: 1.5rem 0;
+            line-height: 1.8;
+        }
+        .action-button {
+            display: inline-block;
+            background: #164f90;
+            color: white;
+            padding: 0.75rem 2rem;
+            text-decoration: none;
+            border-radius: 4px;
+            margin: 1rem 0;
+            font-weight: bold;
+            text-align: center;
+        }
+        .action-button:hover {
+            background: #0f3a6f;
+        }
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #164f90;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+        .footer {
+            background-color: #f9f9f9;
+            padding: 1.5rem;
+            text-align: center;
+            font-size: 0.85rem;
+            color: #666;
+            border-top: 1px solid #eee;
+        }
+        .footer-links {
+            margin: 1rem 0 0 0;
+        }
+        .footer-links a {
+            color: #164f90;
+            text-decoration: none;
+            margin: 0 1rem;
+        }
+        .chapter-info {
+            font-size: 0.9rem;
+            color: #999;
+            margin-bottom: 0.5rem;
+        }
+        strong {
+            color: #1a1a2e;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- Header -->
+    <div class="header">
+        <h1>Phi Beta Sigma Fraternity</h1>
+        <p>Nu Gamma Sigma Chapter</p>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+        <div class="greeting">
+            Hello <strong>{{ member_name|default:"Member" }}</strong>,
+        </div>
+
+        <p>We hope this message finds you well. We're reaching out regarding your membership dues account.</p>
+
+        <!-- Countdown Section -->
+        <div class="countdown-box">
+            <div class="days">{{ days_remaining }}</div>
+            <div class="label">days remaining to pay dues</div>
+        </div>
+
+        <!-- Main Message -->
+        <div class="message-section">
+            <p>Our records indicate that your membership dues are currently overdue. To maintain your active membership status and retain access to chapter documents and resources, please submit your payment as soon as possible.</p>
+
+            <p><strong>What happens if dues aren't paid?</strong></p>
+            <ul style="color: #666;">
+                <li>Your membership status will change to "non-financial"</li>
+                <li>You will lose access to chapter documents and resources</li>
+                <li>You may be subject to removal after the grace period expires</li>
+                <li>Your portal account access may be restricted</li>
+            </ul>
+        </div>
+
+        <!-- Action Button -->
+        <div style="text-align: center;">
+            <a href="{{ portal_url }}" class="action-button">Pay Your Dues Now</a>
+        </div>
+
+        <!-- Important Info -->
+        <div class="info-box">
+            <strong>Questions about your account?</strong><br>
+            If you believe this is in error or need assistance with payment options, please contact your chapter officers at <strong>{{ contact_email|default:"nugammasigma@example.com" }}</strong>
+        </div>
+
+        <!-- Additional Info -->
+        <div class="message-section" style="font-size: 0.9rem; color: #666;">
+            <p><strong>Deadline:</strong> You have until <strong>{{ deadline_date|date:"F j, Y" }}</strong> to resolve this matter.</p>
+            <p>Thank you for your prompt attention to this matter. Your membership in Phi Beta Sigma is important to us.</p>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <div class="chapter-info">
+            Phi Beta Sigma Fraternity, Inc.<br>
+            Nu Gamma Sigma Chapter
+        </div>
+        <p style="margin: 1rem 0 0 0;">
+            This is an automated message. Please do not reply to this email.
+        </p>
+        <div class="footer-links">
+            <a href="{{ portal_url }}">Chapter Portal</a> |
+            <a href="{{ contact_email|default:"mailto:nugammasigma@example.com" }}">Contact Officers</a>
+        </div>
+    </div>
+</div>
+</body>
+</html>

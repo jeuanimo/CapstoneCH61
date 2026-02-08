@@ -1,0 +1,191 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Officer Only Documents - Nu Gamma Sigma{% endblock %}
+
+{% block content %}
+<div class="portal-page">
+    <div class="portal-header">
+        <h1><i class="fas fa-lock"></i> Officer Only Documents</h1>
+        <p>Confidential documents for officers only</p>
+        <a href="{% url 'create_document' %}" class="btn btn-primary" style="margin-top: 1rem;">
+            <i class="fas fa-plus"></i> Upload Document
+        </a>
+    </div>
+
+    <!-- Search Section -->
+    <div class="filters-section">
+        <form method="get" class="filter-form">
+            <div class="search-box">
+                <input type="text" name="search" class="form-control" placeholder="Search officer documents..." value="{{ search_query }}">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-search"></i> Search
+                </button>
+            </div>
+            
+            {% if search_query %}
+            <a href="{% url 'officer_only_documents' %}" class="btn btn-secondary">
+                <i class="fas fa-times"></i> Clear Search
+            </a>
+            {% endif %}
+        </form>
+    </div>
+
+    <!-- Documents Table -->
+    {% if documents %}
+        <div class="documents-table-wrapper">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th><i class="fas fa-file"></i> Document</th>
+                        <th>Description</th>
+                        <th>Uploaded By</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for document in documents %}
+                    <tr>
+                        <td>
+                            <strong>{{ document.title }}</strong>
+                        </td>
+                        <td>{{ document.description|truncatewords:15 }}</td>
+                        <td>{{ document.uploaded_by.get_full_name|default:document.uploaded_by.username }}</td>
+                        <td>{{ document.created_at|date:"M d, Y" }}</td>
+                        <td class="action-buttons">
+                            <a href="{{ document.file.url }}" class="btn btn-sm btn-info" download>
+                                <i class="fas fa-download"></i> Download
+                            </a>
+                            <a href="{% url 'edit_document' document.id %}" class="btn btn-sm btn-warning">
+                                <i class="fas fa-edit"></i> Edit
+                            </a>
+                            <a href="{% url 'delete_document' document.id %}" class="btn btn-sm btn-danger">
+                                <i class="fas fa-trash"></i> Delete
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i> No officer-only documents available yet.
+        </div>
+    {% endif %}
+
+    <!-- Back to Documents Button -->
+    <div style="margin-top: 2rem;">
+        <a href="{% url 'documents_view' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to All Documents
+        </a>
+    </div>
+</div>
+
+<style>
+    .documents-table-wrapper {
+        overflow-x: auto;
+        margin: 2rem 0;
+    }
+
+    .table {
+        background: var(--bg-secondary);
+        border-collapse: collapse;
+    }
+
+    .table thead {
+        background: var(--primary-color);
+        color: white;
+        font-weight: 600;
+    }
+
+    .table tbody tr {
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .table tbody tr:hover {
+        background: var(--bg-hover);
+    }
+
+    .table td {
+        padding: 1rem;
+        vertical-align: middle;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .action-buttons .btn-sm {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.85rem;
+    }
+
+    .portal-header {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: white;
+        padding: 2rem;
+        border-radius: 8px;
+        margin-bottom: 2rem;
+    }
+
+    .portal-header h1 {
+        margin: 0;
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .portal-header p {
+        margin: 0;
+        font-size: 1.1rem;
+        opacity: 0.95;
+    }
+
+    .filter-form {
+        background: var(--bg-secondary);
+        padding: 1.5rem;
+        border-radius: 8px;
+        display: flex;
+        gap: 1rem;
+        align-items: flex-end;
+        flex-wrap: wrap;
+    }
+
+    .search-box {
+        flex: 1;
+        min-width: 250px;
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .search-box input {
+        flex: 1;
+    }
+
+    /* Dark mode support */
+    body.dark-mode .table {
+        background: #2a2a2a;
+        color: #fff;
+    }
+
+    body.dark-mode .table thead {
+        background: var(--primary-color);
+    }
+
+    body.dark-mode .table tbody tr {
+        border-bottom-color: #444;
+    }
+
+    body.dark-mode .table tbody tr:hover {
+        background: #333;
+    }
+
+    body.dark-mode .filter-form {
+        background: #2a2a2a;
+        color: #fff;
+    }
+</style>
+{% endblock %}

@@ -193,6 +193,20 @@ body.dark-mode .brand-subtitle {
     font-size: 1.2rem;
 }
 
+.user-badge .profile-pic {
+    width: 32px !important;
+    height: 32px !important;
+    max-width: 32px !important;
+    max-height: 32px !important;
+    min-width: 32px;
+    min-height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(255, 255, 255, 0.6);
+    display: block !important;
+    flex-shrink: 0;
+}
+
 .user-badge .username {
     white-space: nowrap;
 }

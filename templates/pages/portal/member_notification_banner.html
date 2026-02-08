@@ -1,0 +1,45 @@
+{% if user.is_authenticated and user.member_profile %}
+    {% if user.member_profile.is_marked_for_removal %}
+    <div style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%); padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem; border-left: 5px solid #c92a2a;">
+        <div style="display: flex; align-items: start; gap: 1rem;">
+            <i class="fas fa-exclamation-triangle" style="font-size: 1.5rem; color: white; flex-shrink: 0; margin-top: 0.25rem;"></i>
+            <div style="flex: 1; color: white;">
+                <h4 style="margin: 0 0 0.5rem 0; font-weight: bold;">⏰ Account Removal Notice</h4>
+                <p style="margin: 0 0 0.75rem 0;">
+                    {% with days=user.member_profile.days_until_removal %}
+                    Your account will be removed in <strong>{{ days }} day{{ days|pluralize }}</strong>.
+                    {% endwith %}
+                </p>
+                <p style="margin: 0 0 0.75rem 0; font-size: 0.95rem;">
+                    <strong>Reason:</strong> {{ user.member_profile.removal_reason }}
+                </p>
+                <p style="margin: 0; font-size: 0.9rem;">
+                    💰 <strong>To restore access, please:</strong>
+                    {% if not user.member_profile.dues_current %}
+                    <a href="{% url 'dues_payments' %}" style="color: white; text-decoration: underline; font-weight: bold;">Pay your national and local dues</a>
+                    {% else %}
+                    Update your status with International HQ
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+    {% elif not user.member_profile.dues_current %}
+    <div style="background: linear-gradient(135deg, #ffc107 0%, #ffb700 100%); padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem; border-left: 5px solid #f39c12;">
+        <div style="display: flex; align-items: start; gap: 1rem;">
+            <i class="fas fa-money-check" style="font-size: 1.5rem; color: white; flex-shrink: 0; margin-top: 0.25rem;"></i>
+            <div style="flex: 1; color: #333;">
+                <h4 style="margin: 0 0 0.5rem 0; font-weight: bold;">💳 Dues Payment Needed</h4>
+                <p style="margin: 0 0 0.75rem 0;">
+                    Your national and local dues are not current. Please update your payment status.
+                </p>
+                <p style="margin: 0;">
+                    <a href="{% url 'dues_payments' %}" class="btn btn-sm" style="background-color: #ff6b6b; color: white; padding: 0.5rem 1rem; border-radius: 4px; text-decoration: none; display: inline-block; font-weight: 500;">
+                        <i class="fas fa-credit-card"></i> Pay Dues Now
+                    </a>
+                </p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+{% endif %}

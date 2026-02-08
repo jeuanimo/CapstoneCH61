@@ -134,10 +134,10 @@ urlpatterns = [
     path('portal/', views.portal_dashboard, name='portal_dashboard'),
     
     # MEMBER ROSTER MANAGEMENT (Officer only)
-    path('portal/roster/', views.member_roster, name='member_roster'),
-    path('portal/roster/create/', views.create_member, name='create_member'),
-    path('portal/roster/edit/<int:pk>/', views.edit_member, name='edit_member'),
-    path('portal/roster/delete/<int:pk>/', views.delete_member, name='delete_member'),
+    path('portal/roster/', views.MemberListView.as_view(), name='member_roster'),
+    path('portal/roster/create/', views.MemberCreateView.as_view(), name='create_member'),
+    path('portal/roster/edit/<int:pk>/', views.MemberUpdateView.as_view(), name='edit_member'),
+    path('portal/roster/delete/<int:pk>/', views.MemberDeleteView.as_view(), name='delete_member'),
     path('portal/roster/import/', views.import_members, name='import_members'),
     path('portal/officers/import/', views.import_officers, name='import_officers'),
     
@@ -154,6 +154,7 @@ urlpatterns = [
     path('portal/dues/', views.dues_view, name='dues_view'),
     path('portal/announcements/', views.announcements_view, name='announcements_view'),
     path('portal/documents/', views.documents_view, name='documents_view'),
+    path('portal/documents/officer-only/', views.officer_only_documents, name='officer_only_documents'),
     path('portal/messages/', views.messages_inbox, name='messages_inbox'),
     path('portal/messages/<int:message_id>/', views.message_detail, name='message_detail'),
     path('portal/messages/send/', views.send_message, name='send_message'),
@@ -179,16 +180,17 @@ urlpatterns = [
     path('portal/events/create/', views.create_event, name='create_event'),
     path('portal/events/<int:event_id>/edit/', views.edit_event, name='edit_event'),
     path('portal/events/<int:event_id>/delete/', views.delete_event, name='delete_event'),
+    path('portal/events/<int:event_id>/rsvp/', views.rsvp_event, name='rsvp_event'),
     path('portal/documents/create/', views.create_document, name='create_document'),
     path('portal/documents/<int:document_id>/edit/', views.edit_document, name='edit_document'),
     path('portal/documents/<int:document_id>/delete/', views.delete_document, name='delete_document'),
     
     # DUES AND PAYMENTS MANAGEMENT (Officer/Treasurer only)
-    path('portal/dues-and-payments/', views.dues_and_payments, name='dues_and_payments'),
-    path('portal/dues-and-payments/create-bill/', views.create_bill, name='create_bill'),
-    path('portal/dues-and-payments/add/', views.add_dues_payment, name='add_dues_payment'),
-    path('portal/dues-and-payments/edit/<int:pk>/', views.edit_dues_payment, name='edit_dues_payment'),
-    path('portal/dues-and-payments/delete/<int:pk>/', views.delete_dues_payment, name='delete_dues_payment'),
+    path('portal/dues-and-payments/', views.DuesPaymentListView.as_view(), name='dues_and_payments'),
+    path('portal/dues-and-payments/create-bill/', views.CreateBillView.as_view(), name='create_bill'),
+    path('portal/dues-and-payments/add/', views.DuesPaymentCreateView.as_view(), name='add_dues_payment'),
+    path('portal/dues-and-payments/edit/<int:pk>/', views.DuesPaymentUpdateView.as_view(), name='edit_dues_payment'),
+    path('portal/dues-and-payments/delete/<int:pk>/', views.DuesPaymentDeleteView.as_view(), name='delete_dues_payment'),
     path('portal/dues-and-payments/bulk-delete/', views.bulk_delete_dues_payments, name='bulk_delete_dues_payments'),
     path('portal/member-dues-summary/', views.member_dues_summary, name='member_dues_summary'),
     
@@ -199,11 +201,18 @@ urlpatterns = [
     path('portal/payment-success/<int:stripe_payment_id>/', views.payment_success, name='payment_success'),
     path('portal/payment-cancelled/<int:stripe_payment_id>/', views.payment_cancelled, name='payment_cancelled'),
     
+    # MEMBER SYNCHRONIZATION (Admin only)
+    path('portal/sync-members/', views.sync_members_with_hq, name='sync_members'),
+    path('portal/marked-members/', views.view_marked_members, name='view_marked_members'),
+    
     # TWILIO SMS INTEGRATION (Admin/Officer only)
     path('portal/twilio/config/', views.setup_twilio_config, name='twilio_config'),
     path('portal/sms/preferences/', views.update_sms_preferences, name='sms_preferences'),
     path('portal/sms/send-alert/', views.send_sms_alert, name='send_sms_alert'),
     path('portal/sms/logs/', views.view_sms_logs, name='view_sms_logs'),
+    
+    # EMAIL COMMUNICATION (Officer only)
+    path('portal/email/send-members/', views.send_member_email, name='send_member_email'),
     
     # BOUTIQUE / SHOP - PUBLIC PAGES
     path('boutique/', views.shop_home, name='shop_home'),

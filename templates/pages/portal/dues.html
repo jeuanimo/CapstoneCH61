@@ -10,6 +10,9 @@
         <p>Track your membership dues and payment history</p>
     </div>
 
+    <!-- Member Warning/Notification Banner -->
+    {% include 'pages/portal/member_notification_banner.html' %}
+
     {% if member_profile %}
     <div class="dues-summary">
         <div class="summary-card">
@@ -58,7 +61,12 @@
                             {% endif %}
                         </span>
                     </td>
-                    <td>
+                    <td class="action-column">
+                        {% if not payment.is_verified %}
+                        <a href="{% url 'pay_dues_online' payment.id %}" class="btn-action stripe-btn" title="Pay with Stripe">
+                            <i class="fab fa-cc-stripe"></i> Pay with Stripe
+                        </a>
+                        {% endif %}
                         <a href="{% url 'delete_dues_payment' payment.id %}" class="btn-action delete-btn" title="Delete this bill" onclick="return confirm('Are you sure you want to delete this bill? This action cannot be undone.');">
                             <i class="fas fa-trash-alt"></i>
                         </a>
@@ -237,23 +245,51 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        width: 36px;
-        height: 36px;
+        padding: 0.5rem 0.8rem;
         border-radius: 6px;
         text-decoration: none;
         transition: all 0.3s ease;
-        font-size: 1rem;
+        font-size: 0.9rem;
+        margin-right: 0.5rem;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-action.stripe-btn {
+        background: #635bff;
+        color: white;
+        padding: 0.5rem 1rem;
+    }
+
+    .btn-action.stripe-btn:hover {
+        background: #5a50dd;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(99, 91, 255, 0.3);
+    }
+
+    .btn-action.stripe-btn i {
+        margin-right: 0.4rem;
     }
 
     .btn-action.delete-btn {
         background: #f8d7da;
         color: #721c24;
+        width: 36px;
+        height: 36px;
+        padding: 0;
     }
 
     .btn-action.delete-btn:hover {
         background: #f5c6cb;
         color: #721c24;
         transform: scale(1.1);
+    }
+
+    .action-column {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
     }
 
     /* Dark Mode */
@@ -297,6 +333,17 @@
     body.dark-mode .btn-action.delete-btn:hover {
         background: #8b5558;
         color: #f8d7da;
+    }
+
+    body.dark-mode .btn-action.stripe-btn {
+        background: #635bff;
+        color: white;
+    }
+
+    body.dark-mode .btn-action.stripe-btn:hover {
+        background: #7c72ff;
+        color: white;
+        box-shadow: 0 4px 8px rgba(99, 91, 255, 0.5);
     }
 </style>
 {% endblock %}

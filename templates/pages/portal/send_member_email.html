@@ -1,0 +1,279 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Send Member Email - Chapter Portal{% endblock %}
+
+{% block content %}
+<div style="padding: 2rem 0;">
+    <div class="container">
+        <div style="margin-bottom: 2rem;">
+            <h1 style="color: #1a1a2e; margin-bottom: 0.5rem;">
+                <i class="fas fa-envelope"></i> Send Email to Members
+            </h1>
+            <p style="color: #6c757d; margin: 0;">
+                Send announcements and communications to chapter members
+            </p>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <!-- Preview Mode -->
+        {% if is_preview %}
+        <div style="background: white; padding: 2rem; border-radius: 8px; border: 1px solid #dee2e6; margin-bottom: 2rem;">
+            <h3 style="color: #1a1a2e; margin-bottom: 1.5rem;">
+                <i class="fas fa-eye"></i> Email Preview
+            </h3>
+            
+            <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 6px; margin-bottom: 1.5rem;">
+                <p style="color: #6c757d; margin: 0.5rem 0 0 0; font-size: 0.85rem;">
+                    <strong>To:</strong> {{ recipient_count }} member(s)
+                    {% if has_more %}<em>(showing first 10)</em>{% endif %}
+                </p>
+                {% if recipient_count > 0 %}
+                <div style="background: white; padding: 0.75rem; border-radius: 4px; margin-top: 0.75rem; max-height: 150px; overflow-y: auto;">
+                    <small style="color: #555;">
+                        {% for email in recipients %}
+                            {{ email }}<br>
+                        {% endfor %}
+                        {% if has_more %}
+                            ... +{{ recipient_count|add:-10 }} more
+                        {% endif %}
+                    </small>
+                </div>
+                {% endif %}
+            </div>
+
+            <div style="background: #e7f3ff; padding: 1rem; border-radius: 6px; border-left: 4px solid #164f90; margin-bottom: 1.5rem;">
+                <p style="color: #164f90; margin: 0; font-size: 0.9rem;">
+                    <strong>Subject:</strong> {{ subject }}
+                </p>
+            </div>
+
+            <div style="background: white; padding: 1.5rem; border: 1px solid #dee2e6; border-radius: 6px; margin-bottom: 1.5rem;">
+                <p style="color: #164f90; font-weight: bold; margin-bottom: 1rem;">Message Preview:</p>
+                <div style="white-space: pre-wrap; color: #555; font-size: 0.95rem; line-height: 1.6;">{{ message }}</div>
+            </div>
+
+            <form method="post" style="display: flex; gap: 1rem;">
+                {% csrf_token %}
+                <input type="hidden" name="recipient_group" value="{{ form.recipient_group.value }}">
+                <input type="hidden" name="subject" value="{{ subject }}">
+                <input type="hidden" name="message" value="{{ message }}">
+                <input type="hidden" name="send_immediately" value="on">
+                
+                <button type="submit" class="btn btn-success" style="flex: 1;">
+                    <i class="fas fa-check"></i> Send Email Now
+                </button>
+                <a href="{% url 'send_member_email' %}" class="btn btn-secondary" style="flex: 1;">
+                    <i class="fas fa-arrow-left"></i> Back to Edit
+                </a>
+            </form>
+        </div>
+        {% else %}
+
+        <!-- Form Mode -->
+        <div style="background: white; padding: 2rem; border-radius: 8px; border: 1px solid #dee2e6;">
+            <form method="post">
+                {% csrf_token %}
+
+                <!-- Recipient Group Selection -->
+                <div style="margin-bottom: 2rem; padding-bottom: 2rem; border-bottom: 1px solid #dee2e6;">
+                    <h4 style="color: #1a1a2e; margin-bottom: 1rem;">
+                        <i class="fas fa-users"></i> Who should receive this email?
+                    </h4>
+                    
+                    {% for radio in form.recipient_group %}
+                        <div style="display: flex; align-items: center; margin-bottom: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 6px;">
+                            {{ radio.tag }}
+                            <label for="{{ radio.id_for_label }}" style="margin-left: 0.75rem; margin-bottom: 0; cursor: pointer; flex: 1;">
+                                <strong style="color: #1a1a2e;">{{ radio.choice_label }}</strong>
+                            </label>
+                        </div>
+                    {% endfor %}
+                    
+                    {% if form.recipient_group.errors %}
+                        <div style="color: #dc3545; margin-top: 0.5rem;">
+                            {% for error in form.recipient_group.errors %}{{ error }}{% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Subject -->
+                <div style="margin-bottom: 1.5rem;">
+                    <label for="{{ form.subject.id_for_label }}" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #1a1a2e;">
+                        Subject *
+                    </label>
+                    {{ form.subject }}
+                    <small style="color: #6c757d; display: block; margin-top: 0.25rem;">
+                        This will be the email subject line
+                    </small>
+                    {% if form.subject.errors %}
+                        <div style="color: #dc3545; margin-top: 0.5rem;">
+                            {% for error in form.subject.errors %}{{ error }}{% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Message -->
+                <div style="margin-bottom: 1.5rem;">
+                    <label for="{{ form.message.id_for_label }}" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #1a1a2e;">
+                        Message *
+                    </label>
+                    {{ form.message }}
+                    {% if form.message.errors %}
+                        <div style="color: #dc3545; margin-top: 0.5rem;">
+                            {% for error in form.message.errors %}{{ error }}{% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Options -->
+                <div style="margin-bottom: 2rem; padding: 1rem; background: #f8f9fa; border-radius: 6px;">
+                    <h5 style="color: #1a1a2e; margin-bottom: 1rem;">
+                        <i class="fas fa-cog"></i> Options
+                    </h5>
+                    
+                    <div style="margin-bottom: 1rem;">
+                        <div style="display: flex; align-items: center;">
+                            {{ form.include_unsubscribed }}
+                            <label for="{{ form.include_unsubscribed.id_for_label }}" style="margin-left: 0.75rem; margin-bottom: 0; cursor: pointer;">
+                                {{ form.include_unsubscribed.label }}
+                            </label>
+                        </div>
+                        <small style="color: #6c757d; display: block; margin-top: 0.25rem; margin-left: 2rem;">
+                            {{ form.include_unsubscribed.help_text }}
+                        </small>
+                    </div>
+
+                    <div style="display: flex; align-items: center;">
+                        {{ form.send_immediately }}
+                        <label for="{{ form.send_immediately.id_for_label }}" style="margin-left: 0.75rem; margin-bottom: 0; cursor: pointer;">
+                            {{ form.send_immediately.label }}
+                        </label>
+                    </div>
+                    <small style="color: #6c757d; display: block; margin-top: 0.25rem; margin-left: 2rem;">
+                        {{ form.send_immediately.help_text }}
+                    </small>
+                </div>
+
+                <!-- Buttons -->
+                <div style="display: flex; gap: 1rem;">
+                    <button type="submit" class="btn btn-primary" style="flex: 1;">
+                        <i class="fas fa-eye"></i> Preview Email
+                    </button>
+                    <a href="{% url 'portal_dashboard' %}" class="btn btn-secondary" style="flex: 1;">
+                        <i class="fas fa-times"></i> Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        {% endif %}
+
+        <div style="margin-top: 2rem; padding: 1rem; background: #e7f3ff; border-left: 4px solid #164f90; border-radius: 6px;">
+            <p style="color: #164f90; margin: 0; font-size: 0.9rem;">
+                <i class="fas fa-info-circle"></i> <strong>Tip:</strong> Always preview before sending to ensure the message looks correct and reaches the right members.
+            </p>
+        </div>
+    </div>
+</div>
+
+<style>
+    .container {
+        max-width: 900px;
+    }
+
+    .form-control {
+        border-color: #1a1a2e;
+        border-radius: 6px;
+        padding: 0.75rem;
+    }
+
+    .form-control:focus {
+        border-color: #164f90;
+        box-shadow: 0 0 0 0.2rem rgba(22, 79, 144, 0.25);
+    }
+
+    .btn {
+        border-radius: 6px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        transition: all 0.2s;
+    }
+
+    .btn-primary {
+        background: #164f90;
+        border-color: #164f90;
+    }
+
+    .btn-primary:hover {
+        background: #0f3a6f;
+    }
+
+    .btn-success {
+        background: #28a745;
+        border-color: #28a745;
+    }
+
+    .btn-success:hover {
+        background: #218838;
+    }
+
+    @media (max-width: 768px) {
+        [style*="display: grid; grid-template-columns"] {
+            display: grid !important;
+            grid-template-columns: 1fr !important;
+        }
+
+        [style*="display: flex"] {
+            flex-direction: column !important;
+        }
+    }
+
+    body.dark-mode {
+        background: #0d1317;
+    }
+
+    body.dark-mode [style*="background: white"] {
+        background: #1a2a4a !important;
+        border-color: #2a3a5a !important;
+    }
+
+    body.dark-mode h1, body.dark-mode h3, body.dark-mode h4, body.dark-mode h5 {
+        color: #87ceeb !important;
+    }
+
+    body.dark-mode [style*="color: #1a1a2e"] {
+        color: #87ceeb !important;
+    }
+
+    body.dark-mode [style*="color: #555"] {
+        color: #b0b8c8 !important;
+    }
+
+    body.dark-mode [style*="background: #f8f9fa"] {
+        background: #0f1a30 !important;
+    }
+
+    body.dark-mode .form-control {
+        background: #0f1a30;
+        border-color: #2a3a5a;
+        color: #e8edf7;
+    }
+
+    body.dark-mode [style*="background: #e7f3ff"] {
+        background: #1a3a5a !important;
+    }
+
+    body.dark-mode [style*="color: #164f90"] {
+        color: #87ceeb !important;
+    }
+</style>
+{% endblock %}

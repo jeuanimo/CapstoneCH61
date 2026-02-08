@@ -104,6 +104,11 @@ from django.conf import settings
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
 import os
+# Class-based view imports
+from django.views.generic import CreateView, UpdateView, DeleteView, ListView
+from django.urls import reverse_lazy
+# Custom mixins for CBVs
+from .mixins import StaffRequiredMixin, DeleteConfirmationMixin, OfficerRequiredMixin
 from decimal import Decimal
 from django.utils import timezone
 from urllib.parse import urlparse
@@ -251,11 +256,24 @@ def events(request):
     
     # Check if user is an officer (for edit/delete permissions)
     is_officer = False
+    user_rsvps = {}  # Store user's RSVP status for each event
+    
     if request.user.is_authenticated:
         is_officer = ChapterLeadership.objects.filter(
             email__iexact=request.user.email,
             is_active=True
         ).exists() or request.user.is_staff
+        
+        # Get user's RSVP status for all events
+        try:
+            member_profile = MemberProfile.objects.get(user=request.user)
+            rsvp_records = EventAttendance.objects.filter(
+                member=member_profile,
+                rsvp_status=True
+            ).values_list('event_id', flat=True)
+            user_rsvps = {event_id: True for event_id in rsvp_records}
+        except MemberProfile.DoesNotExist:
+            pass
     
     context = {
         'filterset': filterset,
@@ -266,6 +284,7 @@ def events(request):
         'month_name': month_name,
         'events_this_month': events_this_month,
         'is_officer': is_officer,
+        'user_rsvps': user_rsvps,  # Pass RSVP status to template
     }
     return render(request, 'pages/events.html', context)
 
@@ -1092,160 +1111,468 @@ def portal_dashboard(request):
     return render(request, 'pages/portal/dashboard.html', context)
 
 
-@login_required
-def member_roster(request):
-    """View all active members (financial and life members)"""
-    members = MemberProfile.objects.financial_members().select_related('user').order_by('user__last_name')
+# ==================== CLASS-BASED VIEWS (CBV) - MEMBER MANAGEMENT ====================
+# These are modern Django views that are more maintainable and DRY than FBVs above.
+# Gradually replace FBV versions with these as you migrate your codebase.
+
+class MemberListView(StaffRequiredMixin, ListView):
+    """
+    List all active members (financial and life members).
     
-    context = {
-        'members': members,
-        'is_staff': request.user.is_staff,
-    }
-    return render(request, 'pages/portal/roster.html', context)
+    Replaces: member_roster FBV
+    URL: /portal/roster/
+    
+    Features:
+    - Staff/admin only access
+    - Shows all financial and life members
+    - Ordered by last name
+    """
+    model = MemberProfile
+    template_name = 'pages/portal/roster.html'
+    context_object_name = 'members'
+    paginate_by = 50
+    
+    def get_queryset(self):
+        """Get financial members ordered by last name"""
+        return MemberProfile.objects.financial_members().select_related('user').order_by('user__last_name')
+    
+    def get_context_data(self, **kwargs):
+        """Add is_staff to context for template"""
+        context = super().get_context_data(**kwargs)
+        context['is_staff'] = self.request.user.is_staff
+        return context
 
 
-@login_required
-@user_passes_test(lambda u: u.is_staff)
-def create_member(request):
-    """Create a new member profile (admin only)"""
-    if request.method == 'POST':
-        form = MemberProfileForm(request.POST, request.FILES)
-        if form.is_valid():
-            # Create user account with random password
-            user = User.objects.create_user(
-                username=form.cleaned_data['username'],
-                email=form.cleaned_data['email'],
-                first_name=form.cleaned_data['first_name'],
-                last_name=form.cleaned_data['last_name'],
-                password=User.objects.make_random_password()
+class MemberCreateView(StaffRequiredMixin, CreateView):
+    """
+    Create a new member profile with user account.
+    
+    Replaces: create_member FBV
+    URL: /portal/roster/create/
+    
+    Features:
+    - Staff/admin only access
+    - Auto-creates user account
+    - Generates invitation code
+    - Creates leadership position if specified
+    """
+    model = MemberProfile
+    form_class = MemberProfileForm
+    template_name = 'pages/portal/member_form.html'
+    success_url = reverse_lazy('member_roster')
+    
+    def get_context_data(self, **kwargs):
+        """Add form context"""
+        context = super().get_context_data(**kwargs)
+        context['action'] = 'Create'
+        context['title'] = 'Create Member Profile'
+        return context
+    
+    def form_valid(self, form):
+        """Create user account and member profile"""
+        # Get form data before saving
+        username = form.cleaned_data['username']
+        email = form.cleaned_data['email']
+        first_name = form.cleaned_data['first_name']
+        last_name = form.cleaned_data['last_name']
+        leadership_position = form.cleaned_data.get('leadership_position')
+        
+        # Create user account with random password
+        user = User.objects.create_user(
+            username=username,
+            email=email,
+            first_name=first_name,
+            last_name=last_name,
+            password=User.objects.make_random_password()
+        )
+        user.is_active = True
+        user.save()
+        
+        # Save member profile with user reference
+        member_profile = form.save(commit=False)
+        member_profile.user = user
+        member_profile.save()
+        
+        # Create leadership position if specified
+        if leadership_position:
+            ChapterLeadership.objects.create(
+                position=leadership_position,
+                full_name=user.get_full_name() or user.username,
+                email=user.email,
+                phone=member_profile.phone,
+                is_active=True
             )
-            user.is_active = True  # Set active so they can log in after signup
-            user.save()
-            
-            # Create member profile
-            member_profile = form.save(commit=False)
-            member_profile.user = user
-            member_profile.save()
-            
-            # Handle leadership position if selected
-            leadership_position = form.cleaned_data.get('leadership_position')
-            if leadership_position:
-                ChapterLeadership.objects.create(
-                    position=leadership_position,
-                    full_name=user.get_full_name() or user.username,
-                    email=user.email,
-                    phone=member_profile.phone,
-                    is_active=True
-                )
-            
-            # Generate invitation code using helper function
-            invitation = generate_invitation_for_member(user, member_profile, request.user)
-            
-            logger.info(f"Member created: {member_profile.member_number} by {request.user.username}")
-            
-            # Show success message with invitation code
-            messages.success(
-                request, 
-                f"Successfully created member profile for {user.get_full_name()}! "
-                f"Invitation Code: <strong>{invitation.code}</strong> "
-                f"(Send this code to {user.email} so they can set their password)"
-            )
-            return redirect('member_roster')
-        else:
-            for field, errors in form.errors.items():
-                for error in errors:
-                    messages.error(request, f"{field}: {error}")
-    else:
-        form = MemberProfileForm()
-    
-    context = {
-        'form': form,
-        'action': 'Create',
-        'title': 'Create Member Profile'
-    }
-    return render(request, 'pages/portal/member_form.html', context)
+        
+        # Generate invitation code
+        invitation = generate_invitation_for_member(user, member_profile, self.request.user)
+        
+        logger.info(f"Member created: {member_profile.member_number} by {self.request.user.username}")
+        
+        # Show success message with invitation code
+        messages.success(
+            self.request,
+            f"Successfully created member profile for {user.get_full_name()}! "
+            f"Invitation Code: {invitation.code} "
+            f"(Send this code to {user.email} so they can set their password)"
+        )
+        
+        # Let parent class handle the response
+        return super().form_valid(form)
 
 
-@login_required
-@user_passes_test(lambda u: u.is_staff)
-def edit_member(request, pk):
-    """Edit member profile (admin only)"""
-    member_profile = get_object_or_404(MemberProfile, pk=pk)
+class MemberUpdateView(StaffRequiredMixin, UpdateView):
+    """
+    Edit an existing member profile.
     
-    if request.method == 'POST':
-        form = MemberProfileForm(request.POST, request.FILES, instance=member_profile, user_instance=member_profile.user)
-        if form.is_valid():
-            # Update user information
-            user = member_profile.user
-            user.username = form.cleaned_data['username']  # Allow username change
-            user.first_name = form.cleaned_data['first_name']
-            user.last_name = form.cleaned_data['last_name']
-            user.email = form.cleaned_data['email']
-            user.save()
-            
-            # Update member profile
-            member_profile = form.save()
-            
-            # Handle leadership position
-            leadership_position = form.cleaned_data.get('leadership_position')
-            # Remove existing leadership positions for this member
-            ChapterLeadership.objects.filter(email__iexact=user.email).delete()
-            # Add new leadership position if selected
-            if leadership_position:
-                ChapterLeadership.objects.create(
-                    position=leadership_position,
-                    full_name=user.get_full_name() or user.username,
-                    email=user.email,
-                    phone=member_profile.phone,
-                    is_active=True
-                )
-            
-            logger.info(f"Member updated: {member_profile.member_number} by {request.user.username}")
-            messages.success(request, f"Successfully updated {user.get_full_name()}'s profile!")
-            return redirect('member_roster')
-        else:
-            for field, errors in form.errors.items():
-                for error in errors:
-                    messages.error(request, f"{field}: {error}")
-            # Form stays with the POST data and user_instance for re-display
-    else:
-        form = MemberProfileForm(instance=member_profile, user_instance=member_profile.user)
-        # Pre-select leadership position if member is an officer
-        existing_leadership = ChapterLeadership.objects.filter(email__iexact=member_profile.user.email, is_active=True).first()
+    Replaces: edit_member FBV
+    URL: /portal/roster/edit/<id>/
+    
+    Features:
+    - Staff/admin only access
+    - Updates both user and member profile
+    - Manages leadership positions
+    - Pre-populates leadership position if member is officer
+    """
+    model = MemberProfile
+    form_class = MemberProfileForm
+    template_name = 'pages/portal/member_form.html'
+    success_url = reverse_lazy('member_roster')
+    
+    def get_form_kwargs(self):
+        """Pass user instance to form"""
+        kwargs = super().get_form_kwargs()
+        kwargs['user_instance'] = self.object.user
+        return kwargs
+    
+    def get_context_data(self, **kwargs):
+        """Add edit context"""
+        context = super().get_context_data(**kwargs)
+        context['action'] = 'Edit'
+        context['title'] = f'Edit Member Profile'
+        context['member_profile'] = self.object
+        return context
+    
+    def get_initial(self):
+        """Pre-populate leadership position if member is officer"""
+        initial = super().get_initial()
+        
+        member = self.get_object()
+        existing_leadership = ChapterLeadership.objects.filter(
+            email__iexact=member.user.email,
+            is_active=True
+        ).first()
+        
         if existing_leadership:
-            form.fields['leadership_position'].initial = existing_leadership.position
+            initial['leadership_position'] = existing_leadership.position
+        
+        return initial
     
-    context = {
-        'form': form,
-        'action': 'Edit',
-        'title': 'Edit Member Profile',
-        'member_profile': member_profile
-    }
-    return render(request, 'pages/portal/member_form.html', context)
-    
-    context = {
-        'form': form,
-        'member_profile': member_profile,
-        'action': 'Edit',
-        'title': f'Edit {member_profile.user.get_full_name()}'
-    }
-    return render(request, 'pages/portal/member_form.html', context)
+    def form_valid(self, form):
+        """Update user and member profile"""
+        # Update user account
+        user = self.object.user
+        user.username = form.cleaned_data['username']
+        user.first_name = form.cleaned_data['first_name']
+        user.last_name = form.cleaned_data['last_name']
+        user.email = form.cleaned_data['email']
+        user.save()
+        
+        # Handle leadership position
+        leadership_position = form.cleaned_data.get('leadership_position')
+        ChapterLeadership.objects.filter(email__iexact=user.email).delete()
+        
+        if leadership_position:
+            ChapterLeadership.objects.create(
+                position=leadership_position,
+                full_name=user.get_full_name() or user.username,
+                email=user.email,
+                phone=self.object.phone,
+                is_active=True
+            )
+        
+        logger.info(f"Member updated: {self.object.member_number} by {self.request.user.username}")
+        messages.success(self.request, f"Successfully updated {user.get_full_name()}'s profile!")
+        
+        return super().form_valid(form)
 
 
-@login_required
-@user_passes_test(lambda u: u.is_staff)
-def delete_member(request, pk):
-    """Delete member profile (admin only)"""
-    member_profile = get_object_or_404(MemberProfile, pk=pk)
-    user = member_profile.user
-    name = user.get_full_name() or user.username
+class MemberDeleteView(StaffRequiredMixin, DeleteConfirmationMixin, DeleteView):
+    """
+    Delete a member profile.
     
-    # Delete both user and profile (cascade will handle profile)
-    user.delete()
+    Replaces: delete_member FBV
+    URL: /portal/roster/delete/<id>/
     
-    logger.info(f"Member deleted: {name} by {request.user.username}")
-    messages.success(request, f"Successfully deleted member profile for {name}.")
-    return redirect('member_roster')
+    Features:
+    - Staff/admin only access
+    - Deletes both member profile and user account
+    - Shows confirmation message
+    - Logs deletion
+    """
+    model = MemberProfile
+    template_name = 'pages/portal/member_confirm_delete.html'
+    success_url = reverse_lazy('member_roster')
+    
+    def delete(self, request, *args, **kwargs):
+        """Delete member profile and associated user account"""
+        member_profile = self.get_object()
+        user = member_profile.user
+        
+        # Call parent delete to delete the membership profile
+        response = super().delete(request, *args, **kwargs)
+        
+        # Also delete the user account
+        user.delete()
+        
+        return response
+
+
+# ==================== CLASS-BASED VIEWS (CBV) - PAYMENT MANAGEMENT ====================
+# These are modern Django views for dues/payment management with officer permissions.
+
+class DuesPaymentListView(OfficerRequiredMixin, ListView):
+    """
+    List all dues and payments.
+    
+    Replaces: dues_and_payments FBV
+    URL: /portal/dues-payments/
+    
+    Features:
+    - Officer/admin only access
+    - Filterable by status, type, date range
+    - Searchable by member name
+    - Shows summary statistics (totals, overdue count)
+    """
+    model = DuesPayment
+    template_name = 'pages/portal/dues_and_payments.html'
+    context_object_name = 'payments'
+    paginate_by = 50
+    
+    def get_queryset(self):
+        """Apply filters from GET parameters"""
+        queryset = DuesPayment.objects.all().select_related('member', 'member__user', 'created_by')
+        
+        # Member search
+        member_search = self.request.GET.get('member', '').strip()
+        if member_search:
+            queryset = queryset.filter(
+                member__user__first_name__icontains=member_search
+            ) | queryset.filter(
+                member__user__last_name__icontains=member_search
+            ) | queryset.filter(
+                member__member_number__icontains=member_search
+            )
+        
+        # Status filter
+        status_filter = self.request.GET.get('status', '')
+        if status_filter:
+            queryset = queryset.filter(status=status_filter)
+        
+        # Time-based filters
+        from datetime import timedelta
+        filter_type = self.request.GET.get('filter', 'all')
+        
+        if filter_type == 'overdue':
+            queryset = queryset.filter(status='pending', due_date__lt=timezone.now().date())
+        elif filter_type == 'pending':
+            queryset = queryset.filter(status='pending', due_date__gte=timezone.now().date())
+        elif filter_type == 'paid':
+            queryset = queryset.filter(status='paid')
+        elif filter_type == 'this_month':
+            now = timezone.now()
+            start = now.replace(day=1)
+            if now.month == 12:
+                end = start.replace(year=now.year + 1, month=1) - timedelta(days=1)
+            else:
+                end = start.replace(month=now.month + 1) - timedelta(days=1)
+            queryset = queryset.filter(due_date__range=[start.date(), end.date()])
+        
+        return queryset.order_by('-due_date')
+    
+    def get_context_data(self, **kwargs):
+        """Add summary statistics and filter info"""
+        context = super().get_context_data(**kwargs)
+        payments = self.get_queryset()
+        
+        from django.db import models
+        
+        total_amount = payments.aggregate(models.Sum('amount'))['amount__sum'] or 0
+        total_paid = payments.aggregate(models.Sum('amount_paid'))['amount_paid__sum'] or 0
+        overdue_count = DuesPayment.objects.filter(status='pending', due_date__lt=timezone.now().date()).count()
+        pending_count = DuesPayment.objects.filter(status='pending', due_date__gte=timezone.now().date()).count()
+        
+        context.update({
+            'filter_type': self.request.GET.get('filter', 'all'),
+            'member_search': self.request.GET.get('member', '').strip(),
+            'status_filter': self.request.GET.get('status', ''),
+            'status_choices': DuesPayment.PAYMENT_STATUS_CHOICES,
+            'total_amount': total_amount,
+            'total_paid': total_paid,
+            'outstanding': total_amount - total_paid,
+            'overdue_count': overdue_count,
+            'pending_count': pending_count,
+        })
+        return context
+
+
+class DuesPaymentCreateView(OfficerRequiredMixin, CreateView):
+    """
+    Create a new dues/payment entry.
+    
+    Replaces: add_dues_payment FBV
+    URL: /portal/dues-payments/create/
+    
+    Features:
+    - Officer/admin only access
+    - Creates payment record for member
+    - Logs action
+    - Shows success message
+    """
+    model = DuesPayment
+    form_class = DuesPaymentForm
+    template_name = 'pages/portal/dues_payment_form.html'
+    success_url = reverse_lazy('dues_and_payments')
+    
+    def form_valid(self, form):
+        """Set created_by and log action"""
+        payment = form.save(commit=False)
+        payment.created_by = self.request.user
+        payment.save()
+        
+        logger.info(f"Dues payment added: {payment.member.user.get_full_name()} - {payment.get_payment_type_display()} by {self.request.user.username}")
+        messages.success(self.request, f"Successfully added dues payment for {payment.member.user.get_full_name()}!")
+        
+        return super().form_valid(form)
+    
+    def get_context_data(self, **kwargs):
+        """Add action label"""
+        context = super().get_context_data(**kwargs)
+        context['action'] = 'Add'
+        return context
+
+
+class DuesPaymentUpdateView(OfficerRequiredMixin, UpdateView):
+    """
+    Edit a dues/payment entry.
+    
+    Replaces: edit_dues_payment FBV
+    URL: /portal/dues-payments/edit/<id>/
+    
+    Features:
+    - Officer/admin only access
+    - Updates payment record
+    - Logs action
+    - Shows success message
+    """
+    model = DuesPayment
+    form_class = DuesPaymentForm
+    template_name = 'pages/portal/dues_payment_form.html'
+    success_url = reverse_lazy('dues_and_payments')
+    
+    def form_valid(self, form):
+        """Log update action"""
+        payment = form.save()
+        logger.info(f"Dues payment updated: {payment.member.user.get_full_name()} - {payment.get_payment_type_display()} by {self.request.user.username}")
+        messages.success(self.request, f"Successfully updated dues payment for {payment.member.user.get_full_name()}!")
+        return super().form_valid(form)
+    
+    def get_context_data(self, **kwargs):
+        """Add action and payment labels"""
+        context = super().get_context_data(**kwargs)
+        context['action'] = 'Edit'
+        context['payment'] = self.object
+        return context
+
+
+class DuesPaymentDeleteView(OfficerRequiredMixin, DeleteConfirmationMixin, DeleteView):
+    """
+    Delete a dues/payment entry.
+    
+    Replaces: delete_dues_payment FBV
+    URL: /portal/dues-payments/delete/<id>/
+    
+    Features:
+    - Officer/admin only access
+    - Deletes payment record
+    - Logs deletion with details
+    - Shows confirmation message
+    """
+    model = DuesPayment
+    template_name = 'pages/portal/dues_payment_confirm_delete.html'
+    success_url = reverse_lazy('dues_and_payments')
+    
+    def delete(self, request, *args, **kwargs):
+        """Log deletion action"""
+        payment = self.get_object()
+        logger.info(f"Dues payment deleted: {payment.member.user.get_full_name()} - {payment.get_payment_type_display()} - ${payment.amount} by {request.user.username}")
+        messages.success(request, f"Successfully deleted dues payment for {payment.member.user.get_full_name()}.")
+        return super().delete(request, *args, **kwargs)
+
+
+class CreateBillView(OfficerRequiredMixin, CreateView):
+    """
+    Create bills for member(s).
+    
+    Replaces: create_bill FBV
+    URL: /portal/bills/create/
+    
+    Features:
+    - Officer/admin only access
+    - Creates bills for single member or all active members
+    - Custom payment types supported
+    - Success message shows count and due date
+    - Bulk creation with logging
+    """
+    model = DuesPayment
+    form_class = CreateBillForm
+    template_name = 'pages/portal/create_bill.html'
+    success_url = reverse_lazy('dues_and_payments')
+    
+    def form_valid(self, form):
+        """Create bills for member(s)"""
+        send_to_all = form.cleaned_data.get('send_to_all_members', False)
+        custom_type = self.request.POST.get('custom_type', '').strip()
+        
+        # Determine target members
+        if send_to_all:
+            members = MemberProfile.objects.all()
+            if not members.exists():
+                messages.error(self.request, 'No active members found in the chapter.')
+                return self.form_invalid(form)
+        else:
+            member = form.cleaned_data.get('member')
+            if not member:
+                messages.error(self.request, 'Please select a member or check "Send to All Active Members".')
+                return self.form_invalid(form)
+            members = [member]
+        
+        # Create bills
+        bills_created = 0
+        payment_type = form.cleaned_data['payment_type']
+        for member in members:
+            DuesPayment.objects.create(
+                member=member,
+                payment_type=payment_type,
+                custom_type=custom_type if payment_type == 'other' else '',
+                amount=form.cleaned_data['amount'],
+                amount_paid=0,
+                description=form.cleaned_data.get('description', ''),
+                due_date=form.cleaned_data['due_date'],
+                status='pending',
+                created_by=self.request.user
+            )
+            bills_created += 1
+            logger.info(f"Bill created: {member.user.get_full_name()} - ${form.cleaned_data['amount']:.2f} - {payment_type} by {self.request.user.username}")
+        
+        # Show appropriate success message
+        due_date_str = form.cleaned_data['due_date'].strftime('%B %d, %Y')
+        if send_to_all:
+            messages.success(self.request, f"Bills created for {bills_created} members! Due: {due_date_str}")
+        else:
+            member_name = members[0].user.get_full_name()
+            messages.success(self.request, f"Bill created for {member_name}! Due: {due_date_str}")
+        
+        return super().form_valid(form)
 
 
 def _validate_csv_row(row, row_num):
@@ -1870,6 +2197,15 @@ def documents_view(request):
     if request.user.is_staff:
         is_officer = True
     
+    # Non-financial members cannot view documents at all
+    if not is_financial and not is_officer and not request.user.is_staff:
+        messages.error(
+            request,
+            'You cannot view documents. Please pay your national and local dues to restore access. '
+            'Contact an officer if you need assistance.'
+        )
+        return redirect('portal_dashboard')
+    
     # Financial members and officers can view documents, staff can always view
     if is_financial or is_officer or request.user.is_staff:
         # Show all public documents or documents they have access to
@@ -1916,6 +2252,50 @@ def documents_view(request):
         'is_financial': is_financial,
     }
     return render(request, 'pages/portal/documents.html', context)
+
+
+@login_required
+def officer_only_documents(request):
+    """View documents in the Officer Only category (officers and staff only)"""
+    # Check user permissions
+    try:
+        member_profile = MemberProfile.objects.get(user=request.user)
+    except MemberProfile.DoesNotExist:
+        member_profile = None
+    
+    # Check if user is an officer
+    is_officer = ChapterLeadership.objects.filter(
+        email__iexact=request.user.email, 
+        is_active=True
+    ).exists() if request.user.email else False
+    
+    # Staff members are also officers
+    if request.user.is_staff:
+        is_officer = True
+    
+    # Only officers and staff can access this page
+    if not is_officer:
+        messages.error(request, "Only officers can access Officer Only documents.")
+        return redirect('documents_view')
+    
+    # Get all documents in the officer_only category
+    documents = Document.objects.filter(category='officer_only').select_related('uploaded_by').order_by('-created_at')
+    
+    # Apply search filter if provided
+    search_query = request.GET.get('search', '')
+    if search_query:
+        documents = documents.filter(
+            Q(title__icontains=search_query) | 
+            Q(description__icontains=search_query)
+        )
+    
+    context = {
+        'documents': documents,
+        'search_query': search_query,
+        'is_officer': is_officer,
+        'page_title': 'Officer Only Documents',
+    }
+    return render(request, 'pages/portal/officer_only_documents.html', context)
 
 
 @login_required
@@ -2518,6 +2898,38 @@ def delete_event(request, event_id):
 
 
 @login_required
+def rsvp_event(request, event_id):
+    """Toggle RSVP status for an event (members only)"""
+    event = get_object_or_404(Event, id=event_id)
+    
+    try:
+        member_profile = MemberProfile.objects.get(user=request.user)
+    except MemberProfile.DoesNotExist:
+        messages.error(request, "You don't have a member profile.")
+        return redirect('events')
+    
+    # Get or create attendance record
+    attendance, created = EventAttendance.objects.get_or_create(
+        event=event,
+        member=member_profile,
+        defaults={'rsvp_status': True, 'status': 'absent'}  # Default to RSVP yes
+    )
+    
+    # If already exists, toggle RSVP status
+    if not created:
+        attendance.rsvp_status = not attendance.rsvp_status
+        attendance.save()
+    
+    # Determine message
+    if attendance.rsvp_status:
+        messages.success(request, f"You've RSVP'd for {event.title}!")
+    else:
+        messages.info(request, f"You've removed your RSVP for {event.title}.")
+    
+    return redirect('events')
+
+
+@login_required
 def edit_own_profile(request):
     """Allow members to edit their own profile"""
     try:
@@ -2645,207 +3057,6 @@ def _is_financial_officer(user):
             position__in=['treasurer', 'secretary']  # secretary can be financial secretary
         ).exists() or user.memberprofile.is_officer
     return False
-
-
-@login_required
-@user_passes_test(lambda u: u.is_staff or (hasattr(u, 'member_profile') and u.member_profile.is_officer))
-def dues_and_payments(request):
-    """View all dues and payments (officers only)"""
-    # Get filter parameters
-    filter_type = request.GET.get('filter', 'all')
-    member_search = request.GET.get('member', '').strip()
-    status_filter = request.GET.get('status', '')
-    
-    # Base queryset
-    payments = DuesPayment.objects.all().select_related('member', 'member__user', 'created_by')
-    
-    # Apply member search
-    if member_search:
-        payments = payments.filter(
-            member__user__first_name__icontains=member_search
-        ) | payments.filter(
-            member__user__last_name__icontains=member_search
-        ) | payments.filter(
-            member__member_number__icontains=member_search
-        )
-    
-    # Apply status filter
-    if status_filter:
-        payments = payments.filter(status=status_filter)
-    
-    # Apply time filter
-    from django.utils import timezone
-    from datetime import timedelta
-    
-    if filter_type == 'overdue':
-        payments = payments.filter(status='pending', due_date__lt=timezone.now().date())
-    elif filter_type == 'pending':
-        payments = payments.filter(status='pending', due_date__gte=timezone.now().date())
-    elif filter_type == 'paid':
-        payments = payments.filter(status='paid')
-    elif filter_type == 'this_month':
-        now = timezone.now()
-        start = now.replace(day=1)
-        if now.month == 12:
-            end = start.replace(year=now.year + 1, month=1) - timedelta(days=1)
-        else:
-            end = start.replace(month=now.month + 1) - timedelta(days=1)
-        payments = payments.filter(due_date__range=[start.date(), end.date()])
-    
-    # Sort by due date
-    payments = payments.order_by('-due_date')
-    
-    # Calculate summary statistics
-    total_amount = payments.aggregate(models.Sum('amount'))['amount__sum'] or 0
-    total_paid = payments.aggregate(models.Sum('amount_paid'))['amount_paid__sum'] or 0
-    overdue_count = DuesPayment.objects.filter(status='pending', due_date__lt=timezone.now().date()).count()
-    pending_count = DuesPayment.objects.filter(status='pending', due_date__gte=timezone.now().date()).count()
-    
-    context = {
-        'payments': payments,
-        'filter_type': filter_type,
-        'member_search': member_search,
-        'status_filter': status_filter,
-        'status_choices': DuesPayment.PAYMENT_STATUS_CHOICES,
-        'total_amount': total_amount,
-        'total_paid': total_paid,
-        'outstanding': total_amount - total_paid,
-        'overdue_count': overdue_count,
-        'pending_count': pending_count,
-    }
-    return render(request, 'pages/portal/dues_and_payments.html', context)
-
-
-@login_required
-@user_passes_test(lambda u: u.is_staff or (hasattr(u, 'member_profile') and u.member_profile.is_officer))
-def add_dues_payment(request):
-    """Add new dues/payment entry (officers only)"""
-    if request.method == 'POST':
-        form = DuesPaymentForm(request.POST)
-        if form.is_valid():
-            payment = form.save(commit=False)
-            payment.created_by = request.user
-            payment.save()
-            logger.info(f"Dues payment added: {payment.member.user.get_full_name()} - {payment.get_payment_type_display()} by {request.user.username}")
-            messages.success(request, f"Successfully added dues payment for {payment.member.user.get_full_name()}!")
-            return redirect('dues_and_payments')
-        else:
-            messages.error(request, "Please correct the errors below.")
-    else:
-        form = DuesPaymentForm()
-    
-    context = {
-        'form': form,
-        'action': 'Add',
-    }
-    return render(request, 'pages/portal/dues_payment_form.html', context)
-
-
-@login_required
-@user_passes_test(lambda u: u.is_staff or (hasattr(u, 'member_profile') and u.member_profile.is_officer))
-def create_bill(request):
-    """Create a bill for a member (simplified interface for treasurer, financial secretary, admin)"""
-    if request.method == 'POST':
-        form = CreateBillForm(request.POST)
-        if form.is_valid():
-            send_to_all = form.cleaned_data.get('send_to_all_members', False)
-            custom_type = request.POST.get('custom_type', '').strip()
-            
-            # Determine which members to create bills for
-            if send_to_all:
-                # Get all active members (those with MemberProfile)
-                members = MemberProfile.objects.all()
-                if not members.exists():
-                    messages.error(request, 'No active members found in the chapter.')
-                    return redirect('create_bill')
-            else:
-                # Single member
-                member = form.cleaned_data.get('member')
-                if not member:
-                    messages.error(request, 'Please select a member or check "Send to All Active Members".')
-                    return redirect('create_bill')
-                members = [member]
-            
-            # Create bills for each member
-            bills_created = 0
-            payment_type = form.cleaned_data['payment_type']
-            for member in members:
-                bill = DuesPayment.objects.create(
-                    member=member,
-                    payment_type=payment_type,
-                    custom_type=custom_type if payment_type == 'other' else '',
-                    amount=form.cleaned_data['amount'],
-                    amount_paid=0,
-                    description=form.cleaned_data.get('description', ''),
-                    due_date=form.cleaned_data['due_date'],
-                    status='pending',
-                    created_by=request.user
-                )
-                bills_created += 1
-                logger.info(f"Bill created: {member.user.get_full_name()} - ${bill.amount:.2f} - {bill.get_payment_type_display()} by {request.user.username}")
-            
-            if send_to_all:
-                messages.success(request, f"Bills created for {bills_created} members! Due: {form.cleaned_data['due_date'].strftime('%B %d, %Y')}")
-            else:
-                member_name = members[0].user.get_full_name()
-                messages.success(request, f"Bill created for {member_name}! Due: {form.cleaned_data['due_date'].strftime('%B %d, %Y')}")
-            return redirect('dues_and_payments')
-        else:
-            messages.error(request, "Please correct the errors below.")
-    else:
-        form = CreateBillForm()
-    
-    context = {
-        'form': form,
-    }
-    return render(request, 'pages/portal/create_bill.html', context)
-
-
-@login_required
-@user_passes_test(lambda u: u.is_staff or (hasattr(u, 'member_profile') and u.member_profile.is_officer))
-def edit_dues_payment(request, pk):
-    """Edit dues/payment entry (officers only)"""
-    payment = get_object_or_404(DuesPayment, pk=pk)
-    
-    if request.method == 'POST':
-        form = DuesPaymentForm(request.POST, instance=payment)
-        if form.is_valid():
-            payment = form.save()
-            logger.info(f"Dues payment updated: {payment.member.user.get_full_name()} - {payment.get_payment_type_display()} by {request.user.username}")
-            messages.success(request, f"Successfully updated dues payment for {payment.member.user.get_full_name()}!")
-            return redirect('dues_and_payments')
-        else:
-            messages.error(request, "Please correct the errors below.")
-    else:
-        form = DuesPaymentForm(instance=payment)
-    
-    context = {
-        'form': form,
-        'payment': payment,
-        'action': 'Edit',
-    }
-    return render(request, 'pages/portal/dues_payment_form.html', context)
-
-
-@login_required
-@user_passes_test(lambda u: u.is_staff or (hasattr(u, 'member_profile') and u.member_profile.is_officer))
-def delete_dues_payment(request, pk):
-    """Delete dues/payment entry (officers only)"""
-    payment = get_object_or_404(DuesPayment, pk=pk)
-    member_name = payment.member.user.get_full_name()
-    payment_type = payment.get_payment_type_display()
-    amount = payment.amount
-    
-    if request.method == 'POST':
-        payment.delete()
-        logger.info(f"Dues payment deleted: {member_name} - {payment_type} - ${amount} by {request.user.username}")
-        messages.success(request, f"Successfully deleted dues payment for {member_name}.")
-        return redirect('dues_and_payments')
-    
-    context = {
-        'payment': payment,
-    }
-    return render(request, 'pages/portal/dues_payment_confirm_delete.html', context)
 
 
 @login_required
@@ -3714,3 +3925,217 @@ def delete_product(request, pk):
         'product': product,
     }
     return render(request, 'pages/boutique/delete_product_confirm.html', context)
+
+
+# ============================================================================
+# MEMBER SYNCHRONIZATION (REMOVE USERS NOT IN HQ LIST)
+# ============================================================================
+
+@login_required
+def sync_members_with_hq(request):
+    """Sync members with international HQ member list - mark as non-financial for dues collection"""
+    from pages.forms_sync import MemberSyncForm
+    
+    if request.method == 'POST':
+        form = MemberSyncForm(request.POST, request.FILES)
+        if form.is_valid():
+            try:
+                # Parse member numbers from CSV
+                hq_member_numbers, csv_errors = form.parse_member_numbers()
+                
+                # Find members NOT in the new HQ list (they need to pay dues)
+                all_members = MemberProfile.objects.all()
+                members_to_mark = []  # NOT in the new HQ list - need to pay dues
+                members_in_hq = []  # In the new HQ list - keep as is
+                
+                for member_profile in all_members:
+                    if member_profile.member_number not in hq_member_numbers:
+                        members_to_mark.append(member_profile)
+                    else:
+                        members_in_hq.append(member_profile)
+                
+                # If preview request, show what would be marked
+                if request.POST.get('preview') == 'on':
+                    context = {
+                        'form': form,
+                        'hq_member_count': len(hq_member_numbers),
+                        'local_member_count': all_members.count(),
+                        'members_to_mark': members_to_mark,
+                        'members_in_hq': members_in_hq,
+                        'csv_errors': csv_errors,
+                        'is_preview': True,
+                    }
+                    return render(request, 'pages/portal/sync_members.html', context)
+                
+                # Execute the action - mark members NOT in HQ list as non-financial with 90-day countdown
+                from django.utils import timezone
+                from pages.email_utils import send_dues_reminder_email
+                marked_count = 0
+                email_sent_count = 0
+                
+                # Mark members who are NOT on the current HQ list as non-financial with 90-day countdown
+                reason = f"Not on current International HQ member list (sync on {timezone.now().strftime('%Y-%m-%d')}). Member must verify status and pay national and local dues within 90 days."
+                
+                for member_profile in members_to_mark:
+                    # Mark as non-financial
+                    member_profile.status = 'non_financial'
+                    member_profile.dues_current = False
+                    
+                    # Start 90-day countdown for dues payment
+                    member_profile.marked_for_removal_date = timezone.now()
+                    member_profile.removal_reason = reason
+                    member_profile.save()
+                    marked_count += 1
+                    
+                    # Send email notification to member
+                    if send_dues_reminder_email(member_profile):
+                        email_sent_count += 1
+                
+                messages.warning(
+                    request,
+                    f'Marked {marked_count} member(s) as non-financial with 90-day countdown. They must pay dues or lose access to the member portal.'
+                )
+                messages.info(
+                    request,
+                    f'Email reminders sent to {email_sent_count} member(s). Members will also see a notification on the portal dashboard.'
+                )
+                
+                # Log the action
+                logger.info(
+                    f"Member sync performed by {request.user.username}: "
+                    f"Marked {marked_count} NOT on HQ list as non-financial, {len(members_in_hq)} on HQ list kept as-is, HQ_List={len(hq_member_numbers)}, "
+                    f"Emails sent: {email_sent_count}"
+                )
+                
+                # Show summary
+                context = {
+                    'form': form,
+                    'hq_member_count': len(hq_member_numbers),
+                    'local_member_count': all_members.count(),
+                    'members_to_mark': [],
+                    'members_in_hq': members_in_hq,
+                    'csv_errors': csv_errors,
+                    'is_preview': False,
+                    'marked_count': marked_count,
+                    'in_hq_count': len(members_in_hq),
+                    'grace_period': True,
+                }
+                return render(request, 'pages/portal/sync_members.html', context)
+            
+            except Exception as e:
+                messages.error(request, f'Error processing sync: {str(e)}')
+                logger.error(f"Member sync error: {str(e)}")
+    else:
+        form = MemberSyncForm()
+    
+    context = {
+        'form': form,
+        'total_members': MemberProfile.objects.count(),
+    }
+    return render(request, 'pages/portal/sync_members.html', context)
+
+
+@login_required
+@user_passes_test(lambda u: u.is_staff)
+def view_marked_members(request):
+    """View members marked for removal with countdown status"""
+    # Find all members marked for removal
+    marked_members = MemberProfile.objects.filter(
+        marked_for_removal_date__isnull=False
+    ).order_by('marked_for_removal_date')
+    
+    # Categorize by status
+    at_risk = []
+    expiring_soon = []  # Less than 30 days
+    
+    for member in marked_members:
+        days_remaining = member.days_until_removal()
+        if days_remaining is not None:
+            if days_remaining <= 30 and days_remaining > 0:
+                expiring_soon.append({
+                    'member': member,
+                    'days_remaining': days_remaining,
+                })
+            elif days_remaining > 0:
+                at_risk.append({
+                    'member': member,
+                    'days_remaining': days_remaining,
+                })
+    
+    context = {
+        'marked_members': marked_members,
+        'at_risk': at_risk,
+        'expiring_soon': expiring_soon,
+        'total_marked': marked_members.count(),
+    }
+    return render(request, 'pages/portal/view_marked_members.html', context)
+
+
+@login_required
+def send_member_email(request):
+    """Send bulk email to members (officers only)"""
+    from pages.forms import BulkEmailForm
+    from pages.email_utils import send_bulk_email_to_members
+    
+    # Check if user is staff/officer
+    if not request.user.is_staff:
+        messages.error(request, "Only officers can send member emails.")
+        return redirect('portal_dashboard')
+    
+    if request.method == 'POST':
+        form = BulkEmailForm(request.POST)
+        if form.is_valid():
+            recipient_group = form.cleaned_data['recipient_group']
+            subject = form.cleaned_data['subject']
+            message = form.cleaned_data['message']
+            send_immediately = form.cleaned_data.get('send_immediately', False)
+            
+            # Get recipient email addresses based on group
+            if recipient_group == 'all':
+                members = MemberProfile.objects.all()
+            elif recipient_group == 'financial':
+                members = MemberProfile.objects.filter(
+                    status__in=['financial', 'financial_life_member']
+                )
+            elif recipient_group == 'non_financial':
+                members = MemberProfile.objects.filter(status='non_financial')
+            elif recipient_group == 'officers':
+                # Get officers from ChapterLeadership
+                officers = ChapterLeadership.objects.filter(is_active=True).values_list('email', flat=True)
+                members = MemberProfile.objects.filter(user__email__in=officers)
+            
+            # If preview (not sending immediately), show recipients first
+            if not send_immediately:
+                recipient_list = list(members.values_list('user__email', flat=True))
+                context = {
+                    'form': form,
+                    'subject': subject,
+                    'message': message,
+                    'recipient_count': len(recipient_list),
+                    'recipients': recipient_list[:10],  # Show first 10
+                    'has_more': len(recipient_list) > 10,
+                    'is_preview': True,
+                }
+                return render(request, 'pages/portal/send_member_email.html', context)
+            
+            # Send the emails
+            email_count = send_bulk_email_to_members(members, subject, message)
+            
+            messages.success(
+                request,
+                f'Email sent to {email_count} member(s) in {recipient_group.replace("_", " ")} group.'
+            )
+            logger.info(
+                f"Bulk email sent by {request.user.username}: "
+                f"Subject='{subject}', Recipients={recipient_group}, Count={email_count}"
+            )
+            
+            return redirect('portal_dashboard')
+    else:
+        form = BulkEmailForm()
+    
+    context = {
+        'form': form,
+        'is_preview': False,
+    }
+    return render(request, 'pages/portal/send_member_email.html', context)

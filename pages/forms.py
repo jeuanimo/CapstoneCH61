@@ -187,6 +187,16 @@ class MemberProfileForm(forms.ModelForm):
         help_text='Select if this member holds a leadership position'
     )
     
+    # Admin action fields (not on model)
+    mark_non_financial = forms.BooleanField(
+        required=False,
+        label='Mark Member as Non-Financial with 90-Day Countdown',
+        widget=forms.CheckboxInput(attrs={
+            'class': 'form-check-input'
+        }),
+        help_text='Check to start 90-day countdown for dues payment. Member will lose document access.'
+    )
+    
     class Meta:
         model = MemberProfile
         fields = [
@@ -301,6 +311,38 @@ class MemberProfileForm(forms.ModelForm):
             if MemberProfile.objects.filter(member_number=member_number).exists():
                 raise forms.ValidationError("This member number is already in use.")
         return member_number
+    
+    def save(self, commit=True):
+        """Handle non-financial marking and send email notification"""
+        from django.utils import timezone
+        from pages.email_utils import send_dues_reminder_email
+        
+        member_profile = super().save(commit=False)
+        mark_non_financial = self.cleaned_data.get('mark_non_financial', False)
+        
+        # If checkbox is checked, mark as non-financial with 90-day countdown
+        if mark_non_financial:
+            member_profile.status = 'non_financial'
+            member_profile.dues_current = False
+            member_profile.marked_for_removal_date = timezone.now()
+            member_profile.removal_reason = "Manually marked as non-financial by officer. Member must pay dues within 90 days."
+        
+        # Update user account if needed
+        if self.user_instance:
+            self.user_instance.username = self.cleaned_data.get('username')
+            self.user_instance.first_name = self.cleaned_data.get('first_name')
+            self.user_instance.last_name = self.cleaned_data.get('last_name')
+            self.user_instance.email = self.cleaned_data.get('email')
+            if commit:
+                self.user_instance.save()
+        
+        if commit:
+            member_profile.save()
+            # Send email notification if marked as non-financial
+            if mark_non_financial:
+                send_dues_reminder_email(member_profile)
+        
+        return member_profile
 
 
 class DuesPaymentForm(forms.ModelForm):
@@ -639,3 +681,61 @@ class SMSPreferenceForm(forms.ModelForm):
                 raise forms.ValidationError('Please set both start and end times for quiet hours.')
         
         return cleaned_data
+
+class BulkEmailForm(forms.Form):
+    """Form for sending bulk emails to members"""
+    
+    RECIPIENT_CHOICES = [
+        ('all', 'All Members'),
+        ('financial', 'Financial Members Only'),
+        ('non_financial', 'Non-Financial Members Only'),
+        ('officers', 'Officers Only'),
+    ]
+    
+    recipient_group = forms.ChoiceField(
+        choices=RECIPIENT_CHOICES,
+        widget=forms.RadioSelect(attrs={
+            'class': 'form-check-input'
+        }),
+        label='Send Email To',
+        help_text='Choose which members to receive this email'
+    )
+    
+    subject = forms.CharField(
+        max_length=200,
+        required=True,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Email subject line'
+        }),
+        help_text='Subject line for the email'
+    )
+    
+    message = forms.CharField(
+        required=True,
+        widget=forms.Textarea(attrs={
+            'class': 'form-control',
+            'rows': 10,
+            'placeholder': 'Write your announcement here...\n\nTips:\n- Keep it professional\n- Include any action items or deadlines\n- Sign with chapter name'
+        }),
+        help_text='Body of the email message'
+    )
+    
+    include_unsubscribed = forms.BooleanField(
+        required=False,
+        label='Include members who opted out of emails',
+        widget=forms.CheckboxInput(attrs={
+            'class': 'form-check-input'
+        }),
+        help_text='Uncheck to respect SMS/email preferences'
+    )
+    
+    send_immediately = forms.BooleanField(
+        required=False,
+        label='Send immediately',
+        initial=True,
+        widget=forms.CheckboxInput(attrs={
+            'class': 'form-check-input'
+        }),
+        help_text='If unchecked, you\'ll see a preview first'
+    )

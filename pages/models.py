@@ -176,6 +176,19 @@ class MemberProfile(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
+    # 90-day removal tracking (for members not in HQ list)
+    marked_for_removal_date = models.DateTimeField(
+        blank=True, 
+        null=True, 
+        help_text="Date member was marked for dues payment - gives 90 day window to pay national/local dues"
+    )
+    removal_reason = models.CharField(
+        max_length=200, 
+        blank=True, 
+        default='',
+        help_text="Reason for marking (e.g., 'Not on current HQ list - requires dues verification')"
+    )
+    
     # Custom manager
     objects = MemberProfileManager()
     
@@ -189,6 +202,29 @@ class MemberProfile(models.Model):
     
     def get_full_name(self):
         return self.user.get_full_name() or self.user.username
+    
+    def is_marked_for_removal(self):
+        """Check if member is marked for removal"""
+        return self.marked_for_removal_date is not None
+    
+    def days_until_removal(self):
+        """Calculate days remaining before removal (90 day window)"""
+        if not self.marked_for_removal_date:
+            return None
+        from datetime import timedelta
+        from django.utils import timezone
+        removal_deadline = self.marked_for_removal_date + timedelta(days=90)
+        days_left = (removal_deadline - timezone.now()).days
+        return max(0, days_left)  # Return 0 if deadline has passed
+    
+    def should_be_removed(self):
+        """Check if 90 days have passed since marking for removal"""
+        if not self.marked_for_removal_date:
+            return False
+        from datetime import timedelta
+        from django.utils import timezone
+        removal_deadline = self.marked_for_removal_date + timedelta(days=90)
+        return timezone.now() >= removal_deadline
     
     def save(self, *args, **kwargs):
         # Automatically update status based on dues_current (unless Life Member, New Member, or Suspended)
@@ -345,6 +381,7 @@ class Document(models.Model):
         ('bylaws', 'Bylaws & Constitution'),
         ('financial', 'Financial Documents'),
         ('forms', 'Forms & Templates'),
+        ('officer_only', 'Officer Only'),
         ('other', 'Other'),
     ]
     
