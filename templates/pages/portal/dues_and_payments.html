@@ -263,9 +263,10 @@
         </div>
         <div class="table-responsive">
             <table class="table table-striped table-hover mb-0" id="paymentsTable">
+                <caption class="sr-only">Dues and payment records</caption>
                 <thead class="table-light">
                     <tr>
-                        {% if payments %}<th style="width: 30px;"><input type="checkbox" id="selectAllCheckbox" onclick="toggleAllCheckboxes(this)"></th>{% endif %}
+                        {% if payments %}<th style="width: 30px;"><input type="checkbox" id="selectAllCheckbox" aria-label="Select all payments" onclick="toggleAllCheckboxes(this)"></th>{% endif %}
                         <th>Member</th>
                         <th>Payment Type</th>
                         <th>Amount</th>
@@ -280,7 +281,7 @@
                     {% if payments %}
                         {% for payment in payments %}
                         <tr>
-                            <td><input type="checkbox" class="payment-checkbox" value="{{ payment.id }}" onchange="updateBulkDeleteButton()"></td>
+                            <td><input type="checkbox" class="payment-checkbox" aria-label="Select payment" value="{{ payment.id }}" onchange="updateBulkDeleteButton()"></td>
                             <td>
                                 <strong>{{ payment.member.user.get_full_name }}</strong><br>
                                 <small class="text-muted">#{{ payment.member.member_number }}</small>

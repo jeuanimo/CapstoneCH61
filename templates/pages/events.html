@@ -322,7 +322,7 @@
         
         <div class="search-box">
             <form method="get" style="display: flex; gap: 1rem; width: 100%; justify-content: center;">
-                <input type="text" name="title" placeholder="Search events..." value="{{ request.GET.title }}">
+                <input type="text" name="title" placeholder="Search events..." aria-label="Search events" value="{{ request.GET.title }}">
                 <button type="submit">Search</button>
             </form>
         </div>
@@ -338,6 +338,7 @@
                 </div>
                 
                 <table class="calendar-table">
+                    <caption class="sr-only">Monthly event calendar</caption>
                     <thead>
                         <tr>
                             <th>Sun</th>

@@ -555,10 +555,10 @@
                 <form method="post" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 0.75rem;">
                     {% csrf_token %}
                     <div>
-                        <input type="file" name="photo_upload" accept="image/*" required style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
+                        <input type="file" name="photo_upload" accept="image/*" required aria-label="Upload program photo" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
                     </div>
                     <div>
-                        <input type="text" name="caption" placeholder="Photo caption (optional)" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-size: 0.9rem;">
+                        <input type="text" name="caption" placeholder="Photo caption (optional)" aria-label="Photo caption" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-size: 0.9rem;">
                     </div>
                     <button type="submit" class="upload-btn" style="width: 100%; cursor: pointer;">
                         <i class="fas fa-upload"></i> Upload Photo

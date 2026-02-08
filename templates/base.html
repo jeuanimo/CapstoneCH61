@@ -34,10 +34,10 @@
                 </div>
                 <div class="top-actions">
                     <div class="social-media">
-                        <a href="https://www.facebook.com/profile.php?id=61579175674487" class="social-link" title="Facebook" target="_blank">
+                        <a href="https://www.facebook.com/profile.php?id=61579175674487" class="social-link" title="Facebook" target="_blank" rel="noopener noreferrer">
                             <i class="fab fa-facebook-f"></i>
                         </a>
-                        <a href="https://instagram.com" class="social-link" title="Instagram" target="_blank">
+                        <a href="https://instagram.com" class="social-link" title="Instagram" target="_blank" rel="noopener noreferrer">
                             <i class="fab fa-instagram"></i>
                         </a>
                         <a href="mailto:contact@example.com" class="social-link" title="Email">
@@ -75,7 +75,7 @@
                         <a href="{% url 'about' %}" class="nav-link">About Us</a>
                     </li>
                     <li class="nav-item">
-                        <a href="https://phibetasigma1914.org/" class="nav-link" target="_blank">Phi Beta Sigma HQ</a>
+                        <a href="https://phibetasigma1914.org/" class="nav-link" target="_blank" rel="noopener noreferrer">Phi Beta Sigma HQ</a>
                     </li>
                     <li class="nav-item {% if request.resolver_match.url_name == 'chapter_programs' %}active{% endif %}">
                         <a href="{% url 'chapter_programs' %}" class="nav-link">Programs</a>
