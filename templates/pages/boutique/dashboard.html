@@ -1,0 +1,474 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Boutique Dashboard - Sales & Inventory{% endblock %}
+
+{% block css %}
+<style>
+    .dashboard-container {
+        background-image: linear-gradient(rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.95)), url('{% static 'img/ngs.jpg' %}');
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        min-height: 100vh;
+        padding: 20px 0 40px;
+    }
+
+    body.dark-mode .dashboard-container {
+        background-image: linear-gradient(rgba(11, 16, 32, 0.95), rgba(11, 16, 32, 0.95)), url('{% static 'img/ngs.jpg' %}');
+    }
+
+    .dashboard-header {
+        background: rgba(26, 26, 46, 0.9);
+        padding: 30px;
+        border-radius: 8px;
+        margin-bottom: 30px;
+        color: white;
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        text-align: center;
+        height: 100%;
+        transition: transform 0.2s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-3px);
+    }
+
+    body.dark-mode .stat-card {
+        background: #1a2a4a;
+        color: #e8edf7;
+    }
+
+    .stat-value {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #164f90;
+    }
+
+    body.dark-mode .stat-value {
+        color: #87ceeb;
+    }
+
+    .stat-label {
+        color: #666;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    body.dark-mode .stat-label {
+        color: #a0b0c0;
+    }
+
+    .stat-card.revenue .stat-value {
+        color: #28a745;
+    }
+
+    .stat-card.warning .stat-value {
+        color: #ffc107;
+    }
+
+    .stat-card.danger .stat-value {
+        color: #dc3545;
+    }
+
+    .section-card {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+    }
+
+    body.dark-mode .section-card {
+        background: #1a2a4a;
+        color: #e8edf7;
+    }
+
+    .section-title {
+        color: #164f90;
+        border-bottom: 2px solid #164f90;
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+    }
+
+    body.dark-mode .section-title {
+        color: #87ceeb;
+        border-bottom-color: #87ceeb;
+    }
+
+    .time-filter {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .time-filter a {
+        padding: 8px 16px;
+        border-radius: 20px;
+        text-decoration: none;
+        background: #e9ecef;
+        color: #333;
+        transition: all 0.2s ease;
+    }
+
+    .time-filter a:hover {
+        background: #164f90;
+        color: white;
+    }
+
+    .time-filter a.active {
+        background: #164f90;
+        color: white;
+    }
+
+    body.dark-mode .time-filter a {
+        background: #2a3a5a;
+        color: #e8edf7;
+    }
+
+    body.dark-mode .time-filter a:hover,
+    body.dark-mode .time-filter a.active {
+        background: #87ceeb;
+        color: #1a2a4a;
+    }
+
+    .table-responsive {
+        overflow-x: auto;
+    }
+
+    .dashboard-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .dashboard-table th,
+    .dashboard-table td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .dashboard-table th {
+        background: #f8f9fa;
+        font-weight: 600;
+        color: #164f90;
+    }
+
+    body.dark-mode .dashboard-table th {
+        background: #2a3a5a;
+        color: #87ceeb;
+    }
+
+    body.dark-mode .dashboard-table td {
+        border-bottom-color: #3a4a6a;
+    }
+
+    .low-stock {
+        color: #dc3545;
+        font-weight: bold;
+    }
+
+    .in-stock {
+        color: #28a745;
+    }
+
+    .status-badge {
+        padding: 4px 12px;
+        border-radius: 15px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+    .status-pending {
+        background: #fff3cd;
+        color: #856404;
+    }
+
+    .status-completed {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .status-shipped {
+        background: #cce5ff;
+        color: #004085;
+    }
+
+    .status-delivered {
+        background: #d1e7dd;
+        color: #0f5132;
+    }
+
+    body.dark-mode .status-pending {
+        background: #6b5a00;
+        color: #fff3cd;
+    }
+
+    body.dark-mode .status-completed {
+        background: #155724;
+        color: #d4edda;
+    }
+
+    .back-link {
+        color: white;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        margin-bottom: 15px;
+    }
+
+    .back-link:hover {
+        color: #87ceeb;
+    }
+
+    .category-bar {
+        height: 25px;
+        border-radius: 4px;
+        margin-bottom: 8px;
+    }
+
+    @media (max-width: 768px) {
+        .stat-value {
+            font-size: 1.8rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="container">
+        <!-- Header -->
+        <div class="dashboard-header">
+            <a href="{% url 'shop_home' %}" class="back-link">
+                <i class="fas fa-arrow-left"></i> Back to Shop
+            </a>
+            <h1 style="margin-bottom: 10px;">
+                <i class="fas fa-chart-line"></i> Boutique Dashboard
+            </h1>
+            <p style="opacity: 0.9; margin-bottom: 20px;">Sales analytics and inventory management</p>
+            
+            <!-- Time Filter -->
+            <div class="time-filter">
+                <a href="?period=today" class="{% if time_filter == 'today' %}active{% endif %}">Today</a>
+                <a href="?period=week" class="{% if time_filter == 'week' %}active{% endif %}">Last 7 Days</a>
+                <a href="?period=month" class="{% if time_filter == 'month' %}active{% endif %}">Last 30 Days</a>
+                <a href="?period=year" class="{% if time_filter == 'year' %}active{% endif %}">Last Year</a>
+                <a href="?period=all" class="{% if time_filter == 'all' %}active{% endif %}">All Time</a>
+            </div>
+        </div>
+
+        <!-- Stats Cards Row -->
+        <div class="row mb-4">
+            <div class="col-6 col-md-3 mb-3">
+                <div class="stat-card">
+                    <div class="stat-value">{{ total_orders }}</div>
+                    <div class="stat-label">Total Orders</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3 mb-3">
+                <div class="stat-card revenue">
+                    <div class="stat-value">${{ total_revenue|floatformat:2 }}</div>
+                    <div class="stat-label">Revenue</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3 mb-3">
+                <div class="stat-card">
+                    <div class="stat-value">{{ total_items_sold }}</div>
+                    <div class="stat-label">Items Sold</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3 mb-3">
+                <div class="stat-card {% if pending_orders > 0 %}warning{% endif %}">
+                    <div class="stat-value">{{ pending_orders }}</div>
+                    <div class="stat-label">Pending Orders</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Inventory Stats Row -->
+        <div class="row mb-4">
+            <div class="col-6 col-md-3 mb-3">
+                <div class="stat-card">
+                    <div class="stat-value">{{ total_products }}</div>
+                    <div class="stat-label">Active Products</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3 mb-3">
+                <div class="stat-card {% if low_stock_count > 0 %}warning{% endif %}">
+                    <div class="stat-value">{{ low_stock_count }}</div>
+                    <div class="stat-label">Low Stock (&le;{{ low_stock_threshold }})</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3 mb-3">
+                <div class="stat-card {% if out_of_stock > 0 %}danger{% endif %}">
+                    <div class="stat-value">{{ out_of_stock }}</div>
+                    <div class="stat-label">Out of Stock</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3 mb-3">
+                <div class="stat-card">
+                    <div class="stat-value">{{ completed_orders }}</div>
+                    <div class="stat-label">Completed Orders</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Product Sales -->
+            <div class="col-lg-8 mb-4">
+                <div class="section-card">
+                    <h4 class="section-title">
+                        <i class="fas fa-shopping-bag"></i> Product Sales ({{ period_label }})
+                    </h4>
+                    {% if product_stats %}
+                    <div class="table-responsive">
+                        <table class="dashboard-table">
+                            <caption class="sr-only">Product sales statistics</caption>
+                            <thead>
+                                <tr>
+                                    <th scope="col">Product</th>
+                                    <th scope="col">Category</th>
+                                    <th scope="col">Units Sold</th>
+                                    <th scope="col">Revenue</th>
+                                    <th scope="col">In Stock</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for stat in product_stats %}
+                                <tr>
+                                    <td>
+                                        <a href="{% url 'product_detail' stat.product__id %}" style="color: inherit; text-decoration: none;">
+                                            {{ stat.product__name }}
+                                        </a>
+                                    </td>
+                                    <td>{{ stat.product__category|title }}</td>
+                                    <td><strong>{{ stat.units_sold }}</strong></td>
+                                    <td style="color: #28a745; font-weight: bold;">${{ stat.revenue|floatformat:2 }}</td>
+                                    <td class="{% if stat.product__inventory <= low_stock_threshold %}low-stock{% else %}in-stock{% endif %}">
+                                        {{ stat.product__inventory }}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p style="text-align: center; color: #999; padding: 40px;">
+                        <i class="fas fa-chart-bar" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
+                        No sales data for this period.
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Category Breakdown -->
+            <div class="col-lg-4 mb-4">
+                <div class="section-card">
+                    <h4 class="section-title">
+                        <i class="fas fa-tags"></i> Sales by Category
+                    </h4>
+                    {% if category_stats %}
+                    {% for cat in category_stats %}
+                    <div style="margin-bottom: 15px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <span>{{ cat.product__category|title }}</span>
+                            <span style="font-weight: bold;">${{ cat.revenue|floatformat:2 }}</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div class="category-bar" style="flex: 1; background: #164f90;"></div>
+                            <span style="font-size: 0.85rem; color: #666;">{{ cat.units_sold }} units</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <p style="text-align: center; color: #999; padding: 20px;">No category data available.</p>
+                    {% endif %}
+                </div>
+
+                <!-- Low Stock Alerts -->
+                <div class="section-card">
+                    <h4 class="section-title">
+                        <i class="fas fa-exclamation-triangle"></i> Low Stock Alerts
+                    </h4>
+                    {% if low_stock_products %}
+                    <ul style="list-style: none; padding: 0; margin: 0;">
+                        {% for product in low_stock_products %}
+                        <li style="padding: 10px 0; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
+                            <a href="{% url 'edit_product' product.id %}" style="color: inherit; text-decoration: none;">
+                                {{ product.name }}
+                            </a>
+                            <span class="{% if product.inventory == 0 %}low-stock{% else %}{% if product.inventory <= 5 %}low-stock{% else %}{% endif %}{% endif %}" style="font-weight: bold;">
+                                {% if product.inventory == 0 %}
+                                    OUT
+                                {% else %}
+                                    {{ product.inventory }} left
+                                {% endif %}
+                            </span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <p style="text-align: center; color: #28a745; padding: 20px;">
+                        <i class="fas fa-check-circle"></i> All products are well stocked!
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Orders -->
+        <div class="section-card">
+            <h4 class="section-title">
+                <i class="fas fa-history"></i> Recent Orders
+            </h4>
+            {% if recent_orders %}
+            <div class="table-responsive">
+                <table class="dashboard-table">
+                    <caption class="sr-only">Recent orders list</caption>
+                    <thead>
+                        <tr>
+                            <th scope="col">Order #</th>
+                            <th scope="col">Customer</th>
+                            <th scope="col">Date</th>
+                            <th scope="col">Items</th>
+                            <th scope="col">Total</th>
+                            <th scope="col">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in recent_orders %}
+                        <tr>
+                            <td><strong>#{{ order.id }}</strong></td>
+                            <td>{{ order.user.get_full_name|default:order.user.username }}</td>
+                            <td>{{ order.created_at|date:"M d, Y" }}</td>
+                            <td>{{ order.items.count }} item{% if order.items.count != 1 %}s{% endif %}</td>
+                            <td style="font-weight: bold;">${{ order.total_price|floatformat:2 }}</td>
+                            <td>
+                                <span class="status-badge status-{{ order.status }}">
+                                    {{ order.get_status_display }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p style="text-align: center; color: #999; padding: 40px;">
+                <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
+                No orders yet.
+            </p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

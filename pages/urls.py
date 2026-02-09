@@ -233,4 +233,6 @@ urlpatterns = [
     path('boutique/admin/add-product/', views.add_product, name='add_product'),
     path('boutique/admin/edit-product/<int:pk>/', views.edit_product, name='edit_product'),
     path('boutique/admin/delete-product/<int:pk>/', views.delete_product, name='delete_product'),
+    path('boutique/admin/bulk-delete/', views.bulk_delete_products, name='bulk_delete_products'),
+    path('boutique/admin/dashboard/', views.boutique_dashboard, name='boutique_dashboard'),
 ]

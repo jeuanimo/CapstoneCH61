@@ -75,7 +75,7 @@ COMMON PATTERNS:
 
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from django.db.models import Q, Sum
+from django.db.models import Q, Sum, Count, Avg, F
 from django.db import models
 from django_filters import CharFilter, FilterSet
 from .models import (
@@ -3983,6 +3983,140 @@ def delete_product(request, pk):
         'product': product,
     }
     return render(request, 'pages/boutique/delete_product_confirm.html', context)
+
+
+@login_required
+@user_passes_test(is_officer_or_staff)
+def bulk_delete_products(request):
+    """Bulk delete multiple products (officers/staff only)"""
+    if request.method == 'POST':
+        product_ids = request.POST.getlist('product_ids')
+        
+        if not product_ids:
+            messages.warning(request, "No products selected for deletion.")
+            return redirect('shop_home')
+        
+        try:
+            # Get all products to delete
+            products_to_delete = Product.objects.filter(pk__in=product_ids)
+            count = products_to_delete.count()
+            
+            # Create log message with details
+            details = [f"{p.name} (${p.price})" for p in products_to_delete]
+            
+            # Delete all products
+            products_to_delete.delete()
+            
+            # Log the bulk deletion
+            logger.info(f"Bulk deleted {count} products by {request.user.username}. Details: {'; '.join(details)}")
+            messages.success(request, f"Successfully deleted {count} product{'s' if count != 1 else ''}.")
+        
+        except Exception as e:
+            logger.error(f"Error bulk deleting products: {str(e)}")
+            messages.error(request, f"Error deleting products: {str(e)}")
+        
+        return redirect('shop_home')
+    
+    return redirect('shop_home')
+
+
+@login_required
+@user_passes_test(is_officer_or_staff)
+def boutique_dashboard(request):
+    """Sales dashboard for boutique (officers/staff only)"""
+    from datetime import timedelta
+    
+    # Time filters
+    time_filter = request.GET.get('period', 'all')
+    today = timezone.now().date()
+    
+    # Calculate date range based on filter
+    if time_filter == 'today':
+        start_date = today
+        period_label = 'Today'
+    elif time_filter == 'week':
+        start_date = today - timedelta(days=7)
+        period_label = 'Last 7 Days'
+    elif time_filter == 'month':
+        start_date = today - timedelta(days=30)
+        period_label = 'Last 30 Days'
+    elif time_filter == 'year':
+        start_date = today - timedelta(days=365)
+        period_label = 'Last Year'
+    else:
+        start_date = None
+        period_label = 'All Time'
+    
+    # Base querysets
+    orders_qs = Order.objects.exclude(status='cancelled')
+    if start_date:
+        orders_qs = orders_qs.filter(created_at__date__gte=start_date)
+    
+    # Overall stats
+    total_orders = orders_qs.count()
+    completed_orders = orders_qs.filter(status__in=['completed', 'shipped', 'delivered']).count()
+    total_revenue = orders_qs.filter(status__in=['completed', 'shipped', 'delivered']).aggregate(
+        total=Sum('total_price')
+    )['total'] or Decimal('0.00')
+    pending_orders = orders_qs.filter(status='pending').count()
+    
+    # Product sales stats
+    order_items_qs = OrderItem.objects.filter(
+        order__status__in=['completed', 'shipped', 'delivered']
+    )
+    if start_date:
+        order_items_qs = order_items_qs.filter(order__created_at__date__gte=start_date)
+    
+    product_stats = order_items_qs.values(
+        'product__id', 'product__name', 'product__price', 'product__inventory', 'product__category'
+    ).annotate(
+        units_sold=Sum('quantity'),
+        revenue=Sum(F('quantity') * F('price'))
+    ).order_by('-units_sold')
+    
+    # Total items sold
+    total_items_sold = order_items_qs.aggregate(total=Sum('quantity'))['total'] or 0
+    
+    # Inventory status
+    all_products = Product.objects.filter(is_active=True)
+    total_products = all_products.count()
+    low_stock_threshold = 10
+    low_stock_products = all_products.filter(inventory__lte=low_stock_threshold).order_by('inventory')
+    out_of_stock = all_products.filter(inventory=0).count()
+    
+    # Recent orders
+    recent_orders = Order.objects.exclude(status='cancelled').order_by('-created_at')[:10]
+    
+    # Category breakdown
+    category_stats = order_items_qs.values('product__category').annotate(
+        units_sold=Sum('quantity'),
+        revenue=Sum(F('quantity') * F('price'))
+    ).order_by('-revenue')
+    
+    context = {
+        'time_filter': time_filter,
+        'period_label': period_label,
+        # Overall stats
+        'total_orders': total_orders,
+        'completed_orders': completed_orders,
+        'total_revenue': total_revenue,
+        'pending_orders': pending_orders,
+        'total_items_sold': total_items_sold,
+        # Product stats
+        'product_stats': product_stats,
+        # Inventory
+        'total_products': total_products,
+        'low_stock_products': low_stock_products,
+        'low_stock_count': low_stock_products.count(),
+        'out_of_stock': out_of_stock,
+        'low_stock_threshold': low_stock_threshold,
+        # Recent orders
+        'recent_orders': recent_orders,
+        # Category breakdown
+        'category_stats': category_stats,
+    }
+    
+    return render(request, 'pages/boutique/dashboard.html', context)
 
 
 # ============================================================================
