@@ -102,30 +102,52 @@
                             {% endif %}
                         </div>
 
-                        <!-- Sizes -->
+                        <!-- Sizes (Multi-Select Checkboxes) -->
                         <div class="mb-3">
-                            {{ form.sizes.label_tag }}
-                            {{ form.sizes }}
+                            <label class="form-label"><strong>{{ form.sizes_multi.label }}</strong></label>
+                            <div class="row">
+                                {% for checkbox in form.sizes_multi %}
+                                <div class="col-4 col-md-3">
+                                    <div class="form-check">
+                                        {{ checkbox.tag }}
+                                        <label class="form-check-label" for="{{ checkbox.id_for_label }}">
+                                            {{ checkbox.choice_label }}
+                                        </label>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
                             <small class="form-text text-muted">
-                                Enter sizes separated by commas (e.g., S,M,L,XL)
+                                {{ form.sizes_multi.help_text }}
                             </small>
-                            {% if form.sizes.errors %}
+                            {% if form.sizes_multi.errors %}
                             <div class="text-danger">
-                                {{ form.sizes.errors }}
+                                {{ form.sizes_multi.errors }}
                             </div>
                             {% endif %}
                         </div>
 
-                        <!-- Colors -->
+                        <!-- Colors (Multi-Select Checkboxes) -->
                         <div class="mb-3">
-                            {{ form.colors.label_tag }}
-                            {{ form.colors }}
+                            <label class="form-label"><strong>{{ form.colors_multi.label }}</strong></label>
+                            <div class="row">
+                                {% for checkbox in form.colors_multi %}
+                                <div class="col-4 col-md-3">
+                                    <div class="form-check">
+                                        {{ checkbox.tag }}
+                                        <label class="form-check-label" for="{{ checkbox.id_for_label }}">
+                                            {{ checkbox.choice_label }}
+                                        </label>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
                             <small class="form-text text-muted">
-                                Enter colors separated by commas (e.g., Black,White,Blue)
+                                {{ form.colors_multi.help_text }}
                             </small>
-                            {% if form.colors.errors %}
+                            {% if form.colors_multi.errors %}
                             <div class="text-danger">
-                                {{ form.colors.errors }}
+                                {{ form.colors_multi.errors }}
                             </div>
                             {% endif %}
                         </div>

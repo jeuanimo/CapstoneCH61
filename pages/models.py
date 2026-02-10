@@ -825,6 +825,32 @@ class Product(models.Model):
         ('other', 'Other'),
     ]
     
+    SIZE_CHOICES = [
+        ('XS', 'X-Small'),
+        ('S', 'Small'),
+        ('M', 'Medium'),
+        ('L', 'Large'),
+        ('XL', 'X-Large'),
+        ('2XL', '2X-Large'),
+        ('3XL', '3X-Large'),
+        ('4XL', '4X-Large'),
+        ('OS', 'One Size'),
+    ]
+    
+    COLOR_CHOICES = [
+        ('Black', 'Black'),
+        ('White', 'White'),
+        ('Blue', 'Blue'),
+        ('Royal Blue', 'Royal Blue'),
+        ('Navy', 'Navy'),
+        ('Gold', 'Gold'),
+        ('Silver', 'Silver'),
+        ('Gray', 'Gray'),
+        ('Red', 'Red'),
+        ('Green', 'Green'),
+        ('Purple', 'Purple'),
+    ]
+    
     name = models.CharField(max_length=200)
     description = models.TextField(blank=True, default='')
     category = models.CharField(max_length=50, choices=CATEGORY_CHOICES, default='other')
@@ -848,12 +874,22 @@ class Product(models.Model):
         return self.name
     
     def get_sizes_list(self):
-        """Returns list of sizes"""
+        """Returns list of sizes for this product"""
         return [s.strip() for s in self.sizes.split(',') if s.strip()] if self.sizes else []
     
     def get_colors_list(self):
-        """Returns list of colors"""
+        """Returns list of colors for this product"""
         return [c.strip() for c in self.colors.split(',') if c.strip()] if self.colors else []
+    
+    @classmethod
+    def get_available_sizes(cls):
+        """Returns list of all standard size options"""
+        return [size[0] for size in cls.SIZE_CHOICES]
+    
+    @classmethod
+    def get_available_colors(cls):
+        """Returns list of all standard color options"""
+        return [color[0] for color in cls.COLOR_CHOICES]
 
 
 class Cart(models.Model):

@@ -138,9 +138,27 @@ class BoutiqueImportForm(forms.Form):
 
 class ProductForm(forms.ModelForm):
     """Form for creating/editing products"""
+    
+    # Multi-select fields for standard sizes and colors
+    sizes_multi = forms.MultipleChoiceField(
+        choices=Product.SIZE_CHOICES,
+        widget=forms.CheckboxSelectMultiple(attrs={'class': 'form-check-input'}),
+        required=False,
+        label='Sizes',
+        help_text='Select available sizes for this product'
+    )
+    
+    colors_multi = forms.MultipleChoiceField(
+        choices=Product.COLOR_CHOICES,
+        widget=forms.CheckboxSelectMultiple(attrs={'class': 'form-check-input'}),
+        required=False,
+        label='Colors',
+        help_text='Select available colors for this product'
+    )
+    
     class Meta:
         model = Product
-        fields = ['name', 'description', 'category', 'price', 'image', 'inventory', 'sizes', 'colors', 'is_active']
+        fields = ['name', 'description', 'category', 'price', 'image', 'inventory', 'is_active']
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Product name'}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'placeholder': 'Product description'}),
@@ -148,10 +166,26 @@ class ProductForm(forms.ModelForm):
             'price': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'min': '0'}),
             'image': forms.FileInput(attrs={'class': 'form-control'}),
             'inventory': forms.NumberInput(attrs={'class': 'form-control', 'min': '0'}),
-            'sizes': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g., XS,S,M,L,XL'}),
-            'colors': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g., Black,White,Red'}),
             'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Pre-populate multi-select fields from existing comma-separated values
+        if self.instance and self.instance.pk:
+            self.fields['sizes_multi'].initial = self.instance.get_sizes_list()
+            self.fields['colors_multi'].initial = self.instance.get_colors_list()
+    
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        # Convert multi-select lists back to comma-separated strings
+        sizes_list = self.cleaned_data.get('sizes_multi', [])
+        colors_list = self.cleaned_data.get('colors_multi', [])
+        instance.sizes = ','.join(sizes_list)
+        instance.colors = ','.join(colors_list)
+        if commit:
+            instance.save()
+        return instance
 
 
 class CheckoutForm(forms.ModelForm):
