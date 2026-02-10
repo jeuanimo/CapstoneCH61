@@ -1,20 +1,157 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block css %}
+<style>
+    /* Theme Colors - Phi Beta Sigma Royal Blue */
+    :root {
+        --pbs-blue: #0047AB;
+        --pbs-blue-dark: #003380;
+        --pbs-blue-light: #1e5bc6;
+    }
+
+    .page-title {
+        color: var(--pbs-blue);
+        margin-bottom: 30px;
+        font-weight: bold;
+    }
+
+    body.dark-mode .page-title {
+        color: #4a90e2;
+    }
+
+    .order-card {
+        border: 1px solid #dee2e6;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        height: 100%;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .order-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0, 71, 171, 0.15);
+    }
+
+    body.dark-mode .order-card {
+        background: #2d2d2d;
+        border-color: #444;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .order-title {
+        color: var(--pbs-blue);
+        margin: 0;
+        font-weight: 600;
+    }
+
+    body.dark-mode .order-title {
+        color: #4a90e2;
+    }
+
+    .order-total {
+        color: var(--pbs-blue);
+        font-size: 1.3em;
+        font-weight: bold;
+    }
+
+    body.dark-mode .order-total {
+        color: #4a90e2;
+    }
+
+    .shipping-box {
+        margin: 15px 0;
+        padding: 15px;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+    }
+
+    body.dark-mode .shipping-box {
+        background-color: #3d3d3d;
+    }
+
+    .btn-details {
+        background: transparent;
+        border: 2px solid var(--pbs-blue);
+        color: var(--pbs-blue);
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.2s ease;
+        width: 100%;
+        text-decoration: none;
+        text-align: center;
+        display: block;
+    }
+
+    .btn-details:hover {
+        background: var(--pbs-blue);
+        color: white;
+    }
+
+    body.dark-mode .btn-details {
+        border-color: #4a90e2;
+        color: #4a90e2;
+    }
+
+    body.dark-mode .btn-details:hover {
+        background: #4a90e2;
+        color: #1a1a1a;
+    }
+
+    .btn-shop {
+        background: linear-gradient(135deg, var(--pbs-blue) 0%, var(--pbs-blue-dark) 100%);
+        border: none;
+        color: white;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        margin-top: 10px;
+        display: inline-block;
+    }
+
+    .btn-shop:hover {
+        background: linear-gradient(135deg, var(--pbs-blue-light) 0%, var(--pbs-blue) 100%);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 71, 171, 0.4);
+    }
+
+    body.dark-mode .btn-shop {
+        background: linear-gradient(135deg, #2a5a9a 0%, #1a4a8a 100%);
+    }
+
+    .badge {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-weight: 500;
+    }
+
+    @media (max-width: 768px) {
+        .col-md-6 {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container mt-4">
-    <h1 style="color: #1a1a2e; margin-bottom: 30px;">📋 Order History</h1>
+    <h1 class="page-title">📋 Order History</h1>
 
     {% if orders %}
     <div class="row">
         {% for order in orders %}
         <div class="col-md-6 mb-4">
-            <div class="card" style="border: 1px solid #dee2e6; height: 100%;">
-                <div class="card-body">
+            <div class="card order-card">
+                <div class="card-body" style="padding: 25px;">
                     <!-- Order Header -->
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                        <h5 style="margin: 0; color: #1a1a2e;">Order #{{ order.id }}</h5>
-                        <span class="badge" style="background-color: {% if order.status == 'completed' %}#28a745{% elif order.status == 'shipped' %}#0066cc{% elif order.status == 'pending' %}#ffc107{% else %}#6c757d{% endif %}; padding: 6px 12px; font-size: 0.85em;">
+                        <h5 class="order-title">Order #{{ order.id }}</h5>
+                        <span class="badge" style="background-color: {% if order.status == 'completed' %}#28a745{% elif order.status == 'shipped' %}#0066cc{% elif order.status == 'pending' %}#ffc107{% else %}#6c757d{% endif %}; color: white;">
                             {{ order.get_status_display }}
                         </span>
                     </div>
@@ -32,24 +169,24 @@
                     <!-- Order Total -->
                     <div style="margin: 20px 0; padding: 15px 0; border-top: 1px solid #dee2e6; border-bottom: 1px solid #dee2e6;">
                         <p style="margin: 0; color: #6c757d;">Order Total</p>
-                        <p style="margin: 5px 0 0 0; color: #1a1a2e; font-size: 1.3em; font-weight: bold;">
+                        <p class="order-total" style="margin: 5px 0 0 0;">
                             ${{ order.total_price }}
                         </p>
                     </div>
 
                     <!-- Shipping Info -->
-                    <div style="margin: 15px 0; padding: 15px; background-color: #f8f9fa; border-radius: 4px;">
+                    <div class="shipping-box">
                         <p style="margin: 0 0 10px 0; color: #6c757d; font-size: 0.9em;">
                             <strong>Shipping To:</strong>
                         </p>
-                        <p style="margin: 0; color: #1a1a2e; font-size: 0.9em;">
+                        <p style="margin: 0; color: var(--pbs-blue); font-size: 0.9em;">
                             {{ order.address }}<br>
                             {{ order.city }}, {{ order.state }} {{ order.zip_code }}
                         </p>
                     </div>
 
                     <!-- View Details Button -->
-                    <a href="{% url 'order_history' %}" class="btn btn-sm btn-outline-dark" style="border-color: #1a1a2e; color: #1a1a2e; width: 100%; text-decoration: none;">
+                    <a href="{% url 'order_history' %}" class="btn-details">
                         View Details
                     </a>
                 </div>
@@ -59,27 +196,13 @@
     </div>
 
     {% else %}
-    <div class="alert alert-info" role="alert" style="background-color: #d1ecf1; border-color: #bee5eb;">
-        <h4 class="alert-heading">No Orders Yet</h4>
-        <p>You haven't placed any orders yet. Start shopping to make your first purchase!</p>
-        <a href="{% url 'shop_home' %}" class="btn btn-dark" style="background-color: #1a1a2e; border-color: #1a1a2e; margin-top: 10px;">
+    <div class="alert alert-info" role="alert" style="background-color: #e7f1ff; border-color: var(--pbs-blue); border-radius: 12px;">
+        <h4 class="alert-heading" style="color: var(--pbs-blue);">No Orders Yet</h4>
+        <p style="color: #6c757d;">You haven't placed any orders yet. Start shopping to make your first purchase!</p>
+        <a href="{% url 'shop_home' %}" class="btn-shop">
             Start Shopping
         </a>
     </div>
     {% endif %}
 </div>
-
-<style>
-    .badge {
-        display: inline-block;
-        padding: 6px 12px;
-        border-radius: 4px;
-    }
-
-    @media (max-width: 768px) {
-        .col-md-6 {
-            width: 100%;
-        }
-    }
-</style>
 {% endblock %}

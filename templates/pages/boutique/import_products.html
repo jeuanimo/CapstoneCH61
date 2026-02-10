@@ -1,26 +1,186 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block css %}
+<style>
+    /* Theme Colors - Phi Beta Sigma Royal Blue */
+    :root {
+        --pbs-blue: #0047AB;
+        --pbs-blue-dark: #003380;
+        --pbs-blue-light: #1e5bc6;
+    }
+
+    .page-title {
+        color: var(--pbs-blue);
+        margin-bottom: 10px;
+        font-weight: bold;
+    }
+
+    body.dark-mode .page-title {
+        color: #4a90e2;
+    }
+
+    .import-card {
+        border: 1px solid #dee2e6;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    }
+
+    body.dark-mode .import-card {
+        background: #2d2d2d;
+        border-color: #444;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .section-title {
+        color: var(--pbs-blue);
+        margin-bottom: 25px;
+        font-weight: 600;
+    }
+
+    body.dark-mode .section-title {
+        color: #4a90e2;
+    }
+
+    .form-label {
+        color: var(--pbs-blue);
+        font-weight: 500;
+    }
+
+    body.dark-mode .form-label {
+        color: #a0c4f0;
+    }
+
+    .form-control {
+        border-radius: 8px;
+        padding: 12px 15px;
+        border-color: var(--pbs-blue);
+    }
+
+    .form-control:focus {
+        border-color: var(--pbs-blue);
+        box-shadow: 0 0 0 0.2rem rgba(0, 71, 171, 0.25);
+    }
+
+    body.dark-mode .form-control {
+        background: #3d3d3d;
+        border-color: #555;
+        color: #e0e0e0;
+    }
+
+    .btn-import {
+        background: linear-gradient(135deg, var(--pbs-blue) 0%, var(--pbs-blue-dark) 100%);
+        border: none;
+        color: white;
+        padding: 12px 30px;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-import:hover {
+        background: linear-gradient(135deg, var(--pbs-blue-light) 0%, var(--pbs-blue) 100%);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 71, 171, 0.4);
+    }
+
+    body.dark-mode .btn-import {
+        background: linear-gradient(135deg, #2a5a9a 0%, #1a4a8a 100%);
+    }
+
+    .btn-download {
+        background: transparent;
+        border: 2px solid var(--pbs-blue);
+        color: var(--pbs-blue);
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.2s ease;
+        text-decoration: none;
+    }
+
+    .btn-download:hover {
+        background: var(--pbs-blue);
+        color: white;
+    }
+
+    body.dark-mode .btn-download {
+        border-color: #4a90e2;
+        color: #4a90e2;
+    }
+
+    body.dark-mode .btn-download:hover {
+        background: #4a90e2;
+        color: #1a1a1a;
+    }
+
+    .stat-number {
+        color: var(--pbs-blue);
+        font-size: 2em;
+        font-weight: bold;
+    }
+
+    body.dark-mode .stat-number {
+        color: #4a90e2;
+    }
+
+    .code-box {
+        background-color: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        overflow-x: auto;
+        font-family: monospace;
+        font-size: 0.9em;
+        color: #333;
+    }
+
+    body.dark-mode .code-box {
+        background-color: #3d3d3d;
+        color: #e0e0e0;
+    }
+
+    h6.guide-heading {
+        color: var(--pbs-blue);
+        margin-bottom: 10px;
+    }
+
+    body.dark-mode h6.guide-heading {
+        color: #a0c4f0;
+    }
+
+    @media (max-width: 768px) {
+        .col-md-4 {
+            margin-top: 30px;
+        }
+
+        pre {
+            font-size: 0.8em !important;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container mt-4">
-    <h1 style="color: #1a1a2e; margin-bottom: 10px;">📦 Import Products</h1>
+    <h1 class="page-title">📦 Import Products</h1>
     <p style="color: #6c757d; margin-bottom: 30px;">Admin: Import merchandise from CSV file</p>
 
     <div class="row">
         <!-- Upload Form -->
         <div class="col-md-8">
-            <div class="card" style="border: 1px solid #dee2e6;">
-                <div class="card-body">
-                    <h5 class="card-title" style="color: #1a1a2e; margin-bottom: 25px;">Upload CSV File</h5>
+            <div class="card import-card">
+                <div class="card-body" style="padding: 30px;">
+                    <h5 class="card-title section-title">Upload CSV File</h5>
 
                     <form method="POST" enctype="multipart/form-data">
                         {% csrf_token %}
 
                         <!-- CSV File Input -->
                         <div class="mb-3">
-                            <label for="{{ form.csv_file.id_for_label }}" class="form-label" style="color: #1a1a2e; font-weight: 500;">Select CSV File</label>
+                            <label for="{{ form.csv_file.id_for_label }}" class="form-label">Select CSV File</label>
                             <div class="input-group">
-                                <input type="file" class="form-control" id="{{ form.csv_file.id_for_label }}" name="csv_file" accept=".csv" required style="border-color: #1a1a2e;">
+                                <input type="file" class="form-control" id="{{ form.csv_file.id_for_label }}" name="csv_file" accept=".csv" required>
                             </div>
                             <small class="form-text" style="color: #6c757d; display: block; margin-top: 10px;">
                                 Maximum file size: 5MB. Format: CSV with columns for name, category, price, etc.
@@ -35,10 +195,10 @@
                         </div>
 
                         <!-- Images ZIP Input (Optional) -->
-                        <div class="mb-3">
-                            <label for="{{ form.images_zip.id_for_label }}" class="form-label" style="color: #1a1a2e; font-weight: 500;">📸 Images ZIP File (Optional)</label>
+                        <div class="mb-4">
+                            <label for="{{ form.images_zip.id_for_label }}" class="form-label">📸 Images ZIP File (Optional)</label>
                             <div class="input-group">
-                                <input type="file" class="form-control" id="{{ form.images_zip.id_for_label }}" name="images_zip" accept=".zip" style="border-color: #1a1a2e;">
+                                <input type="file" class="form-control" id="{{ form.images_zip.id_for_label }}" name="images_zip" accept=".zip">
                             </div>
                             <small class="form-text" style="color: #6c757d; display: block; margin-top: 10px;">
                                 Optional: Upload a ZIP file containing product images. Maximum size: 50MB.
@@ -53,7 +213,7 @@
                         </div>
 
                         <!-- Submit Button -->
-                        <button type="submit" class="btn btn-dark" style="background-color: #1a1a2e; border-color: #1a1a2e; padding: 10px 30px; font-weight: 500;">
+                        <button type="submit" class="btn-import">
                             Import Products
                         </button>
                     </form>
@@ -71,18 +231,32 @@
             </div>
 
             <!-- CSV Format Guide -->
-            <div class="card mt-4" style="border: 1px solid #dee2e6;">
-                <div class="card-body">
-                    <h5 class="card-title" style="color: #1a1a2e; margin-bottom: 20px;">📋 CSV Format Guide</h5>
+            <div class="card import-card mt-4">
+                <div class="card-body" style="padding: 30px;">
+                    <h5 class="card-title section-title">📋 CSV Format Guide</h5>
                     
-                    <h6 style="color: #1a1a2e; margin-bottom: 10px;">Required Columns:</h6>
+                    <!-- Download Sample CSV Button -->
+                    <div class="mb-4">
+                        <a href="{% static 'sample_products.csv' %}" download class="btn-download">
+                            ⬇️ Download Sample CSV Template
+                        </a>
+                        <p style="color: #6c757d; font-size: 0.85em; margin-top: 8px;">
+                            Download a ready-to-use template with example products
+                        </p>
+                    </div>
+                    
+                    <h6 class="guide-heading">Required Column:</h6>
                     <ul style="color: #6c757d; margin-bottom: 20px;">
                         <li><strong>name</strong> - Product name (e.g., "Phi Beta Sigma T-Shirt")</li>
-                        <li><strong>category</strong> - Must be one of: apparel, accessories, drinkware, other</li>
-                        <li><strong>price</strong> - Price in dollars (e.g., 19.99)</li>
+                    </ul>
+                    
+                    <h6 class="guide-heading">Recommended Columns:</h6>
+                    <ul style="color: #6c757d; margin-bottom: 20px;">
+                        <li><strong>category</strong> - One of: apparel, accessories, drinkware, other (defaults to "other")</li>
+                        <li><strong>price</strong> - Price in dollars (e.g., 19.99) (defaults to 0)</li>
                     </ul>
 
-                    <h6 style="color: #1a1a2e; margin-bottom: 10px;">Optional Columns:</h6>
+                    <h6 class="guide-heading">Optional Columns:</h6>
                     <ul style="color: #6c757d; margin-bottom: 20px;">
                         <li><strong>description</strong> - Product description</li>
                         <li><strong>inventory</strong> - Number of units in stock (default: 100)</li>
@@ -92,7 +266,7 @@
                         <li><strong>image_path</strong> - Path inside ZIP file (e.g., "images/tshirt.jpg")</li>
                     </ul>
 
-                    <h6 style="color: #1a1a2e; margin-bottom: 10px;">📸 Adding Images:</h6>
+                    <h6 class="guide-heading">📸 Adding Images:</h6>
                     <p style="color: #6c757d; margin-bottom: 10px;">
                         <strong>Option 1: Image URLs</strong> - Add an <code>image_url</code> column with direct image links. Images are downloaded automatically.
                     </p>
@@ -100,8 +274,8 @@
                         <strong>Option 2: ZIP File</strong> - Create a ZIP file with your images, add an <code>image_path</code> column with file paths (e.g., "images/product.jpg"), and upload both files together.
                     </p>
 
-                    <h6 style="color: #1a1a2e; margin-bottom: 10px;">Example CSV with Images:</h6>
-                    <div style="background-color: #f8f9fa; padding: 15px; border-radius: 4px; overflow-x: auto; font-family: monospace; font-size: 0.9em; color: #333;">
+                    <h6 class="guide-heading">Example CSV with Images:</h6>
+                    <div class="code-box">
                         <pre style="margin: 0; white-space: pre-wrap; word-wrap: break-word;">name,category,price,description,inventory,sizes,colors,image_url
 "Phi Beta Sigma T-Shirt",apparel,19.99,"Classic fraternity tee",100,"S, M, L, XL","Black, White, Navy",https://example.com/tshirt.jpg
 "Chapter Hat",apparel,24.99,"Embroidered baseball cap",50,"One Size","Black, Navy",https://example.com/hat.jpg
@@ -121,46 +295,49 @@ name,category,price,description,inventory,sizes,colors,image_path
         <!-- Sidebar Info -->
         <div class="col-md-4">
             <!-- Recent Imports -->
-            <div class="card mb-4" style="border: 1px solid #dee2e6;">
-                <div class="card-body">
-                    <h5 class="card-title" style="color: #1a1a2e; margin-bottom: 20px;">📊 Import Statistics</h5>
+            <div class="card import-card mb-4">
+                <div class="card-body" style="padding: 25px;">
+                    <h5 class="card-title section-title">📊 Import Statistics</h5>
                     <div style="text-align: center;">
                         <p style="margin: 0; color: #6c757d; font-size: 0.9em;">Total Products</p>
-                        <p style="margin: 10px 0 0 0; color: #1a1a2e; font-size: 2em; font-weight: bold;">{{ total_products }}</p>
+                        <p class="stat-number" style="margin: 10px 0 0 0;">{{ total_products }}</p>
                     </div>
                 </div>
             </div>
 
             <!-- Tips -->
-            <div class="card" style="border: 1px solid #dee2e6;">
-                <div class="card-body">
-                    <h5 class="card-title" style="color: #1a1a2e; margin-bottom: 15px;">💡 Tips</h5>
+            <div class="card import-card">
+                <div class="card-body" style="padding: 25px;">
+                    <h5 class="card-title section-title">💡 Tips</h5>
                     <ul style="font-size: 0.9em; color: #6c757d; margin: 0; padding-left: 20px;">
                         <li style="margin-bottom: 10px;">Use Excel or Google Sheets to create your CSV file</li>
-                        <li style="margin-bottom: 10px;">Ensure all required columns are present</li>
+                        <li style="margin-bottom: 10px;">Only the <strong>name</strong> column is required - other fields have defaults</li>
                         <li style="margin-bottom: 10px;">Products with the same name won't be duplicated</li>
-                        <li style="margin-bottom: 10px;">Check category names carefully for typos</li>
+                        <li style="margin-bottom: 10px;">Rows with errors are skipped (import continues)</li>
+                        <li style="margin-bottom: 10px;">Column names are case-insensitive ("Name" and "name" both work)</li>
                         <li>Maximum file size is 5MB</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Shopify Support -->
+            <div class="card import-card mt-4">
+                <div class="card-body" style="padding: 25px;">
+                    <h5 class="card-title section-title">🛒 Shopify Import</h5>
+                    <p style="font-size: 0.9em; color: #6c757d; margin-bottom: 10px;">
+                        You can also import directly from a Shopify product export CSV. The importer automatically detects Shopify format and maps:
+                    </p>
+                    <ul style="font-size: 0.85em; color: #6c757d; margin: 0; padding-left: 20px;">
+                        <li>Title → name</li>
+                        <li>Variant Price → price</li>
+                        <li>Variant Inventory Qty → inventory</li>
+                        <li>Body (HTML) → description</li>
+                        <li>Image Src → image</li>
+                        <li>Type → category (auto-mapped)</li>
                     </ul>
                 </div>
             </div>
         </div>
     </div>
 </div>
-
-<style>
-    .card {
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    }
-
-    @media (max-width: 768px) {
-        .col-md-4 {
-            margin-top: 30px;
-        }
-
-        pre {
-            font-size: 0.8em !important;
-        }
-    }
-</style>
 {% endblock %}

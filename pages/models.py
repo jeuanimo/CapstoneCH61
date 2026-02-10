@@ -972,13 +972,24 @@ class Product(models.Model):
 
 
 class Cart(models.Model):
-    """Shopping cart for users"""
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='boutique_cart')
+    """Shopping cart for users (authenticated or anonymous via session)"""
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='boutique_cart', null=True, blank=True)
+    session_key = models.CharField(max_length=40, null=True, blank=True, db_index=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
+    class Meta:
+        constraints = [
+            models.CheckConstraint(
+                check=models.Q(user__isnull=False) | models.Q(session_key__isnull=False),
+                name='cart_must_have_user_or_session'
+            )
+        ]
+    
     def __str__(self):
-        return f"Cart for {self.user.username}"
+        if self.user:
+            return f"Cart for {self.user.username}"
+        return f"Cart for session {self.session_key[:8]}..."
     
     def get_total_price(self):
         """Calculate total price of cart items"""
@@ -1010,7 +1021,7 @@ class CartItem(models.Model):
 
 
 class Order(models.Model):
-    """Customer order"""
+    """Customer order (supports both authenticated and anonymous users)"""
     STATUS_CHOICES = [
         ('pending', 'Pending Payment'),
         ('completed', 'Payment Completed'),
@@ -1019,11 +1030,14 @@ class Order(models.Model):
         ('cancelled', 'Cancelled'),
     ]
     
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='boutique_orders')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='boutique_orders', null=True, blank=True)
+    session_key = models.CharField(max_length=40, null=True, blank=True, db_index=True, help_text='Session key for anonymous orders')
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='pending')
     total_price = models.DecimalField(max_digits=10, decimal_places=2)
     stripe_payment_intent = models.CharField(max_length=250, blank=True, default='')
     email = models.EmailField()
+    full_name = models.CharField(max_length=200, blank=True, default='', help_text='Customer full name')
+    phone = models.CharField(max_length=20, blank=True, default='', help_text='Contact phone number')
     address = models.TextField()
     city = models.CharField(max_length=100)
     state = models.CharField(max_length=50)
@@ -1036,10 +1050,14 @@ class Order(models.Model):
         indexes = [
             models.Index(fields=['user', '-created_at']),
             models.Index(fields=['status', '-created_at']),
+            models.Index(fields=['session_key', '-created_at']),
+            models.Index(fields=['email', '-created_at']),
         ]
     
     def __str__(self):
-        return f"Order #{self.id} - {self.user.username}"
+        if self.user:
+            return f"Order #{self.id} - {self.user.username}"
+        return f"Order #{self.id} - {self.email}"
 
 
 class OrderItem(models.Model):

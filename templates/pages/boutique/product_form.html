@@ -2,42 +2,150 @@
 
 {% block title %}{{ title }} - Boutique{% endblock %}
 
-{% block content %}
+{% block css %}
 <style>
-    body.dark-mode .card {
-        background-color: #1a2a4a;
-        color: #e8edf7;
+    /* Theme Colors - Phi Beta Sigma Royal Blue */
+    :root {
+        --pbs-blue: #0047AB;
+        --pbs-blue-dark: #003380;
+        --pbs-blue-light: #1e5bc6;
     }
+
+    .product-form-card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 71, 171, 0.15);
+    }
+
+    body.dark-mode .product-form-card {
+        background-color: #2d2d2d;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .card-header-blue {
+        background: linear-gradient(135deg, var(--pbs-blue) 0%, var(--pbs-blue-dark) 100%);
+        color: white;
+        border-radius: 12px 12px 0 0 !important;
+        padding: 20px;
+    }
+
+    body.dark-mode .card-header-blue {
+        background: linear-gradient(135deg, #2a5a9a 0%, #1a4a8a 100%);
+    }
+
+    .form-control,
+    .form-select {
+        border-radius: 8px;
+        padding: 12px 15px;
+        border-color: #dee2e6;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        border-color: var(--pbs-blue);
+        box-shadow: 0 0 0 0.2rem rgba(0, 71, 171, 0.25);
+    }
+
     body.dark-mode .form-control,
     body.dark-mode .form-select {
-        background-color: #0b1020;
+        background-color: #3d3d3d;
         color: #e8edf7;
-        border-color: #2a4a7a;
+        border-color: #555;
     }
+
     body.dark-mode .form-control:focus,
     body.dark-mode .form-select:focus {
-        background-color: #0b1020;
+        background-color: #3d3d3d;
         color: #e8edf7;
-        border-color: #4a7aba;
+        border-color: #4a90e2;
     }
-    body.dark-mode label {
+
+    body.dark-mode label,
+    body.dark-mode .form-label {
         color: #e8edf7;
     }
+
     body.dark-mode .form-text {
         color: #b0b8c8;
     }
-</style>
 
+    .form-label {
+        color: var(--pbs-blue);
+        font-weight: 500;
+    }
+
+    body.dark-mode .form-label {
+        color: #a0c4f0;
+    }
+
+    .btn-save {
+        background: linear-gradient(135deg, var(--pbs-blue) 0%, var(--pbs-blue-dark) 100%);
+        border: none;
+        color: white;
+        padding: 12px 28px;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-save:hover {
+        background: linear-gradient(135deg, var(--pbs-blue-light) 0%, var(--pbs-blue) 100%);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 71, 171, 0.4);
+    }
+
+    body.dark-mode .btn-save {
+        background: linear-gradient(135deg, #2a5a9a 0%, #1a4a8a 100%);
+    }
+
+    .btn-cancel {
+        background: transparent;
+        border: 2px solid #6c757d;
+        color: #6c757d;
+        padding: 10px 28px;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.2s ease;
+    }
+
+    .btn-cancel:hover {
+        background: #6c757d;
+        color: white;
+    }
+
+    body.dark-mode .btn-cancel {
+        border-color: #888;
+        color: #aaa;
+    }
+
+    body.dark-mode .btn-cancel:hover {
+        background: #888;
+        color: #1a1a1a;
+    }
+
+    .form-check-input:checked {
+        background-color: var(--pbs-blue);
+        border-color: var(--pbs-blue);
+    }
+
+    .form-check-input:focus {
+        box-shadow: 0 0 0 0.2rem rgba(0, 71, 171, 0.25);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
 <div class="container my-5">
     <div class="row justify-content-center">
         <div class="col-md-8">
-            <div class="card" style="box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);">
-                <div class="card-header bg-primary text-white">
+            <div class="card product-form-card">
+                <div class="card-header card-header-blue">
                     <h4 class="mb-0">
                         <i class="fas fa-box"></i> {{ title }}
                     </h4>
                 </div>
-                <div class="card-body">
+                <div class="card-body" style="padding: 30px;">
                     <form method="post" enctype="multipart/form-data">
                         {% csrf_token %}
                         
@@ -49,7 +157,7 @@
 
                         <!-- Product Name -->
                         <div class="mb-3">
-                            {{ form.name.label_tag }}
+                            <label class="form-label">{{ form.name.label }}</label>
                             {{ form.name }}
                             {% if form.name.errors %}
                             <div class="text-danger">
@@ -60,7 +168,7 @@
 
                         <!-- Description -->
                         <div class="mb-3">
-                            {{ form.description.label_tag }}
+                            <label class="form-label">{{ form.description.label }}</label>
                             {{ form.description }}
                             {% if form.description.errors %}
                             <div class="text-danger">
@@ -71,7 +179,7 @@
 
                         <!-- Category -->
                         <div class="mb-3">
-                            {{ form.category.label_tag }}
+                            <label class="form-label">{{ form.category.label }}</label>
                             {{ form.category }}
                             {% if form.category.errors %}
                             <div class="text-danger">
@@ -82,7 +190,7 @@
 
                         <!-- Price -->
                         <div class="mb-3">
-                            {{ form.price.label_tag }}
+                            <label class="form-label">{{ form.price.label }}</label>
                             {{ form.price }}
                             {% if form.price.errors %}
                             <div class="text-danger">
@@ -93,7 +201,7 @@
 
                         <!-- Inventory -->
                         <div class="mb-3">
-                            {{ form.inventory.label_tag }}
+                            <label class="form-label">{{ form.inventory.label }}</label>
                             {{ form.inventory }}
                             {% if form.inventory.errors %}
                             <div class="text-danger">
@@ -153,8 +261,8 @@
                         </div>
 
                         <!-- Image -->
-                        <div class="mb-3">
-                            {{ form.image.label_tag }}
+                        <div class="mb-4">
+                            <label class="form-label">{{ form.image.label }}</label>
                             {% if product and product.image %}
                             <div class="mb-2">
                                 <img src="{{ product.image.url }}" alt="{{ product.name }}" style="max-height: 200px;" class="img-fluid rounded">
@@ -170,10 +278,10 @@
 
                         <!-- Form Actions -->
                         <div class="d-flex justify-content-between">
-                            <a href="{% url 'shop_home' %}" class="btn btn-secondary">
+                            <a href="{% url 'shop_home' %}" class="btn-cancel">
                                 <i class="fas fa-times"></i> Cancel
                             </a>
-                            <button type="submit" class="btn btn-primary">
+                            <button type="submit" class="btn-save">
                                 <i class="fas fa-save"></i> Save Product
                             </button>
                         </div>

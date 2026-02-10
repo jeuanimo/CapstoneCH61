@@ -103,7 +103,7 @@ import logging
 from django.core.mail import send_mail
 from django.conf import settings
 from django.shortcuts import get_object_or_404
-from django.http import JsonResponse
+from django.http import JsonResponse, Http404
 import os
 # Class-based view imports
 from django.views.generic import CreateView, UpdateView, DeleteView, ListView
@@ -3583,6 +3583,44 @@ def view_sms_logs(request):
 
 # ==================== BOUTIQUE VIEWS ====================
 
+def get_or_create_cart(request):
+    """
+    Get or create a shopping cart for the current user/session.
+    Supports both authenticated users and anonymous guests via session.
+    """
+    if request.user.is_authenticated:
+        cart, _ = Cart.objects.get_or_create(user=request.user)
+        # If user previously had a session cart, merge it
+        session_key = request.session.session_key
+        if session_key:
+            try:
+                session_cart = Cart.objects.get(session_key=session_key, user__isnull=True)
+                # Merge session cart items into user cart
+                for item in session_cart.items.all():
+                    existing_item = cart.items.filter(
+                        product=item.product,
+                        size=item.size,
+                        color=item.color
+                    ).first()
+                    if existing_item:
+                        existing_item.quantity += item.quantity
+                        existing_item.save()
+                    else:
+                        item.cart = cart
+                        item.save()
+                session_cart.delete()
+            except Cart.DoesNotExist:
+                pass
+    else:
+        # Create session if it doesn't exist
+        if not request.session.session_key:
+            request.session.create()
+        session_key = request.session.session_key
+        cart, _ = Cart.objects.get_or_create(session_key=session_key, user__isnull=True)
+    
+    return cart
+
+
 def shop_home(request):
     """Display all products with optional filtering"""
     products = Product.objects.all()
@@ -3591,7 +3629,8 @@ def shop_home(request):
     if category:
         products = products.filter(category=category)
     
-    categories = Product.objects.values_list('category', flat=True).distinct()
+    # Use predefined category choices for consistent, unique categories
+    categories = [choice[0] for choice in Product.CATEGORY_CHOICES]
     
     context = {
         'products': products,
@@ -3613,11 +3652,10 @@ def product_detail(request, pk):
     return render(request, 'pages/boutique/product_detail.html', context)
 
 
-@login_required
 def add_to_cart(request, pk):
-    """Add product to cart"""
+    """Add product to cart (works for both authenticated and anonymous users)"""
     product = get_object_or_404(Product, pk=pk)
-    cart, _ = Cart.objects.get_or_create(user=request.user)
+    cart = get_or_create_cart(request)
     
     if request.method == 'POST':
         quantity = int(request.POST.get('quantity', 1))
@@ -3645,13 +3683,9 @@ def add_to_cart(request, pk):
     return redirect('product_detail', pk=pk)
 
 
-@login_required
 def view_cart(request):
-    """Display shopping cart"""
-    try:
-        cart = Cart.objects.get(user=request.user)
-    except Cart.DoesNotExist:
-        cart = None
+    """Display shopping cart (works for both authenticated and anonymous users)"""
+    cart = get_or_create_cart(request)
     
     context = {
         'cart': cart,
@@ -3659,10 +3693,10 @@ def view_cart(request):
     return render(request, 'pages/boutique/cart.html', context)
 
 
-@login_required
 def update_cart_item(request, item_id):
-    """Update cart item quantity"""
-    cart_item = get_object_or_404(CartItem, id=item_id, cart__user=request.user)
+    """Update cart item quantity (works for both authenticated and anonymous users)"""
+    cart = get_or_create_cart(request)
+    cart_item = get_object_or_404(CartItem, id=item_id, cart=cart)
     
     if request.method == 'POST':
         quantity = int(request.POST.get('quantity', 1))
@@ -3681,44 +3715,49 @@ def update_cart_item(request, item_id):
     return redirect('view_cart')
 
 
-@login_required
 def remove_from_cart(request, item_id):
-    """Remove item from cart"""
-    cart_item = get_object_or_404(CartItem, id=item_id, cart__user=request.user)
+    """Remove item from cart (works for both authenticated and anonymous users)"""
+    cart = get_or_create_cart(request)
+    cart_item = get_object_or_404(CartItem, id=item_id, cart=cart)
     cart_item.delete()
     messages.success(request, 'Item removed from cart')
     return redirect('view_cart')
 
 
-@login_required
 def checkout(request):
-    """Checkout and create order"""
-    try:
-        cart = Cart.objects.get(user=request.user)
-    except Cart.DoesNotExist:
+    """Checkout and create order (works for both authenticated and anonymous users)"""
+    cart = get_or_create_cart(request)
+    
+    if not cart.items.exists():
         messages.error(request, 'Your cart is empty')
         return redirect('shop_home')
     
-    if not cart.cartitem_set.exists():
-        messages.error(request, 'Your cart is empty')
-        return redirect('shop_home')
+    is_guest = not request.user.is_authenticated
     
     if request.method == 'POST':
-        form = CheckoutForm(request.POST)
+        form = CheckoutForm(request.POST, is_guest=is_guest)
         if form.is_valid():
             # Create order
-            order = Order.objects.create(
-                user=request.user,
-                total_price=cart.get_total_price(),
-                email=form.cleaned_data['email'],
-                address=form.cleaned_data['address'],
-                city=form.cleaned_data['city'],
-                state=form.cleaned_data['state'],
-                zip_code=form.cleaned_data['zip_code'],
-            )
+            order_data = {
+                'total_price': cart.get_total_price(),
+                'email': form.cleaned_data['email'],
+                'full_name': form.cleaned_data.get('full_name', ''),
+                'phone': form.cleaned_data.get('phone', ''),
+                'address': form.cleaned_data['address'],
+                'city': form.cleaned_data['city'],
+                'state': form.cleaned_data['state'],
+                'zip_code': form.cleaned_data['zip_code'],
+            }
+            
+            if request.user.is_authenticated:
+                order_data['user'] = request.user
+            else:
+                order_data['session_key'] = request.session.session_key
+            
+            order = Order.objects.create(**order_data)
             
             # Create order items from cart
-            for cart_item in cart.cartitem_set.all():
+            for cart_item in cart.items.all():
                 OrderItem.objects.create(
                     order=order,
                     product=cart_item.product,
@@ -3729,25 +3768,44 @@ def checkout(request):
                 )
             
             # Clear cart
-            cart.cartitem_set.all().delete()
+            cart.items.all().delete()
             
             return redirect('payment', order_id=order.id)
     else:
-        form = CheckoutForm(initial={
-            'email': request.user.email,
-        })
+        initial_data = {}
+        if request.user.is_authenticated:
+            initial_data['email'] = request.user.email
+            if hasattr(request.user, 'first_name') and hasattr(request.user, 'last_name'):
+                full_name = f"{request.user.first_name} {request.user.last_name}".strip()
+                if full_name:
+                    initial_data['full_name'] = full_name
+        form = CheckoutForm(initial=initial_data, is_guest=is_guest)
     
     context = {
         'form': form,
         'cart': cart,
+        'is_guest': is_guest,
     }
     return render(request, 'pages/boutique/checkout.html', context)
 
 
-@login_required
+def get_order_for_request(request, order_id):
+    """
+    Get an order that belongs to the current user or session.
+    Returns order or raises Http404.
+    """
+    if request.user.is_authenticated:
+        return get_object_or_404(Order, id=order_id, user=request.user)
+    else:
+        session_key = request.session.session_key
+        if session_key:
+            return get_object_or_404(Order, id=order_id, session_key=session_key)
+        raise Http404("Order not found")
+
+
 def payment(request, order_id):
-    """Handle Stripe payment"""
-    order = get_object_or_404(Order, id=order_id, user=request.user)
+    """Handle Stripe payment (works for both authenticated and anonymous users)"""
+    order = get_order_for_request(request, order_id)
     stripe.api_key = settings.STRIPE_SECRET_KEY
     
     if order.status != 'pending':
@@ -3756,13 +3814,17 @@ def payment(request, order_id):
     
     if request.method == 'POST':
         try:
+            metadata = {'order_id': order.id}
+            if request.user.is_authenticated:
+                metadata['user_id'] = request.user.id
+            else:
+                metadata['session_key'] = request.session.session_key
+                metadata['email'] = order.email
+            
             intent = stripe.PaymentIntent.create(
                 amount=int(order.total_price * 100),  # Convert to cents
                 currency='usd',
-                metadata={
-                    'order_id': order.id,
-                    'user_id': request.user.id,
-                }
+                metadata=metadata
             )
             
             order.stripe_payment_intent = intent['id']
@@ -3784,10 +3846,9 @@ def payment(request, order_id):
     return render(request, 'pages/boutique/payment.html', context)
 
 
-@login_required
 def payment_success(request, order_id):
-    """Handle successful payment"""
-    order = get_object_or_404(Order, id=order_id, user=request.user)
+    """Handle successful payment (works for both authenticated and anonymous users)"""
+    order = get_order_for_request(request, order_id)
     order.status = 'completed'
     order.save()
     

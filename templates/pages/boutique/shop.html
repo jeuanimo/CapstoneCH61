@@ -3,6 +3,14 @@
 
 {% block css %}
 <style>
+    /* Theme Colors - Phi Beta Sigma Royal Blue */
+    :root {
+        --pbs-blue: #0047AB;
+        --pbs-blue-dark: #003380;
+        --pbs-blue-light: #1e5bc6;
+        --pbs-gold: #CFB53B;
+    }
+
     .boutique-page-container {
         background-image: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)), url('{% static 'img/ngs.jpg' %}');
         background-size: cover;
@@ -17,7 +25,7 @@
     }
 
     .boutique-hero {
-        background: rgba(26, 26, 46, 0.85) !important;
+        background: linear-gradient(135deg, var(--pbs-blue) 0%, var(--pbs-blue-dark) 100%) !important;
         padding: 60px 20px;
         text-align: center;
         margin-bottom: 40px;
@@ -36,27 +44,145 @@
     }
 
     body.dark-mode .boutique-hero {
-        background: rgba(11, 16, 32, 0.9) !important;
+        background: linear-gradient(135deg, #1a2a4a 0%, #0b1020 100%) !important;
     }
 
-    .card {
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    /* Product Cards - Enhanced Styling */
+    .product-card {
+        border: 1px solid #dee2e6;
+        border-radius: 12px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        background: white;
     }
 
-    body.dark-mode .card {
+    .product-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 0 25px rgba(0, 71, 171, 0.4),
+                    0 0 50px rgba(0, 71, 171, 0.2),
+                    0 12px 30px rgba(0, 0, 0, 0.15);
+        border-color: var(--pbs-blue);
+    }
+
+    body.dark-mode .product-card {
         background-color: #1a2a4a;
         border-color: #2a4a7a;
         color: #e8edf7;
     }
 
-    .card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+    body.dark-mode .product-card:hover {
+        box-shadow: 0 0 25px rgba(74, 144, 226, 0.5),
+                    0 0 50px rgba(74, 144, 226, 0.3),
+                    0 12px 30px rgba(0, 0, 0, 0.3);
+        border-color: rgba(74, 144, 226, 0.6);
+    }
+
+    /* Card title in dark mode */
+    body.dark-mode .product-card .card-title {
+        color: #e8edf7 !important;
+    }
+
+    body.dark-mode .product-card .product-price {
+        color: #e8edf7 !important;
+    }
+
+    /* Card image styling */
+    .product-card .card-img-top {
+        transition: transform 0.3s ease;
+    }
+
+    .product-card:hover .card-img-top {
+        transform: scale(1.05);
+    }
+
+    .product-card .card-img-wrapper {
+        overflow: hidden;
+        height: 250px;
+    }
+
+    /* Category Badge Styling */
+    .category-badge {
+        background: linear-gradient(135deg, var(--pbs-blue) 0%, var(--pbs-blue-light) 100%);
+        color: white;
+        font-size: 0.85em;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    body.dark-mode .category-badge {
+        background: linear-gradient(135deg, #2a4a7a 0%, #3a5a8a 100%);
+    }
+
+    /* Button Styling */
+    .btn-view-details {
+        background-color: white;
+        border: 2px solid var(--pbs-blue);
+        color: var(--pbs-blue);
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-view-details:hover {
+        background-color: var(--pbs-blue);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 71, 171, 0.3);
+    }
+
+    body.dark-mode .btn-view-details {
+        background-color: transparent;
+        border-color: #4a90e2;
+        color: #4a90e2;
+    }
+
+    body.dark-mode .btn-view-details:hover {
+        background-color: #4a90e2;
+        color: white;
+    }
+
+    .btn-add-cart {
+        background: linear-gradient(135deg, var(--pbs-blue) 0%, var(--pbs-blue-dark) 100%);
+        border: none;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-add-cart:hover {
+        background: linear-gradient(135deg, var(--pbs-blue-light) 0%, var(--pbs-blue) 100%);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 71, 171, 0.4);
+    }
+
+    body.dark-mode .btn-add-cart {
+        background: linear-gradient(135deg, #2a5a9a 0%, #1a4a8a 100%);
+    }
+
+    body.dark-mode .btn-add-cart:hover {
+        background: linear-gradient(135deg, #3a6aaa 0%, #2a5a9a 100%);
+    }
+
+    /* Product grid spacing */
+    .products-grid {
+        gap: 30px;
+    }
+
+    .product-col {
+        padding: 15px;
     }
 
     .admin-controls {
         background-color: #e3f2fd;
-        border-left: 4px solid #2196f3;
+        border-left: 4px solid var(--pbs-blue);
         padding: 15px;
         border-radius: 5px;
         margin-bottom: 30px;
@@ -65,6 +191,106 @@
     body.dark-mode .admin-controls {
         background-color: #1a2a4a;
         border-left-color: #4a7aba;
+    }
+
+    /* Filter Bar Styling - Horizontal Layout */
+    .filter-card {
+        background: linear-gradient(180deg, #f5f6f7 0%, #e8eaed 100%);
+        border: 1px solid #c8c9c7;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        margin-bottom: 30px;
+    }
+
+    body.dark-mode .filter-card {
+        background: linear-gradient(180deg, #1a2a4a 0%, #0f1a30 100%);
+        border-color: #2a4a7a;
+    }
+
+    .filter-card .card-body {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+
+    .filter-card .card-title {
+        color: #0f3d6e;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-size: 0.95em;
+        margin-bottom: 0;
+        white-space: nowrap;
+    }
+
+    body.dark-mode .filter-card .card-title {
+        color: #9ec5ff;
+    }
+
+    .filter-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .filter-link {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.85em;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        transition: all 0.25s ease;
+        background: linear-gradient(180deg, #2a7dd4 0%, #1e6bb8 50%, #0f3d6e 100%);
+        border: 1px solid #0a2d52;
+        color: white !important;
+        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+                    inset 0 -1px 0 rgba(0, 0, 0, 0.35);
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+    }
+
+    .filter-link:hover {
+        background: linear-gradient(180deg, #3a8be3 0%, #2a7dd4 50%, #15508c 100%);
+        transform: translateY(-1px);
+        box-shadow: 0 5px 10px rgba(0, 0, 0, 0.4),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+                    inset 0 -1px 0 rgba(0, 0, 0, 0.3);
+        color: white !important;
+    }
+
+    .filter-link.active {
+        background: linear-gradient(180deg, #ffc107 0%, #e0a800 50%, #c69500 100%);
+        border-color: #a67c00;
+        color: var(--pbs-blue-dark) !important;
+        text-shadow: 0 1px 0 rgba(255, 255, 255, 0.3);
+        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.35),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+                    inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+    }
+
+    .filter-link.active:hover {
+        background: linear-gradient(180deg, #ffcd39 0%, #ffc107 50%, #d4a106 100%);
+    }
+
+    body.dark-mode .filter-link {
+        background: linear-gradient(180deg, #1f3b6a 0%, #112746 100%);
+        border-color: #0a2d52;
+        color: #e8edf7 !important;
+    }
+
+    body.dark-mode .filter-link:hover {
+        background: linear-gradient(180deg, #2a4d8c 0%, #1f3b6a 60%, #112746 100%);
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .filter-link.active {
+        background: linear-gradient(180deg, #ffc107 0%, #e0a800 50%, #c69500 100%);
+        color: var(--pbs-blue-dark) !important;
     }
 
     @media (max-width: 768px) {
@@ -76,7 +302,11 @@
             font-size: 1em !important;
         }
 
-        .card {
+        .product-col {
+            padding: 10px;
+        }
+        
+        .product-card {
             margin-bottom: 20px;
         }
     }
@@ -127,59 +357,59 @@
         {% endif %}
 
         <!-- Shop Content -->
-        <div class="row">
-            <!-- Sidebar Filters -->
-            <div class="col-md-3">
-                <div class="card" style="background-color: #f8f9fa; border: 1px solid #dee2e6;">
-                    <div class="card-body">
-                        <h5 class="card-title">Filter by Category</h5>
-                        <div class="list-group">
-                            <a href="{% url 'shop_home' %}" class="list-group-item list-group-item-action {% if not selected_category %}active{% endif %}" style="background-color: {% if not selected_category %}#1a1a2e{% else %}white{% endif %}; color: {% if not selected_category %}white{% else %}black{% endif %};">
-                                All Products
-                            </a>
-                            {% for cat in categories %}
-                            <a href="?category={{ cat }}" class="list-group-item list-group-item-action {% if selected_category == cat %}active{% endif %}" style="background-color: {% if selected_category == cat %}#1a1a2e{% else %}white{% endif %}; color: {% if selected_category == cat %}white{% else %}black{% endif %};">
-                                {{ cat|title }}
-                            </a>
-                            {% endfor %}
-                        </div>
-                    </div>
+        <!-- Category Filter Bar (Horizontal) -->
+        <div class="card filter-card">
+            <div class="card-body">
+                <h5 class="card-title">Filter by Category:</h5>
+                <div class="filter-links">
+                    <a href="{% url 'shop_home' %}" class="filter-link {% if not selected_category %}active{% endif %}">
+                        All Products
+                    </a>
+                    {% for cat in categories %}
+                    <a href="?category={{ cat }}" class="filter-link {% if selected_category == cat %}active{% endif %}">
+                        {{ cat|title }}
+                    </a>
+                    {% endfor %}
                 </div>
             </div>
+        </div>
 
-            <!-- Products Grid -->
-            <div class="col-md-9">
-                <div class="row">
+        <!-- Products Grid -->
+        <div class="row">
+            <div class="col-12">
+                <div class="row products-grid">
                     {% if products %}
                         {% for product in products %}
-                        <div class="col-md-6 col-lg-4 mb-4">
-                            <div class="card h-100" style="border: 1px solid #dee2e6; box-shadow: 0 2px 8px rgba(0,0,0,0.1); position: relative;">
+                        <div class="col-sm-6 col-md-4 col-lg-3 product-col">
+                            <div class="card product-card h-100" style="position: relative;">
                                 {% if user.is_staff or user.member_profile.is_officer %}
                                 <div style="position: absolute; top: 10px; left: 10px; z-index: 10;">
                                     <input type="checkbox" class="product-checkbox" data-product-id="{{ product.id }}" style="width: 20px; height: 20px; cursor: pointer;">
                                 </div>
                                 {% endif %}
-                                {% if product.image %}
-                                <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}" style="height: 250px; object-fit: cover;">
-                                {% else %}
-                                <div class="card-img-top" style="height: 250px; background-color: #e9ecef; display: flex; align-items: center; justify-content: center;">
-                                    <span style="color: #6c757d;">No Image</span>
+                                <div class="card-img-wrapper">
+                                    {% if product.image %}
+                                    <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}" style="height: 250px; object-fit: cover;">
+                                    {% else %}
+                                    <div class="card-img-top" style="height: 250px; background-color: #e9ecef; display: flex; align-items: center; justify-content: center;">
+                                        <span style="color: #6c757d;">No Image</span>
+                                    </div>
+                                    {% endif %}
                                 </div>
-                                {% endif %}
                                 <div class="card-body" style="display: flex; flex-direction: column;">
-                                    <h5 class="card-title" style="color: #1a1a2e;">{{ product.name }}</h5>
+                                    <h5 class="card-title" style="color: var(--pbs-blue);">{{ product.name }}</h5>
                                     <p class="card-text text-muted" style="flex-grow: 1;">
                                         {{ product.description|truncatewords:15 }}
                                     </p>
                                     <div class="mb-3">
-                                        <span class="badge" style="background-color: #1a1a2e; font-size: 0.9em;">{{ product.category|title }}</span>
+                                        <span class="category-badge">{{ product.category|title }}</span>
                                     </div>
                                     <div style="margin-top: auto;">
-                                        <p style="font-size: 1.5em; color: #1a1a2e; font-weight: bold; margin: 10px 0;">
+                                        <p class="product-price" style="font-size: 1.5em; color: var(--pbs-blue); font-weight: bold; margin: 10px 0;">
                                             ${{ product.price }}
                                         </p>
                                         <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-                                            <a href="{% url 'product_detail' product.id %}" class="btn btn-outline-dark btn-sm" style="flex: 1; border-color: #1a1a2e; color: #1a1a2e;">View Details</a>
+                                            <a href="{% url 'product_detail' product.id %}" class="btn btn-view-details btn-sm" style="flex: 1;">View Details</a>
                                         </div>
                                         <!-- Admin buttons for product -->
                                         {% if user.is_staff or user.member_profile.is_officer %}

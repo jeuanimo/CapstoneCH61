@@ -1,125 +1,288 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block css %}
+<style>
+    /* Theme Colors - Phi Beta Sigma Royal Blue */
+    :root {
+        --pbs-blue: #0047AB;
+        --pbs-blue-dark: #003380;
+        --pbs-blue-light: #1e5bc6;
+    }
+
+    /* Product Layout Spacing */
+    .product-row {
+        display: flex;
+        flex-wrap: wrap;
+        margin: 0 -20px;
+    }
+
+    .product-image-col,
+    .product-info-col {
+        padding: 0 20px;
+    }
+
+    .product-image-wrapper {
+        background: #fff;
+        border-radius: 16px;
+        padding: 20px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    body.dark-mode .product-image-wrapper {
+        background: #2d2d2d;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .product-info-wrapper {
+        background: #fff;
+        border-radius: 16px;
+        padding: 30px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        height: 100%;
+    }
+
+    body.dark-mode .product-info-wrapper {
+        background: #2d2d2d;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .category-badge {
+        background: linear-gradient(135deg, var(--pbs-blue) 0%, var(--pbs-blue-light) 100%);
+        color: white;
+        font-size: 0.95em;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: inline-block;
+    }
+
+    body.dark-mode .category-badge {
+        background: linear-gradient(135deg, #2a4a7a 0%, #3a5a8a 100%);
+    }
+
+    .btn-add-cart {
+        background: linear-gradient(135deg, var(--pbs-blue) 0%, var(--pbs-blue-dark) 100%);
+        border: none;
+        color: white;
+        padding: 14px 28px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 1.1em;
+        transition: all 0.3s ease;
+    }
+
+    .btn-add-cart:hover {
+        background: linear-gradient(135deg, var(--pbs-blue-light) 0%, var(--pbs-blue) 100%);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 71, 171, 0.4);
+    }
+
+    body.dark-mode .btn-add-cart {
+        background: linear-gradient(135deg, #2a5a9a 0%, #1a4a8a 100%);
+    }
+
+    body.dark-mode .btn-add-cart:hover {
+        background: linear-gradient(135deg, #3a6aaa 0%, #2a5a9a 100%);
+    }
+
+    .product-title {
+        color: var(--pbs-blue);
+    }
+
+    body.dark-mode .product-title {
+        color: #4a90e2;
+    }
+
+    .product-price {
+        color: var(--pbs-blue);
+    }
+
+    body.dark-mode .product-price {
+        color: #4a90e2;
+    }
+
+    .form-control:focus {
+        border-color: var(--pbs-blue);
+        box-shadow: 0 0 0 0.2rem rgba(0, 71, 171, 0.25);
+    }
+
+    .product-main-image {
+        max-height: 500px;
+        object-fit: contain;
+        border-radius: 12px;
+        width: 100%;
+    }
+
+    .no-image-placeholder {
+        height: 400px;
+        background-color: #f0f2f5;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        width: 100%;
+    }
+
+    body.dark-mode .no-image-placeholder {
+        background-color: #3d3d3d;
+    }
+
+    /* Responsive Spacing */
+    @media (min-width: 768px) {
+        .product-image-col {
+            padding-right: 25px;
+        }
+        .product-info-col {
+            padding-left: 25px;
+        }
+    }
+
+    @media (max-width: 767px) {
+        .product-image-col,
+        .product-info-col {
+            padding: 0 15px;
+        }
+        .product-image-col {
+            margin-bottom: 30px;
+        }
+        .product-info-wrapper {
+            padding: 20px;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container mt-4">
     <!-- Breadcrumb Navigation -->
     <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'shop_home' %}" style="color: #1a1a2e;">Shop</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'shop_home' %}" style="color: var(--pbs-blue);">Shop</a></li>
             <li class="breadcrumb-item active">{{ product.name }}</li>
         </ol>
     </nav>
 
     <!-- Product Details -->
-    <div class="row">
+    <div class="row product-row g-4">
         <!-- Product Image -->
-        <div class="col-md-6 mb-4">
-            {% if product.image %}
-            <img src="{{ product.image.url }}" alt="{{ product.name }}" class="img-fluid" style="max-height: 500px; object-fit: contain;">
-            {% else %}
-            <div style="height: 500px; background-color: #e9ecef; display: flex; align-items: center; justify-content: center;">
-                <span style="color: #6c757d; font-size: 1.2em;">No Image Available</span>
+        <div class="col-md-6 product-image-col">
+            <div class="product-image-wrapper">
+                {% if product.image %}
+                <img src="{{ product.image.url }}" alt="{{ product.name }}" class="img-fluid product-main-image">
+                {% else %}
+                <div class="no-image-placeholder">
+                    <span style="color: #6c757d; font-size: 1.2em;">No Image Available</span>
+                </div>
+                {% endif %}
             </div>
-            {% endif %}
         </div>
 
         <!-- Product Info & Add to Cart -->
-        <div class="col-md-6">
-            <h1 style="color: #1a1a2e; font-weight: bold;">{{ product.name }}</h1>
-            
-            <div style="margin-bottom: 20px;">
-                <span class="badge" style="background-color: #1a1a2e; font-size: 0.95em; padding: 6px 12px;">{{ product.category|title }}</span>
-            </div>
+        <div class="col-md-6 product-info-col">
+            <div class="product-info-wrapper">
+                <h1 class="product-title" style="font-weight: bold;">{{ product.name }}</h1>
+                
+                <div style="margin-bottom: 20px;">
+                    <span class="category-badge">{{ product.category|title }}</span>
+                </div>
 
-            <p style="color: #6c757d; line-height: 1.6; margin-bottom: 30px;">{{ product.description }}</p>
+                <p style="color: #6c757d; line-height: 1.6; margin-bottom: 30px;">{{ product.description }}</p>
 
-            <!-- Price -->
-            <div style="margin-bottom: 30px;">
-                <p style="font-size: 2em; color: #1a1a2e; font-weight: bold;">
-                    ${{ product.price }}
-                </p>
-                <p style="color: #6c757d;">
-                    {% if product.inventory > 5 %}
-                        <span style="color: #28a745;">✓ In Stock ({{ product.inventory }} available)</span>
-                    {% elif product.inventory > 0 %}
-                        <span style="color: #ffc107;">Limited Stock ({{ product.inventory }} left)</span>
-                    {% else %}
-                        <span style="color: #dc3545;">Out of Stock</span>
-                    {% endif %}
-                </p>
-            </div>
+                <!-- Price -->
+                <div style="margin-bottom: 30px;">
+                    <p class="product-price" style="font-size: 2.2em; font-weight: bold; margin-bottom: 10px;">
+                        ${{ product.price }}
+                    </p>
+                    <p style="color: #6c757d; margin-bottom: 0;">
+                        {% if product.inventory > 5 %}
+                            <span style="color: #28a745;">✓ In Stock ({{ product.inventory }} available)</span>
+                        {% elif product.inventory > 0 %}
+                            <span style="color: #ffc107;">Limited Stock ({{ product.inventory }} left)</span>
+                        {% else %}
+                            <span style="color: #dc3545;">Out of Stock</span>
+                        {% endif %}
+                    </p>
+                </div>
 
             <!-- Add to Cart Form -->
-            {% if product.inventory > 0 %}
-            <form method="POST" action="{% url 'add_to_cart' product.id %}">
-                {% csrf_token %}
+                {% if product.inventory > 0 %}
+                <form method="POST" action="{% url 'add_to_cart' product.id %}">
+                    {% csrf_token %}
 
-                <!-- Quantity -->
-                <div class="mb-3">
-                    <label for="quantity" style="color: #1a1a2e; font-weight: 500;">Quantity:</label>
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <input type="number" id="quantity" name="quantity" value="1" min="1" max="{{ product.inventory }}" class="form-control" style="width: 100px; border-color: #1a1a2e;">
-                        <span style="color: #6c757d;">Max: {{ product.inventory }}</span>
+                    <!-- Quantity -->
+                    <div class="mb-3">
+                        <label for="quantity" style="color: var(--pbs-blue); font-weight: 500;">Quantity:</label>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <input type="number" id="quantity" name="quantity" value="1" min="1" max="{{ product.inventory }}" class="form-control" style="width: 100px; border-color: var(--pbs-blue);">
+                            <span style="color: #6c757d;">Max: {{ product.inventory }}</span>
+                        </div>
                     </div>
-                </div>
 
-                <!-- Size -->
-                {% if sizes %}
-                <div class="mb-3">
-                    <label for="size" style="color: #1a1a2e; font-weight: 500;">Size:</label>
-                    <select id="size" name="size" class="form-control" style="border-color: #1a1a2e;">
-                        <option value="">-- Select Size --</option>
-                        {% for size in sizes %}
-                        <option value="{{ size }}">{{ size }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                {% endif %}
-
-                <!-- Color -->
-                {% if colors %}
-                <div class="mb-3">
-                    <label for="color" style="color: #1a1a2e; font-weight: 500;">Color:</label>
-                    <select id="color" name="color" class="form-control" style="border-color: #1a1a2e;">
-                        <option value="">-- Select Color --</option>
-                        {% for color in colors %}
-                        <option value="{{ color }}">{{ color }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                {% endif %}
-
-                <!-- Buttons -->
-                <div style="display: flex; gap: 15px;">
-                    <button type="submit" class="btn btn-dark" style="flex: 1; background-color: #1a1a2e; border-color: #1a1a2e; padding: 12px; font-weight: 500;">
-                        🛒 Add to Cart
-                    </button>
-                    {% if user.is_staff or user.member_profile.is_officer %}
-                    <a href="{% url 'edit_product' product.id %}" class="btn btn-warning" style="padding: 12px 20px;">
-                        <i class="fas fa-edit"></i> Edit
-                    </a>
-                    <a href="{% url 'delete_product' product.id %}" class="btn btn-danger" style="padding: 12px 20px;">
-                        <i class="fas fa-trash"></i> Delete
-                    </a>
+                    <!-- Size -->
+                    {% if sizes %}
+                    <div class="mb-3">
+                        <label for="size" style="color: var(--pbs-blue); font-weight: 500;">Size:</label>
+                        <select id="size" name="size" class="form-control" style="border-color: var(--pbs-blue);">
+                            <option value="">-- Select Size --</option>
+                            {% for size in sizes %}
+                            <option value="{{ size }}">{{ size }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
                     {% endif %}
+
+                    <!-- Color -->
+                    {% if colors %}
+                    <div class="mb-3">
+                        <label for="color" style="color: var(--pbs-blue); font-weight: 500;">Color:</label>
+                        <select id="color" name="color" class="form-control" style="border-color: var(--pbs-blue);">
+                            <option value="">-- Select Color --</option>
+                            {% for color in colors %}
+                            <option value="{{ color }}">{{ color }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% endif %}
+
+                    <!-- Buttons -->
+                    <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                        <button type="submit" class="btn btn-add-cart" style="flex: 1; min-width: 200px;">
+                            🛒 Add to Cart
+                        </button>
+                        {% if user.is_staff or user.member_profile.is_officer %}
+                        <a href="{% url 'edit_product' product.id %}" class="btn btn-warning" style="padding: 14px 20px;">
+                            <i class="fas fa-edit"></i> Edit
+                        </a>
+                        <a href="{% url 'delete_product' product.id %}" class="btn btn-danger" style="padding: 14px 20px;">
+                            <i class="fas fa-trash"></i> Delete
+                        </a>
+                        {% endif %}
+                    </div>
+                </form>
+                {% else %}
+                <div class="alert alert-danger">
+                    This product is currently out of stock.
                 </div>
-            </form>
-            {% else %}
-            <div class="alert alert-danger">
-                This product is currently out of stock.
-            </div>
-            {% endif %}
+                {% endif %}
 
             <!-- Product Details Section -->
-            <hr style="margin: 40px 0;">
-            <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px;">
-                <h5 style="color: #1a1a2e; margin-bottom: 15px;">Product Details</h5>
-                <ul style="margin: 0; padding-left: 20px; color: #6c757d;">
-                    <li>Category: <strong>{{ product.category|title }}</strong></li>
-                    <li>SKU: <strong>#{{ product.id }}</strong></li>
-                    <li>Availability: <strong>In Stock</strong></li>
-                </ul>
+                <hr style="margin: 40px 0 30px 0;">
+                <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px;">
+                    <h5 style="color: var(--pbs-blue); margin-bottom: 15px;">Product Details</h5>
+                    <ul style="margin: 0; padding-left: 20px; color: #6c757d;">
+                        <li>Category: <strong>{{ product.category|title }}</strong></li>
+                        <li>SKU: <strong>#{{ product.id }}</strong></li>
+                        <li>Availability: <strong>In Stock</strong></li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
@@ -127,7 +290,7 @@
     <!-- Related Products -->
     <hr style="margin: 60px 0;">
     <div class="mt-5 mb-5">
-        <h3 style="color: #1a1a2e; margin-bottom: 30px;">You Might Also Like</h3>
+        <h3 style="color: var(--pbs-blue); margin-bottom: 30px;">You Might Also Like</h3>
         <!-- Add related products here if needed -->
     </div>
 </div>
@@ -139,13 +302,17 @@
         border-radius: 4px;
     }
 
+    body.dark-mode .product-info-wrapper div[style*="background-color: #f8f9fa"] {
+        background-color: #3d3d3d !important;
+    }
+
     @media (max-width: 768px) {
-        h1 {
+        .product-title {
             font-size: 1.8em !important;
         }
-
-        .row > div {
-            margin-bottom: 20px;
+        
+        .product-price {
+            font-size: 1.8em !important;
         }
     }
 </style>

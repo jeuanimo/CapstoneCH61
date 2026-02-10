@@ -61,13 +61,13 @@ URL PATTERN ORGANIZATION:
    - 'portal/sms/send-alert/': Send SMS announcements
    - 'portal/sms/logs/': View SMS delivery logs
 
-9. BOUTIQUE / E-COMMERCE (Public browsing, login for checkout)
+9. BOUTIQUE / E-COMMERCE (Public - supports guest and member checkout)
    - 'boutique/': Shop homepage
    - 'boutique/product/<id>/': Product detail page
    - 'boutique/add-to-cart/<id>/': Add item to shopping cart
    - 'boutique/cart/': View shopping cart
-   - 'boutique/checkout/', 'payment/': Order processing
-   - 'boutique/orders/': Order history
+   - 'boutique/checkout/', 'payment/': Order processing (guest OK)
+   - 'boutique/orders/': Order history (login required)
 
 10. BOUTIQUE ADMIN (Officer only)
     - 'boutique/admin/import-products/': Bulk import CSV
@@ -218,7 +218,7 @@ urlpatterns = [
     path('boutique/', views.shop_home, name='shop_home'),
     path('boutique/product/<int:pk>/', views.product_detail, name='product_detail'),
     
-    # SHOPPING CART & CHECKOUT (Login required)
+    # SHOPPING CART & CHECKOUT (Works for both guests and logged-in users)
     path('boutique/add-to-cart/<int:pk>/', views.add_to_cart, name='add_to_cart'),
     path('boutique/cart/', views.view_cart, name='view_cart'),
     path('boutique/cart/update/<int:item_id>/', views.update_cart_item, name='update_cart_item'),

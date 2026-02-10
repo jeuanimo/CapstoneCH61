@@ -1,28 +1,150 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block css %}
+<style>
+    /* Theme Colors - Phi Beta Sigma Royal Blue */
+    :root {
+        --pbs-blue: #0047AB;
+        --pbs-blue-dark: #003380;
+        --pbs-blue-light: #1e5bc6;
+    }
+
+    .payment-title {
+        color: var(--pbs-blue);
+        margin-bottom: 30px;
+        font-weight: bold;
+    }
+
+    body.dark-mode .payment-title {
+        color: #4a90e2;
+    }
+
+    .payment-card {
+        border: 1px solid #dee2e6;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    }
+
+    body.dark-mode .payment-card {
+        background: #2d2d2d;
+        border-color: #444;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .section-title {
+        color: var(--pbs-blue);
+        margin-bottom: 25px;
+        font-weight: 600;
+    }
+
+    body.dark-mode .section-title {
+        color: #4a90e2;
+    }
+
+    .btn-pay {
+        background: linear-gradient(135deg, var(--pbs-blue) 0%, var(--pbs-blue-dark) 100%);
+        border: none;
+        color: white;
+        padding: 14px 28px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 1.1em;
+        transition: all 0.3s ease;
+        width: 100%;
+    }
+
+    .btn-pay:hover:not(:disabled) {
+        background: linear-gradient(135deg, var(--pbs-blue-light) 0%, var(--pbs-blue) 100%);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 71, 171, 0.4);
+    }
+
+    .btn-pay:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
+
+    body.dark-mode .btn-pay {
+        background: linear-gradient(135deg, #2a5a9a 0%, #1a4a8a 100%);
+    }
+
+    .summary-label {
+        color: #6c757d;
+    }
+
+    .summary-value {
+        color: var(--pbs-blue);
+    }
+
+    body.dark-mode .summary-value {
+        color: #a0c4f0;
+    }
+
+    .total-due {
+        color: #28a745;
+        font-weight: bold;
+    }
+
+    .shipping-box {
+        background-color: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+
+    body.dark-mode .shipping-box {
+        background-color: #3d3d3d;
+    }
+
+    #card-element {
+        border: 2px solid #dee2e6;
+        padding: 14px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        transition: border-color 0.2s ease;
+    }
+
+    #card-element:focus-within {
+        border-color: var(--pbs-blue);
+    }
+
+    body.dark-mode #card-element {
+        background: #3d3d3d;
+        border-color: #555;
+    }
+
+    @media (max-width: 768px) {
+        .col-md-4 {
+            margin-top: 30px;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container mt-4">
-    <h1 style="color: #1a1a2e; margin-bottom: 30px;">Secure Payment</h1>
+    <h1 class="payment-title">Secure Payment</h1>
 
     <div class="row">
         <!-- Payment Form -->
         <div class="col-md-8">
-            <div class="card" style="border: 1px solid #dee2e6;">
-                <div class="card-body">
-                    <h5 class="card-title" style="color: #1a1a2e; margin-bottom: 25px;">💳 Payment Information</h5>
+            <div class="card payment-card">
+                <div class="card-body" style="padding: 30px;">
+                    <h5 class="card-title section-title">💳 Payment Information</h5>
 
                     <form id="payment-form" method="POST">
                         {% csrf_token %}
 
                         <!-- Stripe Card Element -->
-                        <div id="card-element" style="border: 1px solid #dee2e6; padding: 12px; border-radius: 4px; margin-bottom: 20px;"></div>
+                        <div id="card-element"></div>
 
                         <!-- Card Errors -->
                         <div id="card-errors" role="alert" style="color: #dc3545; margin-bottom: 20px;"></div>
 
                         <!-- Submit Button -->
-                        <button type="submit" id="submit-button" class="btn btn-dark w-100" style="background-color: #1a1a2e; border-color: #1a1a2e; padding: 12px; font-weight: 500;">
+                        <button type="submit" id="submit-button" class="btn-pay">
                             Pay ${{ order.total_price }}
                         </button>
                     </form>
@@ -40,12 +162,12 @@
 
         <!-- Order Summary -->
         <div class="col-md-4">
-            <div class="card" style="border: 1px solid #dee2e6; position: sticky; top: 20px;">
-                <div class="card-body">
-                    <h5 class="card-title" style="color: #1a1a2e; margin-bottom: 20px;">Order #{{ order.id }}</h5>
+            <div class="card payment-card" style="position: sticky; top: 20px;">
+                <div class="card-body" style="padding: 25px;">
+                    <h5 class="card-title section-title">Order #{{ order.id }}</h5>
 
                     <!-- Order Details -->
-                    <div style="background-color: #f8f9fa; padding: 15px; border-radius: 4px; margin-bottom: 20px;">
+                    <div class="shipping-box">
                         <p style="margin: 5px 0; color: #6c757d;">
                             <strong>Shipping To:</strong><br>
                             {{ order.address }}<br>
@@ -57,22 +179,22 @@
                     <!-- Order Total -->
                     <div style="margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid #dee2e6;">
                         <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                            <span style="color: #6c757d;">Subtotal:</span>
-                            <span style="color: #1a1a2e;">${{ order.total_price }}</span>
+                            <span class="summary-label">Subtotal:</span>
+                            <span class="summary-value">${{ order.total_price }}</span>
                         </div>
                         <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                            <span style="color: #6c757d;">Shipping:</span>
-                            <span style="color: #1a1a2e;">TBD</span>
+                            <span class="summary-label">Shipping:</span>
+                            <span class="summary-value">TBD</span>
                         </div>
                         <div style="display: flex; justify-content: space-between;">
-                            <span style="color: #6c757d;">Tax:</span>
-                            <span style="color: #1a1a2e;">TBD</span>
+                            <span class="summary-label">Tax:</span>
+                            <span class="summary-value">TBD</span>
                         </div>
                     </div>
 
                     <div style="display: flex; justify-content: space-between; align-items: center; font-size: 1.2em;">
-                        <span style="color: #1a1a2e; font-weight: bold;">Total Due:</span>
-                        <span style="color: #28a745; font-weight: bold;">${{ order.total_price }}</span>
+                        <span style="color: var(--pbs-blue); font-weight: bold;">Total Due:</span>
+                        <span class="total-due">${{ order.total_price }}</span>
                     </div>
                 </div>
             </div>
@@ -125,17 +247,4 @@
         }
     });
 </script>
-
-<style>
-    #card-element {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-        font-size: 16px;
-    }
-
-    @media (max-width: 768px) {
-        .col-md-4 {
-            margin-top: 30px;
-        }
-    }
-</style>
 {% endblock %}

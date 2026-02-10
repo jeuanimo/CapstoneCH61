@@ -3,146 +3,201 @@
 {% load math_filters %}
 
 {% block content %}
-<div class="container mt-4">
-    <!-- Success Message -->
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="alert alert-success" role="alert" style="background-color: #d4edda; border-color: #c3e6cb; padding: 30px; border-radius: 8px; text-align: center;">
-                <h2 style="color: #155724; margin-bottom: 20px;">✓ Payment Successful!</h2>
-                <p style="color: #155724; font-size: 1.1em; margin: 0;">
-                    Thank you for your purchase. Your order has been confirmed.
-                </p>
-            </div>
-
-            <!-- Order Details -->
-            <div class="card mt-4" style="border: 1px solid #dee2e6;">
-                <div class="card-body">
-                    <h5 class="card-title" style="color: #1a1a2e; margin-bottom: 25px;">Order Details</h5>
-
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <p style="color: #6c757d; margin: 0;">
-                                <strong>Order Number:</strong><br>
-                                <span style="color: #1a1a2e; font-size: 1.1em;">#{{ order.id }}</span>
-                            </p>
-                        </div>
-                        <div class="col-md-6">
-                            <p style="color: #6c757d; margin: 0;">
-                                <strong>Order Date:</strong><br>
-                                <span style="color: #1a1a2e;">{{ order.created_at|date:"M d, Y \a\t g:i A" }}</span>
-                            </p>
-                        </div>
-                    </div>
-
-                    <hr>
-
-                    <!-- Shipping Information -->
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <p style="color: #6c757d; margin: 0;">
-                                <strong>Shipping Address:</strong>
-                            </p>
-                            <p style="color: #1a1a2e; margin: 5px 0;">
-                                {{ order.address }}<br>
-                                {{ order.city }}, {{ order.state }} {{ order.zip_code }}
-                            </p>
-                        </div>
-                        <div class="col-md-6">
-                            <p style="color: #6c757d; margin: 0;">
-                                <strong>Email:</strong><br>
-                                <span style="color: #1a1a2e;">{{ order.email }}</span>
-                            </p>
-                        </div>
-                    </div>
-
-                    <hr>
-
-                    <!-- Order Items -->
-                    <h6 style="color: #1a1a2e; margin-bottom: 20px;">Items Ordered:</h6>
-                    <table class="table" style="border: none; margin: 0;">
-                        <caption class="sr-only">Order summary</caption>
-                        <thead style="background-color: #f8f9fa;">
-                            <tr>
-                                <th style="color: #1a1a2e; border-bottom: 1px solid #dee2e6;">Product</th>
-                                <th style="color: #1a1a2e; border-bottom: 1px solid #dee2e6; text-align: right;">Qty</th>
-                                <th style="color: #1a1a2e; border-bottom: 1px solid #dee2e6; text-align: right;">Price</th>
-                                <th style="color: #1a1a2e; border-bottom: 1px solid #dee2e6; text-align: right;">Total</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for item in order.orderitem_set.all %}
-                            <tr>
-                                <td style="color: #1a1a2e; padding: 12px 0; border-bottom: 1px solid #f0f0f0;">
-                                    {{ item.product.name }}
-                                    {% if item.size %}<br><small style="color: #6c757d;">Size: {{ item.size }}</small>{% endif %}
-                                    {% if item.color %}<br><small style="color: #6c757d;">Color: {{ item.color }}</small>{% endif %}
-                                </td>
-                                <td style="color: #1a1a2e; padding: 12px 0; border-bottom: 1px solid #f0f0f0; text-align: right;">
-                                    {{ item.quantity }}
-                                </td>
-                                <td style="color: #1a1a2e; padding: 12px 0; border-bottom: 1px solid #f0f0f0; text-align: right;">
-                                    ${{ item.price }}
-                                </td>
-                                <td style="color: #1a1a2e; padding: 12px 0; border-bottom: 1px solid #f0f0f0; text-align: right; font-weight: bold;">
-                                    ${{ item.price|mul:item.quantity }}
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-
-                    <hr>
-
-                    <!-- Order Total -->
-                    <div style="text-align: right; padding: 20px 0;">
-                        <div style="display: flex; justify-content: flex-end; margin-bottom: 10px;">
-                            <span style="color: #6c757d; margin-right: 20px;">Subtotal:</span>
-                            <span style="color: #1a1a2e; font-weight: 500; min-width: 100px; text-align: right;">${{ order.total_price }}</span>
-                        </div>
-                        <div style="display: flex; justify-content: flex-end; margin-bottom: 10px;">
-                            <span style="color: #6c757d; margin-right: 20px;">Shipping:</span>
-                            <span style="color: #1a1a2e; font-weight: 500; min-width: 100px; text-align: right;">TBD</span>
-                        </div>
-                        <div style="display: flex; justify-content: flex-end; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 2px solid #dee2e6;">
-                            <span style="color: #6c757d; margin-right: 20px;">Tax:</span>
-                            <span style="color: #1a1a2e; font-weight: 500; min-width: 100px; text-align: right;">TBD</span>
-                        </div>
-                        <div style="display: flex; justify-content: flex-end;">
-                            <span style="color: #1a1a2e; font-weight: bold; font-size: 1.3em; margin-right: 20px;">Total:</span>
-                            <span style="color: #28a745; font-weight: bold; font-size: 1.3em; min-width: 100px; text-align: right;">${{ order.total_price }}</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Next Steps -->
-            <div class="alert alert-info mt-4" style="background-color: #d1ecf1; border-color: #bee5eb;">
-                <h6 style="color: #0c5460; margin-bottom: 15px;">What's Next?</h6>
-                <ul style="margin: 0; padding-left: 20px; color: #0c5460;">
-                    <li>You'll receive an order confirmation email shortly</li>
-                    <li>Your order will be processed and shipped within 5-7 business days</li>
-                    <li>You can track your order status in your account</li>
-                </ul>
-            </div>
-
-            <!-- Action Buttons -->
-            <div style="display: flex; flex-direction: column; gap: 15px; margin-top: 30px;">
-                <a href="{% url 'order_history' %}" class="btn btn-dark" style="background-color: #1a1a2e; border-color: #1a1a2e; padding: 12px; text-align: center; text-decoration: none;">
-                    View All Orders
-                </a>
-                <a href="{% url 'shop_home' %}" class="btn btn-outline-dark" style="border-color: #1a1a2e; color: #1a1a2e; padding: 12px; text-align: center; text-decoration: none;">
-                    Continue Shopping
-                </a>
-            </div>
-        </div>
-    </div>
-</div>
-
 <style>
-    .alert {
-        border-radius: 8px;
+    :root {
+        --pbs-blue: #0047AB;
+        --pbs-blue-dark: #003380;
+        --pbs-blue-light: #1e5bc6;
     }
-
+    
+    .success-alert {
+        background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+        border: 2px solid #28a745;
+        padding: 30px;
+        border-radius: 15px;
+        text-align: center;
+        box-shadow: 0 4px 15px rgba(40, 167, 69, 0.2);
+    }
+    
+    .success-alert h2 {
+        color: #155724;
+        margin-bottom: 20px;
+    }
+    
+    .success-alert p {
+        color: #155724;
+        font-size: 1.1em;
+        margin: 0;
+    }
+    
+    .order-card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 4px 20px rgba(0, 71, 171, 0.15);
+        overflow: hidden;
+    }
+    
+    .order-card .card-title {
+        color: var(--pbs-blue);
+        margin-bottom: 25px;
+        font-weight: 600;
+    }
+    
+    .order-label {
+        color: #6c757d;
+        margin: 0;
+    }
+    
+    .order-value {
+        color: var(--pbs-blue);
+        font-size: 1.1em;
+    }
+    
+    .order-table thead {
+        background: linear-gradient(135deg, #f0f5ff 0%, #e8edf7 100%);
+    }
+    
+    .order-table th {
+        color: var(--pbs-blue);
+        border-bottom: 2px solid var(--pbs-blue-light);
+        font-weight: 600;
+    }
+    
+    .order-table td {
+        color: #333;
+        padding: 12px 0;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .info-alert {
+        background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
+        border: 1px solid #17a2b8;
+        border-radius: 12px;
+    }
+    
+    .info-alert h6 {
+        color: #0c5460;
+        margin-bottom: 15px;
+    }
+    
+    .info-alert ul {
+        margin: 0;
+        padding-left: 20px;
+        color: #0c5460;
+    }
+    
+    .btn-orders {
+        background: linear-gradient(135deg, var(--pbs-blue) 0%, var(--pbs-blue-dark) 100%);
+        border: none;
+        color: white;
+        padding: 12px;
+        border-radius: 10px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        text-align: center;
+        text-decoration: none;
+    }
+    
+    .btn-orders:hover {
+        background: linear-gradient(135deg, var(--pbs-blue-light) 0%, var(--pbs-blue) 100%);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0, 71, 171, 0.3);
+    }
+    
+    .btn-continue {
+        background: white;
+        border: 2px solid var(--pbs-blue);
+        color: var(--pbs-blue);
+        padding: 12px;
+        border-radius: 10px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        text-align: center;
+        text-decoration: none;
+    }
+    
+    .btn-continue:hover {
+        background: var(--pbs-blue);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0, 71, 171, 0.3);
+    }
+    
+    .total-section {
+        text-align: right;
+        padding: 20px 0;
+    }
+    
+    .total-row {
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: 10px;
+    }
+    
+    .total-label {
+        color: #6c757d;
+        margin-right: 20px;
+    }
+    
+    .total-value {
+        color: var(--pbs-blue);
+        font-weight: 500;
+        min-width: 100px;
+        text-align: right;
+    }
+    
+    .grand-total {
+        color: var(--pbs-blue);
+        font-weight: bold;
+        font-size: 1.3em;
+    }
+    
+    .grand-total-value {
+        color: #28a745;
+        font-weight: bold;
+        font-size: 1.3em;
+    }
+    
+    /* Dark Mode */
+    body.dark-mode .order-card {
+        background-color: #1e3a5f;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+    
+    body.dark-mode .order-card .card-body {
+        color: #e8edf7;
+    }
+    
+    body.dark-mode .order-card .card-title {
+        color: #5c9fff;
+    }
+    
+    body.dark-mode .order-value {
+        color: #5c9fff;
+    }
+    
+    body.dark-mode .order-table thead {
+        background: linear-gradient(135deg, #0d2137 0%, #1e3a5f 100%);
+    }
+    
+    body.dark-mode .order-table th {
+        color: #5c9fff;
+    }
+    
+    body.dark-mode .order-table td {
+        color: #e8edf7;
+        border-color: #2a4a6a;
+    }
+    
+    body.dark-mode .total-value {
+        color: #5c9fff;
+    }
+    
+    body.dark-mode .grand-total {
+        color: #5c9fff;
+    }
+    
     @media (max-width: 768px) {
         .row {
             padding: 0 15px;
@@ -153,4 +208,131 @@
         }
     }
 </style>
+
+<div class="container mt-4">
+    <!-- Success Message -->
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="success-alert">
+                <h2>✓ Payment Successful!</h2>
+                <p>Thank you for your purchase. Your order has been confirmed.</p>
+            </div>
+
+            <!-- Order Details -->
+            <div class="card order-card mt-4">
+                <div class="card-body">
+                    <h5 class="card-title">Order Details</h5>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <p class="order-label">
+                                <strong>Order Number:</strong><br>
+                                <span class="order-value">#{{ order.id }}</span>
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="order-label">
+                                <strong>Order Date:</strong><br>
+                                <span class="order-value">{{ order.created_at|date:"M d, Y \a\t g:i A" }}</span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <!-- Shipping Information -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <p class="order-label">
+                                <strong>Shipping Address:</strong>
+                            </p>
+                            <p class="order-value" style="font-size: 1em;">
+                                {{ order.address }}<br>
+                                {{ order.city }}, {{ order.state }} {{ order.zip_code }}
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="order-label">
+                                <strong>Email:</strong><br>
+                                <span class="order-value">{{ order.email }}</span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <!-- Order Items -->
+                    <h6 style="color: var(--pbs-blue); margin-bottom: 20px; font-weight: 600;">Items Ordered:</h6>
+                    <table class="table order-table" style="border: none; margin: 0;">
+                        <caption class="sr-only">Order summary</caption>
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th style="text-align: right;">Qty</th>
+                                <th style="text-align: right;">Price</th>
+                                <th style="text-align: right;">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in order.orderitem_set.all %}
+                            <tr>
+                                <td>
+                                    {{ item.product.name }}
+                                    {% if item.size %}<br><small style="color: #6c757d;">Size: {{ item.size }}</small>{% endif %}
+                                    {% if item.color %}<br><small style="color: #6c757d;">Color: {{ item.color }}</small>{% endif %}
+                                </td>
+                                <td style="text-align: right;">{{ item.quantity }}</td>
+                                <td style="text-align: right;">${{ item.price }}</td>
+                                <td style="text-align: right; font-weight: bold;">${{ item.price|mul:item.quantity }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+
+                    <hr>
+
+                    <!-- Order Total -->
+                    <div class="total-section">
+                        <div class="total-row">
+                            <span class="total-label">Subtotal:</span>
+                            <span class="total-value">${{ order.total_price }}</span>
+                        </div>
+                        <div class="total-row">
+                            <span class="total-label">Shipping:</span>
+                            <span class="total-value">TBD</span>
+                        </div>
+                        <div class="total-row" style="margin-bottom: 20px; padding-bottom: 20px; border-bottom: 2px solid #dee2e6;">
+                            <span class="total-label">Tax:</span>
+                            <span class="total-value">TBD</span>
+                        </div>
+                        <div class="total-row">
+                            <span class="grand-total" style="margin-right: 20px;">Total:</span>
+                            <span class="grand-total-value" style="min-width: 100px; text-align: right;">${{ order.total_price }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Next Steps -->
+            <div class="alert info-alert mt-4">
+                <h6>What's Next?</h6>
+                <ul>
+                    <li>You'll receive an order confirmation email shortly</li>
+                    <li>Your order will be processed and shipped within 5-7 business days</li>
+                    <li>You can track your order status in your account</li>
+                </ul>
+            </div>
+
+            <!-- Action Buttons -->
+            <div style="display: flex; flex-direction: column; gap: 15px; margin-top: 30px;">
+                <a href="{% url 'order_history' %}" class="btn btn-orders">
+                    View All Orders
+                </a>
+                <a href="{% url 'shop_home' %}" class="btn btn-continue">
+                    Continue Shopping
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
