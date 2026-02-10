@@ -407,10 +407,49 @@ class Document(models.Model):
 class Message(models.Model):
     """Direct messaging between members"""
     
+    class Status(models.TextChoices):
+        DRAFT = "DR", "Draft"
+        SENT = "SE", "Sent"
+        READ = "RD", "Read"
+        ARCHIVED = "AR", "Archived"
+        DELETED = "DE", "Deleted"
+    
+    class Priority(models.TextChoices):
+        LOW = "LO", "Low"
+        NORMAL = "NR", "Normal"
+        HIGH = "HI", "High"
+        URGENT = "UR", "Urgent"
+    
+    class Category(models.TextChoices):
+        GENERAL = "GN", "General"
+        OFFICIAL = "OF", "Official Chapter Business"
+        EVENT = "EV", "Event Related"
+        FINANCIAL = "FI", "Financial"
+        COMMITTEE = "CM", "Committee"
+    
     sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_messages')
     recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='received_messages')
     subject = models.CharField(max_length=200, blank=True, default='')
     content = models.TextField()
+    
+    # Status tracking with TextChoices
+    status = models.CharField(
+        max_length=2,
+        choices=Status.choices,
+        default=Status.SENT,
+    )
+    priority = models.CharField(
+        max_length=2,
+        choices=Priority.choices,
+        default=Priority.NORMAL,
+    )
+    category = models.CharField(
+        max_length=2,
+        choices=Category.choices,
+        default=Category.GENERAL,
+    )
+    
+    # Keep is_read for backward compatibility and easy querying
     is_read = models.BooleanField(default=False)
     read_at = models.DateTimeField(blank=True, null=True)
     parent_message = models.ForeignKey('self', on_delete=models.CASCADE, blank=True, null=True, related_name='replies')
@@ -425,10 +464,50 @@ class Message(models.Model):
         return f"{self.sender.username} to {self.recipient.username}: {self.subject or 'No Subject'}"
     
     def mark_as_read(self):
+        """Mark message as read and update status"""
         if not self.is_read:
             self.is_read = True
             self.read_at = timezone.now()
+            self.status = self.Status.READ
             self.save()
+    
+    def archive(self):
+        """Archive the message"""
+        self.status = self.Status.ARCHIVED
+        self.save()
+    
+    def soft_delete(self):
+        """Soft delete - marks as deleted but keeps in database"""
+        self.status = self.Status.DELETED
+        self.save()
+    
+    @property
+    def is_urgent(self):
+        """Check if message is high priority or urgent"""
+        return self.priority in [self.Priority.HIGH, self.Priority.URGENT]
+    
+    @property
+    def status_display_class(self):
+        """Return Bootstrap class for status badge"""
+        status_classes = {
+            self.Status.DRAFT: 'secondary',
+            self.Status.SENT: 'primary',
+            self.Status.READ: 'success',
+            self.Status.ARCHIVED: 'warning',
+            self.Status.DELETED: 'danger',
+        }
+        return status_classes.get(self.status, 'secondary')
+    
+    @property
+    def priority_display_class(self):
+        """Return Bootstrap class for priority badge"""
+        priority_classes = {
+            self.Priority.LOW: 'secondary',
+            self.Priority.NORMAL: 'info',
+            self.Priority.HIGH: 'warning',
+            self.Priority.URGENT: 'danger',
+        }
+        return priority_classes.get(self.priority, 'info')
 
 
 class ProfileComment(models.Model):
