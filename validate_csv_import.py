@@ -23,33 +23,75 @@ from pages.forms_boutique import BoutiqueImportForm
 from pages.models import Product
 from django.core.files.uploadedfile import InMemoryUploadedFile
 
+# Constants
+TEST_CSV_FILE = 'TEST_PRODUCTS.csv'
+
+
+def _create_uploaded_file_from_path(csv_path):
+    """Create an InMemoryUploadedFile from CSV file path"""
+    with open(csv_path, 'rb') as f:
+        csv_content = f.read()
+    
+    return InMemoryUploadedFile(
+        io.BytesIO(csv_content),
+        field_name='csv_file',
+        name=TEST_CSV_FILE,
+        content_type='text/csv',
+        size=len(csv_content),
+        charset='utf-8'
+    )
+
+
+def _display_product_details(products_data):
+    """Display parsed product details"""
+    print("📦 Products Found:")
+    print("-" * 70)
+    for i, product in enumerate(products_data, 1):
+        print(f"\n{i}. {product['name']}")
+        print(f"   Category: {product['category']}")
+        print(f"   Price: ${product['price']:.2f}")
+        print(f"   Inventory: {product['inventory']}")
+        desc = product['description']
+        print(f"   Description: {desc[:50]}..." if len(desc) > 50 else f"   Description: {desc}")
+        print(f"   Sizes: {product['sizes']}")
+        print(f"   Colors: {product['colors']}")
+        if product.get('image_url'):
+            print(f"   Image URL: {product['image_url']}")
+        if product.get('image_path'):
+            print(f"   Image Path: {product['image_path']}")
+
+
+def _handle_parse_success(products_data):
+    """Handle successful CSV parsing"""
+    print(f"✅ CSV parsed successfully - Found {len(products_data)} products\n")
+    _display_product_details(products_data)
+    
+    print("\n" + "="*70)
+    print("✅ ALL VALIDATION TESTS PASSED!")
+    print("="*70)
+    print("\n📝 Next Steps:")
+    print("1. Go to: http://localhost:8000/pages/boutique/admin/import-products/")
+    print("2. Upload TEST_PRODUCTS.csv file")
+    print("3. Click 'Import Products'")
+    print("4. Verify products appear on shop page: /pages/boutique/")
+    print("\n")
+    return True
+
+
 def test_csv_parsing():
     """Test CSV file parsing without importing"""
     print("\n" + "="*70)
     print("📋 CSV IMPORT VALIDATION TEST")
     print("="*70)
     
-    csv_path = 'TEST_PRODUCTS.csv'
-    
-    if not os.path.exists(csv_path):
-        print(f"❌ Test CSV file not found: {csv_path}")
+    if not os.path.exists(TEST_CSV_FILE):
+        print(f"❌ Test CSV file not found: {TEST_CSV_FILE}")
         return False
     
-    print(f"\n✅ Found test CSV file: {csv_path}")
-    
-    # Read and validate CSV
-    with open(csv_path, 'rb') as f:
-        csv_content = f.read()
+    print(f"\n✅ Found test CSV file: {TEST_CSV_FILE}")
     
     # Create uploaded file object
-    csv_file = InMemoryUploadedFile(
-        io.BytesIO(csv_content),
-        field_name='csv_file',
-        name='TEST_PRODUCTS.csv',
-        content_type='text/csv',
-        size=len(csv_content),
-        charset='utf-8'
-    )
+    csv_file = _create_uploaded_file_from_path(TEST_CSV_FILE)
     
     # Create form
     form = BoutiqueImportForm({'csv_file': csv_file}, {'csv_file': csv_file})
@@ -64,35 +106,7 @@ def test_csv_parsing():
         try:
             # Parse CSV
             products_data = form.parse_csv()
-            print(f"✅ CSV parsed successfully - Found {len(products_data)} products\n")
-            
-            # Display product details
-            print("📦 Products Found:")
-            print("-" * 70)
-            for i, product in enumerate(products_data, 1):
-                print(f"\n{i}. {product['name']}")
-                print(f"   Category: {product['category']}")
-                print(f"   Price: ${product['price']:.2f}")
-                print(f"   Inventory: {product['inventory']}")
-                print(f"   Description: {product['description'][:50]}..." if len(product['description']) > 50 else f"   Description: {product['description']}")
-                print(f"   Sizes: {product['sizes']}")
-                print(f"   Colors: {product['colors']}")
-                if product.get('image_url'):
-                    print(f"   Image URL: {product['image_url']}")
-                if product.get('image_path'):
-                    print(f"   Image Path: {product['image_path']}")
-            
-            print("\n" + "="*70)
-            print("✅ ALL VALIDATION TESTS PASSED!")
-            print("="*70)
-            print("\n📝 Next Steps:")
-            print("1. Go to: http://localhost:8000/pages/boutique/admin/import-products/")
-            print("2. Upload TEST_PRODUCTS.csv file")
-            print("3. Click 'Import Products'")
-            print("4. Verify products appear on shop page: /pages/boutique/")
-            print("\n")
-            
-            return True
+            return _handle_parse_success(products_data)
             
         except Exception as e:
             print(f"❌ Error parsing CSV: {str(e)}")
@@ -148,7 +162,7 @@ def test_image_urls():
         return True
     
     # Read CSV and test URLs
-    with open('TEST_PRODUCTS.csv', 'r') as f:
+    with open(TEST_CSV_FILE, 'r') as f:
         reader = csv.DictReader(f)
         products = list(reader)
     

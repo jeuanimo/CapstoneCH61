@@ -8,7 +8,7 @@
     <div class="portal-header">
         <h1><i class="fas fa-users"></i> Member Roster</h1>
         <p>Connect with fellow brothers of Nu Gamma Sigma Chapter</p>
-        {% if is_staff %}
+        {% if is_staff or is_officer %}
         <div class="header-actions">
             <a href="{% url 'create_member' %}" class="btn btn-primary">
                 <i class="fas fa-plus"></i> Add New Member
@@ -23,11 +23,40 @@
     <!-- Member Warning/Notification Banner -->
     {% include 'pages/portal/member_notification_banner.html' %}
 
+    <!-- Bulk Actions Toolbar (Officers Only) -->
+    {% if is_staff or is_officer %}
+    <div class="bulk-actions-container" id="bulkActionsContainer" style="display: none;">
+        <div class="bulk-actions-toolbar">
+            <div class="selection-info">
+                <span id="selectedCount">0</span> members selected
+            </div>
+            <form id="bulkActionsForm" method="post" action="{% url 'bulk_member_actions' %}">
+                {% csrf_token %}
+                <input type="hidden" id="memberIds" name="member_ids">
+                
+                <select id="bulkAction" name="action" class="form-control form-control-sm" onchange="handleBulkActionChange(this.value)">
+                    <option value="">-- Select Action --</option>
+                    <option value="edit">Bulk Edit</option>
+                    <option value="delete">Delete Selected</option>
+                </select>
+                
+                <button type="submit" class="btn btn-sm btn-primary" id="bulkActionBtn" disabled>
+                    Apply Action
+                </button>
+                <button type="button" class="btn btn-sm btn-secondary" onclick="toggleBulkActions(false)">
+                    Cancel
+                </button>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+
     <div class="roster-table-container">
         <table class="roster-table">
             <caption class="sr-only">Chapter member roster</caption>
             <thead>
                 <tr>
+                    {% if is_staff or is_officer %}<th class="checkbox-column"><input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAll(this.checked)"></th>{% endif %}
                     <th>Photo</th>
                     <th>Name</th>
                     <th>Member #</th>
@@ -38,7 +67,8 @@
             </thead>
             <tbody>
                 {% for member in members %}
-                <tr>
+                <tr class="roster-row" data-member-id="{{ member.pk }}">
+                    {% if is_staff or is_officer %}<td class="checkbox-column"><input type="checkbox" class="member-checkbox" value="{{ member.pk }}" onchange="updateBulkSelection()"></td>{% endif %}
                     <td class="member-photo">
                         {% if member.profile_image %}
                         <img src="{{ member.profile_image.url }}" alt="{{ member.user.get_full_name }}">
@@ -73,7 +103,7 @@
                         <a href="{% url 'send_message_to' member.user.username %}" class="btn btn-secondary btn-sm" title="Send Message">
                             <i class="fas fa-envelope"></i>
                         </a>
-                        {% if is_staff %}
+                        {% if is_staff or is_officer %}
                         <a href="{% url 'generate_member_invitation' member.pk %}" class="btn btn-info btn-sm" title="Generate Invitation Code">
                             <i class="fas fa-ticket-alt"></i>
                         </a>
@@ -88,7 +118,7 @@
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="6" class="empty-state">
+                    <td colspan="{% if is_staff or is_officer %}7{% else %}6{% endif %}" class="empty-state">
                         <i class="fas fa-users"></i>
                         <p>No active members found.</p>
                     </td>
@@ -380,5 +410,168 @@
         background: #2d3e5f;
         color: #b0b8c8;
     }
+
+    /* Bulk Actions Styles */
+    .checkbox-column {
+        width: 50px;
+        text-align: center;
+    }
+
+    .checkbox-column input[type="checkbox"] {
+        cursor: pointer;
+        width: 18px;
+        height: 18px;
+    }
+
+    .bulk-actions-container {
+        margin-bottom: 1.5rem;
+        background: white;
+        border: 2px solid #2a7dd4;
+        border-radius: 8px;
+        padding: 1rem;
+        box-shadow: 0 2px 10px rgba(42, 125, 212, 0.2);
+    }
+
+    .bulk-actions-toolbar {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .selection-info {
+        font-weight: 600;
+        color: #164f90;
+        min-width: 150px;
+    }
+
+    .bulk-actions-toolbar .form-control-sm {
+        min-width: 150px;
+    }
+
+    .bulk-actions-toolbar button {
+        white-space: nowrap;
+    }
+
+    .roster-row.selected {
+        background-color: #e3f2fd;
+        font-weight: 500;
+    }
+
+    body.dark-mode .bulk-actions-container {
+        background: #1a2a4a;
+        border-color: #2a7dd4;
+    }
+
+    body.dark-mode .selection-info {
+        color: #87ceeb;
+    }
+
+    body.dark-mode .roster-row.selected {
+        background-color: #1f3f5f;
+    }
+
+    @media (max-width: 768px) {
+        .bulk-actions-toolbar {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .bulk-actions-toolbar .form-control-sm,
+        .bulk-actions-toolbar button {
+            width: 100%;
+        }
+
+        .selection-info {
+            text-align: center;
+        }
+    }
 </style>
+
+<script>
+function updateBulkSelection() {
+    const checkboxes = document.querySelectorAll('.member-checkbox:checked');
+    const selectedCount = checkboxes.length;
+    const bulkActionsContainer = document.getElementById('bulkActionsContainer');
+    const selectedCountSpan = document.getElementById('selectedCount');
+    const memberIdsInput = document.getElementById('memberIds');
+    const bulkActionBtn = document.getElementById('bulkActionBtn');
+
+    selectedCountSpan.textContent = selectedCount;
+    
+    // Collect IDs
+    const ids = Array.from(checkboxes).map(cb => cb.value);
+    memberIdsInput.value = ids.join(',');
+    
+    // Show/hide bulk actions container
+    if (selectedCount > 0) {
+        bulkActionsContainer.style.display = 'block';
+        bulkActionBtn.disabled = false;
+        
+        // Highlight selected rows
+        document.querySelectorAll('.roster-row').forEach(row => {
+            const checkbox = row.querySelector('.member-checkbox');
+            if (checkbox && checkbox.checked) {
+                row.classList.add('selected');
+            } else {
+                row.classList.remove('selected');
+            }
+        });
+    } else {
+        bulkActionsContainer.style.display = 'none';
+        bulkActionBtn.disabled = true;
+        document.querySelectorAll('.roster-row').forEach(row => row.classList.remove('selected'));
+    }
+}
+
+function toggleSelectAll(checked) {
+    const checkboxes = document.querySelectorAll('.member-checkbox');
+    checkboxes.forEach(cb => {
+        cb.checked = checked;
+    });
+    updateBulkSelection();
+}
+
+function toggleBulkActions(show) {
+    if (!show) {
+        // Clear selection
+        document.querySelectorAll('.member-checkbox').forEach(cb => cb.checked = false);
+        document.getElementById('selectAllCheckbox').checked = false;
+        updateBulkSelection();
+    }
+}
+
+function handleBulkActionChange(action) {
+    const bulkActionBtn = document.getElementById('bulkActionBtn');
+    if (action) {
+        bulkActionBtn.disabled = false;
+    } else {
+        bulkActionBtn.disabled = true;
+    }
+}
+
+// Form submission handler
+document.getElementById('bulkActionsForm').addEventListener('submit', function(e) {
+    const action = document.getElementById('bulkAction').value;
+    const selectedCount = document.querySelectorAll('.member-checkbox:checked').length;
+    
+    if (!action) {
+        e.preventDefault();
+        alert('Please select an action');
+        return;
+    }
+    
+    if (selectedCount === 0) {
+        e.preventDefault();
+        alert('Please select at least one member');
+        return;
+    }
+    
+    if (action === 'delete') {
+        if (!confirm(`Are you sure you want to delete ${selectedCount} member(s)? This action cannot be undone.`)) {
+            e.preventDefault();
+        }
+    }
+});
+</script>
 {% endblock %}

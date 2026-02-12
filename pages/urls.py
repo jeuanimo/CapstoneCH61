@@ -138,6 +138,9 @@ urlpatterns = [
     path('portal/roster/create/', views.MemberCreateView.as_view(), name='create_member'),
     path('portal/roster/edit/<int:pk>/', views.MemberUpdateView.as_view(), name='edit_member'),
     path('portal/roster/delete/<int:pk>/', views.MemberDeleteView.as_view(), name='delete_member'),
+    path('portal/roster/bulk-actions/', views.bulk_member_actions, name='bulk_member_actions'),
+    path('portal/roster/bulk-actions/edit/', views.bulk_member_edit, name='bulk_member_edit'),
+    path('portal/roster/bulk-actions/delete/', views.bulk_member_delete_confirm, name='bulk_member_delete_confirm'),
     path('portal/roster/import/', views.import_members, name='import_members'),
     path('portal/officers/import/', views.import_officers, name='import_officers'),
     
@@ -224,8 +227,9 @@ urlpatterns = [
     path('boutique/cart/update/<int:item_id>/', views.update_cart_item, name='update_cart_item'),
     path('boutique/cart/remove/<int:item_id>/', views.remove_from_cart, name='remove_from_cart'),
     path('boutique/checkout/', views.checkout, name='checkout'),
-    path('boutique/payment/<int:order_id>/', views.payment, name='payment'),
-    path('boutique/payment-success/<int:order_id>/', views.payment_success, name='payment_success'),
+    path('boutique/checkout/<int:order_id>/', views.checkout, name='checkout_with_order'),
+    path('boutique/payment/<int:order_id>/', views.payment, name='boutique_payment'),
+    path('boutique/payment-success/<int:order_id>/', views.boutique_payment_success, name='boutique_payment_success'),
     path('boutique/orders/', views.order_history, name='order_history'),
     
     # BOUTIQUE ADMIN URLS (Officer/Staff only)

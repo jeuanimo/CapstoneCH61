@@ -10,6 +10,11 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+# Email constants
+CHAPTER_NAME = 'Nu Gamma Sigma'
+DEFAULT_CONTACT_EMAIL = 'nugammasigma@example.com'
+CHAPTER_FULL_NAME = 'Phi Beta Sigma - Nu Gamma Sigma Chapter'
+
 
 def send_dues_reminder_email(member_profile):
     """
@@ -34,9 +39,9 @@ def send_dues_reminder_email(member_profile):
             'member_name': member_profile.user.get_full_name() or member_profile.user.username,
             'days_remaining': days_remaining,
             'deadline_date': deadline_date,
-            'chapter_name': 'Nu Gamma Sigma',
+            'chapter_name': CHAPTER_NAME,
             'portal_url': settings.SITE_URL + '/portal/dues/' if hasattr(settings, 'SITE_URL') else 'https://nugammasigma.org/portal/dues/',
-            'contact_email': getattr(settings, 'CONTACT_EMAIL', 'nugammasigma@example.com'),
+            'contact_email': getattr(settings, 'CONTACT_EMAIL', DEFAULT_CONTACT_EMAIL),
         }
         
         # Try to use template if it exists, otherwise use plain text
@@ -58,7 +63,7 @@ Questions? Contact your chapter officers at:
 {context['contact_email']}
 
 ---
-Phi Beta Sigma - Nu Gamma Sigma Chapter
+{CHAPTER_FULL_NAME}
 """
             html_message = None
         
@@ -101,9 +106,9 @@ def send_announcement_email(title, content, recipient_emails):
             'title': title,
             'content_html': content,
             'announcement_date': timezone.now().strftime("%B %d, %Y"),
-            'chapter_name': 'Nu Gamma Sigma',
+            'chapter_name': CHAPTER_NAME,
             'portal_url': getattr(settings, 'SITE_URL', 'https://nugammasigma.org') + '/portal/',
-            'contact_email': getattr(settings, 'CONTACT_EMAIL', 'nugammasigma@example.com'),
+            'contact_email': getattr(settings, 'CONTACT_EMAIL', DEFAULT_CONTACT_EMAIL),
             'include_portal_link': True,
         }
         
@@ -121,7 +126,7 @@ Visit the chapter portal for more information:
 {context['portal_url']}
 
 ---
-Phi Beta Sigma - Nu Gamma Sigma Chapter
+{CHAPTER_FULL_NAME}
 """
             html_message = None
         
@@ -173,9 +178,9 @@ def send_payment_confirmation_email(member_profile, payment_amount, payment_date
             'payment_amount': payment_amount,
             'payment_date': payment_date,
             'transaction_id': transaction_id,
-            'chapter_name': 'Nu Gamma Sigma',
+            'chapter_name': CHAPTER_NAME,
             'portal_url': getattr(settings, 'SITE_URL', 'https://nugammasigma.org') + '/portal/profile/',
-            'contact_email': getattr(settings, 'CONTACT_EMAIL', 'nugammasigma@example.com'),
+            'contact_email': getattr(settings, 'CONTACT_EMAIL', DEFAULT_CONTACT_EMAIL),
         }
         
         # Try to use template if it exists, otherwise use plain text
@@ -198,7 +203,7 @@ Your dues status has been updated and document access has been restored. If you 
 Visit your profile: {context['portal_url']}
 
 ---
-Phi Beta Sigma - Nu Gamma Sigma Chapter
+{CHAPTER_FULL_NAME}
 """
             html_message = None
         

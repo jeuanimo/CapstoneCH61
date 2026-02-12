@@ -1,0 +1,403 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Confirm Bulk Delete - Nu Gamma Sigma{% endblock %}
+
+{% block content %}
+<div class="portal-page">
+    <div class="portal-header">
+        <h1><i class="fas fa-exclamation-triangle text-danger"></i> Confirm Bulk Delete</h1>
+        <p>This action cannot be undone</p>
+    </div>
+
+    <div class="form-container">
+        <div class="form-card warning">
+            <div class="warning-alert">
+                <i class="fas fa-exclamation-circle"></i>
+                <h2>Delete {{ member_count }} Member(s)?</h2>
+                <p>You are about to permanently delete the following members and their user accounts. This action <strong>CANNOT be undone</strong>.</p>
+            </div>
+
+            <div class="members-to-delete">
+                <h3>Members to Delete:</h3>
+                <div class="member-list">
+                    {% for member in members %}
+                    <div class="member-item">
+                        <span class="member-name">
+                            {{ member.user.get_full_name|default:member.user.username }}
+                        </span>
+                        <span class="member-number">#{{ member.member_number }}</span>
+                        <span class="member-email">{{ member.user.email }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <form method="post" id="deleteForm">
+                {% csrf_token %}
+
+                <div class="form-group confirmation-checkbox">
+                    <label for="{{ form.confirm_delete.id_for_label }}" class="checkbox-label">
+                        {{ form.confirm_delete }}
+                        <span>{{ form.confirm_delete.label }}</span>
+                    </label>
+                    {% if form.confirm_delete.errors %}
+                        <div class="alert alert-danger">
+                            {{ form.confirm_delete.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="deletion-consequences">
+                    <h3>This will permanently:</h3>
+                    <ul>
+                        <li>Delete all member profiles and information</li>
+                        <li>Delete all associated user accounts and login credentials</li>
+                        <li>Remove all member-related data (messages, posts, photos, etc.)</li>
+                        <li>Remove from leadership positions if applicable</li>
+                        <li>Remove from all group memberships</li>
+                    </ul>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-danger btn-lg" id="deleteBtn" disabled>
+                        <i class="fas fa-trash"></i> Permanently Delete {{ member_count }} Member(s)
+                    </button>
+                    <a href="{% url 'member_roster' %}" class="btn btn-secondary btn-lg">
+                        <i class="fas fa-times"></i> Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .portal-page {
+        padding: 2rem 0;
+    }
+
+    .portal-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    .portal-header h1 {
+        color: #dc3545;
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+    }
+
+    .portal-header p {
+        color: #666;
+        font-size: 1.1rem;
+    }
+
+    .form-container {
+        max-width: 700px;
+        margin: 0 auto;
+    }
+
+    .form-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        border: 2px solid #dc3545;
+    }
+
+    .form-card.warning {
+        border-left: 5px solid #dc3545;
+    }
+
+    .warning-alert {
+        background: #f8d7da;
+        border: 1px solid #f5c6cb;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+
+    .warning-alert i {
+        font-size: 3rem;
+        color: #dc3545;
+        display: block;
+        margin-bottom: 1rem;
+    }
+
+    .warning-alert h2 {
+        color: #721c24;
+        margin: 0.5rem 0;
+    }
+
+    .warning-alert p {
+        color: #721c24;
+        margin: 0.5rem 0;
+    }
+
+    .members-to-delete {
+        background: #f8f9fa;
+        border-left: 4px solid #dc3545;
+        padding: 1rem;
+        border-radius: 4px;
+        margin-bottom: 2rem;
+    }
+
+    .members-to-delete h3 {
+        font-size: 1.1rem;
+        color: #dc3545;
+        margin-bottom: 1rem;
+    }
+
+    .member-list {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+
+    .member-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.75rem;
+        border-bottom: 1px solid #dee2e6;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .member-item:last-child {
+        border-bottom: none;
+    }
+
+    .member-name {
+        font-weight: 600;
+        flex-grow: 1;
+    }
+
+    .member-number {
+        color: #dc3545;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+
+    .member-email {
+        color: #6c757d;
+        font-size: 0.85rem;
+    }
+
+    .confirmation-checkbox {
+        background: #fff3cd;
+        border: 1px solid #ffc107;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .checkbox-label {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        cursor: pointer;
+        margin: 0;
+        font-weight: 500;
+        color: #856404;
+    }
+
+    .checkbox-label input[type="checkbox"] {
+        margin-top: 0.25rem;
+        cursor: pointer;
+        width: 20px;
+        height: 20px;
+    }
+
+    .deletion-consequences {
+        background: #fff3cd;
+        border-left: 4px solid #ffc107;
+        padding: 1rem;
+        border-radius: 4px;
+        margin-bottom: 2rem;
+    }
+
+    .deletion-consequences h3 {
+        font-size: 1rem;
+        color: #856404;
+        margin-bottom: 0.75rem;
+    }
+
+    .deletion-consequences ul {
+        margin: 0;
+        padding-left: 1.5rem;
+        color: #856404;
+    }
+
+    .deletion-consequences li {
+        margin-bottom: 0.5rem;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: 2rem;
+    }
+
+    .btn-lg {
+        padding: 0.75rem 2rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-danger {
+        background: #dc3545;
+        color: white;
+    }
+
+    .btn-danger:hover:not(:disabled) {
+        background: #c82333;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
+    }
+
+    .btn-danger:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+    }
+
+    .btn-secondary:hover {
+        background: #5a6268;
+        transform: translateY(-2px);
+    }
+
+    .alert {
+        padding: 1rem;
+        border-radius: 4px;
+        margin-bottom: 1rem;
+    }
+
+    .alert-danger {
+        background: #f8d7da;
+        border: 1px solid #f5c6cb;
+        color: #721c24;
+    }
+
+    /* Dark Mode */
+    body.dark-mode .portal-header h1 {
+        color: #ff6b6b;
+    }
+
+    body.dark-mode .form-card {
+        background: #1a2a4a;
+        box-shadow: 0 0 20px rgba(255, 107, 107, 0.3);
+        border-color: #ff6b6b;
+    }
+
+    body.dark-mode .warning-alert {
+        background: #4a1e1e;
+        border-color: #8b3a3a;
+    }
+
+    body.dark-mode .warning-alert i {
+        color: #ff6b6b;
+    }
+
+    body.dark-mode .warning-alert h2,
+    body.dark-mode .warning-alert p {
+        color: #ff8787;
+    }
+
+    body.dark-mode .members-to-delete {
+        background: #0f1a2e;
+        border-color: #2a7dd4;
+    }
+
+    body.dark-mode .members-to-delete h3 {
+        color: #87ceeb;
+    }
+
+    body.dark-mode .member-item {
+        border-bottom-color: #2d3e5f;
+        color: #e8eef5;
+    }
+
+    body.dark-mode .member-name {
+        color: #87ceeb;
+    }
+
+    body.dark-mode .member-number {
+        color: #ff8787;
+    }
+
+    body.dark-mode .member-email {
+        color: #b0b8c8;
+    }
+
+    body.dark-mode .confirmation-checkbox {
+        background: #3a2a1a;
+        border-color: #5a4a2a;
+    }
+
+    body.dark-mode .checkbox-label {
+        color: #d4b896;
+    }
+
+    body.dark-mode .deletion-consequences {
+        background: #3a2a1a;
+        border-color: #5a4a2a;
+        color: #d4b896;
+    }
+
+    body.dark-mode .deletion-consequences h3 {
+        color: #e8c896;
+    }
+
+    @media (max-width: 768px) {
+        .form-card {
+            padding: 1rem;
+        }
+
+        .form-actions {
+            flex-direction: column;
+        }
+
+        .btn-lg {
+            width: 100%;
+        }
+
+        .member-item {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+    }
+</style>
+
+<script>
+    // Enable delete button only when confirmation checkbox is checked
+    document.getElementById('{{ form.confirm_delete.id_for_label }}').addEventListener('change', function() {
+        const deleteBtn = document.getElementById('deleteBtn');
+        deleteBtn.disabled = !this.checked;
+    });
+
+    // Show additional confirmation on form submit
+    document.getElementById('deleteForm').addEventListener('submit', function(e) {
+        const checkbox = document.querySelector('[name="confirm_delete"]');
+        if (!checkbox.checked) {
+            e.preventDefault();
+            alert('Please confirm that you understand this action cannot be undone.');
+            return false;
+        }
+    });
+</script>
+{% endblock %}

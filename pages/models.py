@@ -974,7 +974,7 @@ class Product(models.Model):
 class Cart(models.Model):
     """Shopping cart for users (authenticated or anonymous via session)"""
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='boutique_cart', null=True, blank=True)
-    session_key = models.CharField(max_length=40, null=True, blank=True, db_index=True)
+    session_key = models.CharField(max_length=40, blank=True, default='', db_index=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -1031,7 +1031,7 @@ class Order(models.Model):
     ]
     
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='boutique_orders', null=True, blank=True)
-    session_key = models.CharField(max_length=40, null=True, blank=True, db_index=True, help_text='Session key for anonymous orders')
+    session_key = models.CharField(max_length=40, blank=True, default='', db_index=True, help_text='Session key for anonymous orders')
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='pending')
     total_price = models.DecimalField(max_digits=10, decimal_places=2)
     stripe_payment_intent = models.CharField(max_length=250, blank=True, default='')

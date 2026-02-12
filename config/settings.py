@@ -88,6 +88,8 @@ import secrets
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Development-only secret key prefix (never used in production)
+DEV_SECRET_KEY_PREFIX = 'django-insecure-dev-'
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
@@ -98,7 +100,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config('SECRET_KEY', default=None)
 if not SECRET_KEY:
     # Auto-generate for development - don't use in production!
-    SECRET_KEY = 'django-insecure-dev-' + secrets.token_hex(32)
+    SECRET_KEY = DEV_SECRET_KEY_PREFIX + secrets.token_hex(32)
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # Set DEBUG = False in .env for production
@@ -349,6 +351,13 @@ DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='noreply@nugammasigma.
 CONTACT_EMAIL = config('CONTACT_EMAIL', default='nugammasigma@example.com')           # Email for contact form submissions
 
 
+# ====================== STRIPE PAYMENT CONFIGURATION ======================
+
+# Stripe API keys for payment processing
+# Development: Use test keys from https://dashboard.stripe.com/test/apikeys
+# Production: Use live keys (keep secret!)
+STRIPE_PUBLIC_KEY = config('STRIPE_PUBLIC_KEY', default='pk_test_placeholder')       # Stripe publishable key
+STRIPE_SECRET_KEY = config('STRIPE_SECRET_KEY', default='sk_test_placeholder')       # Stripe secret key (keep secret!)
 
 
 

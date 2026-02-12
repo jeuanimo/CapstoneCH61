@@ -1111,7 +1111,7 @@ def portal_dashboard(request):
 # These are modern Django views that are more maintainable and DRY than FBVs above.
 # Gradually replace FBV versions with these as you migrate your codebase.
 
-class MemberListView(StaffRequiredMixin, ListView):
+class MemberListView(OfficerRequiredMixin, ListView):
     """
     List all active members (financial and life members).
     
@@ -1119,7 +1119,7 @@ class MemberListView(StaffRequiredMixin, ListView):
     URL: /portal/roster/
     
     Features:
-    - Staff/admin only access
+    - Officer/admin only access
     - Shows all financial and life members
     - Ordered by last name
     """
@@ -1133,13 +1133,18 @@ class MemberListView(StaffRequiredMixin, ListView):
         return MemberProfile.objects.financial_members().select_related('user').order_by('user__last_name')
     
     def get_context_data(self, **kwargs):
-        """Add is_staff to context for template"""
+        """Add permission flags to context for template"""
         context = super().get_context_data(**kwargs)
         context['is_staff'] = self.request.user.is_staff
+        # Add officer flag for template conditional checks
+        is_officer = False
+        if hasattr(self.request.user, 'member_profile'):
+            is_officer = self.request.user.member_profile.is_officer
+        context['is_officer'] = is_officer
         return context
 
 
-class MemberCreateView(StaffRequiredMixin, CreateView):
+class MemberCreateView(OfficerRequiredMixin, CreateView):
     """
     Create a new member profile with user account.
     
@@ -1147,7 +1152,7 @@ class MemberCreateView(StaffRequiredMixin, CreateView):
     URL: /portal/roster/create/
     
     Features:
-    - Staff/admin only access
+    - Officer/admin only access
     - Auto-creates user account
     - Generates invitation code
     - Creates leadership position if specified
@@ -1216,7 +1221,7 @@ class MemberCreateView(StaffRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
-class MemberUpdateView(StaffRequiredMixin, UpdateView):
+class MemberUpdateView(OfficerRequiredMixin, UpdateView):
     """
     Edit an existing member profile.
     
@@ -1224,7 +1229,7 @@ class MemberUpdateView(StaffRequiredMixin, UpdateView):
     URL: /portal/roster/edit/<id>/
     
     Features:
-    - Staff/admin only access
+    - Officer/admin only access
     - Updates both user and member profile
     - Manages leadership positions
     - Pre-populates leadership position if member is officer
@@ -1292,7 +1297,7 @@ class MemberUpdateView(StaffRequiredMixin, UpdateView):
         return super().form_valid(form)
 
 
-class MemberDeleteView(StaffRequiredMixin, DeleteConfirmationMixin, DeleteView):
+class MemberDeleteView(OfficerRequiredMixin, DeleteConfirmationMixin, DeleteView):
     """
     Delete a member profile.
     
@@ -1300,7 +1305,7 @@ class MemberDeleteView(StaffRequiredMixin, DeleteConfirmationMixin, DeleteView):
     URL: /portal/roster/delete/<id>/
     
     Features:
-    - Staff/admin only access
+    - Officer/admin only access
     - Deletes both member profile and user account
     - Shows confirmation message
     - Logs deletion
@@ -1321,6 +1326,253 @@ class MemberDeleteView(StaffRequiredMixin, DeleteConfirmationMixin, DeleteView):
         user.delete()
         
         return response
+
+
+# ==================== BULK OPERATIONS - MEMBER MANAGEMENT ====================
+# Views for performing bulk edit and delete operations on multiple members
+
+# ==================== HELPER FUNCTIONS FOR BULK OPERATIONS ====================
+
+def _apply_member_status_updates(member, status, dues_current):
+    """
+    Apply status and dues updates to a member.
+    Returns True if any changes were made.
+    """
+    changed = False
+    
+    if status:
+        member.status = status
+        changed = True
+    
+    if dues_current:
+        if dues_current == 'yes':
+            member.dues_current = True
+            changed = True
+        elif dues_current == 'no':
+            member.dues_current = False
+            changed = True
+    
+    if changed:
+        member.save()
+    
+    return changed
+
+
+def _update_member_leadership_position(member, leadership_position):
+    """
+    Update a member's leadership position.
+    Deletes existing positions and creates new one if specified.
+    """
+    # Delete existing leadership entries for this member
+    ChapterLeadership.objects.filter(
+        email__iexact=member.user.email
+    ).delete()
+    
+    # Create new one if specified
+    if leadership_position:
+        ChapterLeadership.objects.create(
+            position=leadership_position,
+            full_name=member.user.get_full_name() or member.user.username,
+            email=member.user.email,
+            phone=member.phone,
+            is_active=True
+        )
+
+
+def _delete_member_and_account(member):
+    """
+    Delete a member profile, user account, and related data.
+    Returns the member's display name for logging.
+    """
+    user = member.user
+    display_name = f"{user.get_full_name()} (#{member.member_number})"
+    
+    # Delete ChapterLeadership positions
+    ChapterLeadership.objects.filter(email__iexact=user.email).delete()
+    
+    # Delete member profile
+    member.delete()
+    
+    # Delete user account
+    user.delete()
+    
+    return display_name
+
+
+def _process_bulk_member_edits(form, members):
+    """
+    Process bulk member edits and return count of members updated.
+    """
+    status = form.cleaned_data.get('status')
+    dues_current = form.cleaned_data.get('dues_current')
+    leadership_position = form.cleaned_data.get('leadership_position')
+    
+    updates_applied = 0
+    
+    for member in members:
+        # Update status and dues
+        changed = _apply_member_status_updates(member, status, dues_current)
+        
+        if changed:
+            updates_applied += 1
+        
+        # Update leadership positions
+        if leadership_position is not None:  # Empty string means remove
+            _update_member_leadership_position(member, leadership_position)
+    
+    return updates_applied
+
+
+@login_required
+@user_passes_test(lambda u: u.is_staff or (hasattr(u, 'member_profile') and u.member_profile.is_officer))
+def bulk_member_actions(request):
+    """
+    Handle bulk actions on members (edit or delete).
+    
+    URL: /portal/roster/bulk-actions/
+    
+    POST Data:
+    - action: 'edit' or 'delete'
+    - member_ids: Comma-separated list of member IDs
+    """
+    if request.method == 'POST':
+        from .forms_bulk_operations import BulkMemberActionForm
+        
+        form = BulkMemberActionForm(request.POST)
+        if form.is_valid():
+            action = form.cleaned_data['action']
+            member_ids = form.cleaned_data['member_ids']  # Already parsed as list
+            
+            # Store in session for next view
+            request.session['bulk_member_ids'] = member_ids
+            
+            if action == 'edit':
+                return redirect('bulk_member_edit')
+            elif action == 'delete':
+                return redirect('bulk_member_delete_confirm')
+        else:
+            # Form errors
+            messages.error(request, "Invalid selection. Please try again.")
+            return redirect('member_roster')
+    
+    return redirect('member_roster')
+
+
+@login_required
+@user_passes_test(lambda u: u.is_staff or (hasattr(u, 'member_profile') and u.member_profile.is_officer))
+def bulk_member_edit(request):
+    """
+    Bulk edit multiple members - select which fields to update.
+    
+    URLs:
+    - GET: /portal/roster/bulk-actions/edit/
+    - POST: Apply bulk edits
+    """
+    from .forms_bulk_operations import BulkMemberEditForm
+    
+    # Get member IDs from session
+    member_ids = request.session.get('bulk_member_ids', [])
+    if not member_ids:
+        messages.error(request, "No members selected.")
+        return redirect('member_roster')
+    
+    # Get the members
+    members = MemberProfile.objects.filter(pk__in=member_ids).select_related('user')
+    
+    if request.method != 'POST':
+        form = BulkMemberEditForm()
+    else:
+        form = BulkMemberEditForm(request.POST)
+        if not form.is_valid():
+            messages.error(request, MSG_FORM_ERRORS)
+        else:
+            updates_applied = _process_bulk_member_edits(form, members)
+            logger.info(f"Bulk edit applied to {updates_applied} members by {request.user.username}")
+            messages.success(request, f"Successfully updated {updates_applied} member(s)!")
+            
+            # Clean up session
+            if 'bulk_member_ids' in request.session:
+                del request.session['bulk_member_ids']
+            
+            return redirect('member_roster')
+    
+    context = {
+        'form': form,
+        'members': members,
+        'member_count': len(member_ids),
+    }
+    return render(request, 'pages/portal/bulk_member_edit.html', context)
+
+
+def _process_bulk_member_deletions(members, username):
+    """
+    Process bulk member deletions and return deletion summary.
+    Returns tuple of (deleted_count, deleted_names).
+    """
+    deleted_count = 0
+    deleted_names = []
+    
+    for member in members:
+        display_name = _delete_member_and_account(member)
+        deleted_names.append(display_name)
+        deleted_count += 1
+    
+    logger.warning(
+        f"Bulk deleted {deleted_count} members by {username}: "
+        f"{', '.join(deleted_names)}"
+    )
+    
+    return deleted_count, deleted_names
+
+
+@login_required
+@user_passes_test(lambda u: u.is_staff or (hasattr(u, 'member_profile') and u.member_profile.is_officer))
+def bulk_member_delete_confirm(request):
+    """
+    Confirm bulk deletion of members.
+    
+    URLs:
+    - GET: /portal/roster/bulk-actions/delete/ - Show confirmation form
+    - POST: Apply bulk deletion
+    """
+    from .forms_bulk_operations import BulkMemberDeleteForm
+    
+    # Get member IDs from session
+    member_ids = request.session.get('bulk_member_ids', [])
+    if not member_ids:
+        messages.error(request, "No members selected.")
+        return redirect('member_roster')
+    
+    # Get the members
+    members = MemberProfile.objects.filter(pk__in=member_ids).select_related('user')
+    
+    if request.method != 'POST':
+        form = BulkMemberDeleteForm()
+    else:
+        form = BulkMemberDeleteForm(request.POST)
+        if not form.is_valid():
+            messages.error(request, "Please confirm the deletion.")
+        elif not form.cleaned_data['confirm_delete']:
+            messages.error(request, "Please confirm the deletion.")
+        else:
+            deleted_count, _ = _process_bulk_member_deletions(members, request.user.username)
+            messages.success(
+                request, 
+                f"Successfully deleted {deleted_count} member(s) and their user accounts."
+            )
+            
+            # Clean up session
+            if 'bulk_member_ids' in request.session:
+                del request.session['bulk_member_ids']
+            
+            return redirect('member_roster')
+    
+    context = {
+        'form': form,
+        'members': members,
+        'member_count': len(member_ids),
+    }
+    return render(request, 'pages/portal/bulk_member_delete_confirm.html', context)
 
 
 # ==================== CLASS-BASED VIEWS (CBV) - PAYMENT MANAGEMENT ====================
@@ -3583,6 +3835,30 @@ def view_sms_logs(request):
 
 # ==================== BOUTIQUE VIEWS ====================
 
+def _merge_session_cart_to_user_cart(cart, session_key):
+    """Merge session cart items into user cart"""
+    if not session_key:
+        return
+    
+    try:
+        session_cart = Cart.objects.get(session_key=session_key, user__isnull=True)
+        for item in session_cart.items.all():
+            existing_item = cart.items.filter(
+                product=item.product,
+                size=item.size,
+                color=item.color
+            ).first()
+            if existing_item:
+                existing_item.quantity += item.quantity
+                existing_item.save()
+            else:
+                item.cart = cart
+                item.save()
+        session_cart.delete()
+    except Cart.DoesNotExist:
+        pass
+
+
 def get_or_create_cart(request):
     """
     Get or create a shopping cart for the current user/session.
@@ -3590,27 +3866,8 @@ def get_or_create_cart(request):
     """
     if request.user.is_authenticated:
         cart, _ = Cart.objects.get_or_create(user=request.user)
-        # If user previously had a session cart, merge it
         session_key = request.session.session_key
-        if session_key:
-            try:
-                session_cart = Cart.objects.get(session_key=session_key, user__isnull=True)
-                # Merge session cart items into user cart
-                for item in session_cart.items.all():
-                    existing_item = cart.items.filter(
-                        product=item.product,
-                        size=item.size,
-                        color=item.color
-                    ).first()
-                    if existing_item:
-                        existing_item.quantity += item.quantity
-                        existing_item.save()
-                    else:
-                        item.cart = cart
-                        item.save()
-                session_cart.delete()
-            except Cart.DoesNotExist:
-                pass
+        _merge_session_cart_to_user_cart(cart, session_key)
     else:
         # Create session if it doesn't exist
         if not request.session.session_key:
@@ -3724,8 +3981,63 @@ def remove_from_cart(request, item_id):
     return redirect('view_cart')
 
 
-def checkout(request):
+def _build_order_data_from_form(request, form, cart):
+    """Build order data dictionary from checkout form"""
+    order_data = {
+        'total_price': cart.get_total_price(),
+        'email': form.cleaned_data['email'],
+        'full_name': form.cleaned_data.get('full_name', ''),
+        'phone': form.cleaned_data.get('phone', ''),
+        'address': form.cleaned_data['address'],
+        'city': form.cleaned_data['city'],
+        'state': form.cleaned_data['state'],
+        'zip_code': form.cleaned_data['zip_code'],
+    }
+    
+    if request.user.is_authenticated:
+        order_data['user'] = request.user
+    else:
+        order_data['session_key'] = request.session.session_key
+    
+    return order_data
+
+
+def _create_order_items_from_cart(order, cart):
+    """Create OrderItems from cart items"""
+    for cart_item in cart.items.all():
+        OrderItem.objects.create(
+            order=order,
+            product=cart_item.product,
+            quantity=cart_item.quantity,
+            size=cart_item.size,
+            color=cart_item.color,
+            price=cart_item.product.price,
+        )
+
+
+def _get_checkout_form_initial_data(request):
+    """Get initial data for checkout form based on user"""
+    initial_data = {}
+    if request.user.is_authenticated:
+        initial_data['email'] = request.user.email
+        if hasattr(request.user, 'first_name') and hasattr(request.user, 'last_name'):
+            full_name = f"{request.user.first_name} {request.user.last_name}".strip()
+            if full_name:
+                initial_data['full_name'] = full_name
+    return initial_data
+
+
+def checkout(request, order_id=None):
     """Checkout and create order (works for both authenticated and anonymous users)"""
+    # If order_id provided, load existing order (for returning to checkout after payment error)
+    if order_id:
+        order = get_order_for_request(request, order_id)
+        context = {
+            'order': order,
+            'is_guest': not request.user.is_authenticated,
+        }
+        return render(request, 'pages/boutique/checkout.html', context)
+    
     cart = get_or_create_cart(request)
     
     if not cart.items.exists():
@@ -3738,47 +4050,18 @@ def checkout(request):
         form = CheckoutForm(request.POST, is_guest=is_guest)
         if form.is_valid():
             # Create order
-            order_data = {
-                'total_price': cart.get_total_price(),
-                'email': form.cleaned_data['email'],
-                'full_name': form.cleaned_data.get('full_name', ''),
-                'phone': form.cleaned_data.get('phone', ''),
-                'address': form.cleaned_data['address'],
-                'city': form.cleaned_data['city'],
-                'state': form.cleaned_data['state'],
-                'zip_code': form.cleaned_data['zip_code'],
-            }
-            
-            if request.user.is_authenticated:
-                order_data['user'] = request.user
-            else:
-                order_data['session_key'] = request.session.session_key
-            
+            order_data = _build_order_data_from_form(request, form, cart)
             order = Order.objects.create(**order_data)
             
             # Create order items from cart
-            for cart_item in cart.items.all():
-                OrderItem.objects.create(
-                    order=order,
-                    product=cart_item.product,
-                    quantity=cart_item.quantity,
-                    size=cart_item.size,
-                    color=cart_item.color,
-                    price=cart_item.product.price,
-                )
+            _create_order_items_from_cart(order, cart)
             
             # Clear cart
             cart.items.all().delete()
             
-            return redirect('payment', order_id=order.id)
+            return redirect('boutique_payment', order_id=order.id)
     else:
-        initial_data = {}
-        if request.user.is_authenticated:
-            initial_data['email'] = request.user.email
-            if hasattr(request.user, 'first_name') and hasattr(request.user, 'last_name'):
-                full_name = f"{request.user.first_name} {request.user.last_name}".strip()
-                if full_name:
-                    initial_data['full_name'] = full_name
+        initial_data = _get_checkout_form_initial_data(request)
         form = CheckoutForm(initial=initial_data, is_guest=is_guest)
     
     context = {
@@ -3838,7 +4121,7 @@ def payment(request, order_id):
             return render(request, 'pages/boutique/payment.html', context)
         except stripe.error.StripeError as e:
             messages.error(request, f'Payment error: {str(e)}')
-            return redirect('checkout', order_id=order.id)
+            return redirect('checkout_with_order', order_id=order.id)
     
     context = {
         'order': order,
@@ -3846,7 +4129,7 @@ def payment(request, order_id):
     return render(request, 'pages/boutique/payment.html', context)
 
 
-def payment_success(request, order_id):
+def boutique_payment_success(request, order_id):
     """Handle successful payment (works for both authenticated and anonymous users)"""
     order = get_order_for_request(request, order_id)
     order.status = 'completed'
