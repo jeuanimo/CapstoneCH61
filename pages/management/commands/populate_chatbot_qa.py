@@ -20,7 +20,7 @@ class Command(BaseCommand):
             # About Chapter
             {
                 'question': 'What is Nu Gamma Sigma Chapter?',
-                'keywords': 'nu gamma sigma chapter about fraternity philbrook sigma belleville',
+                'keywords': 'nu gamma sigma chapter about fraternity phi beta sigma belleville',
                 'answer': 'Nu Gamma Sigma Chapter is an alumni chapter of Phi Beta Sigma Fraternity, Inc. serving Belleville, Illinois and the surrounding communities of St. Clair County and Madison County. Chartered on May 21, 2002, we are dedicated to the fraternity\'s mission of "Culture for Service and Service for Humanity."',
                 'category': 'about',
                 'is_active': True,
