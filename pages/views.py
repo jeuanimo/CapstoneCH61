@@ -75,8 +75,7 @@ COMMON PATTERNS:
 
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from django.db.models import Q, Sum, Count, Avg, F
-from django.db import models
+from django.db.models import Q, Sum, F
 from django_filters import CharFilter, FilterSet
 from .models import (
     Event, ChapterLeadership, MemberProfile, DuesPayment,
@@ -86,14 +85,14 @@ from .models import (
     TwilioConfiguration, SMSPreference, SMSLog,
     Product, Cart, CartItem, Order, OrderItem
 )
-from .forms import ContactForm, ChapterLeadershipForm, MemberProfileForm, DuesPaymentForm, StripeConfigurationForm, TwilioConfigurationForm, SMSPreferenceForm, CreateBillForm
+from .forms import ChapterLeadershipForm, MemberProfileForm, DuesPaymentForm, StripeConfigurationForm, TwilioConfigurationForm, SMSPreferenceForm, CreateBillForm
 from .forms_profile import (
     EditProfileForm, CreatePostForm, InvitationSignupForm,
     EditPhotoForm, CreateAlbumForm, CreateEventForm, DocumentForm
 )
 from .forms_boutique import BoutiqueImportForm, ProductForm, CheckoutForm
 from .decorators import is_officer_or_staff
-from datetime import datetime, timedelta
+from datetime import datetime
 import calendar
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.forms import AuthenticationForm
@@ -109,7 +108,7 @@ import os
 from django.views.generic import CreateView, UpdateView, DeleteView, ListView
 from django.urls import reverse_lazy
 # Custom mixins for CBVs
-from .mixins import StaffRequiredMixin, DeleteConfirmationMixin, OfficerRequiredMixin
+from .mixins import DeleteConfirmationMixin, OfficerRequiredMixin
 from decimal import Decimal
 from django.utils import timezone
 from urllib.parse import urlparse
@@ -131,6 +130,9 @@ TAG_SIGMA_BETA = 'sigma beta'
 # Date format constants
 DATE_FORMATS = ['%Y-%m-%d', '%m/%d/%Y', '%Y/%m/%d']
 DATE_FORMATS_SHORT = ['%Y-%m-%d', '%m/%d/%Y']
+
+# Initialize logger at module level (must be before any function definitions that use it)
+logger = logging.getLogger(__name__)
 
 
 # ==================== HELPER FUNCTIONS ====================
@@ -192,8 +194,6 @@ def generate_invitation_for_member(user, member_profile, created_by):
     logger.info(f"Invitation code generated: {invitation.code} for member {member_profile.member_number}")
     return invitation
 
-
-logger = logging.getLogger(__name__)
 
 # Create your views here.
 
@@ -1642,10 +1642,8 @@ class DuesPaymentListView(OfficerRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         payments = self.get_queryset()
         
-        from django.db import models
-        
-        total_amount = payments.aggregate(models.Sum('amount'))['amount__sum'] or 0
-        total_paid = payments.aggregate(models.Sum('amount_paid'))['amount_paid__sum'] or 0
+        total_amount = payments.aggregate(Sum('amount'))['amount__sum'] or 0
+        total_paid = payments.aggregate(Sum('amount_paid'))['amount_paid__sum'] or 0
         overdue_count = DuesPayment.objects.filter(status='pending', due_date__lt=timezone.now().date()).count()
         pending_count = DuesPayment.objects.filter(status='pending', due_date__gte=timezone.now().date()).count()
         
@@ -3384,8 +3382,8 @@ def member_dues_summary(request):
     member_data = []
     for member in members:
         payments = member.payments.all()
-        total_owed = payments.aggregate(models.Sum('amount'))['amount__sum'] or 0
-        total_paid = payments.aggregate(models.Sum('amount_paid'))['amount_paid__sum'] or 0
+        total_owed = payments.aggregate(Sum('amount'))['amount__sum'] or 0
+        total_paid = payments.aggregate(Sum('amount_paid'))['amount_paid__sum'] or 0
         balance = total_owed - total_paid
         
         overdue_payments = payments.filter(status='pending', due_date__lt=timezone.now().date()).count()
