@@ -24,6 +24,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.home_view, name='home'),
     path('pages/', include('pages.urls')),
+    path('chatbot/', include('pages.urls_chatbot')),
 ]
 
 # Serve media files in development

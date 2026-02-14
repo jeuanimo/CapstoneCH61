@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <!-- Gradient Background -->
+  <defs>
+    <linearGradient id="chatGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#87CEEB;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#4A90E2;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="sunGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFD700;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFA500;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Main Chat Bubble -->
+  <circle cx="100" cy="100" r="85" fill="url(#chatGradient)" stroke="#002E5C" stroke-width="2"/>
+  
+  <!-- Inner Lighter Circle -->
+  <circle cx="100" cy="100" r="75" fill="#E8F4F8" stroke="none"/>
+  
+  <!-- Chat Bubble Icon -->
+  <path d="M 50 60 Q 50 40 70 40 L 130 40 Q 150 40 150 60 L 150 110 Q 150 130 130 130 L 85 130 L 70 150 L 75 130 L 70 130 Q 50 130 50 110 Z" 
+        fill="#4A90E2" stroke="#002E5C" stroke-width="2" stroke-linejoin="round"/>
+  
+  <!-- Dots inside bubble (AI indicator) -->
+  <circle cx="70" cy="80" r="6" fill="#FFD700"/>
+  <circle cx="100" cy="80" r="6" fill="#FFD700"/>
+  <circle cx="130" cy="80" r="6" fill="#FFD700"/>
+  
+  <!-- Pulse lines for AI effect -->
+  <line x1="60" y1="105" x2="80" y2="105" stroke="#FFD700" stroke-width="3" stroke-linecap="round"/>
+  <line x1="100" y1="105" x2="140" y2="105" stroke="#FFD700" stroke-width="3" stroke-linecap="round"/>
+  
+  <!-- Outer ring accent -->
+  <circle cx="100" cy="100" r="85" fill="none" stroke="#FFD700" stroke-width="3" stroke-dasharray="10,5" opacity="0.7"/>
+</svg>

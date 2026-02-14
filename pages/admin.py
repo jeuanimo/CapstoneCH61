@@ -279,3 +279,6 @@ admin.site.register(Product, ProductAdmin)
 admin.site.register(Cart, CartAdmin)
 admin.site.register(CartItem)
 admin.site.register(Order, OrderAdmin)
+
+# Import chatbot admin to register PublicAnswer model
+from pages import admin_chatbot  # noqa: F401

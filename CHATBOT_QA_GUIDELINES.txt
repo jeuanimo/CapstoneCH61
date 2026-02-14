@@ -1,0 +1,283 @@
+================================================================================
+CHATBOT Q&A ENTRY GUIDELINES
+================================================================================
+
+WHAT TO INCLUDE (Public Information Only):
+-------------------------------------------
+✓ Fraternity history and traditions
+✓ Mission and values
+✓ General membership information
+✓ Event dates and descriptions
+✓ Program information
+✓ Leadership team names/titles
+✓ Contact information
+✓ Chapter location and meeting times
+✓ Public achievements and records
+✓ Community service initiatives
+✓ General FAQs
+
+WHAT TO NEVER INCLUDE (Sensitive Information):
+-----------------------------------------------
+✗ Passwords or login credentials
+✗ Private member information
+✗ Financial data or dues amounts
+✗ Security procedures
+✗ Personal phone numbers or addresses
+✗ Private email addresses
+✗ Medical or health information
+✗ Internal member disputes
+✗ Confidential committee discussions
+✗ Social media credentials
+✗ Probation or disciplinary records
+✗ Member-only content
+✗ Internal ritual information
+
+================================================================================
+WRITING EFFECTIVE Q&A ENTRIES
+================================================================================
+
+QUESTION FIELD (50-500 characters):
+- Be clear and specific
+- Write as a natural question someone would ask
+- Examples:
+  ✓ "What is the mission of Phi Beta Sigma?"
+  ✓ "When are chapter meetings held?"
+  ✓ "How do I get involved in community service?"
+
+KEYWORDS FIELD (comma-separated, lowercase):
+- Include variations of the question
+- Think about synonyms
+- Include single-word terms
+- Examples:
+  ✓ "mission, values, purpose, fraternity goals"
+  ✓ "meetings, chapter meetings, when, schedule, time"
+  ✓ "community service, service, volunteer, involvement"
+
+ANSWER FIELD (50+ characters):
+- Be clear and helpful
+- Keep sentences simple
+- Provide specific details
+- 150-300 words is ideal
+- Add a call-to-action if appropriate
+- Example:
+
+  "Phi Beta Sigma Fraternity, Inc. was founded on January 9, 1914,
+   at Howard University in Washington, D.C. Our fraternity is built
+   on three pillars: Culture for Service, Service for Humanity, and
+   Brotherhood. The Nu Gamma Sigma Chapter exemplifies these values
+   through regular community service projects, academic support
+   programs, and social events that strengthen our chapter and
+   surrounding community.
+   
+   For more information, visit our website or contact a chapter officer."
+
+================================================================================
+CONFIDENCE THRESHOLD GUIDELINES
+================================================================================
+
+Lower Thresholds (20-35):
+- For broad, frequently asked questions
+- For questions with multiple keyword variations
+- For common synonyms
+- Use when casting a wider net
+- Example: "What is a fraternity?" threshold: 25
+
+Medium Thresholds (35-50):
+- For moderately specific questions
+- Default threshold: 30
+- For most standard Q&A entries
+- Example: "What are our meeting times?" threshold: 40
+
+Higher Thresholds (50-100):
+- For very specific questions
+- When you want exact matches
+- For technical or detailed topics
+- Example: "Who is the current chapter president?" threshold: 70
+
+================================================================================
+CATEGORY SELECTION
+================================================================================
+
+About the Fraternity:
+- History, mission, values, general info
+- Examples: "Founded in 1914...", "Our mission is..."
+
+History & Traditions:
+- Founding story, traditions, symbols
+- Examples: "Our colors are...", "Stroll means..."
+
+Membership:
+- How to join, membership requirements
+- Examples: "How do I become a member?", "Requirements"
+
+Events & Programs:
+- Chapter events, programs, activities
+- Examples: "Events calendar", "Community service"
+
+Contact Information:
+- How to reach the chapter, emails, locations
+- Examples: "Where do you meet?", "How to contact us"
+
+Values & Mission:
+- Core values, mission statement, purpose
+- Examples: "What do you stand for?", "Our values"
+
+Frequently Asked Questions:
+- Common visitor questions
+- Examples: "What's the difference...", "When...", "Why..."
+
+Other:
+- Anything that doesn't fit above categories
+
+================================================================================
+QUALITY CHECKLIST FOR EACH ENTRY
+================================================================================
+
+Before submitting a Q&A entry, check:
+
+Question:
+[ ] Clear and understandable
+[ ] Natural phrasing (how someone would ask)
+[ ] 5-500 characters
+[ ] Specific enough to be useful
+[ ] No typos or grammatical errors
+
+Keywords:
+[ ] Multiple variations included
+[ ] Lowercase
+[ ] Comma-separated
+[ ] At least 3-5 keywords
+[ ] Include synonyms
+[ ] Include related terms
+
+Answer:
+[ ] No sensitive/private information
+[ ] Clear and helpful
+[ ] Grammatically correct
+[ ] 50+ characters
+[ ] Specific details provided
+[ ] Professional tone
+[ ] No broken links or references
+
+Settings:
+[ ] Is Active: Checked (unless test)
+[ ] Category: Appropriate selection
+[ ] Confidence Threshold: Appropriate level (30 default)
+[ ] Internal Note: Optional note for admins
+
+================================================================================
+TESTING YOUR ENTRIES
+================================================================================
+
+After adding an entry, test the chatbot:
+
+1. Go to http://localhost:8000/chatbot/
+2. Try exact question: "What is the mission of Phi Beta Sigma?"
+3. Try synonym: "Who founded the fraternity?"
+4. Try partial match: "mission"
+5. Try keyword: "values"
+6. Verify answer is returned correctly
+
+If not working:
+- Check keywords include all search terms
+- Lower confidence threshold
+- Verify entry is marked "Active"
+- Check for typos in keywords
+
+================================================================================
+SEASONAL Q&A UPDATES
+================================================================================
+
+Update entries seasonally with:
+
+Spring/Rush:
+- "How do I join?", "What is rush?", "Membership requirements"
+- "When is rush?", "How much does membership cost?" (public info only)
+
+Summer:
+- "What are summer activities?", "Does the chapter meet in summer?"
+
+Fall:
+- "What events happen in the fall?"
+- "When do fall meetings start?"
+
+Winter:
+- Holiday event information
+- End-of-year celebrations
+
+================================================================================
+TROUBLESHOOTING ENTRY ISSUES
+================================================================================
+
+Entry not appearing in search:
+
+1. Check "Is Active" is checked
+2. Verify keywords are lowercase
+3. Check confidence threshold isn't too high
+4. Ensure keywords match search terms
+5. Test with exact question first
+
+Entry appears for wrong queries:
+
+1. Check keywords aren't too broad
+2. Raise confidence threshold
+3. Make keywords more specific
+4. Remove ambiguous terms
+
+User getting "no match" responses:
+
+1. Check database has active entries
+2. Add more diverse keywords
+3. Add more Q&A entries
+4. Lower confidence thresholds on popular topics
+
+================================================================================
+BEST PRACTICES
+================================================================================
+
+✓ Update entries regularly (monthly review)
+✓ Monitor what questions users ask (check logs)
+✓ Add new entries based on common questions
+✓ Use simple, clear language
+✓ Provide specific answers, not vague responses
+✓ Include contact info for complex questions
+✓ Include links to website pages when helpful
+✓ Review entries quarterly for accuracy
+✓ Archive outdated entries (set to inactive)
+✓ Keep tone friendly and welcoming
+
+================================================================================
+EXAMPLE ENTRIES (Ready to Use)
+================================================================================
+
+Entry 1: What is Phi Beta Sigma?
+Question: What is Phi Beta Sigma Fraternity, Inc.?
+Keywords: fraternity, phi beta sigma, brotherhood, organization, PBS
+Answer: Phi Beta Sigma Fraternity, Inc. is a historically Black social fraternity founded on January 9, 1914, by A. Langston Taylor, Leonard F. Morse, and Charles I. Brown at Howard University. We are committed to culture, brotherhood, and service to humanity. Visit our website to learn more about our chapter.
+Category: About the Fraternity
+Confidence Threshold: 35
+
+Entry 2: How to Join
+Question: How can I become a member of Phi Beta Sigma?
+Keywords: join, membership, pledge, how to become, rush, requirements
+Answer: We welcome men of good character who are committed to our values of brotherhood and service. Membership requirements include maintaining good academic standing, being in good standing with the university, and demonstrating commitment to service. For current membership opportunities, contact our Membership Chairman or visit our website.
+Category: Membership
+Confidence Threshold: 45
+
+Entry 3: Contact Us
+Question: How can I contact the chapter?
+Keywords: contact, email, phone, reach out, information
+Answer: You can reach our chapter through our website contact form or by visiting during chapter meetings. Our officers are available to discuss any questions about the fraternity. For urgent matters, please reach out through our official website or social media.
+Category: Contact Information
+Confidence Threshold: 40
+
+Entry 4: Values
+Question: What are the core values of Phi Beta Sigma?
+Keywords: values, mission, principles, beliefs, culture, service
+Answer: Phi Beta Sigma is built on three core pillars: Culture for Service, Service for Humanity, and Brotherhood. We believe in academic excellence, community engagement, and supporting one another. These values guide everything we do as a chapter.
+Category: Values & Mission
+Confidence Threshold: 50
+
+================================================================================
+END OF Q&A GUIDELINES
+================================================================================
