@@ -171,13 +171,34 @@
         background: linear-gradient(135deg, #3a6aaa 0%, #2a5a9a 100%);
     }
 
-    /* Product grid spacing */
+    /* Product grid spacing - 3 items per row, centered */
     .products-grid {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
         gap: 30px;
+        margin: 0 auto;
+        max-width: 1200px;
     }
 
     .product-col {
-        padding: 15px;
+        flex: 0 0 calc(33.333% - 20px);
+        max-width: calc(33.333% - 20px);
+        padding: 0;
+    }
+
+    @media (max-width: 992px) {
+        .product-col {
+            flex: 0 0 calc(50% - 15px);
+            max-width: calc(50% - 15px);
+        }
+    }
+
+    @media (max-width: 576px) {
+        .product-col {
+            flex: 0 0 100%;
+            max-width: 100%;
+        }
     }
 
     .admin-controls {
@@ -375,12 +396,10 @@
         </div>
 
         <!-- Products Grid -->
-        <div class="row">
-            <div class="col-12">
-                <div class="row products-grid">
-                    {% if products %}
-                        {% for product in products %}
-                        <div class="col-sm-6 col-md-4 col-lg-3 product-col">
+        <div class="products-grid">
+            {% if products %}
+                {% for product in products %}
+                <div class="product-col">
                             <div class="card product-card h-100" style="position: relative;">
                                 {% if user.is_staff or user.member_profile.is_officer %}
                                 <div style="position: absolute; top: 10px; left: 10px; z-index: 10;">
@@ -426,16 +445,14 @@
                                 </div>
                             </div>
                         </div>
-                        {% endfor %}
-                    {% else %}
-                    <div class="col-12">
-                        <div class="alert alert-info" role="alert">
-                            No products found in this category.
-                        </div>
-                    </div>
-                    {% endif %}
+                {% endfor %}
+            {% else %}
+            <div style="width: 100%;">
+                <div class="alert alert-info" role="alert">
+                    No products found in this category.
                 </div>
             </div>
+            {% endif %}
         </div>
     </div>
 </div>

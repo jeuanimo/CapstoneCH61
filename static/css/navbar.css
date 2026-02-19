@@ -177,7 +177,8 @@ body.dark-mode .brand-subtitle {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.5rem 1rem;
+    height: 42px;
+    padding: 0 1rem;
     background: linear-gradient(180deg, #2a7dd4 0%, #1e6bb8 50%, #0f3d6e 100%);
     color: var(--text-light);
     border: 1px solid #0a2d52;
@@ -187,6 +188,16 @@ body.dark-mode .brand-subtitle {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.35),
                 inset 0 1px 0 rgba(255, 255, 255, 0.4),
                 inset 0 -1px 0 rgba(0, 0, 0, 0.3);
+    box-sizing: border-box;
+    transition: all 0.25s ease;
+}
+
+.user-badge:hover {
+    background: linear-gradient(180deg, #3a8be3 0%, #2a7dd4 50%, #15508c 100%);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.5),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.4);
+    transform: translateY(-2px);
 }
 
 .user-badge i {
@@ -194,12 +205,12 @@ body.dark-mode .brand-subtitle {
 }
 
 .user-badge .profile-pic {
-    width: 32px !important;
-    height: 32px !important;
-    max-width: 32px !important;
-    max-height: 32px !important;
-    min-width: 32px;
-    min-height: 32px;
+    width: 28px !important;
+    height: 28px !important;
+    max-width: 28px !important;
+    max-height: 28px !important;
+    min-width: 28px;
+    min-height: 28px;
     border-radius: 50%;
     object-fit: cover;
     border: 2px solid rgba(255, 255, 255, 0.6);
@@ -216,6 +227,10 @@ body.dark-mode .user-badge {
     background: linear-gradient(180deg, #1f3b6a 0%, #112746 60%, #0a1a33 100%);
     border: 1px solid #0a2d52;
     color: #e8edf7;
+}
+
+body.dark-mode .user-badge:hover {
+    background: linear-gradient(180deg, #2a4a7a 0%, #1a3556 60%, #0f2040 100%);
 }
 
 /* ============================================================================
@@ -659,16 +674,16 @@ body.dark-mode .dropdown-divider {
 .portal-nav-link {
     color: var(--text-light);
     text-decoration: none;
-    padding: 0.5rem 0.3rem;
+    padding: 0.5rem 0.25rem;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: 0.25rem;
-    font-size: 0.6rem;
+    font-size: 0.45rem;
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.2px;
+    letter-spacing: 0.1px;
     transition: all 0.25s ease;
     border-radius: 6px;
     flex: 1;
@@ -676,7 +691,7 @@ body.dark-mode .dropdown-divider {
     min-height: 2.7rem;
     text-align: center;
     white-space: normal;
-    word-wrap: break-word;
+    word-break: break-word;
     line-height: 1.1;
     background: linear-gradient(180deg, #2a7dd4 0%, #1e6bb8 50%, #0f3d6e 100%);
     border: 1px solid #0a2d52;
@@ -690,6 +705,13 @@ body.dark-mode .dropdown-divider {
 
 .portal-nav-link i {
     font-size: 0.85rem;
+}
+
+.portal-nav-link span {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    line-height: 1.2;
 }
 
 .portal-nav-link:hover,

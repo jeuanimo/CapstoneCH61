@@ -152,6 +152,8 @@ urlpatterns = [
     path('portal/posts/delete/<int:post_id>/', views.delete_post, name='delete_post'),
     path('portal/profile/<str:username>/', views.member_profile, name='member_profile'),
     path('portal/comment/<int:comment_id>/like/', views.like_comment, name='like_comment'),
+    path('portal/comment/<int:comment_id>/edit/', views.edit_comment, name='edit_comment'),
+    path('portal/comment/<int:comment_id>/delete/', views.delete_comment, name='delete_comment'),
     
     # MEMBER PORTAL - COMMUNICATIONS (Login required)
     path('portal/dues/', views.dues_view, name='dues_view'),

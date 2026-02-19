@@ -47,6 +47,10 @@ body {
     background-color: var(--background-light);
     transition: background-color 0.3s ease, color 0.3s ease;
     min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 0;
 }
 
 /* ============================================================================
@@ -684,7 +688,7 @@ body.dark-mode .bg-light {
    ========================================================================== */
 
 .main-content {
-    min-height: calc(100vh - 200px);
+    flex: 1;
     padding: 3rem 0;
     background-color: var(--background-light);
 }
@@ -702,9 +706,8 @@ footer {
     color: var(--text-light);
     text-align: center;
     padding: 1rem;
-    position: relative;
-    bottom: 0;
     width: 100%;
+    margin-top: auto;
 }
 
 footer p {

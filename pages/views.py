@@ -98,6 +98,7 @@ from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.views.decorators.csrf import ensure_csrf_cookie
 import logging
 from django.core.mail import send_mail
 from django.conf import settings
@@ -204,6 +205,7 @@ class EventFilter(FilterSet):
         model = Event
         fields = ['title']
 
+@ensure_csrf_cookie
 def home_view(request):
     """Home page view"""
     # Get upcoming events for the calendar modal
@@ -2406,6 +2408,53 @@ def like_comment(request, comment_id):
         'liked': liked,
         'like_count': like_count
     })
+
+
+@login_required
+def edit_comment(request, comment_id):
+    """Edit user's own comment"""
+    comment = get_object_or_404(ProfileComment, id=comment_id)
+    
+    # Only comment author can edit
+    if comment.author != request.user:
+        messages.error(request, "You can only edit your own comments.")
+        return redirect('member_profile', username=comment.profile.user.username)
+    
+    if request.method == 'POST':
+        content = request.POST.get('comment_content', '').strip()
+        if content:
+            comment.content = content
+            comment.save()
+            messages.success(request, "Comment updated successfully!")
+        else:
+            messages.error(request, "Comment content cannot be empty.")
+        return redirect('member_profile', username=comment.profile.user.username)
+    
+    # Return JSON for AJAX edit
+    return JsonResponse({
+        'id': comment.id,
+        'content': comment.content,
+    })
+
+
+@login_required
+def delete_comment(request, comment_id):
+    """Delete user's own comment"""
+    comment = get_object_or_404(ProfileComment, id=comment_id)
+    profile_username = comment.profile.user.username
+    
+    # Only comment author or profile owner can delete
+    if comment.author != request.user and comment.profile.user != request.user:
+        messages.error(request, "You can only delete your own comments.")
+        return redirect('member_profile', username=profile_username)
+    
+    if request.method == 'POST':
+        comment.delete()
+        messages.success(request, "Comment deleted successfully!")
+        return redirect('member_profile', username=profile_username)
+    
+    # GET request - return confirmation page or redirect
+    return redirect('member_profile', username=profile_username)
 
 
 @login_required

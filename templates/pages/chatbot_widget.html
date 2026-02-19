@@ -417,7 +417,20 @@ document.addEventListener('DOMContentLoaded', function() {
             removeMessage(loadingId);
 
             if (data.success) {
-                if (data.type === 'answer') {
+                if (data.type === 'greeting') {
+                    // Display greeting
+                    let content = `<p>${data.message}</p>`;
+                    if (data.prompts && data.prompts.length > 0) {
+                        content += `<ul class="suggestions-list">`;
+                        data.prompts.forEach(p => {
+                            content += `<li onclick="askQuestion('${p.replace(/'/g, "\\'")}')">
+                                <strong>${p}</strong>
+                            </li>`;
+                        });
+                        content += `</ul>`;
+                    }
+                    addMessage(content, 'bot-message');
+                } else if (data.type === 'answer') {
                     // Display answer
                     let content = `<strong>${data.question}</strong>`;
                     content += `<p>${data.answer}</p>`;
@@ -440,7 +453,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     addMessage(data.message, 'bot-message');
                 }
             } else {
-                addMessage(`<span class="error-message">Error: ${data.error}</span>`, 'bot-message');
+                addMessage(`<span class="error-message">${data.error || 'Something went wrong. Please try again.'}</span>`, 'bot-message');
             }
         } catch (error) {
             removeMessage(loadingId);

@@ -34,6 +34,13 @@ CONFIDENCE_THRESHOLD_DEFAULT = 30
 MAX_SUGGESTIONS = 5
 RATE_LIMIT = '5/m'  # 5 requests per minute per IP
 
+# Greeting words to detect casual conversation
+GREETING_WORDS = {
+    'hello', 'hi', 'hey', 'greetings', 'howdy', 'hola', 'sup', 'yo',
+    'good morning', 'good afternoon', 'good evening', 'whats up', "what's up",
+    'how are you', 'how do you do', 'nice to meet you'
+}
+
 # Sanitization: Remove dangerous characters but keep spaces, letters, numbers, basic punctuation
 SANITIZE_PATTERN = re.compile(r'[^a-zA-Z0-9\s\?\.\,\-\']')
 WHITESPACE_PATTERN = re.compile(r'\s+')
@@ -79,6 +86,51 @@ def _validate_query(query):
         return False, f"Query too short. Minimum {MIN_QUERY_LENGTH} characters."
     
     return True, None
+
+
+def _is_greeting(query):
+    """
+    Check if the query is a casual greeting.
+    
+    Args:
+        query: Sanitized user query
+        
+    Returns:
+        Boolean indicating if query is a greeting
+    """
+    query_lower = query.lower().strip()
+    
+    # Check exact match or close match with greetings
+    if query_lower in GREETING_WORDS:
+        return True
+    
+    # Check if query starts with a greeting word (e.g., "hello there")
+    for greeting in GREETING_WORDS:
+        if query_lower.startswith(greeting):
+            return True
+    
+    return False
+
+
+def _build_greeting_response():
+    """
+    Build a friendly greeting response with helpful prompts.
+    
+    Returns:
+        Dictionary with greeting response data
+    """
+    return {
+        'success': True,
+        'type': 'greeting',
+        'message': "Hello! I'm the Phi Beta Sigma assistant. How can I help you today?",
+        'prompts': [
+            'What is Phi Beta Sigma?',
+            'How can I join the fraternity?',
+            'What events do you have coming up?',
+            'Tell me about your community programs'
+        ],
+        'source': 'greeting_handler',
+    }
 
 
 def _calculate_keyword_score(query, keywords_list):
@@ -279,20 +331,24 @@ def chatbot_query(request):
         # Log query (do NOT log sensitive data)
         logger.info(f'Chatbot query received: {len(query)} chars')
         
-        # Find best matches
-        matches = _find_best_matches(query)
-        
-        if matches:
-            # Return best match
-            best_match = matches[0]
-            response = _build_response(best_match=best_match)
+        # Check if it's a greeting first
+        if _is_greeting(query):
+            response = _build_greeting_response()
         else:
-            # No match - return suggestions
-            suggestions = _get_fallback_suggestions()
-            if suggestions:
-                response = _build_response(suggestions=suggestions)
+            # Find best matches
+            matches = _find_best_matches(query)
+            
+            if matches:
+                # Return best match
+                best_match = matches[0]
+                response = _build_response(best_match=best_match)
             else:
-                response = _build_response()
+                # No match - return suggestions
+                suggestions = _get_fallback_suggestions()
+                if suggestions:
+                    response = _build_response(suggestions=suggestions)
+                else:
+                    response = _build_response()
         
         return JsonResponse(response, status=200)
     
