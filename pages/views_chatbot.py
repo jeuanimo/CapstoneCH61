@@ -215,13 +215,12 @@ def _get_fallback_suggestions():
     )
 
 
-def _build_response(best_match=None, matches=None, suggestions=None):
+def _build_response(best_match=None, suggestions=None):
     """
     Build JSON response for chatbot query.
     
     Args:
         best_match: Tuple of (PublicAnswer, score) or None
-        matches: List of matching (PublicAnswer, score) tuples
         suggestions: List of suggested answers
         
     Returns:
@@ -352,7 +351,7 @@ def chatbot_query(request):
         
         return JsonResponse(response, status=200)
     
-    except Exception as e:
+    except Exception:
         # Log error but don't expose details to user
         logger.exception('Error in chatbot_query')
         return JsonResponse({

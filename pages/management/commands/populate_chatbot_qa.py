@@ -190,7 +190,7 @@ class Command(BaseCommand):
         updated_count = 0
         
         for qa in qa_entries:
-            obj, created = PublicAnswer.objects.update_or_create(
+            _, created = PublicAnswer.objects.update_or_create(
                 question=qa['question'],
                 defaults={
                     'keywords': qa['keywords'],
