@@ -1,0 +1,425 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Send Bulk Message - Nu Gamma Sigma{% endblock %}
+
+{% block content %}
+<div class="portal-page">
+    <div class="portal-header">
+        <h1><i class="fas fa-paper-plane"></i> Send Bulk Message</h1>
+        <p>Send messages to multiple members at once</p>
+    </div>
+
+    <div class="message-form-container">
+        <form method="post" class="message-form" id="bulkMessageForm">
+            {% csrf_token %}
+            
+            <!-- Recipient Selection -->
+            <div class="form-section">
+                <h3><i class="fas fa-users"></i> Select Recipients</h3>
+                
+                <div class="recipient-options">
+                    {% for radio in form.recipient_group %}
+                    <div class="form-check recipient-option">
+                        {{ radio.tag }}
+                        <label class="form-check-label" for="{{ radio.id_for_label }}">
+                            {{ radio.choice_label }}
+                            {% if radio.choice_label == 'All Members' %}
+                            <span class="badge badge-info">{{ all_count }}</span>
+                            {% elif radio.choice_label == 'Financial Members Only' %}
+                            <span class="badge badge-success">{{ financial_count }}</span>
+                            {% elif radio.choice_label == 'Non-Financial Members Only' %}
+                            <span class="badge badge-warning">{{ non_financial_count }}</span>
+                            {% elif radio.choice_label == 'Officers Only' %}
+                            <span class="badge badge-primary">{{ officers_count }}</span>
+                            {% endif %}
+                        </label>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Individual Member Selection (hidden by default) -->
+            <div class="form-section member-selection-section" id="memberSelectionSection" style="display: none;">
+                <h3><i class="fas fa-user-check"></i> Select Individual Members</h3>
+                <div class="member-checkboxes" style="max-height: 300px; overflow-y: auto; border: 1px solid #ddd; padding: 1rem; border-radius: 8px;">
+                    <div class="select-all-container mb-3">
+                        <label class="form-check-label">
+                            <input type="checkbox" id="selectAllMembers" class="form-check-input"> 
+                            <strong>Select All</strong>
+                        </label>
+                    </div>
+                    {% for checkbox in form.selected_members %}
+                    <div class="form-check member-checkbox-item">
+                        {{ checkbox.tag }}
+                        <label class="form-check-label" for="{{ checkbox.id_for_label }}">
+                            {{ checkbox.choice_label }}
+                        </label>
+                    </div>
+                    {% endfor %}
+                </div>
+                <small class="text-muted">Selected: <span id="selectedMemberCount">0</span> members</small>
+            </div>
+
+            <!-- Message Details -->
+            <div class="form-section">
+                <h3><i class="fas fa-envelope"></i> Message Details</h3>
+                
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="{{ form.priority.id_for_label }}">{{ form.priority.label }}</label>
+                        {{ form.priority }}
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="{{ form.category.id_for_label }}">{{ form.category.label }}</label>
+                        {{ form.category }}
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ form.subject.id_for_label }}">{{ form.subject.label }} *</label>
+                    {{ form.subject }}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.content.id_for_label }}">{{ form.content.label }} *</label>
+                    {{ form.content }}
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="fas fa-paper-plane"></i> Send Messages
+                </button>
+                <a href="{% url 'messages_inbox' %}" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .portal-page {
+        padding: 2rem 0;
+    }
+
+    .portal-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    .portal-header h1 {
+        color: #164f90;
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .portal-header p {
+        color: #666;
+        font-size: 1.1rem;
+    }
+
+    .message-form-container {
+        max-width: 900px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 12px;
+        padding: 3rem;
+        box-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+    }
+
+    .form-section {
+        margin-bottom: 2rem;
+        padding-bottom: 2rem;
+        border-bottom: 1px solid #eee;
+    }
+
+    .form-section:last-of-type {
+        border-bottom: none;
+    }
+
+    .form-section h3 {
+        color: #164f90;
+        margin-bottom: 1.5rem;
+        font-size: 1.3rem;
+    }
+
+    .recipient-options {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .recipient-option {
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+    }
+
+    .recipient-option:hover {
+        background: #e9ecef;
+    }
+
+    .recipient-option input[type="radio"]:checked + label {
+        color: #164f90;
+        font-weight: 600;
+    }
+
+    .badge {
+        margin-left: 0.5rem;
+        font-size: 0.85rem;
+        padding: 0.35rem 0.65rem;
+        border-radius: 12px;
+    }
+
+    .badge-info {
+        background-color: #6c757d;
+        color: white;
+    }
+
+    .badge-success {
+        background-color: #28a745;
+        color: white;
+    }
+
+    .badge-warning {
+        background-color: #ffc107;
+        color: #212529;
+    }
+
+    .badge-primary {
+        background-color: #164f90;
+        color: white;
+    }
+
+    .member-checkbox-item {
+        padding: 0.5rem;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .member-checkbox-item:last-child {
+        border-bottom: none;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        color: #164f90;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: all 0.2s ease;
+    }
+
+    .form-control:focus {
+        border-color: #164f90;
+        box-shadow: 0 0 0 3px rgba(22, 79, 144, 0.1);
+        outline: none;
+    }
+
+    textarea.form-control {
+        resize: vertical;
+        min-height: 150px;
+    }
+
+    .form-row {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .form-row .form-group {
+        flex: 1;
+        min-width: 200px;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-start;
+        margin-top: 2rem;
+    }
+
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+        border: none;
+        transition: all 0.2s ease;
+    }
+
+    .btn-primary {
+        background-color: #164f90;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background-color: #0d3a6e;
+    }
+
+    .btn-secondary {
+        background-color: #6c757d;
+        color: white;
+    }
+
+    .btn-secondary:hover {
+        background-color: #545b62;
+    }
+
+    .btn-lg {
+        padding: 1rem 2rem;
+        font-size: 1.1rem;
+    }
+
+    /* Dark mode styles */
+    body.dark-mode .message-form-container {
+        background: #1a1a2e;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    }
+
+    body.dark-mode .form-section {
+        border-bottom-color: #333;
+    }
+
+    body.dark-mode .form-section h3 {
+        color: #87CEEB;
+    }
+
+    body.dark-mode .recipient-option {
+        background: #16213e;
+    }
+
+    body.dark-mode .recipient-option:hover {
+        background: #1f4068;
+    }
+
+    body.dark-mode .form-group label {
+        color: #87CEEB;
+    }
+
+    body.dark-mode .form-control {
+        background: #16213e;
+        border-color: #333;
+        color: #f5f5f5;
+    }
+
+    body.dark-mode .form-control:focus {
+        border-color: #87CEEB;
+        box-shadow: 0 0 0 3px rgba(135, 206, 235, 0.1);
+    }
+
+    body.dark-mode .member-checkboxes {
+        background: #16213e;
+        border-color: #333;
+    }
+
+    body.dark-mode .member-checkbox-item {
+        border-bottom-color: #333;
+    }
+
+    @media (max-width: 768px) {
+        .message-form-container {
+            padding: 1.5rem;
+            margin: 0 1rem;
+        }
+
+        .form-row {
+            flex-direction: column;
+        }
+
+        .form-actions {
+            flex-direction: column;
+        }
+
+        .btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const recipientOptions = document.querySelectorAll('input[name="recipient_group"]');
+    const memberSelectionSection = document.getElementById('memberSelectionSection');
+    const memberCheckboxes = document.querySelectorAll('.member-checkbox-item input[type="checkbox"]');
+    const selectAllCheckbox = document.getElementById('selectAllMembers');
+    const selectedCountSpan = document.getElementById('selectedMemberCount');
+    
+    // Show/hide individual member selection based on radio selection
+    recipientOptions.forEach(radio => {
+        radio.addEventListener('change', function() {
+            if (this.value === 'selected') {
+                memberSelectionSection.style.display = 'block';
+            } else {
+                memberSelectionSection.style.display = 'none';
+            }
+        });
+        
+        // Check initial state
+        if (radio.checked && radio.value === 'selected') {
+            memberSelectionSection.style.display = 'block';
+        }
+    });
+    
+    // Select all functionality
+    if (selectAllCheckbox) {
+        selectAllCheckbox.addEventListener('change', function() {
+            memberCheckboxes.forEach(cb => {
+                cb.checked = this.checked;
+            });
+            updateSelectedCount();
+        });
+    }
+    
+    // Update count when individual checkboxes change
+    memberCheckboxes.forEach(cb => {
+        cb.addEventListener('change', updateSelectedCount);
+    });
+    
+    function updateSelectedCount() {
+        const checkedCount = document.querySelectorAll('.member-checkbox-item input[type="checkbox"]:checked').length;
+        selectedCountSpan.textContent = checkedCount;
+        
+        // Update select all checkbox state
+        if (selectAllCheckbox) {
+            selectAllCheckbox.checked = checkedCount === memberCheckboxes.length;
+            selectAllCheckbox.indeterminate = checkedCount > 0 && checkedCount < memberCheckboxes.length;
+        }
+    }
+    
+    // Form validation
+    document.getElementById('bulkMessageForm').addEventListener('submit', function(e) {
+        const recipientGroup = document.querySelector('input[name="recipient_group"]:checked');
+        
+        if (recipientGroup && recipientGroup.value === 'selected') {
+            const checkedMembers = document.querySelectorAll('.member-checkbox-item input[type="checkbox"]:checked');
+            if (checkedMembers.length === 0) {
+                e.preventDefault();
+                alert('Please select at least one member to send the message to.');
+                return false;
+            }
+        }
+        
+        return true;
+    });
+});
+</script>
+{% endblock %}
