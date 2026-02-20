@@ -1,0 +1,152 @@
+/* ==========================================================================
+   CHATBOT WIDGET - Simple fixed height approach
+   ========================================================================== */
+
+/* Card container */
+.home-card.chatbot-card {
+    overflow: hidden !important;
+}
+
+/* Card image - small fixed height */
+.home-card.chatbot-card .card-image {
+    height: 50px !important;
+    min-height: 50px !important;
+    max-height: 50px !important;
+}
+
+/* Card content - OVERRIDE the 60% height from home.html */
+.home-card.chatbot-card .card-content {
+    padding: 0.25rem !important;
+    overflow: hidden !important;
+    display: block !important;
+    height: auto !important;
+    flex: 1 !important;
+}
+
+/* Title */
+.home-card.chatbot-card .card-title {
+    font-size: 0.75rem !important;
+    margin: 0 0 0.25rem 0 !important;
+    text-align: center;
+}
+
+/* Container */
+.home-card.chatbot-card .chatbot-container {
+    display: block !important;
+    height: calc(100% - 25px) !important;
+    overflow: hidden !important;
+}
+
+/* CHAT MESSAGES - Fixed height with scroll */
+.home-card.chatbot-card .chat-messages {
+    height: calc(100% - 35px) !important;
+    max-height: 350px !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    padding: 0.25rem;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 0.25rem;
+}
+
+body.dark-mode .home-card.chatbot-card .chat-messages {
+    background: #0b1020;
+    border-color: #1a2a4a;
+}
+
+/* Input area */
+.chatbot-card .chat-input-area {
+    display: flex;
+    gap: 0.25rem;
+}
+
+/* Input field */
+.chatbot-card .chat-input {
+    flex: 1;
+    padding: 0.25rem;
+    border: 1px solid #c8c9c7;
+    border-radius: 3px;
+    font-size: 0.7rem;
+}
+
+body.dark-mode .chatbot-card .chat-input {
+    background: #0b1020;
+    color: #e8edf7;
+    border-color: #1a2a4a;
+}
+
+/* Send button */
+.chatbot-card .send-btn {
+    padding: 0.25rem 0.4rem;
+    background: #164f90;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    font-size: 0.65rem;
+    cursor: pointer;
+}
+
+.chatbot-card .send-btn:hover {
+    background: #1e6bb8;
+}
+
+/* Message styling */
+.chatbot-card .chat-message {
+    display: flex;
+    margin-bottom: 0.3rem;
+}
+
+.chatbot-card .bot-message {
+    justify-content: flex-start;
+}
+
+.chatbot-card .user-message {
+    justify-content: flex-end;
+}
+
+.chatbot-card .message-content {
+    max-width: 90%;
+    padding: 0.3rem 0.4rem;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    word-break: break-word;
+}
+
+.chatbot-card .bot-message .message-content {
+    background-color: #e3e6ea;
+    color: #164f90;
+}
+
+body.dark-mode .chatbot-card .bot-message .message-content {
+    background-color: #1a2a4a;
+    color: #e8edf7;
+}
+
+.chatbot-card .user-message .message-content {
+    background-color: #164f90;
+    color: white;
+}
+
+/* Typing indicator */
+.chatbot-card .typing-indicator {
+    display: flex;
+    gap: 3px;
+    padding: 0.3rem;
+}
+
+.chatbot-card .typing-indicator span {
+    width: 5px;
+    height: 5px;
+    background: #164f90;
+    border-radius: 50%;
+    animation: bounce 1.4s infinite ease-in-out both;
+}
+
+.chatbot-card .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+.chatbot-card .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+
+@keyframes bounce {
+    0%, 80%, 100% { transform: scale(0); }
+    40% { transform: scale(1); }
+}

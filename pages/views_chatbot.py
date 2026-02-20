@@ -32,7 +32,7 @@ MAX_QUERY_LENGTH = 400
 MIN_QUERY_LENGTH = 3
 CONFIDENCE_THRESHOLD_DEFAULT = 30
 MAX_SUGGESTIONS = 5
-RATE_LIMIT = '5/m'  # 5 requests per minute per IP
+RATE_LIMIT = '30/m'  # 30 requests per minute per IP
 
 # Greeting words to detect casual conversation
 GREETING_WORDS = {

@@ -21,6 +21,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.1/css/all.min.css">
 
     {% block css %} {% endblock %}
+    
+    <!-- Chatbot CSS loads LAST to override page styles -->
+    <link rel="stylesheet" href="{% static 'css/chatbot.css' %}">
 </head>
 <body>
     <!-- Top Bar with Brand and Social Links -->

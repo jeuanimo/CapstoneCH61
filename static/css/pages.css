@@ -8,14 +8,17 @@
    HOME PAGE STYLES
    ========================================================================== */
 
+/* NOTE: Home page layout is now defined inline in home.html template
+   to properly support the chat widget scrolling and grid layout.
+   These base styles are kept minimal to avoid conflicts. */
+
 .home-container {
-    text-align: center;
-    padding: 2rem;
-    min-height: 70vh;
+    /* Flex container setup - specific layout in home.html */
     display: flex;
     flex-direction: column;
-    justify-content: center;
     align-items: center;
+    flex: 1;
+    min-height: 0;
 }
 
 .home-content {
