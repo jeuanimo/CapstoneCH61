@@ -3,7 +3,7 @@ Context Processors for Pages App
 Provides global template context variables
 """
 
-from .models import Cart
+from .models import Cart, SiteConfiguration
 
 
 def cart_context(request):
@@ -32,3 +32,20 @@ def cart_context(request):
     return {
         'cart_item_count': cart_count,
     }
+
+
+def site_config_context(request):
+    """
+    Add site configuration to all templates.
+    Provides branding info (logos, chapter name, social links, etc.)
+    """
+    try:
+        config = SiteConfiguration.get_config()
+        return {
+            'site_config': config,
+        }
+    except Exception:
+        # Return empty dict if there's any issue loading config
+        return {
+            'site_config': None,
+        }

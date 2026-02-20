@@ -162,13 +162,12 @@
 
 {% block content %}
 <div class="container mt-4">
-    <!-- Breadcrumb Navigation -->
-    <nav aria-label="breadcrumb" class="mb-4">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'shop_home' %}" style="color: var(--pbs-blue);">Shop</a></li>
-            <li class="breadcrumb-item active">{{ product.name }}</li>
-        </ol>
-    </nav>
+    <!-- Back to Shop Link -->
+    <div class="mb-4">
+        <a href="{% url 'shop_home' %}" style="color: var(--pbs-blue); text-decoration: none;">
+            <i class="fas fa-arrow-left"></i> Back to Shop
+        </a>
+    </div>
 
     <!-- Product Details -->
     <div class="row product-row g-4">

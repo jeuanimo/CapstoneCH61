@@ -106,6 +106,12 @@
                         <span>Initiated {{ member_profile.initiation_date|date:"F d, Y" }}</span>
                     </li>
                     {% endif %}
+                    {% if member_profile.birthday %}
+                    <li>
+                        <i class="fas fa-birthday-cake"></i>
+                        <span>Birthday: {{ member_profile.birthday|date:"F d" }}</span>
+                    </li>
+                    {% endif %}
                     <li>
                         <i class="fas fa-clock"></i>
                         <span>Member since {{ member_profile.created_at|date:"F Y" }}</span>

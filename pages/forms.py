@@ -831,3 +831,76 @@ class BulkMessageForm(forms.Form):
             ).order_by('last_name', 'first_name')
         else:
             self.fields['selected_members'].queryset = User.objects.all().order_by('last_name', 'first_name')
+
+
+class SiteConfigurationForm(forms.ModelForm):
+    """Form for officers/admins to manage site branding and configuration"""
+    
+    class Meta:
+        from .models import SiteConfiguration
+        model = SiteConfiguration
+        fields = [
+            'organization_name', 'chapter_name',
+            'chapter_logo', 'pbs_seal', 'favicon',
+            'facebook_url', 'instagram_url', 'twitter_url', 'email_address',
+            'footer_text'
+        ]
+        widgets = {
+            'organization_name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'e.g., Phi Beta Sigma Fraternity, Inc'
+            }),
+            'chapter_name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'e.g., Nu Gamma Sigma Chapter'
+            }),
+            'chapter_logo': forms.FileInput(attrs={
+                'class': 'form-control',
+                'accept': 'image/*'
+            }),
+            'pbs_seal': forms.FileInput(attrs={
+                'class': 'form-control',
+                'accept': 'image/*'
+            }),
+            'favicon': forms.FileInput(attrs={
+                'class': 'form-control',
+                'accept': 'image/png,image/x-icon,image/svg+xml'
+            }),
+            'facebook_url': forms.URLInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'https://facebook.com/yourpage'
+            }),
+            'instagram_url': forms.URLInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'https://instagram.com/yourprofile'
+            }),
+            'twitter_url': forms.URLInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'https://twitter.com/yourhandle'
+            }),
+            'email_address': forms.EmailInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'contact@example.com'
+            }),
+            'footer_text': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': '© 2026 Your Organization Name'
+            }),
+        }
+        labels = {
+            'organization_name': 'Organization Name',
+            'chapter_name': 'Chapter Name',
+            'chapter_logo': 'Chapter Logo',
+            'pbs_seal': 'Phi Beta Sigma Seal/Logo',
+            'favicon': 'Site Favicon (Browser Icon)',
+            'facebook_url': 'Facebook URL',
+            'instagram_url': 'Instagram URL',
+            'twitter_url': 'Twitter/X URL',
+            'email_address': 'Contact Email',
+            'footer_text': 'Footer Text',
+        }
+        help_texts = {
+            'chapter_logo': 'Your chapter-specific logo (PNG or JPG recommended)',
+            'pbs_seal': 'The Phi Beta Sigma seal shown in the header',
+            'favicon': 'Small icon shown in browser tabs (PNG, ICO, or SVG)',
+        }

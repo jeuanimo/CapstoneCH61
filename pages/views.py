@@ -83,9 +83,9 @@ from .models import (
     ProfileComment, CommentLike, PhotoAlbum, Photo,
     PhotoComment, PhotoLike, InvitationCode, StripeConfiguration, StripePayment,
     TwilioConfiguration, SMSPreference, SMSLog,
-    Product, Cart, CartItem, Order, OrderItem
+    Product, Cart, CartItem, Order, OrderItem, SiteConfiguration
 )
-from .forms import ChapterLeadershipForm, MemberProfileForm, DuesPaymentForm, StripeConfigurationForm, TwilioConfigurationForm, SMSPreferenceForm, CreateBillForm
+from .forms import ChapterLeadershipForm, MemberProfileForm, DuesPaymentForm, StripeConfigurationForm, TwilioConfigurationForm, SMSPreferenceForm, CreateBillForm, SiteConfigurationForm
 from .forms_profile import (
     EditProfileForm, CreatePostForm, InvitationSignupForm,
     EditPhotoForm, CreateAlbumForm, CreateEventForm, DocumentForm
@@ -4427,7 +4427,8 @@ def _import_products_from_csv(products_data, images_dict):
     return created_count, error_count
 
 
-
+@login_required
+@user_passes_test(is_officer_or_staff)
 def import_products(request):
     """Admin/Officer view to import products from CSV with optional images"""
     if request.method == 'POST':
@@ -4653,6 +4654,44 @@ def boutique_dashboard(request):
     }
     
     return render(request, 'pages/boutique/dashboard.html', context)
+
+
+# ============================================================================
+# SITE CONFIGURATION / BRANDING ADMIN PORTAL
+# ============================================================================
+
+@login_required
+@user_passes_test(is_officer_or_staff)
+def site_configuration(request):
+    """
+    Admin portal for officers/staff to manage site branding and configuration.
+    
+    Allows updating:
+    - Organization and chapter names
+    - Logos (chapter logo, PBS seal, favicon)
+    - Social media links
+    - Footer text
+    """
+    config = SiteConfiguration.get_config()
+    
+    if request.method == 'POST':
+        form = SiteConfigurationForm(request.POST, request.FILES, instance=config)
+        if form.is_valid():
+            config = form.save(commit=False)
+            config.updated_by = request.user
+            config.save()
+            messages.success(request, 'Site configuration updated successfully!')
+            return redirect('site_configuration')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = SiteConfigurationForm(instance=config)
+    
+    context = {
+        'form': form,
+        'config': config,
+    }
+    return render(request, 'pages/portal/site_configuration.html', context)
 
 
 # ============================================================================

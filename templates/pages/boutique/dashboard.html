@@ -466,7 +466,7 @@
                         {% for order in recent_orders %}
                         <tr>
                             <td><strong>#{{ order.id }}</strong></td>
-                            <td>{{ order.user.get_full_name|default:order.user.username }}</td>
+                            <td>{% if order.user %}{{ order.user.get_full_name|default:order.user.username }}{% else %}<em>Guest</em>{% endif %}</td>
                             <td>{{ order.created_at|date:"M d, Y" }}</td>
                             <td>{{ order.items.count }} item{% if order.items.count != 1 %}s{% endif %}</td>
                             <td style="font-weight: bold;">${{ order.total_price|floatformat:2 }}</td>

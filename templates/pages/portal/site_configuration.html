@@ -1,0 +1,353 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Site Configuration - Admin Portal{% endblock %}
+
+{% block css %}
+<style>
+    .config-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .config-header {
+        background: linear-gradient(135deg, #0047AB 0%, #003380 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 12px;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+
+    body.dark-mode .config-header {
+        background: linear-gradient(135deg, #1a2a4a 0%, #0b1020 100%);
+    }
+
+    .config-header h1 {
+        margin: 0;
+        font-size: 2rem;
+    }
+
+    .config-header p {
+        margin: 10px 0 0 0;
+        opacity: 0.9;
+    }
+
+    .config-section {
+        background: white;
+        border-radius: 12px;
+        padding: 25px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    body.dark-mode .config-section {
+        background: #1a2a4a;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .config-section h3 {
+        color: #0047AB;
+        margin-top: 0;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #e9ecef;
+    }
+
+    body.dark-mode .config-section h3 {
+        color: #4a90e2;
+        border-bottom-color: #2a4a7a;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 8px;
+        display: block;
+    }
+
+    body.dark-mode .form-group label {
+        color: #e8edf7;
+    }
+
+    .form-control {
+        border: 1px solid #ced4da;
+        border-radius: 8px;
+        padding: 10px 15px;
+        width: 100%;
+        transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+    .form-control:focus {
+        border-color: #0047AB;
+        box-shadow: 0 0 0 3px rgba(0, 71, 171, 0.2);
+        outline: none;
+    }
+
+    body.dark-mode .form-control {
+        background-color: #0b1020;
+        border-color: #2a4a7a;
+        color: #e8edf7;
+    }
+
+    .current-image-preview {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 10px;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+
+    body.dark-mode .current-image-preview {
+        background: #0b1020;
+    }
+
+    .current-image-preview img {
+        max-width: 100px;
+        max-height: 100px;
+        object-fit: contain;
+        border-radius: 8px;
+        border: 1px solid #dee2e6;
+    }
+
+    body.dark-mode .current-image-preview img {
+        border-color: #2a4a7a;
+    }
+
+    .current-image-preview .image-info {
+        flex: 1;
+    }
+
+    .current-image-preview .image-info strong {
+        display: block;
+        color: #28a745;
+        margin-bottom: 5px;
+    }
+
+    .help-text {
+        font-size: 0.85em;
+        color: #6c757d;
+        margin-top: 5px;
+    }
+
+    body.dark-mode .help-text {
+        color: #adb5bd;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+
+    @media (max-width: 768px) {
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .btn-save {
+        background: linear-gradient(135deg, #0047AB 0%, #003380 100%);
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 1.1em;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .btn-save:hover {
+        background: linear-gradient(135deg, #1e5bc6 0%, #0047AB 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0, 71, 171, 0.4);
+    }
+
+    .btn-reset {
+        background: #6c757d;
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .btn-reset:hover {
+        background: #5a6268;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 15px;
+        justify-content: flex-end;
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid #e9ecef;
+    }
+
+    body.dark-mode .form-actions {
+        border-top-color: #2a4a7a;
+    }
+
+    .last-updated {
+        text-align: center;
+        color: #6c757d;
+        font-size: 0.9em;
+        margin-top: 20px;
+    }
+
+    body.dark-mode .last-updated {
+        color: #adb5bd;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="config-container">
+    <div class="config-header">
+        <h1><i class="fas fa-cogs"></i> Site Configuration</h1>
+        <p>Customize your chapter's branding, logos, and site settings</p>
+    </div>
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <!-- Organization Branding Section -->
+        <div class="config-section">
+            <h3><i class="fas fa-building"></i> Organization Branding</h3>
+            
+            <div class="form-group">
+                <label for="{{ form.organization_name.id_for_label }}">Organization Name</label>
+                {{ form.organization_name }}
+                <p class="help-text">This is displayed as the main title in the header</p>
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.chapter_name.id_for_label }}">Chapter Name</label>
+                {{ form.chapter_name }}
+                <p class="help-text">Your chapter name displayed below the organization name</p>
+            </div>
+        </div>
+
+        <!-- Logo Images Section -->
+        <div class="config-section">
+            <h3><i class="fas fa-image"></i> Logos & Images</h3>
+
+            <!-- PBS Seal -->
+            <div class="form-group">
+                <label for="{{ form.pbs_seal.id_for_label }}">Phi Beta Sigma Seal/Logo</label>
+                {% if config.pbs_seal %}
+                <div class="current-image-preview">
+                    <img src="{{ config.pbs_seal.url }}" alt="Current PBS Seal">
+                    <div class="image-info">
+                        <strong><i class="fas fa-check-circle"></i> Current image uploaded</strong>
+                        <span>{{ config.pbs_seal.name|truncatechars:50 }}</span>
+                    </div>
+                </div>
+                {% endif %}
+                {{ form.pbs_seal }}
+                <p class="help-text">The main Phi Beta Sigma seal shown in the header (recommended: 200x200px PNG)</p>
+            </div>
+
+            <!-- Chapter Logo -->
+            <div class="form-group">
+                <label for="{{ form.chapter_logo.id_for_label }}">Chapter Logo (Optional)</label>
+                {% if config.chapter_logo %}
+                <div class="current-image-preview">
+                    <img src="{{ config.chapter_logo.url }}" alt="Current Chapter Logo">
+                    <div class="image-info">
+                        <strong><i class="fas fa-check-circle"></i> Current image uploaded</strong>
+                        <span>{{ config.chapter_logo.name|truncatechars:50 }}</span>
+                    </div>
+                </div>
+                {% endif %}
+                {{ form.chapter_logo }}
+                <p class="help-text">Your chapter-specific logo (can be displayed alongside the PBS seal)</p>
+            </div>
+
+            <!-- Favicon -->
+            <div class="form-group">
+                <label for="{{ form.favicon.id_for_label }}">Site Favicon (Browser Tab Icon)</label>
+                {% if config.favicon %}
+                <div class="current-image-preview">
+                    <img src="{{ config.favicon.url }}" alt="Current Favicon" style="max-width: 48px; max-height: 48px;">
+                    <div class="image-info">
+                        <strong><i class="fas fa-check-circle"></i> Current favicon uploaded</strong>
+                        <span>{{ config.favicon.name|truncatechars:50 }}</span>
+                    </div>
+                </div>
+                {% endif %}
+                {{ form.favicon }}
+                <p class="help-text">Small icon shown in browser tabs (recommended: 32x32 or 64x64 PNG)</p>
+            </div>
+        </div>
+
+        <!-- Social Media Links Section -->
+        <div class="config-section">
+            <h3><i class="fas fa-share-alt"></i> Social Media Links</h3>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="{{ form.facebook_url.id_for_label }}"><i class="fab fa-facebook"></i> Facebook URL</label>
+                    {{ form.facebook_url }}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.instagram_url.id_for_label }}"><i class="fab fa-instagram"></i> Instagram URL</label>
+                    {{ form.instagram_url }}
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="{{ form.twitter_url.id_for_label }}"><i class="fab fa-twitter"></i> Twitter/X URL</label>
+                    {{ form.twitter_url }}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.email_address.id_for_label }}"><i class="fas fa-envelope"></i> Contact Email</label>
+                    {{ form.email_address }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer Section -->
+        <div class="config-section">
+            <h3><i class="fas fa-copyright"></i> Footer Content</h3>
+            
+            <div class="form-group">
+                <label for="{{ form.footer_text.id_for_label }}">Footer Text</label>
+                {{ form.footer_text }}
+                <p class="help-text">Copyright and organization text displayed at the bottom of every page</p>
+            </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+            <a href="{% url 'portal_dashboard' %}" class="btn-reset">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
+            <button type="submit" class="btn-save">
+                <i class="fas fa-save"></i> Save Configuration
+            </button>
+        </div>
+    </form>
+
+    {% if config.updated_at %}
+    <p class="last-updated">
+        <i class="fas fa-clock"></i> Last updated: {{ config.updated_at|date:"F d, Y at g:i A" }}
+        {% if config.updated_by %}by {{ config.updated_by.get_full_name|default:config.updated_by.username }}{% endif %}
+    </p>
+    {% endif %}
+</div>
+{% endblock %}

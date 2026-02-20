@@ -348,13 +348,16 @@
         <!-- Admin Controls for Staff/Officers -->
         {% if user.is_staff or user.member_profile.is_officer %}
         <div class="admin-controls">
-            <h5 style="margin-top: 0; margin-bottom: 15px;">
-                <i class="fas fa-cog"></i> Admin Controls
-            </h5>
-            <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
-                <a href="{% url 'boutique_dashboard' %}" class="btn btn-primary btn-sm">
-                    <i class="fas fa-chart-line"></i> Dashboard
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                <h5 style="margin: 0;">
+                    <i class="fas fa-cog"></i> Quick Actions
+                </h5>
+                <a href="{% url 'boutique_dashboard' %}" class="btn btn-outline-primary btn-sm">
+                    <i class="fas fa-external-link-alt"></i> Full Management Dashboard
                 </a>
+            </div>
+            <hr style="margin: 15px 0;">
+            <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
                 <a href="{% url 'add_product' %}" class="btn btn-success btn-sm">
                     <i class="fas fa-plus"></i> Add Product
                 </a>

@@ -166,6 +166,7 @@ class MemberProfile(models.Model):
     line_name = models.CharField(max_length=100, blank=True, default='')
     line_number = models.CharField(max_length=10, blank=True, default='')
     phone = models.CharField(max_length=20, blank=True, default='')
+    birthday = models.DateField(blank=True, null=True, help_text="Member's birthday")
     emergency_contact_name = models.CharField(max_length=200, blank=True, default='')
     emergency_contact_phone = models.CharField(max_length=20, blank=True, default='')
     address = models.TextField(blank=True, default='')
@@ -1085,3 +1086,108 @@ class OrderItem(models.Model):
     def get_total_price(self):
         """Calculate total price for this order item"""
         return self.price * self.quantity
+
+
+class SiteConfiguration(models.Model):
+    """
+    Singleton model for site-wide configuration and branding.
+    Only one instance should exist - managed via admin portal.
+    
+    Allows officers/admins to customize:
+    - Chapter name and organization name
+    - Logos (chapter logo, PBS seal, favicon)
+    - Social media links
+    - Footer text
+    """
+    
+    # Organization Branding
+    organization_name = models.CharField(
+        max_length=200, 
+        default='Phi Beta Sigma Fraternity, Inc',
+        help_text='Main organization name displayed in header'
+    )
+    chapter_name = models.CharField(
+        max_length=200, 
+        default='Nu Gamma Sigma Chapter',
+        help_text='Chapter name displayed below organization name'
+    )
+    
+    # Logo Images
+    chapter_logo = models.ImageField(
+        upload_to='site_branding/',
+        blank=True,
+        null=True,
+        help_text='Chapter-specific logo (optional)'
+    )
+    pbs_seal = models.ImageField(
+        upload_to='site_branding/',
+        blank=True,
+        null=True,
+        help_text='Phi Beta Sigma seal/logo displayed in header'
+    )
+    favicon = models.ImageField(
+        upload_to='site_branding/',
+        blank=True,
+        null=True,
+        help_text='Site favicon (browser tab icon)'
+    )
+    
+    # Social Media Links
+    facebook_url = models.URLField(
+        blank=True, 
+        default='',
+        help_text='Facebook page URL'
+    )
+    instagram_url = models.URLField(
+        blank=True, 
+        default='',
+        help_text='Instagram profile URL'
+    )
+    twitter_url = models.URLField(
+        blank=True, 
+        default='',
+        help_text='Twitter/X profile URL'
+    )
+    email_address = models.EmailField(
+        blank=True, 
+        default='',
+        help_text='Contact email address'
+    )
+    
+    # Footer Content
+    footer_text = models.CharField(
+        max_length=500,
+        default='© 2026 Phi Beta Sigma Fraternity, Incorporated. Nu Gamma Sigma Chapter',
+        help_text='Footer copyright/text'
+    )
+    
+    # Metadata
+    updated_at = models.DateTimeField(auto_now=True)
+    updated_by = models.ForeignKey(
+        User, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True,
+        related_name='site_config_updates'
+    )
+    
+    class Meta:
+        verbose_name = 'Site Configuration'
+        verbose_name_plural = 'Site Configuration'
+    
+    def __str__(self):
+        return f"Site Configuration (Last updated: {self.updated_at.strftime('%Y-%m-%d %H:%M') if self.updated_at else 'Never'})"
+    
+    def save(self, *args, **kwargs):
+        # Ensure only one instance exists (singleton pattern)
+        if not self.pk and SiteConfiguration.objects.exists():
+            # Update existing instead of creating new
+            existing = SiteConfiguration.objects.first()
+            self.pk = existing.pk
+        super().save(*args, **kwargs)
+    
+    @classmethod
+    def get_config(cls):
+        """Get the site configuration, creating default if none exists"""
+        config, _ = cls.objects.get_or_create(pk=1)
+        return config

@@ -163,6 +163,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',    # Add user/auth info to templates
                 'django.contrib.messages.context_processors.messages',  # Add messages to templates
                 'pages.context_processors.cart_context',          # Add cart info to templates
+                'pages.context_processors.site_config_context',   # Add site branding/config to templates
             ],
         },
     },

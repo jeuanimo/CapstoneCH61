@@ -130,6 +130,9 @@ urlpatterns = [
     path('invitations/delete/<int:pk>/', views.delete_invitation, name='delete_invitation'),
     path('invitations/generate/<int:pk>/', views.generate_member_invitation, name='generate_member_invitation'),
     
+    # SITE CONFIGURATION (Admin/Officer only)
+    path('portal/site-configuration/', views.site_configuration, name='site_configuration'),
+    
     # MEMBER PORTAL - MAIN SECTIONS (Login required)
     path('portal/', views.portal_dashboard, name='portal_dashboard'),
     

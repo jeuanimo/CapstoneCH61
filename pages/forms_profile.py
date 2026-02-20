@@ -93,6 +93,36 @@ class InvitationSignupForm(forms.Form):
 class EditProfileForm(forms.ModelForm):
     """Form for members to edit their own profile"""
     
+    # Birthday dropdown fields
+    MONTH_CHOICES = [
+        ('', '-- Month --'),
+        (1, 'January'), (2, 'February'), (3, 'March'), (4, 'April'),
+        (5, 'May'), (6, 'June'), (7, 'July'), (8, 'August'),
+        (9, 'September'), (10, 'October'), (11, 'November'), (12, 'December'),
+    ]
+    
+    DAY_CHOICES = [('', '-- Day --')] + [(i, str(i)) for i in range(1, 32)]
+    
+    YEAR_CHOICES = [('', '-- Year --')] + [(i, str(i)) for i in range(1920, 2011)]
+    
+    birthday_month = forms.ChoiceField(
+        choices=MONTH_CHOICES,
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    
+    birthday_day = forms.ChoiceField(
+        choices=DAY_CHOICES,
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    
+    birthday_year = forms.ChoiceField(
+        choices=YEAR_CHOICES,
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    
     first_name = forms.CharField(
         max_length=150,
         required=True,
@@ -186,6 +216,41 @@ class EditProfileForm(forms.ModelForm):
             self.fields['first_name'].initial = self.user.first_name
             self.fields['last_name'].initial = self.user.last_name
             self.fields['email'].initial = self.user.email
+        
+        # Pre-fill birthday fields if instance has birthday
+        if self.instance and self.instance.pk and self.instance.birthday:
+            self.fields['birthday_month'].initial = self.instance.birthday.month
+            self.fields['birthday_day'].initial = self.instance.birthday.day
+            self.fields['birthday_year'].initial = self.instance.birthday.year
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        month = cleaned_data.get('birthday_month')
+        day = cleaned_data.get('birthday_day')
+        year = cleaned_data.get('birthday_year')
+        
+        # If any birthday field is filled, require all three
+        if month or day or year:
+            if not (month and day and year):
+                raise forms.ValidationError('Please select month, day, and year for birthday.')
+            
+            # Validate the date
+            from datetime import date
+            try:
+                cleaned_data['birthday'] = date(int(year), int(month), int(day))
+            except ValueError:
+                raise forms.ValidationError('Invalid date. Please check your birthday selection.')
+        else:
+            cleaned_data['birthday'] = None
+        
+        return cleaned_data
+    
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        instance.birthday = self.cleaned_data.get('birthday')
+        if commit:
+            instance.save()
+        return instance
 
 
 class CreatePostForm(forms.ModelForm):
