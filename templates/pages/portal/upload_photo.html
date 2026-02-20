@@ -3,80 +3,244 @@
 {% block title %}Upload Photo - Member Portal{% endblock %}
 
 {% block content %}
-<div class="container my-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card" style="box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);">
-                <div class="card-header">
-                    <h3 class="mb-0">Upload Photo</h3>
-                </div>
-                <div class="card-body">
-                    <form method="post" enctype="multipart/form-data">
-                        {% csrf_token %}
-                        
-                        <div class="mb-3">
-                            <label for="image" class="form-label">Select Image *</label>
-                            <input type="file" class="form-control" id="image" name="image" accept="image/*" required>
-                            <div class="form-text">Supported formats: JPG, PNG, GIF</div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="caption" class="form-label">Caption</label>
-                            <textarea class="form-control" id="caption" name="caption" rows="3" placeholder="Add a caption for your photo..."></textarea>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="album" class="form-label">Album (Optional)</label>
-                            <select class="form-select" id="album" name="album">
-                                <option value="">No Album</option>
-                                {% for album in albums %}
-                                <option value="{{ album.id }}">{{ album.title }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="event" class="form-label">Related Event (Optional)</label>
-                            <select class="form-select" id="event" name="event">
-                                <option value="">No Event</option>
-                                {% for event in events %}
-                                <option value="{{ event.id }}">{{ event.title }} - {{ event.start_date|date:"M d, Y" }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="tags" class="form-label">Tags (Optional)</label>
-                            <input type="text" class="form-control" id="tags" name="tags" placeholder="brotherhood, event, social, community service">
-                            <div class="form-text">Comma-separated tags for easier searching</div>
-                        </div>
-
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-upload"></i> Upload Photo
-                            </button>
-                            <a href="{% url 'photo_gallery' %}" class="btn btn-outline-secondary">
-                                <i class="fas fa-times"></i> Cancel
-                            </a>
-                        </div>
-                    </form>
-                </div>
+<div class="upload-page">
+    <div class="upload-container">
+        <div class="card upload-card">
+            <div class="card-header">
+                <h3 class="mb-0"><i class="fas fa-camera"></i> Upload Photo</h3>
             </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="image" class="form-label">Select Image *</label>
+                        <input type="file" class="form-control" id="image" name="image" accept="image/*" required>
+                        <div class="form-text">Supported formats: JPG, PNG, GIF</div>
+                    </div>
 
-            <!-- Preview Area -->
-            <div id="imagePreview" class="mt-3" style="display: none;">
-                <div class="card" style="box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);">
-                    <div class="card-header">
-                        <h5 class="mb-0">Preview</h5>
+                    <div class="mb-3">
+                        <label for="caption" class="form-label">Caption</label>
+                        <textarea class="form-control" id="caption" name="caption" rows="3" placeholder="Add a caption for your photo..."></textarea>
                     </div>
-                    <div class="card-body text-center">
-                        <img id="preview" src="" alt="Preview" style="max-width: 100%; max-height: 400px;">
+
+                    <div class="mb-3">
+                        <label for="album" class="form-label">Existing Album (Optional)</label>
+                        <select class="form-select" id="album" name="album">
+                            <option value="">Select Existing Album...</option>
+                            {% for album in albums %}
+                            <option value="{{ album.id }}">{{ album.title }}{% if album.program %} ({{ album.get_program_display }}){% endif %}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="form-text">Or create a new album below</div>
                     </div>
+
+                    <div class="mb-3">
+                        <label for="new_album_name" class="form-label">Create New Album</label>
+                        <input type="text" class="form-control" id="new_album_name" name="new_album_name" placeholder="Enter new album name...">
+                        <div class="form-text">Leave blank to use existing album above, or type a name to create a new album</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="program" class="form-label">Program (for new albums)</label>
+                        <select class="form-select" id="program" name="program">
+                            {% for value, label in program_choices %}
+                            <option value="{{ value }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="form-text">Select which fraternity program this album belongs to</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="event" class="form-label">Related Event (Optional)</label>
+                        <select class="form-select" id="event" name="event">
+                            <option value="">No Event</option>
+                            {% for event in events %}
+                            <option value="{{ event.id }}">{{ event.title }} - {{ event.start_date|date:"M d, Y" }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="tags" class="form-label">Tags (Optional)</label>
+                        <input type="text" class="form-control" id="tags" name="tags" placeholder="brotherhood, event, social, community service">
+                        <div class="form-text">Comma-separated tags for easier searching</div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-upload"></i> Upload Photo
+                        </button>
+                        <a href="{% url 'photo_gallery' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-times"></i> Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Preview Area -->
+        <div id="imagePreview" class="mt-4" style="display: none;">
+            <div class="card upload-card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-eye"></i> Preview</h5>
+                </div>
+                <div class="card-body text-center">
+                    <img id="preview" src="" alt="Preview" class="preview-image">
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    .upload-page {
+        padding: 2rem 1rem;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        min-height: calc(100vh - 200px);
+    }
+
+    .upload-container {
+        width: 100%;
+        max-width: 700px;
+        margin: 0 auto;
+    }
+
+    .upload-card {
+        background: white;
+        box-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .upload-card .card-header {
+        background: linear-gradient(135deg, #164f90 0%, #1a5fa8 100%);
+        color: white;
+        padding: 1.25rem 1.5rem;
+        border-bottom: none;
+    }
+
+    .upload-card .card-header h3,
+    .upload-card .card-header h5 {
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        color: white;
+    }
+
+    .upload-card .card-body {
+        padding: 2rem;
+        background: white;
+        color: #333;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #164f90;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-control,
+    .form-select {
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        border-color: #2a7dd4;
+        box-shadow: 0 0 0 3px rgba(42, 125, 212, 0.15);
+    }
+
+    .form-text {
+        color: #6c757d;
+        font-size: 0.85rem;
+        margin-top: 0.35rem;
+    }
+
+    .btn-primary {
+        background-color: #164f90;
+        border-color: #164f90;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        border-radius: 8px;
+    }
+
+    .btn-primary:hover {
+        background-color: #0d3a6e;
+        border-color: #0d3a6e;
+    }
+
+    .btn-outline-secondary {
+        border-width: 2px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        border-radius: 8px;
+    }
+
+    .preview-image {
+        max-width: 100%;
+        max-height: 400px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Dark Mode */
+    body.dark-mode .upload-card {
+        background: #1a2a4a;
+        box-shadow: 0 0 20px rgba(135, 206, 235, 0.3);
+    }
+
+    body.dark-mode .upload-card .card-header {
+        background: linear-gradient(135deg, #1a3a6a 0%, #1f4a80 100%);
+    }
+
+    body.dark-mode .form-label {
+        color: #87ceeb;
+    }
+
+    body.dark-mode .form-control,
+    body.dark-mode .form-select {
+        background: #0f1a30;
+        border-color: #2a3a5a;
+        color: #e8edf7;
+    }
+
+    body.dark-mode .form-control:focus,
+    body.dark-mode .form-select:focus {
+        border-color: #5ca3d6;
+        box-shadow: 0 0 0 3px rgba(92, 163, 214, 0.2);
+    }
+
+    body.dark-mode .form-text {
+        color: #8a9ab8;
+    }
+
+    body.dark-mode .btn-outline-secondary {
+        color: #b0b8c8;
+        border-color: #4a5a7a;
+    }
+
+    body.dark-mode .btn-outline-secondary:hover {
+        background: #2a3a5a;
+        color: #fff;
+    }
+
+    @media (max-width: 768px) {
+        .upload-page {
+            padding: 1rem 0.5rem;
+        }
+
+        .upload-card .card-body {
+            padding: 1.25rem;
+        }
+    }
+</style>
 
 <script>
 // Image preview

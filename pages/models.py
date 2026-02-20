@@ -170,6 +170,7 @@ class MemberProfile(models.Model):
     emergency_contact_phone = models.CharField(max_length=20, blank=True, default='')
     address = models.TextField(blank=True, default='')
     profile_image = models.ImageField(upload_to='members/', blank=True, null=True)
+    cover_image = models.ImageField(upload_to='member_covers/', blank=True, null=True, help_text="Cover photo for profile page (recommended: 820x312)")
     bio = models.TextField(blank=True, default='')
     dues_current = models.BooleanField(default=False, help_text="Are dues paid up to date?")
     is_officer = models.BooleanField(default=False, help_text="Is this member an officer with admin privileges?")
@@ -549,8 +550,17 @@ class CommentLike(models.Model):
 class PhotoAlbum(models.Model):
     """Photo albums for organizing member photos"""
     
+    PROGRAM_CHOICES = [
+        ('', 'No Program'),
+        ('bbb', 'Bigger & Better Business'),
+        ('education', 'Education'),
+        ('social_action', 'Social Action'),
+        ('sigma_beta', 'Sigma Beta Club'),
+    ]
+    
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True, default='')
+    program = models.CharField(max_length=20, choices=PROGRAM_CHOICES, blank=True, default='', help_text="Which fraternity program this album belongs to")
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='created_albums')
     is_public = models.BooleanField(default=True, help_text="Public albums visible to all members")
     created_at = models.DateTimeField(auto_now_add=True)

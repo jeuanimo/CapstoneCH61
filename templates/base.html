@@ -100,17 +100,16 @@
                         <a href="{% url 'login' %}" class="nav-link">Member Login</a>
                     </li>
                     {% endif %}
+                    <!-- Cart Icon - Visible to all users for guest checkout -->
+                    <li class="nav-item navbar-cart">
+                        <a href="{% url 'view_cart' %}" class="cart-link" title="Shopping Cart">
+                            <i class="fas fa-shopping-cart"></i>
+                            {% if cart_item_count > 0 %}
+                            <span class="cart-badge">{{ cart_item_count }}</span>
+                            {% endif %}
+                        </a>
+                    </li>
                 </ul>
-                
-                <!-- Cart Icon (Right Side) - Visible to all users for guest checkout -->
-                <div class="navbar-cart">
-                    <a href="{% url 'view_cart' %}" class="cart-link" title="Shopping Cart">
-                        <i class="fas fa-shopping-cart"></i>
-                        {% if cart_item_count > 0 %}
-                        <span class="cart-badge">{{ cart_item_count }}</span>
-                        {% endif %}
-                    </a>
-                </div>
             </div>
         </div>
     </nav>
@@ -359,19 +358,29 @@
         // Session Timeout Management (10 minutes of inactivity)
         {% if user.is_authenticated %}
         let sessionTimeoutHandle;
+        let warningTimeoutHandle;
         let countdownHandle;
+        let lastActivityTime = Date.now();
         const INACTIVITY_TIMEOUT = 10 * 60 * 1000; // 10 minutes in milliseconds
         const WARNING_TIME = 9 * 60 * 1000; // Show warning at 9 minutes
+        const ACTIVITY_DEBOUNCE = 1000; // Only process activity once per second
 
         function resetSessionTimeout() {
-            // Clear existing timeouts
+            // Clear ALL existing timeouts
             clearTimeout(sessionTimeoutHandle);
+            clearTimeout(warningTimeoutHandle);
             clearInterval(countdownHandle);
 
             // Hide the modal if it's showing
             const modal = document.getElementById('sessionTimeoutModal');
             if (modal) {
                 modal.style.display = 'none';
+            }
+            
+            // Reset countdown display
+            const timerElement = document.getElementById('countdownTimer');
+            if (timerElement) {
+                timerElement.textContent = '60';
             }
 
             // Set new timeout
@@ -384,8 +393,8 @@
                 logoutUser();
             }, INACTIVITY_TIMEOUT);
 
-            // Show warning at 9 minutes
-            setTimeout(function() {
+            // Show warning at 9 minutes (store handle so it can be cleared)
+            warningTimeoutHandle = setTimeout(function() {
                 showSessionTimeoutWarning();
             }, WARNING_TIME);
         }
@@ -395,9 +404,15 @@
             if (modal) {
                 modal.style.display = 'flex';
                 
-                // Start countdown timer (1 minute)
+                // Clear any existing countdown first
+                clearInterval(countdownHandle);
+                
+                // Start countdown timer (1 minute = 60 seconds)
                 let timeLeft = 60;
                 const timerElement = document.getElementById('countdownTimer');
+                if (timerElement) {
+                    timerElement.textContent = timeLeft;
+                }
                 
                 countdownHandle = setInterval(function() {
                     timeLeft--;
@@ -417,9 +432,14 @@
             window.location.href = '{% url "logout" %}';
         }
 
-        // Track user activity
+        // Track user activity with debouncing to prevent erratic behavior
         function resetInactivityTimer() {
-            resetSessionTimeout();
+            const now = Date.now();
+            // Only reset if enough time has passed since last activity
+            if (now - lastActivityTime >= ACTIVITY_DEBOUNCE) {
+                lastActivityTime = now;
+                resetSessionTimeout();
+            }
         }
 
         // Activity events to track

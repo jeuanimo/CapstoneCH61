@@ -146,6 +146,7 @@ urlpatterns = [
     
     # PROFILE AND POST MANAGEMENT (Login required)
     path('portal/profile/edit/', views.edit_own_profile, name='edit_own_profile'),
+    path('portal/profile/cover/', views.update_cover_photo, name='update_cover_photo'),
     path('portal/posts/create/', views.create_post, name='create_post'),
     path('portal/posts/my-posts/', views.my_posts, name='my_posts'),
     path('portal/posts/edit/<int:post_id>/', views.edit_post, name='edit_post'),
@@ -164,6 +165,7 @@ urlpatterns = [
     path('portal/messages/<int:message_id>/', views.message_detail, name='message_detail'),
     path('portal/messages/send/', views.send_message, name='send_message'),
     path('portal/messages/send/<str:recipient_username>/', views.send_message, name='send_message_to'),
+    path('portal/messages/bulk/', views.bulk_send_message, name='bulk_send_message'),
     
     # ATTENDANCE MANAGEMENT (Officer only)
     path('portal/attendance/', views.attendance_view, name='attendance_view'),

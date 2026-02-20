@@ -4,153 +4,367 @@
 {% block title %}{{ profile_user.get_full_name }} - Profile{% endblock %}
 
 {% block content %}
-<div class="profile-page">
-    <div class="profile-header">
-        <div class="profile-avatar">
-            {% if member_profile.profile_image %}
-            <img src="{{ member_profile.profile_image.url }}" alt="{{ profile_user.get_full_name }}">
+<div class="fb-profile-page">
+    <!-- Cover Photo Section -->
+    <div class="cover-section">
+        <div class="cover-photo">
+            {% if member_profile.cover_image %}
+            <img src="{{ member_profile.cover_image.url }}" alt="Cover photo">
             {% else %}
-            <div class="avatar-placeholder">
-                <i class="fas fa-user"></i>
-            </div>
+            <img src="{% static 'img/ngs_logo.png' %}" alt="Nu Gamma Sigma" class="default-cover">
+            {% endif %}
+            {% if user.is_authenticated and user.username == profile_user.username %}
+            <button class="cover-edit-btn" onclick="document.getElementById('coverInput').click()">
+                <i class="fas fa-camera"></i> Edit Cover Photo
+            </button>
+            <form id="coverForm" method="post" enctype="multipart/form-data" action="{% url 'update_cover_photo' %}" style="display:none;">
+                {% csrf_token %}
+                <input type="file" id="coverInput" name="cover_image" accept="image/*" onchange="document.getElementById('coverForm').submit()">
+            </form>
             {% endif %}
         </div>
-        <div class="profile-details">
-            <h1>{{ profile_user.get_full_name|default:profile_user.username }}</h1>
-            <p class="member-number">Member #{{ member_profile.member_number }}</p>
-            <p class="member-status"><i class="fas fa-circle"></i> {{ member_profile.get_status_display }}</p>
-            {% if member_profile.bio %}
-            <p class="member-bio">{{ member_profile.bio }}</p>
-            {% endif %}
-            <div class="profile-actions">
-                {% if user.is_authenticated and user.username == profile_user.username %}
-                <a href="{% url 'edit_own_profile' %}" class="btn btn-primary">
-                    <i class="fas fa-user-edit"></i> Edit Profile
-                </a>
+        
+        <!-- Profile Photo Overlay -->
+        <div class="profile-photo-container">
+            <div class="profile-photo">
+                {% if member_profile.profile_image %}
+                <img src="{{ member_profile.profile_image.url }}" alt="{{ profile_user.get_full_name }}">
                 {% else %}
-                <a href="{% url 'send_message_to' profile_user.username %}" class="btn btn-primary">
-                    <i class="fas fa-envelope"></i> Send Message
-                </a>
+                <div class="photo-placeholder">
+                    <i class="fas fa-user"></i>
+                </div>
                 {% endif %}
-                <a href="{% url 'member_roster' %}" class="btn btn-secondary">
-                    <i class="fas fa-arrow-left"></i> Back to Roster
-                </a>
             </div>
+            {% if user.is_authenticated and user.username == profile_user.username %}
+            <button class="photo-edit-btn" title="Change profile photo">
+                <i class="fas fa-camera"></i>
+            </button>
+            {% endif %}
         </div>
     </div>
 
-    <div class="profile-comments">
-        <h2><i class="fas fa-comments"></i> Comments</h2>
-        
-        <form method="post" class="comment-form">
-            {% csrf_token %}
-            <textarea name="comment_content" placeholder="Write a comment..." rows="3" required></textarea>
-            <button type="submit" class="btn btn-primary">
-                <i class="fas fa-paper-plane"></i> Post Comment
-            </button>
-        </form>
+    <!-- Profile Info Section -->
+    <div class="profile-info-section">
+        <div class="profile-info">
+            <h1 class="profile-name">{{ profile_user.get_full_name|default:profile_user.username }}</h1>
+            <p class="profile-chapter">Nu Gamma Sigma Chapter</p>
+            {% if member_profile.bio %}
+            <p class="profile-bio">{{ member_profile.bio }}</p>
+            {% endif %}
+        </div>
+        <div class="profile-actions">
+            {% if user.is_authenticated and user.username == profile_user.username %}
+            <a href="{% url 'edit_own_profile' %}" class="btn btn-primary">
+                <i class="fas fa-pen"></i> Edit Profile
+            </a>
+            {% else %}
+            <a href="{% url 'send_message_to' profile_user.username %}" class="btn btn-primary">
+                <i class="fas fa-envelope"></i> Message
+            </a>
+            {% endif %}
+        </div>
+    </div>
 
-        <div class="comments-list">
-            {% for comment in comments %}
-            <div class="comment" id="comment-{{ comment.id }}">
-                <div class="comment-header">
-                    <strong>{{ comment.author.get_full_name|default:comment.author.username }}</strong>
-                    <span class="comment-date">{{ comment.created_at|date:"M d, Y g:i A" }}</span>
-                </div>
-                <div class="comment-content" id="comment-content-{{ comment.id }}">
-                    {{ comment.content }}
-                </div>
-                <div class="comment-actions">
-                    <button class="like-btn" data-comment-id="{{ comment.id }}">
-                        <i class="fas fa-thumbs-up"></i> <span class="like-count">{{ comment.likes.count }}</span>
-                    </button>
-                    <button class="reply-btn" data-reply-toggle="{{ comment.id }}">
-                        <i class="fas fa-reply"></i> Reply
-                    </button>
-                    {% if user == comment.author %}
-                    <button class="edit-btn" onclick="editComment({{ comment.id }})">
-                        <i class="fas fa-edit"></i> Edit
-                    </button>
-                    {% endif %}
-                    {% if user == comment.author or user == profile_user %}
-                    <form method="post" action="{% url 'delete_comment' comment.id %}" style="display: inline;" onsubmit="return confirm('Delete this comment?');">
-                        {% csrf_token %}
-                        <button type="submit" class="delete-btn">
-                            <i class="fas fa-trash"></i> Delete
-                        </button>
-                    </form>
-                    {% endif %}
-                </div>
-                
-                <!-- Edit form (hidden by default) -->
-                <form method="post" action="{% url 'edit_comment' comment.id %}" class="edit-form" id="edit-form-{{ comment.id }}" style="display: none;">
-                    {% csrf_token %}
-                    <textarea name="comment_content" rows="3" required>{{ comment.content }}</textarea>
-                    <div class="edit-form-actions">
-                        <button type="submit" class="btn btn-sm btn-primary">Save</button>
-                        <button type="button" class="btn btn-sm btn-secondary" onclick="cancelEdit({{ comment.id }})">Cancel</button>
-                    </div>
-                </form>
-                
-                <form method="post" class="reply-form" id="reply-form-{{ comment.id }}" style="display: none;">
-                    {% csrf_token %}
-                    <input type="hidden" name="parent_id" value="{{ comment.id }}">
-                    <textarea name="comment_content" placeholder="Write a reply..." rows="2" required></textarea>
-                    <button type="submit" class="btn btn-sm btn-primary">Post Reply</button>
-                </form>
+    <!-- Tab Navigation -->
+    <div class="profile-tabs">
+        <button class="tab-btn active" data-tab="about">About</button>
+        <button class="tab-btn" data-tab="photos">Photos</button>
+        <button class="tab-btn" data-tab="activity">Activity</button>
+    </div>
 
-                {% if comment.replies.all %}
-                <div class="replies">
-                    {% for reply in comment.replies.all %}
-                    <div class="comment reply" id="comment-{{ reply.id }}">
-                        <div class="comment-header">
-                            <strong>{{ reply.author.get_full_name|default:reply.author.username }}</strong>
-                            <span class="comment-date">{{ reply.created_at|date:"M d, Y g:i A" }}</span>
-                        </div>
-                        <div class="comment-content" id="comment-content-{{ reply.id }}">
-                            {{ reply.content }}
-                        </div>
-                        <div class="comment-actions">
-                            <button class="like-btn" data-comment-id="{{ reply.id }}">
-                                <i class="fas fa-thumbs-up"></i> <span class="like-count">{{ reply.likes.count }}</span>
-                            </button>
-                            {% if user == reply.author %}
-                            <button class="edit-btn" onclick="editComment({{ reply.id }})">
-                                <i class="fas fa-edit"></i> Edit
-                            </button>
-                            {% endif %}
-                            {% if user == reply.author or user == profile_user %}
-                            <form method="post" action="{% url 'delete_comment' reply.id %}" style="display: inline;" onsubmit="return confirm('Delete this reply?');">
-                                {% csrf_token %}
-                                <button type="submit" class="delete-btn">
-                                    <i class="fas fa-trash"></i> Delete
-                                </button>
-                            </form>
-                            {% endif %}
-                        </div>
-                        
-                        <!-- Edit form for reply -->
-                        <form method="post" action="{% url 'edit_comment' reply.id %}" class="edit-form" id="edit-form-{{ reply.id }}" style="display: none;">
-                            {% csrf_token %}
-                            <textarea name="comment_content" rows="2" required>{{ reply.content }}</textarea>
-                            <div class="edit-form-actions">
-                                <button type="submit" class="btn btn-sm btn-primary">Save</button>
-                                <button type="button" class="btn btn-sm btn-secondary" onclick="cancelEdit({{ reply.id }})">Cancel</button>
-                            </div>
-                        </form>
-                    </div>
+    <!-- Main Content Area -->
+    <div class="profile-content">
+        <!-- Sidebar -->
+        <div class="profile-sidebar">
+            <!-- Intro Card -->
+            <div class="sidebar-card">
+                <h3><i class="fas fa-info-circle"></i> Intro</h3>
+                <ul class="intro-list">
+                    <li>
+                        <i class="fas fa-id-card"></i>
+                        <span>Member #{{ member_profile.member_number }}</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-circle {% if member_profile.status == 'financial' or member_profile.status == 'financial_life_member' %}text-success{% else %}text-warning{% endif %}"></i>
+                        <span>{{ member_profile.get_status_display }}</span>
+                    </li>
+                    {% if member_profile.line_name %}
+                    <li>
+                        <i class="fas fa-signature"></i>
+                        <span>{{ member_profile.line_name }}</span>
+                    </li>
+                    {% endif %}
+                    {% if member_profile.line_number %}
+                    <li>
+                        <i class="fas fa-hashtag"></i>
+                        <span>Line {{ member_profile.line_number }}</span>
+                    </li>
+                    {% endif %}
+                    {% if member_profile.initiation_date %}
+                    <li>
+                        <i class="fas fa-calendar-check"></i>
+                        <span>Initiated {{ member_profile.initiation_date|date:"F d, Y" }}</span>
+                    </li>
+                    {% endif %}
+                    <li>
+                        <i class="fas fa-clock"></i>
+                        <span>Member since {{ member_profile.created_at|date:"F Y" }}</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Photos Preview Card -->
+            <div class="sidebar-card">
+                <h3><i class="fas fa-images"></i> Photos</h3>
+                <div class="photos-grid-small">
+                    {% for photo in user_photos|slice:":9" %}
+                    <a href="{% url 'photo_detail' photo.id %}" class="photo-thumb">
+                        <img src="{{ photo.image.url }}" alt="Photo">
+                    </a>
+                    {% empty %}
+                    <p class="no-photos">No photos yet</p>
                     {% endfor %}
                 </div>
+                {% if user_photos.count > 9 %}
+                <a href="#" class="see-all-link" onclick="switchTab('photos'); return false;">See all photos</a>
                 {% endif %}
             </div>
-            {% empty %}
-            <p class="empty-state">No comments yet. Be the first to comment!</p>
-            {% endfor %}
+        </div>
+
+        <!-- Main Content -->
+        <div class="profile-main">
+            <!-- About Tab -->
+            <div class="tab-content active" id="tab-about">
+                <div class="content-card">
+                    <h3><i class="fas fa-user"></i> About {{ profile_user.first_name }}</h3>
+                    <div class="about-section">
+                        {% if member_profile.bio %}
+                        <div class="about-item">
+                            <h4>Bio</h4>
+                            <p>{{ member_profile.bio }}</p>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="about-item">
+                            <h4>Fraternity Information</h4>
+                            <ul class="about-list">
+                                <li><strong>Chapter:</strong> Nu Gamma Sigma</li>
+                                <li><strong>Member Number:</strong> {{ member_profile.member_number }}</li>
+                                <li><strong>Status:</strong> {{ member_profile.get_status_display }}</li>
+                                {% if member_profile.line_name %}
+                                <li><strong>Line Name:</strong> {{ member_profile.line_name }}</li>
+                                {% endif %}
+                                {% if member_profile.line_number %}
+                                <li><strong>Line Number:</strong> {{ member_profile.line_number }}</li>
+                                {% endif %}
+                                {% if member_profile.initiation_date %}
+                                <li><strong>Initiated:</strong> {{ member_profile.initiation_date|date:"F d, Y" }}</li>
+                                {% endif %}
+                            </ul>
+                        </div>
+
+                        {% if user.is_authenticated and user.username == profile_user.username %}
+                        <div class="about-item">
+                            <h4>Contact Information</h4>
+                            <ul class="about-list">
+                                <li><strong>Email:</strong> {{ profile_user.email }}</li>
+                                {% if member_profile.phone %}
+                                <li><strong>Phone:</strong> {{ member_profile.phone }}</li>
+                                {% endif %}
+                                {% if member_profile.address %}
+                                <li><strong>Address:</strong> {{ member_profile.address }}</li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Photos Tab -->
+            <div class="tab-content" id="tab-photos">
+                <div class="content-card">
+                    <h3><i class="fas fa-images"></i> Photos</h3>
+                    <div class="photos-grid">
+                        {% for photo in user_photos %}
+                        <a href="{% url 'photo_detail' photo.id %}" class="photo-item">
+                            <img src="{{ photo.image.url }}" alt="Photo">
+                            <div class="photo-overlay">
+                                <span><i class="fas fa-heart"></i> {{ photo.like_count }}</span>
+                                <span><i class="fas fa-comment"></i> {{ photo.comment_count }}</span>
+                            </div>
+                        </a>
+                        {% empty %}
+                        <p class="empty-state">No photos uploaded yet.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Activity Tab (Comments) -->
+            <div class="tab-content" id="tab-activity">
+                <div class="content-card">
+                    <h3><i class="fas fa-comments"></i> Wall</h3>
+                    
+                    <!-- Post Comment Form -->
+                    <form method="post" class="post-form">
+                        {% csrf_token %}
+                        <div class="post-input-row">
+                            <div class="post-avatar">
+                                {% if user.member_profile.profile_image %}
+                                <img src="{{ user.member_profile.profile_image.url }}" alt="">
+                                {% else %}
+                                <i class="fas fa-user"></i>
+                                {% endif %}
+                            </div>
+                            <textarea name="comment_content" placeholder="Write something on {{ profile_user.first_name }}'s wall..." rows="2" required></textarea>
+                        </div>
+                        <div class="post-actions">
+                            <button type="submit" class="btn btn-primary btn-sm">
+                                <i class="fas fa-paper-plane"></i> Post
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Comments List -->
+                    <div class="posts-list">
+                        {% for comment in comments %}
+                        <div class="post-item" id="comment-{{ comment.id }}">
+                            <div class="post-avatar">
+                                {% if comment.author.member_profile.profile_image %}
+                                <img src="{{ comment.author.member_profile.profile_image.url }}" alt="">
+                                {% else %}
+                                <i class="fas fa-user"></i>
+                                {% endif %}
+                            </div>
+                            <div class="post-body">
+                                <div class="post-header">
+                                    <a href="{% url 'member_profile' comment.author.username %}" class="post-author">
+                                        {{ comment.author.get_full_name|default:comment.author.username }}
+                                    </a>
+                                    <span class="post-time">{{ comment.created_at|timesince }} ago</span>
+                                </div>
+                                <div class="post-content" id="comment-content-{{ comment.id }}">
+                                    {{ comment.content }}
+                                </div>
+                                <div class="post-footer">
+                                    <button class="like-btn {% if user in comment.likes.all %}liked{% endif %}" data-comment-id="{{ comment.id }}">
+                                        <i class="fas fa-thumbs-up"></i> 
+                                        <span class="like-text">Like</span>
+                                        <span class="like-count">({{ comment.likes.count }})</span>
+                                    </button>
+                                    <button class="reply-btn" data-reply-toggle="{{ comment.id }}">
+                                        <i class="fas fa-comment"></i> Reply
+                                    </button>
+                                    {% if user == comment.author %}
+                                    <button class="edit-post-btn" onclick="editComment({{ comment.id }})">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </button>
+                                    {% endif %}
+                                    {% if user == comment.author or user == profile_user %}
+                                    <form method="post" action="{% url 'delete_comment' comment.id %}" style="display: inline;" onsubmit="return confirm('Delete this post?');">
+                                        {% csrf_token %}
+                                        <button type="submit" class="delete-post-btn">
+                                            <i class="fas fa-trash"></i> Delete
+                                        </button>
+                                    </form>
+                                    {% endif %}
+                                </div>
+                                
+                                <!-- Edit form -->
+                                <form method="post" action="{% url 'edit_comment' comment.id %}" class="edit-form" id="edit-form-{{ comment.id }}" style="display: none;">
+                                    {% csrf_token %}
+                                    <textarea name="comment_content" rows="3" required>{{ comment.content }}</textarea>
+                                    <div class="edit-actions">
+                                        <button type="submit" class="btn btn-primary btn-sm">Save</button>
+                                        <button type="button" class="btn btn-secondary btn-sm" onclick="cancelEdit({{ comment.id }})">Cancel</button>
+                                    </div>
+                                </form>
+                                
+                                <!-- Reply form -->
+                                <form method="post" class="reply-form" id="reply-form-{{ comment.id }}" style="display: none;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="parent_id" value="{{ comment.id }}">
+                                    <textarea name="comment_content" placeholder="Write a reply..." rows="2" required></textarea>
+                                    <button type="submit" class="btn btn-primary btn-sm">Reply</button>
+                                </form>
+
+                                <!-- Replies -->
+                                {% if comment.replies.all %}
+                                <div class="replies-list">
+                                    {% for reply in comment.replies.all %}
+                                    <div class="reply-item" id="comment-{{ reply.id }}">
+                                        <div class="reply-avatar">
+                                            {% if reply.author.member_profile.profile_image %}
+                                            <img src="{{ reply.author.member_profile.profile_image.url }}" alt="">
+                                            {% else %}
+                                            <i class="fas fa-user"></i>
+                                            {% endif %}
+                                        </div>
+                                        <div class="reply-body">
+                                            <div class="reply-header">
+                                                <a href="{% url 'member_profile' reply.author.username %}" class="reply-author">
+                                                    {{ reply.author.get_full_name|default:reply.author.username }}
+                                                </a>
+                                                <span class="reply-content" id="comment-content-{{ reply.id }}">{{ reply.content }}</span>
+                                            </div>
+                                            <div class="reply-footer">
+                                                <button class="like-btn {% if user in reply.likes.all %}liked{% endif %}" data-comment-id="{{ reply.id }}">
+                                                    <i class="fas fa-thumbs-up"></i> {{ reply.likes.count }}
+                                                </button>
+                                                <span class="reply-time">{{ reply.created_at|timesince }}</span>
+                                                {% if user == reply.author %}
+                                                <button class="edit-post-btn" onclick="editComment({{ reply.id }})">Edit</button>
+                                                {% endif %}
+                                                {% if user == reply.author or user == profile_user %}
+                                                <form method="post" action="{% url 'delete_comment' reply.id %}" style="display: inline;" onsubmit="return confirm('Delete?');">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="delete-post-btn">Delete</button>
+                                                </form>
+                                                {% endif %}
+                                            </div>
+                                            <!-- Edit form for reply -->
+                                            <form method="post" action="{% url 'edit_comment' reply.id %}" class="edit-form" id="edit-form-{{ reply.id }}" style="display: none;">
+                                                {% csrf_token %}
+                                                <textarea name="comment_content" rows="2" required>{{ reply.content }}</textarea>
+                                                <div class="edit-actions">
+                                                    <button type="submit" class="btn btn-primary btn-sm">Save</button>
+                                                    <button type="button" class="btn btn-secondary btn-sm" onclick="cancelEdit({{ reply.id }})">Cancel</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% empty %}
+                        <p class="empty-state">No posts yet. Be the first to write on {{ profile_user.first_name }}'s wall!</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
 <script>
+// Tab switching
+function switchTab(tabName) {
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tab === tabName);
+    });
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.toggle('active', content.id === 'tab-' + tabName);
+    });
+}
+
+document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+});
+
+// Edit/Cancel comment
 function editComment(commentId) {
     document.getElementById('comment-content-' + commentId).style.display = 'none';
     document.getElementById('edit-form-' + commentId).style.display = 'block';
@@ -161,30 +375,25 @@ function cancelEdit(commentId) {
     document.getElementById('edit-form-' + commentId).style.display = 'none';
 }
 
-function toggleReplyForm(commentId) {
-    const form = document.getElementById('reply-form-' + commentId);
-    form.style.display = form.style.display === 'none' ? 'block' : 'none';
-}
-
-// Attach reply button listeners
+// Reply toggle
 document.querySelectorAll('[data-reply-toggle]').forEach(btn => {
     btn.addEventListener('click', () => {
-        toggleReplyForm(btn.dataset.replyToggle);
+        const form = document.getElementById('reply-form-' + btn.dataset.replyToggle);
+        form.style.display = form.style.display === 'none' ? 'block' : 'none';
     });
 });
 
+// Like button
 document.querySelectorAll('.like-btn').forEach(btn => {
     btn.addEventListener('click', function() {
         const commentId = this.dataset.commentId;
         fetch(`/portal/comment/${commentId}/like/`, {
             method: 'POST',
-            headers: {
-                'X-CSRFToken': '{{ csrf_token }}',
-            }
+            headers: { 'X-CSRFToken': '{{ csrf_token }}' }
         })
         .then(res => res.json())
         .then(data => {
-            this.querySelector('.like-count').textContent = data.like_count;
+            this.querySelector('.like-count').textContent = '(' + data.like_count + ')';
             this.classList.toggle('liked', data.liked);
         });
     });
@@ -192,283 +401,838 @@ document.querySelectorAll('.like-btn').forEach(btn => {
 </script>
 
 <style>
-    .profile-page {
-        padding: 2rem 0;
+    .fb-profile-page {
+        background: #f0f2f5;
+        min-height: 100vh;
     }
 
-    .profile-header {
-        background: white;
-        border-radius: 12px;
-        padding: 3rem;
-        margin-bottom: 3rem;
-        box-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
-        display: flex;
-        gap: 3rem;
-        align-items: center;
+    /* Cover Section */
+    .cover-section {
+        position: relative;
+        max-width: 940px;
+        margin: 0 auto;
     }
 
-    .profile-avatar {
-        width: 200px;
-        height: 200px;
-        border-radius: 50%;
+    .cover-photo {
+        height: 350px;
+        border-radius: 0 0 8px 8px;
         overflow: hidden;
-        border: 5px solid #164f90;
-        flex-shrink: 0;
+        position: relative;
+        background: linear-gradient(135deg, #164f90 0%, #1a5fa8 50%, #2a7dd4 100%);
     }
 
-    .profile-avatar img {
+    .cover-photo img {
         width: 100%;
         height: 100%;
         object-fit: cover;
     }
 
-    .avatar-placeholder {
+    .cover-photo img.default-cover {
+        object-fit: contain;
+        padding: 30px;
+        background: linear-gradient(135deg, #164f90 0%, #1a5fa8 50%, #2a7dd4 100%);
+    }
+
+    .cover-placeholder {
         width: 100%;
         height: 100%;
-        background: linear-gradient(135deg, #2a7dd4, #164f90);
+    }
+
+    .cover-gradient {
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #164f90 0%, #1a5fa8 50%, #2a7dd4 100%);
+        opacity: 0.9;
+    }
+
+    .cover-edit-btn {
+        position: absolute;
+        bottom: 16px;
+        right: 16px;
+        background: rgba(0, 0, 0, 0.6);
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: background 0.2s;
+    }
+
+    .cover-edit-btn:hover {
+        background: rgba(0, 0, 0, 0.8);
+    }
+
+    /* Profile Photo */
+    .profile-photo-container {
+        position: absolute;
+        bottom: -80px;
+        left: 32px;
+    }
+
+    .profile-photo {
+        width: 168px;
+        height: 168px;
+        border-radius: 50%;
+        border: 4px solid white;
+        overflow: hidden;
+        background: #e4e6eb;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .profile-photo img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .photo-placeholder {
+        width: 100%;
+        height: 100%;
         display: flex;
         align-items: center;
         justify-content: center;
+        background: linear-gradient(135deg, #2a7dd4, #164f90);
     }
 
-    .avatar-placeholder i {
-        font-size: 5rem;
+    .photo-placeholder i {
+        font-size: 4rem;
         color: white;
     }
 
-    .profile-details h1 {
-        color: #164f90;
-        font-size: 2.5rem;
-        margin-bottom: 0.5rem;
+    .photo-edit-btn {
+        position: absolute;
+        bottom: 8px;
+        right: 8px;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: #e4e6eb;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     }
 
-    .member-number {
-        color: #666;
-        font-size: 1.1rem;
-        margin-bottom: 0.5rem;
+    .photo-edit-btn:hover {
+        background: #d8dadf;
     }
 
-    .member-status {
-        color: #27ae60;
-        font-weight: 600;
-        margin-bottom: 1rem;
+    /* Profile Info Section */
+    .profile-info-section {
+        max-width: 940px;
+        margin: 0 auto;
+        padding: 90px 32px 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        background: white;
+        border-bottom: 1px solid #ddd;
     }
 
-    .member-status i {
-        font-size: 0.6rem;
-        margin-right: 0.5rem;
+    .profile-name {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #050505;
+        margin: 0 0 4px 0;
     }
 
-    .member-bio {
-        color: #555;
-        font-size: 1.1rem;
-        line-height: 1.6;
-        margin-bottom: 2rem;
+    .profile-chapter {
+        color: #65676b;
+        font-size: 1rem;
+        margin: 0 0 8px 0;
+    }
+
+    .profile-bio {
+        color: #65676b;
+        font-size: 0.95rem;
+        margin: 0;
+        max-width: 500px;
     }
 
     .profile-actions {
         display: flex;
-        gap: 1rem;
+        gap: 8px;
     }
 
-    .profile-comments {
+    /* Tabs */
+    .profile-tabs {
+        max-width: 940px;
+        margin: 0 auto;
         background: white;
-        border-radius: 12px;
-        padding: 2rem;
-        box-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
-    }
-
-    .profile-comments h2 {
-        color: #164f90;
-        font-size: 2rem;
-        margin-bottom: 2rem;
-    }
-
-    .comment-form {
-        margin-bottom: 2rem;
-    }
-
-    .comment-form textarea {
-        width: 100%;
-        padding: 1rem;
-        border: 2px solid #ddd;
-        border-radius: 8px;
-        font-size: 1rem;
-        margin-bottom: 1rem;
-        resize: vertical;
-    }
-
-    .comments-list {
         display: flex;
-        flex-direction: column;
-        gap: 1.5rem;
+        gap: 8px;
+        padding: 0 16px;
+        border-bottom: 1px solid #ddd;
     }
 
-    .comment {
-        border-left: 4px solid #164f90;
-        padding-left: 1.5rem;
-    }
-
-    .comment.reply {
-        margin-left: 3rem;
-        border-color: #2a7dd4;
-    }
-
-    .comment-header {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 0.5rem;
-    }
-
-    .comment-header strong {
-        color: #164f90;
-    }
-
-    .comment-date {
-        color: #999;
-        font-size: 0.9rem;
-    }
-
-    .comment-content {
-        color: #333;
-        margin-bottom: 1rem;
-        line-height: 1.6;
-    }
-
-    .comment-actions {
-        display: flex;
-        gap: 1rem;
-    }
-
-    .like-btn, .reply-btn {
+    .tab-btn {
+        padding: 16px 16px;
         background: none;
         border: none;
-        color: #164f90;
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #65676b;
         cursor: pointer;
+        border-bottom: 3px solid transparent;
+        transition: all 0.2s;
+    }
+
+    .tab-btn:hover {
+        background: #f0f2f5;
+        border-radius: 6px 6px 0 0;
+    }
+
+    .tab-btn.active {
+        color: #1877f2;
+        border-bottom-color: #1877f2;
+    }
+
+    /* Content Area */
+    .profile-content {
+        max-width: 940px;
+        margin: 16px auto;
+        display: grid;
+        grid-template-columns: 360px 1fr;
+        gap: 16px;
+        padding: 0 16px;
+    }
+
+    /* Sidebar */
+    .sidebar-card {
+        background: white;
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 16px;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
+
+    .sidebar-card h3 {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #050505;
+        margin: 0 0 12px 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .sidebar-card h3 i {
+        color: #65676b;
+    }
+
+    .intro-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .intro-list li {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 8px 0;
+        color: #050505;
+        font-size: 0.95rem;
+    }
+
+    .intro-list li i {
+        width: 20px;
+        color: #65676b;
+        text-align: center;
+    }
+
+    .intro-list li i.text-success {
+        color: #31a24c;
+    }
+
+    .intro-list li i.text-warning {
+        color: #f5a623;
+    }
+
+    /* Photos Grid */
+    .photos-grid-small {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 4px;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .photo-thumb {
+        aspect-ratio: 1;
+        overflow: hidden;
+    }
+
+    .photo-thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.2s;
+    }
+
+    .photo-thumb:hover img {
+        transform: scale(1.05);
+    }
+
+    .no-photos {
+        color: #65676b;
+        text-align: center;
+        padding: 20px;
         font-size: 0.9rem;
-        padding: 0.25rem 0.5rem;
-        transition: color 0.2s;
+    }
+
+    .see-all-link {
+        display: block;
+        text-align: center;
+        padding: 12px;
+        color: #1877f2;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .see-all-link:hover {
+        text-decoration: underline;
+    }
+
+    /* Main Content Cards */
+    .content-card {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
+
+    .content-card h3 {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #050505;
+        margin: 0 0 16px 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .content-card h3 i {
+        color: #1877f2;
+    }
+
+    .tab-content {
+        display: none;
+    }
+
+    .tab-content.active {
+        display: block;
+    }
+
+    /* About Section */
+    .about-section {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+    }
+
+    .about-item h4 {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #050505;
+        margin: 0 0 8px 0;
+    }
+
+    .about-item p {
+        color: #050505;
+        line-height: 1.6;
+        margin: 0;
+    }
+
+    .about-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .about-list li {
+        padding: 6px 0;
+        color: #050505;
+    }
+
+    .about-list li strong {
+        color: #65676b;
+    }
+
+    /* Photos Grid Large */
+    .photos-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+    }
+
+    .photo-item {
+        position: relative;
+        aspect-ratio: 1;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .photo-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.2s;
+    }
+
+    .photo-item:hover img {
+        transform: scale(1.05);
+    }
+
+    .photo-overlay {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 8px;
+        background: linear-gradient(transparent, rgba(0,0,0,0.7));
+        display: flex;
+        gap: 12px;
+        color: white;
+        font-size: 0.85rem;
+        opacity: 0;
+        transition: opacity 0.2s;
+    }
+
+    .photo-item:hover .photo-overlay {
+        opacity: 1;
+    }
+
+    /* Post Form */
+    .post-form {
+        background: #f0f2f5;
+        border-radius: 8px;
+        padding: 12px;
+        margin-bottom: 16px;
+    }
+
+    .post-input-row {
+        display: flex;
+        gap: 8px;
+    }
+
+    .post-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        overflow: hidden;
+        background: #e4e6eb;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .post-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .post-avatar i {
+        color: #65676b;
+    }
+
+    .post-form textarea {
+        flex: 1;
+        border: none;
+        background: white;
+        border-radius: 20px;
+        padding: 10px 16px;
+        font-size: 0.95rem;
+        resize: none;
+        outline: none;
+    }
+
+    .post-actions {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 8px;
+    }
+
+    /* Posts List */
+    .posts-list {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .post-item {
+        display: flex;
+        gap: 8px;
+        padding: 12px;
+        background: #f7f8fa;
+        border-radius: 8px;
+    }
+
+    .post-body {
+        flex: 1;
+    }
+
+    .post-header {
+        display: flex;
+        align-items: baseline;
+        gap: 8px;
+        margin-bottom: 4px;
+    }
+
+    .post-author {
+        font-weight: 600;
+        color: #050505;
+        text-decoration: none;
+    }
+
+    .post-author:hover {
+        text-decoration: underline;
+    }
+
+    .post-time {
+        font-size: 0.8rem;
+        color: #65676b;
+    }
+
+    .post-content {
+        color: #050505;
+        line-height: 1.5;
+        margin-bottom: 8px;
+    }
+
+    .post-footer {
+        display: flex;
+        gap: 16px;
+        border-top: 1px solid #e4e6eb;
+        padding-top: 8px;
+    }
+
+    .like-btn, .reply-btn, .edit-post-btn, .delete-post-btn {
+        background: none;
+        border: none;
+        color: #65676b;
+        font-size: 0.85rem;
+        cursor: pointer;
+        padding: 4px 8px;
+        border-radius: 4px;
+        transition: background 0.2s;
     }
 
     .like-btn:hover, .reply-btn:hover {
-        color: #2a7dd4;
+        background: #e4e6eb;
     }
 
     .like-btn.liked {
-        color: #e74c3c;
+        color: #1877f2;
     }
 
-    .edit-btn, .delete-btn {
-        background: none;
-        border: none;
-        cursor: pointer;
-        font-size: 0.9rem;
-        padding: 0.25rem 0.5rem;
-        transition: color 0.2s;
+    .edit-post-btn:hover {
+        color: #f5a623;
     }
 
-    .edit-btn {
-        color: #f59e0b;
+    .delete-post-btn {
+        color: #dc3545;
     }
 
-    .edit-btn:hover {
-        color: #d97706;
+    .delete-post-btn:hover {
+        background: #ffeef0;
     }
 
-    .delete-btn {
-        color: #dc2626;
-    }
-
-    .delete-btn:hover {
-        color: #b91c1c;
-    }
-
-    .edit-form {
-        margin-top: 1rem;
-        margin-bottom: 1rem;
-    }
-
-    .edit-form textarea {
-        width: 100%;
-        padding: 0.75rem;
-        border: 2px solid #ddd;
-        border-radius: 6px;
-        font-size: 0.95rem;
-        margin-bottom: 0.5rem;
-    }
-
-    .edit-form-actions {
+    /* Reply styles */
+    .replies-list {
+        margin-top: 12px;
+        padding-left: 48px;
         display: flex;
-        gap: 0.5rem;
+        flex-direction: column;
+        gap: 8px;
     }
 
-    .reply-form {
-        margin-top: 1rem;
-        margin-bottom: 1rem;
+    .reply-item {
+        display: flex;
+        gap: 8px;
     }
 
-    .reply-form textarea {
+    .reply-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        overflow: hidden;
+        background: #e4e6eb;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .reply-avatar img {
         width: 100%;
-        padding: 0.75rem;
-        border: 2px solid #ddd;
-        border-radius: 6px;
-        font-size: 0.95rem;
-        margin-bottom: 0.5rem;
+        height: 100%;
+        object-fit: cover;
     }
 
-    .replies {
-        margin-top: 1rem;
+    .reply-avatar i {
+        font-size: 0.9rem;
+        color: #65676b;
+    }
+
+    .reply-body {
+        background: #e4e6eb;
+        border-radius: 18px;
+        padding: 8px 12px;
+        flex: 1;
+    }
+
+    .reply-header {
+        display: inline;
+    }
+
+    .reply-author {
+        font-weight: 600;
+        color: #050505;
+        text-decoration: none;
+        margin-right: 6px;
+    }
+
+    .reply-content {
+        color: #050505;
+    }
+
+    .reply-footer {
+        display: flex;
+        gap: 12px;
+        padding: 4px 12px;
+        font-size: 0.75rem;
+    }
+
+    .reply-time {
+        color: #65676b;
+    }
+
+    .edit-form, .reply-form {
+        margin-top: 8px;
+    }
+
+    .edit-form textarea, .reply-form textarea {
+        width: 100%;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 8px 12px;
+        font-size: 0.9rem;
+        resize: none;
+        margin-bottom: 8px;
+    }
+
+    .edit-actions {
+        display: flex;
+        gap: 8px;
     }
 
     .empty-state {
         text-align: center;
-        color: #999;
-        padding: 2rem;
+        color: #65676b;
+        padding: 40px;
+    }
+
+    /* Buttons */
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        cursor: pointer;
+        text-decoration: none;
+        border: none;
+        transition: background 0.2s;
+    }
+
+    .btn-primary {
+        background: #1877f2;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: #166fe5;
+    }
+
+    .btn-secondary {
+        background: #e4e6eb;
+        color: #050505;
+    }
+
+    .btn-secondary:hover {
+        background: #d8dadf;
+    }
+
+    .btn-sm {
+        padding: 6px 12px;
+        font-size: 0.85rem;
     }
 
     /* Dark Mode */
-    body.dark-mode .profile-header,
-    body.dark-mode .profile-comments {
-        background: #1a2a4a;
-        box-shadow: 0 0 20px rgba(135, 206, 235, 0.3);
+    body.dark-mode .fb-profile-page {
+        background: #18191a;
     }
 
-    body.dark-mode .profile-details h1,
-    body.dark-mode .profile-comments h2,
-    body.dark-mode .comment-header strong {
-        color: #87ceeb;
+    body.dark-mode .cover-photo {
+        background: linear-gradient(135deg, #1a3a6a 0%, #1f4a80 50%, #2a5a9a 100%);
     }
 
-    body.dark-mode .member-number,
-    body.dark-mode .member-bio,
-    body.dark-mode .comment-content {
-        color: #b0b8c8;
+    body.dark-mode .profile-info-section,
+    body.dark-mode .profile-tabs,
+    body.dark-mode .sidebar-card,
+    body.dark-mode .content-card {
+        background: #242526;
+        border-color: #3e4042;
     }
 
-    body.dark-mode .comment-form textarea,
-    body.dark-mode .reply-form textarea {
-        background: #0f1a30;
-        border-color: #2a3a5a;
-        color: #e8edf7;
+    body.dark-mode .profile-name,
+    body.dark-mode .sidebar-card h3,
+    body.dark-mode .content-card h3,
+    body.dark-mode .intro-list li,
+    body.dark-mode .about-item h4,
+    body.dark-mode .about-item p,
+    body.dark-mode .about-list li,
+    body.dark-mode .post-author,
+    body.dark-mode .post-content,
+    body.dark-mode .reply-author,
+    body.dark-mode .reply-content {
+        color: #e4e6eb;
     }
 
+    body.dark-mode .profile-chapter,
+    body.dark-mode .profile-bio,
+    body.dark-mode .tab-btn,
+    body.dark-mode .intro-list li i,
+    body.dark-mode .sidebar-card h3 i,
+    body.dark-mode .about-list li strong,
+    body.dark-mode .post-time,
+    body.dark-mode .reply-time,
     body.dark-mode .like-btn,
     body.dark-mode .reply-btn {
-        color: #87ceeb;
+        color: #b0b3b8;
     }
 
-    body.dark-mode .edit-btn {
-        color: #fbbf24;
+    body.dark-mode .tab-btn.active {
+        color: #2d88ff;
+        border-bottom-color: #2d88ff;
     }
 
-    body.dark-mode .delete-btn {
-        color: #f87171;
+    body.dark-mode .tab-btn:hover {
+        background: #3a3b3c;
     }
 
-    body.dark-mode .edit-form textarea {
-        background: #0f1a30;
-        border-color: #2a3a5a;
-        color: #e8edf7;
+    body.dark-mode .profile-photo {
+        border-color: #242526;
+    }
+
+    body.dark-mode .photo-placeholder,
+    body.dark-mode .post-avatar,
+    body.dark-mode .reply-avatar {
+        background: #3a3b3c;
+    }
+
+    body.dark-mode .post-form {
+        background: #3a3b3c;
+    }
+
+    body.dark-mode .post-form textarea {
+        background: #242526;
+        color: #e4e6eb;
+    }
+
+    body.dark-mode .post-item {
+        background: #3a3b3c;
+    }
+
+    body.dark-mode .reply-body {
+        background: #3a3b3c;
+    }
+
+    body.dark-mode .post-footer {
+        border-color: #3e4042;
+    }
+
+    body.dark-mode .like-btn.liked {
+        color: #2d88ff;
+    }
+
+    body.dark-mode .btn-secondary {
+        background: #3a3b3c;
+        color: #e4e6eb;
+    }
+
+    body.dark-mode .btn-secondary:hover {
+        background: #4e4f50;
+    }
+
+    body.dark-mode .edit-form textarea,
+    body.dark-mode .reply-form textarea {
+        background: #3a3b3c;
+        border-color: #4e4f50;
+        color: #e4e6eb;
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+        .profile-content {
+            grid-template-columns: 1fr;
+        }
+
+        .profile-sidebar {
+            order: 2;
+        }
+
+        .profile-main {
+            order: 1;
+        }
+    }
+
+    @media (max-width: 600px) {
+        .cover-photo {
+            height: 200px;
+        }
+
+        .profile-photo-container {
+            bottom: -60px;
+            left: 16px;
+        }
+
+        .profile-photo {
+            width: 120px;
+            height: 120px;
+        }
+
+        .profile-info-section {
+            padding: 70px 16px 16px;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .profile-name {
+            font-size: 1.5rem;
+        }
+
+        .profile-tabs {
+            overflow-x: auto;
+        }
+
+        .photos-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .replies-list {
+            padding-left: 24px;
+        }
     }
 </style>
 {% endblock %}

@@ -673,9 +673,8 @@ class SMSPreferenceForm(forms.ModelForm):
         start_time = cleaned_data.get('quiet_hours_start')
         end_time = cleaned_data.get('quiet_hours_end')
         
-        if quiet_enabled:
-            if not start_time or not end_time:
-                raise forms.ValidationError('Please set both start and end times for quiet hours.')
+        if quiet_enabled and (not start_time or not end_time):
+            raise forms.ValidationError('Please set both start and end times for quiet hours.')
         
         return cleaned_data
 
@@ -736,3 +735,99 @@ class BulkEmailForm(forms.Form):
         }),
         help_text='If unchecked, you\'ll see a preview first'
     )
+
+
+class BulkMessageForm(forms.Form):
+    """Form for sending bulk internal messages to members"""
+    
+    RECIPIENT_CHOICES = [
+        ('all', 'All Members'),
+        ('financial', 'Financial Members Only'),
+        ('non_financial', 'Non-Financial Members Only'),
+        ('officers', 'Officers Only'),
+        ('selected', 'Select Individual Members'),
+    ]
+    
+    PRIORITY_CHOICES = [
+        ('NR', 'Normal'),
+        ('HI', 'High'),
+        ('UR', 'Urgent'),
+    ]
+    
+    CATEGORY_CHOICES = [
+        ('GN', 'General'),
+        ('OF', 'Official Chapter Business'),
+        ('EV', 'Event Related'),
+        ('FI', 'Financial'),
+        ('CM', 'Committee'),
+    ]
+    
+    recipient_group = forms.ChoiceField(
+        choices=RECIPIENT_CHOICES,
+        widget=forms.RadioSelect(attrs={
+            'class': 'form-check-input'
+        }),
+        label='Send Message To',
+        help_text='Choose which members to receive this message'
+    )
+    
+    selected_members = forms.ModelMultipleChoiceField(
+        queryset=None,  # Set in __init__
+        required=False,
+        widget=forms.CheckboxSelectMultiple(attrs={
+            'class': 'member-checkbox'
+        }),
+        label='Select Members',
+        help_text='Choose specific members (only used when "Select Individual Members" is chosen)'
+    )
+    
+    subject = forms.CharField(
+        max_length=200,
+        required=True,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Message subject'
+        }),
+        help_text='Subject line for the message'
+    )
+    
+    content = forms.CharField(
+        required=True,
+        widget=forms.Textarea(attrs={
+            'class': 'form-control',
+            'rows': 10,
+            'placeholder': 'Write your message here...'
+        }),
+        help_text='Body of the message'
+    )
+    
+    priority = forms.ChoiceField(
+        choices=PRIORITY_CHOICES,
+        initial='NR',
+        widget=forms.Select(attrs={
+            'class': 'form-control'
+        }),
+        label='Priority',
+        help_text='Set message priority level'
+    )
+    
+    category = forms.ChoiceField(
+        choices=CATEGORY_CHOICES,
+        initial='GN',
+        widget=forms.Select(attrs={
+            'class': 'form-control'
+        }),
+        label='Category',
+        help_text='Categorize this message'
+    )
+    
+    def __init__(self, *args, current_user=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        from django.contrib.auth.models import User
+        # Exclude current user from recipient list
+        if current_user:
+            self.fields['selected_members'].queryset = User.objects.exclude(
+                id=current_user.id
+            ).order_by('last_name', 'first_name')
+        else:
+            self.fields['selected_members'].queryset = User.objects.all().order_by('last_name', 'first_name')

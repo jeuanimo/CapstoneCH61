@@ -109,7 +109,7 @@ import os
 from django.views.generic import CreateView, UpdateView, DeleteView, ListView
 from django.urls import reverse_lazy
 # Custom mixins for CBVs
-from .mixins import DeleteConfirmationMixin, OfficerRequiredMixin
+from .mixins import DeleteConfirmationMixin, OfficerRequiredMixin, MemberRequiredMixin
 from decimal import Decimal
 from django.utils import timezone
 from urllib.parse import urlparse
@@ -215,11 +215,14 @@ def home_view(request):
     ).order_by('start_date')[:5]  # Limit to next 5 events
     
     # Get recent program photos for carousel
-    # Only show photos from the four main program pages
-    program_types = ['business', 'education', 'social_action', 'sigma_beta_club']
+    # Show photos from events with program types OR photos in program albums
+    event_program_types = ['business', 'education', 'social_action', 'sigma_beta_club']
+    album_program_types = ['bbb', 'education', 'social_action', 'sigma_beta']
+    
     carousel_photos = Photo.objects.filter(
-        event__event_type__in=program_types
-    ).select_related('uploaded_by', 'event').order_by('-created_at')[:8]
+        Q(event__event_type__in=event_program_types) |  # Photos linked to program events
+        Q(album__program__in=album_program_types)       # Photos in program albums
+    ).select_related('uploaded_by', 'event', 'album').order_by('-created_at')[:8]
     
     context = {
         'upcoming_events': upcoming_events,
@@ -1113,7 +1116,7 @@ def portal_dashboard(request):
 # These are modern Django views that are more maintainable and DRY than FBVs above.
 # Gradually replace FBV versions with these as you migrate your codebase.
 
-class MemberListView(OfficerRequiredMixin, ListView):
+class MemberListView(MemberRequiredMixin, ListView):
     """
     List all active members (financial and life members).
     
@@ -1121,9 +1124,10 @@ class MemberListView(OfficerRequiredMixin, ListView):
     URL: /portal/roster/
     
     Features:
-    - Officer/admin only access
+    - All logged-in members can view the roster
     - Shows all financial and life members
     - Ordered by last name
+    - Edit/delete actions only shown to officers
     """
     model = MemberProfile
     template_name = 'pages/portal/roster.html'
@@ -2360,6 +2364,9 @@ def member_profile(request, username):
         parent_comment=None
     ).select_related('author').prefetch_related('replies', 'likes').order_by('-created_at')
     
+    # Get user's uploaded photos
+    user_photos = Photo.objects.filter(uploaded_by=profile_user).order_by('-created_at')
+    
     # Add comment if POST
     if request.method == 'POST' and 'comment_content' in request.POST:
         content = request.POST.get('comment_content', '').strip()
@@ -2383,6 +2390,7 @@ def member_profile(request, username):
         'profile_user': profile_user,
         'member_profile': member_profile,
         'comments': comments,
+        'user_photos': user_photos,
     }
     return render(request, 'pages/portal/profile.html', context)
 
@@ -2741,41 +2749,144 @@ def message_detail(request, message_id):
 
 @login_required
 def send_message(request, recipient_username=None):
-    """Send a new message"""
+    """Send a message to one or multiple recipients"""
     recipient = None
     if recipient_username:
         recipient = get_object_or_404(User, username=recipient_username)
     
     if request.method == 'POST':
-        recipient_id = request.POST.get('recipient')
         subject = request.POST.get('subject', '').strip()
         content = request.POST.get('content', '').strip()
         parent_id = request.POST.get('parent_id')
+        send_to_multiple = request.POST.get('send_to_multiple') == 'on'
         
-        if recipient_id and content:
-            recipient_user = User.objects.get(id=recipient_id)
+        if content:
             parent_message = None
             if parent_id:
                 parent_message = Message.objects.filter(id=parent_id).first()
             
-            Message.objects.create(
-                sender=request.user,
-                recipient=recipient_user,
-                subject=subject,
-                content=content,
-                parent_message=parent_message
-            )
-            messages.success(request, f"Message sent to {recipient_user.username}!")
+            if send_to_multiple:
+                # Handle multiple recipients
+                recipient_ids = request.POST.getlist('recipients')
+                message_count = 0
+                for rid in recipient_ids:
+                    try:
+                        recipient_user = User.objects.get(id=rid)
+                        Message.objects.create(
+                            sender=request.user,
+                            recipient=recipient_user,
+                            subject=subject,
+                            content=content,
+                            parent_message=parent_message
+                        )
+                        message_count += 1
+                    except User.DoesNotExist:
+                        continue
+                if message_count > 0:
+                    messages.success(request, f"Message sent to {message_count} members!")
+                else:
+                    messages.error(request, "Please select at least one recipient.")
+                    return redirect('send_message')
+            else:
+                # Handle single recipient
+                recipient_id = request.POST.get('recipient')
+                if recipient_id:
+                    recipient_user = User.objects.get(id=recipient_id)
+                    Message.objects.create(
+                        sender=request.user,
+                        recipient=recipient_user,
+                        subject=subject,
+                        content=content,
+                        parent_message=parent_message
+                    )
+                    messages.success(request, f"Message sent to {recipient_user.username}!")
+                else:
+                    messages.error(request, "Please select a recipient.")
+                    return redirect('send_message')
+            
             return redirect('messages_inbox')
     
     # Get all members for recipient selection
-    all_members = User.objects.exclude(id=request.user.id).order_by('username')
+    all_members = User.objects.exclude(id=request.user.id).order_by('last_name', 'first_name', 'username')
     
     context = {
         'recipient': recipient,
         'all_members': all_members,
     }
     return render(request, 'pages/portal/send_message.html', context)
+
+
+def _get_bulk_message_recipients(recipient_group, selected_members, current_user_id):
+    """Helper function to get recipients for bulk messaging based on group selection."""
+    recipient_filters = {
+        'all': lambda: User.objects.exclude(id=current_user_id),
+        'financial': lambda: User.objects.filter(
+            member_profile__in=MemberProfile.objects.financial_members()
+        ).exclude(id=current_user_id),
+        'non_financial': lambda: User.objects.filter(
+            member_profile__status__in=['non_financial', 'non_financial_life_member']
+        ).exclude(id=current_user_id),
+        'officers': lambda: User.objects.filter(
+            member_profile__is_officer=True
+        ).exclude(id=current_user_id),
+        'selected': lambda: selected_members,
+    }
+    return recipient_filters.get(recipient_group, lambda: [])()
+
+
+@login_required
+def bulk_send_message(request):
+    """Send bulk messages to multiple members"""
+    from .forms import BulkMessageForm
+    
+    if request.method == 'POST':
+        form = BulkMessageForm(request.POST, current_user=request.user)
+        if form.is_valid():
+            recipient_group = form.cleaned_data['recipient_group']
+            selected_members = form.cleaned_data.get('selected_members', [])
+            subject = form.cleaned_data['subject']
+            content = form.cleaned_data['content']
+            priority = form.cleaned_data['priority']
+            category = form.cleaned_data['category']
+            
+            recipients = _get_bulk_message_recipients(
+                recipient_group, selected_members, request.user.id
+            )
+            
+            # Create messages for each recipient
+            message_count = 0
+            for recipient in recipients:
+                Message.objects.create(
+                    sender=request.user,
+                    recipient=recipient,
+                    subject=subject,
+                    content=content,
+                    priority=priority,
+                    category=category,
+                )
+                message_count += 1
+            
+            messages.success(request, f"Successfully sent {message_count} messages!")
+            return redirect('messages_inbox')
+    else:
+        form = BulkMessageForm(current_user=request.user)
+    
+    # Get member counts for preview
+    all_count = User.objects.exclude(id=request.user.id).count()
+    financial_count = MemberProfile.objects.financial_members().count()
+    non_financial_count = MemberProfile.objects.filter(
+        status__in=['non_financial', 'non_financial_life_member']
+    ).count()
+    officers_count = MemberProfile.objects.filter(is_officer=True).count()
+    
+    context = {
+        'form': form,
+        'all_count': all_count,
+        'financial_count': financial_count,
+        'non_financial_count': non_financial_count,
+        'officers_count': officers_count,
+    }
+    return render(request, 'pages/portal/bulk_send_message.html', context)
 
 
 @login_required
@@ -2986,11 +3097,22 @@ def upload_photo(request):
         caption = request.POST.get('caption', '').strip()
         tags = request.POST.get('tags', '').strip()
         album_id = request.POST.get('album')
+        new_album_name = request.POST.get('new_album_name', '').strip()
+        program = request.POST.get('program', '')
         event_id = request.POST.get('event')
         
         if image:
             album = None
-            if album_id:
+            
+            # Create new album if name provided
+            if new_album_name:
+                album = PhotoAlbum.objects.create(
+                    title=new_album_name,
+                    program=program,
+                    created_by=request.user,
+                    is_public=True
+                )
+            elif album_id:
                 album = PhotoAlbum.objects.filter(id=album_id).first()
             
             event = None
@@ -3013,10 +3135,12 @@ def upload_photo(request):
     # Get albums and events for the form
     albums = PhotoAlbum.objects.filter(is_public=True)
     events = Event.objects.all().order_by('-start_date')[:20]
+    program_choices = PhotoAlbum.PROGRAM_CHOICES
     
     context = {
         'albums': albums,
         'events': events,
+        'program_choices': program_choices,
     }
     return render(request, 'pages/portal/upload_photo.html', context)
 
@@ -3289,6 +3413,26 @@ def edit_own_profile(request):
         'member_profile': member_profile,
     }
     return render(request, 'pages/portal/edit_profile.html', context)
+
+
+@login_required
+def update_cover_photo(request):
+    """Update user's cover photo"""
+    if request.method == 'POST':
+        try:
+            member_profile = MemberProfile.objects.get(user=request.user)
+        except MemberProfile.DoesNotExist:
+            messages.error(request, "You don't have a member profile.")
+            return redirect('portal_dashboard')
+        
+        if 'cover_image' in request.FILES:
+            member_profile.cover_image = request.FILES['cover_image']
+            member_profile.save()
+            messages.success(request, "Cover photo updated successfully!")
+        else:
+            messages.error(request, "Please select an image.")
+    
+    return redirect('member_profile', username=request.user.username)
 
 
 @login_required

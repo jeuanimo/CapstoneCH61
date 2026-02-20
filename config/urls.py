@@ -23,7 +23,7 @@ from pages import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.home_view, name='home'),
-    path('pages/', include('pages.urls')),
+    path('', include('pages.urls')),  # Pages URLs at root (no /pages/ prefix)
     path('chatbot/', include('pages.urls_chatbot')),
 ]
 

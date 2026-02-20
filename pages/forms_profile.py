@@ -122,11 +122,15 @@ class EditProfileForm(forms.ModelForm):
     class Meta:
         model = MemberProfile
         fields = [
-            'profile_image', 'phone', 'line_name', 'line_number',
+            'profile_image', 'cover_image', 'phone', 'line_name', 'line_number',
             'address', 'bio', 'emergency_contact_name', 'emergency_contact_phone'
         ]
         widgets = {
             'profile_image': forms.FileInput(attrs={
+                'class': 'form-control',
+                'accept': 'image/*'
+            }),
+            'cover_image': forms.FileInput(attrs={
                 'class': 'form-control',
                 'accept': 'image/*'
             }),
@@ -163,6 +167,7 @@ class EditProfileForm(forms.ModelForm):
         }
         labels = {
             'profile_image': 'Profile Picture',
+            'cover_image': 'Cover Photo (820x312 recommended)',
             'phone': 'Phone Number',
             'line_name': 'Line Name',
             'line_number': 'Line Number',
