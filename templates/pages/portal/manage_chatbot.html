@@ -1,0 +1,500 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Manage Chatbot Q&A - Admin Portal{% endblock %}
+
+{% block css %}
+<style>
+    .manage-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, #0047AB 0%, #003380 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 12px;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+
+    body.dark-mode .page-header {
+        background: linear-gradient(135deg, #1a2a4a 0%, #0b1020 100%);
+    }
+
+    .page-header h1 {
+        margin: 0;
+        font-size: 2rem;
+    }
+
+    .page-header p {
+        margin: 10px 0 0 0;
+        opacity: 0.9;
+    }
+
+    .content-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+    }
+
+    @media (max-width: 992px) {
+        .content-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .section-card {
+        background: white;
+        border-radius: 12px;
+        padding: 25px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    body.dark-mode .section-card {
+        background: #1a2a4a;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .section-card h3 {
+        color: #0047AB;
+        margin-top: 0;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #e9ecef;
+    }
+
+    body.dark-mode .section-card h3 {
+        color: #4a90e2;
+        border-bottom-color: #2a4a7a;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .form-group label {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 5px;
+        display: block;
+    }
+
+    body.dark-mode .form-group label {
+        color: #e8edf7;
+    }
+
+    .form-control {
+        border: 1px solid #ced4da;
+        border-radius: 8px;
+        padding: 10px 15px;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    body.dark-mode .form-control {
+        background-color: #0b1020;
+        border-color: #2a4a7a;
+        color: #e8edf7;
+    }
+
+    .btn {
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        border: none;
+        transition: all 0.3s;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #0047AB 0%, #003380 100%);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #1e5bc6 0%, #0047AB 100%);
+        transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+    }
+
+    .btn-secondary:hover {
+        background: #5a6268;
+    }
+
+    .btn-danger {
+        background: #dc3545;
+        color: white;
+    }
+
+    .btn-danger:hover {
+        background: #c82333;
+    }
+
+    .btn-success {
+        background: #28a745;
+        color: white;
+    }
+
+    .btn-warning {
+        background: #ffc107;
+        color: #212529;
+    }
+
+    .btn-sm {
+        padding: 5px 12px;
+        font-size: 0.9em;
+    }
+
+    .qa-list {
+        max-height: 600px;
+        overflow-y: auto;
+    }
+
+    .qa-item {
+        padding: 15px;
+        margin-bottom: 10px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        border-left: 4px solid #0047AB;
+    }
+
+    body.dark-mode .qa-item {
+        background: #0b1020;
+        border-left-color: #4a90e2;
+    }
+
+    .qa-item.inactive {
+        opacity: 0.6;
+        border-left-color: #6c757d;
+    }
+
+    .qa-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 10px;
+    }
+
+    .qa-question {
+        font-weight: 600;
+        color: #333;
+        margin: 0;
+        flex: 1;
+    }
+
+    body.dark-mode .qa-question {
+        color: #e8edf7;
+    }
+
+    .qa-answer {
+        font-size: 0.9em;
+        color: #555;
+        margin: 10px 0;
+        padding: 10px;
+        background: rgba(255,255,255,0.5);
+        border-radius: 6px;
+    }
+
+    body.dark-mode .qa-answer {
+        color: #c0c8d8;
+        background: rgba(0,0,0,0.2);
+    }
+
+    .qa-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        font-size: 0.85em;
+        color: #6c757d;
+    }
+
+    .qa-actions {
+        display: flex;
+        gap: 8px;
+        flex-shrink: 0;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 40px;
+        color: #6c757d;
+    }
+
+    .csv-help {
+        background: #e7f3ff;
+        border: 1px solid #b8daff;
+        border-radius: 8px;
+        padding: 15px;
+        margin-top: 15px;
+        font-size: 0.9em;
+    }
+
+    body.dark-mode .csv-help {
+        background: #1a3a5c;
+        border-color: #2a5a8a;
+        color: #e8edf7;
+    }
+
+    .csv-help code {
+        background: #f1f1f1;
+        padding: 2px 6px;
+        border-radius: 4px;
+    }
+
+    body.dark-mode .csv-help code {
+        background: #0b1020;
+    }
+
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: #0047AB;
+        text-decoration: none;
+        margin-bottom: 20px;
+    }
+
+    body.dark-mode .back-link {
+        color: #4a90e2;
+    }
+
+    .back-link:hover {
+        text-decoration: underline;
+    }
+
+    .badge {
+        display: inline-block;
+        padding: 3px 8px;
+        border-radius: 12px;
+        font-size: 0.75em;
+        font-weight: 600;
+    }
+
+    .badge-success {
+        background: #28a745;
+        color: white;
+    }
+
+    .badge-secondary {
+        background: #6c757d;
+        color: white;
+    }
+
+    .badge-info {
+        background: #17a2b8;
+        color: white;
+    }
+
+    .form-check {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .form-check-input {
+        width: 18px;
+        height: 18px;
+    }
+
+    .category-filter {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 15px;
+    }
+
+    .category-filter .badge {
+        cursor: pointer;
+    }
+
+    .warning-box {
+        background: #fff3cd;
+        border: 1px solid #ffc107;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+
+    body.dark-mode .warning-box {
+        background: #5c4a1a;
+        border-color: #8a7020;
+    }
+
+    .help-text {
+        font-size: 0.85em;
+        color: #6c757d;
+        margin-top: 5px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="manage-container">
+    <a href="{% url 'site_configuration' %}" class="back-link">
+        <i class="fas fa-arrow-left"></i> Back to Site Configuration
+    </a>
+
+    <div class="page-header">
+        <h1><i class="fas fa-robot"></i> Manage Chatbot Q&A</h1>
+        <p>Configure the chatbot's knowledge base for public questions</p>
+    </div>
+
+    <div class="warning-box">
+        <strong><i class="fas fa-exclamation-triangle"></i> Security Reminder:</strong>
+        Only add PUBLIC information. Never include sensitive member data, passwords, or private details.
+    </div>
+
+    {% if messages %}
+    <div class="messages" style="margin-bottom: 20px;">
+        {% for message in messages %}
+        <div class="alert" style="padding: 15px; border-radius: 8px; margin-bottom: 10px; background: {% if message.tags == 'success' %}#d4edda{% elif message.tags == 'error' %}#f8d7da{% else %}#fff3cd{% endif %};">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="content-grid">
+        <!-- Add New Q&A -->
+        <div class="section-card">
+            <h3><i class="fas fa-plus-circle"></i> Add New Q&A</h3>
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="add_qa">
+                
+                <div class="form-group">
+                    <label for="id_question">Question</label>
+                    {{ form.question }}
+                    <p class="help-text">Primary question visitors might ask</p>
+                </div>
+
+                <div class="form-group">
+                    <label for="id_keywords">Keywords (comma-separated)</label>
+                    {{ form.keywords }}
+                    <p class="help-text">Related words for matching, e.g., "history, founded, beginning"</p>
+                </div>
+
+                <div class="form-group">
+                    <label for="id_answer">Answer</label>
+                    {{ form.answer }}
+                    <p class="help-text">PUBLIC information only - no sensitive data!</p>
+                </div>
+
+                <div class="form-group">
+                    <label for="id_category">Category</label>
+                    {{ form.category }}
+                </div>
+
+                <div class="form-group">
+                    <label for="id_confidence_threshold">Confidence Threshold (0-100)</label>
+                    {{ form.confidence_threshold }}
+                    <p class="help-text">Higher = more specific matching required</p>
+                </div>
+
+                <div class="form-group">
+                    <label for="id_internal_note">Internal Note (optional)</label>
+                    {{ form.internal_note }}
+                    <p class="help-text">Admin notes - not visible to public</p>
+                </div>
+
+                <div class="form-group form-check">
+                    {{ form.is_active }}
+                    <label for="id_is_active">Active (chatbot will use this)</label>
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Add Q&A
+                </button>
+            </form>
+
+            <!-- CSV Import -->
+            <hr style="margin: 30px 0;">
+            <h4><i class="fas fa-file-csv"></i> Import from CSV</h4>
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="import_csv">
+                
+                <div class="form-group">
+                    {{ csv_form.csv_file }}
+                </div>
+
+                <button type="submit" class="btn btn-secondary">
+                    <i class="fas fa-upload"></i> Import CSV
+                </button>
+            </form>
+
+            <div class="csv-help">
+                <strong>CSV Format:</strong><br>
+                Columns: <code>question</code>, <code>keywords</code>, <code>answer</code>, <code>category</code>, <code>confidence_threshold</code>, <code>is_active</code><br><br>
+                <strong>Categories:</strong> about, history, membership, events, contact, values, faq, other
+            </div>
+        </div>
+
+        <!-- Existing Q&A -->
+        <div class="section-card">
+            <h3><i class="fas fa-list"></i> Existing Q&A ({{ qa_entries.count }})</h3>
+            
+            {% if qa_entries %}
+            <div class="qa-list">
+                {% for qa in qa_entries %}
+                <div class="qa-item {% if not qa.is_active %}inactive{% endif %}">
+                    <div class="qa-header">
+                        <p class="qa-question">
+                            {{ qa.question|truncatechars:80 }}
+                        </p>
+                        <div class="qa-actions">
+                            <form method="post" style="display: inline;">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="toggle_active">
+                                <input type="hidden" name="qa_id" value="{{ qa.id }}">
+                                <button type="submit" class="btn {% if qa.is_active %}btn-warning{% else %}btn-success{% endif %} btn-sm" title="{% if qa.is_active %}Deactivate{% else %}Activate{% endif %}">
+                                    <i class="fas {% if qa.is_active %}fa-pause{% else %}fa-play{% endif %}"></i>
+                                </button>
+                            </form>
+                            <a href="{% url 'edit_chatbot_qa' qa.id %}" class="btn btn-secondary btn-sm">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <form method="post" style="display: inline;" onsubmit="return confirm('Delete this Q&A entry?');">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="delete_qa">
+                                <input type="hidden" name="qa_id" value="{{ qa.id }}">
+                                <button type="submit" class="btn btn-danger btn-sm">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <div class="qa-answer">
+                        {{ qa.answer|truncatechars:150 }}
+                    </div>
+                    
+                    <div class="qa-meta">
+                        <span class="badge badge-info">{{ qa.get_category_display }}</span>
+                        {% if qa.is_active %}
+                        <span class="badge badge-success">Active</span>
+                        {% else %}
+                        <span class="badge badge-secondary">Inactive</span>
+                        {% endif %}
+                        <span><i class="fas fa-chart-line"></i> Confidence: {{ qa.confidence_threshold }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-robot" style="font-size: 3em; margin-bottom: 15px; opacity: 0.5;"></i>
+                <p>No Q&A entries yet. Add your first entry above!</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -5,13 +5,17 @@ Secure keyword-matching chatbot for public Q&A about the fraternity.
 Security Features:
 - POST only endpoint
 - CSRF protection (Django default)
-- Rate limiting (5 requests per minute)
+- Rate limiting (configurable via SiteConfiguration, default 30/m)
 - Input length limit (400 chars)
 - Input sanitization (remove dangerous chars)
 - No external APIs
 - No user history storage
 - Safe fallback messages
 - Keyword-based scoring (no ML, no fabrication)
+
+Note: Rate limiting is applied via decorator. To change the rate:
+1. Update chatbot_rate_limit in Site Configuration
+2. Restart the server for changes to take effect
 """
 
 from django.shortcuts import render
@@ -32,7 +36,21 @@ MAX_QUERY_LENGTH = 400
 MIN_QUERY_LENGTH = 3
 CONFIDENCE_THRESHOLD_DEFAULT = 30
 MAX_SUGGESTIONS = 5
-RATE_LIMIT = '30/m'  # 30 requests per minute per IP
+
+# Rate limit: Check if configurable via SiteConfiguration, else use default
+# Note: This is evaluated at module load time - requires server restart to change
+def _get_rate_limit():
+    """Get rate limit from SiteConfiguration or use default."""
+    try:
+        from pages.models import SiteConfiguration
+        config = SiteConfiguration.objects.first()
+        if config and config.chatbot_rate_limit:
+            return f'{config.chatbot_rate_limit}/m'
+    except Exception:
+        pass
+    return '30/m'  # Default: 30 requests per minute per IP
+
+RATE_LIMIT = _get_rate_limit()
 
 # Greeting words to detect casual conversation
 GREETING_WORDS = {

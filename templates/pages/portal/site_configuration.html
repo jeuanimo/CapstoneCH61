@@ -6,7 +6,7 @@
 {% block css %}
 <style>
     .config-container {
-        max-width: 900px;
+        max-width: 1000px;
         margin: 0 auto;
         padding: 20px;
     }
@@ -147,8 +147,14 @@
         gap: 20px;
     }
 
+    .form-row-3 {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 20px;
+    }
+
     @media (max-width: 768px) {
-        .form-row {
+        .form-row, .form-row-3 {
             grid-template-columns: 1fr;
         }
     }
@@ -180,10 +186,13 @@
         font-weight: 600;
         cursor: pointer;
         transition: all 0.3s;
+        text-decoration: none;
+        display: inline-block;
     }
 
     .btn-reset:hover {
         background: #5a6268;
+        color: white;
     }
 
     .form-actions {
@@ -209,6 +218,124 @@
     body.dark-mode .last-updated {
         color: #adb5bd;
     }
+
+    .form-check {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+
+    body.dark-mode .form-check {
+        background: #0b1020;
+    }
+
+    .form-check-input {
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+    }
+
+    .form-check-label {
+        font-weight: normal !important;
+        margin-bottom: 0 !important;
+        cursor: pointer;
+    }
+
+    .color-preview {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .section-divider {
+        height: 1px;
+        background: #e9ecef;
+        margin: 25px 0;
+    }
+
+    body.dark-mode .section-divider {
+        background: #2a4a7a;
+    }
+
+    .warning-toggle {
+        background: #fff3cd;
+        border-left: 4px solid #ffc107;
+        padding: 15px;
+        border-radius: 0 8px 8px 0;
+        margin-bottom: 15px;
+    }
+
+    body.dark-mode .warning-toggle {
+        background: #3d3312;
+        color: #f8d7a0;
+    }
+
+    .danger-toggle {
+        background: #f8d7da;
+        border-left: 4px solid #dc3545;
+        padding: 15px;
+        border-radius: 0 8px 8px 0;
+        margin-bottom: 15px;
+    }
+
+    body.dark-mode .danger-toggle {
+        background: #3d1218;
+        color: #f5c6cb;
+    }
+
+    .nav-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+        margin-bottom: 20px;
+        border-bottom: 2px solid #e9ecef;
+        padding-bottom: 10px;
+    }
+
+    body.dark-mode .nav-tabs {
+        border-bottom-color: #2a4a7a;
+    }
+
+    .nav-tab {
+        padding: 8px 16px;
+        background: #f8f9fa;
+        border: none;
+        border-radius: 8px 8px 0 0;
+        color: #666;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-weight: 500;
+    }
+
+    .nav-tab:hover {
+        background: #e9ecef;
+    }
+
+    .nav-tab.active {
+        background: #0047AB;
+        color: white;
+    }
+
+    body.dark-mode .nav-tab {
+        background: #0b1020;
+        color: #adb5bd;
+    }
+
+    body.dark-mode .nav-tab.active {
+        background: #1e5bc6;
+        color: white;
+    }
+
+    .tab-content {
+        display: none;
+    }
+
+    .tab-content.active {
+        display: block;
+    }
 </style>
 {% endblock %}
 
@@ -216,123 +343,400 @@
 <div class="config-container">
     <div class="config-header">
         <h1><i class="fas fa-cogs"></i> Site Configuration</h1>
-        <p>Customize your chapter's branding, logos, and site settings</p>
+        <p>Customize your chapter's branding, content, and site settings</p>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="nav-tabs">
+        <button type="button" class="nav-tab active" data-tab="branding"><i class="fas fa-building"></i> Branding</button>
+        <button type="button" class="nav-tab" data-tab="chapter"><i class="fas fa-info-circle"></i> Chapter Details</button>
+        <button type="button" class="nav-tab" data-tab="about"><i class="fas fa-file-alt"></i> About Content</button>
+        <button type="button" class="nav-tab" data-tab="contact"><i class="fas fa-address-card"></i> Contact</button>
+        <button type="button" class="nav-tab" data-tab="seo"><i class="fas fa-search"></i> SEO</button>
+        <button type="button" class="nav-tab" data-tab="chatbot"><i class="fas fa-robot"></i> Chatbot</button>
+        <button type="button" class="nav-tab" data-tab="theme"><i class="fas fa-palette"></i> Theme</button>
+        <button type="button" class="nav-tab" data-tab="features"><i class="fas fa-toggle-on"></i> Features</button>
     </div>
 
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
 
-        <!-- Organization Branding Section -->
-        <div class="config-section">
-            <h3><i class="fas fa-building"></i> Organization Branding</h3>
-            
-            <div class="form-group">
-                <label for="{{ form.organization_name.id_for_label }}">Organization Name</label>
-                {{ form.organization_name }}
-                <p class="help-text">This is displayed as the main title in the header</p>
+        <!-- BRANDING TAB -->
+        <div id="branding" class="tab-content active">
+            <!-- Organization Branding Section -->
+            <div class="config-section">
+                <h3><i class="fas fa-building"></i> Organization Branding</h3>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="{{ form.organization_name.id_for_label }}">Organization Name</label>
+                        {{ form.organization_name }}
+                        <p class="help-text">Main title displayed in the header</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.chapter_name.id_for_label }}">Chapter Name</label>
+                        {{ form.chapter_name }}
+                        <p class="help-text">Your chapter name displayed below the organization name</p>
+                    </div>
+                </div>
             </div>
 
-            <div class="form-group">
-                <label for="{{ form.chapter_name.id_for_label }}">Chapter Name</label>
-                {{ form.chapter_name }}
-                <p class="help-text">Your chapter name displayed below the organization name</p>
+            <!-- Logo Images Section -->
+            <div class="config-section">
+                <h3><i class="fas fa-image"></i> Logos & Images</h3>
+
+                <!-- PBS Seal -->
+                <div class="form-group">
+                    <label for="{{ form.pbs_seal.id_for_label }}">Phi Beta Sigma Seal/Logo</label>
+                    {% if config.pbs_seal %}
+                    <div class="current-image-preview">
+                        <img src="{{ config.pbs_seal.url }}" alt="Current PBS Seal">
+                        <div class="image-info">
+                            <strong><i class="fas fa-check-circle"></i> Current image uploaded</strong>
+                            <span>{{ config.pbs_seal.name|truncatechars:50 }}</span>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {{ form.pbs_seal }}
+                    <p class="help-text">The main Phi Beta Sigma seal shown in the header (recommended: 200x200px PNG)</p>
+                </div>
+
+                <!-- Chapter Logo -->
+                <div class="form-group">
+                    <label for="{{ form.chapter_logo.id_for_label }}">Chapter Logo (Optional)</label>
+                    {% if config.chapter_logo %}
+                    <div class="current-image-preview">
+                        <img src="{{ config.chapter_logo.url }}" alt="Current Chapter Logo">
+                        <div class="image-info">
+                            <strong><i class="fas fa-check-circle"></i> Current image uploaded</strong>
+                            <span>{{ config.chapter_logo.name|truncatechars:50 }}</span>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {{ form.chapter_logo }}
+                    <p class="help-text">Your chapter-specific logo</p>
+                </div>
+
+                <!-- Favicon -->
+                <div class="form-group">
+                    <label for="{{ form.favicon.id_for_label }}">Site Favicon</label>
+                    {% if config.favicon %}
+                    <div class="current-image-preview">
+                        <img src="{{ config.favicon.url }}" alt="Current Favicon" style="max-width: 48px; max-height: 48px;">
+                        <div class="image-info">
+                            <strong><i class="fas fa-check-circle"></i> Current favicon uploaded</strong>
+                            <span>{{ config.favicon.name|truncatechars:50 }}</span>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {{ form.favicon }}
+                    <p class="help-text">Small icon shown in browser tabs (recommended: 32x32 or 64x64 PNG)</p>
+                </div>
+            </div>
+
+            <!-- Footer Section -->
+            <div class="config-section">
+                <h3><i class="fas fa-copyright"></i> Footer Content</h3>
+                
+                <div class="form-group">
+                    <label for="{{ form.footer_text.id_for_label }}">Footer Text</label>
+                    {{ form.footer_text }}
+                    <p class="help-text">Copyright and organization text displayed at the bottom of every page</p>
+                </div>
             </div>
         </div>
 
-        <!-- Logo Images Section -->
-        <div class="config-section">
-            <h3><i class="fas fa-image"></i> Logos & Images</h3>
+        <!-- CHAPTER DETAILS TAB -->
+        <div id="chapter" class="tab-content">
+            <div class="config-section">
+                <h3><i class="fas fa-info-circle"></i> Chapter Details</h3>
+                <p class="help-text" style="margin-bottom: 20px;">This information appears on the About page and home page.</p>
 
-            <!-- PBS Seal -->
-            <div class="form-group">
-                <label for="{{ form.pbs_seal.id_for_label }}">Phi Beta Sigma Seal/Logo</label>
-                {% if config.pbs_seal %}
-                <div class="current-image-preview">
-                    <img src="{{ config.pbs_seal.url }}" alt="Current PBS Seal">
-                    <div class="image-info">
-                        <strong><i class="fas fa-check-circle"></i> Current image uploaded</strong>
-                        <span>{{ config.pbs_seal.name|truncatechars:50 }}</span>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="{{ form.chapter_president.id_for_label }}">Chapter President</label>
+                        {{ form.chapter_president }}
+                        <p class="help-text">Name of the current chapter president</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.charter_date.id_for_label }}">Charter Date</label>
+                        {{ form.charter_date }}
+                        <p class="help-text">Date the chapter was chartered</p>
                     </div>
                 </div>
-                {% endif %}
-                {{ form.pbs_seal }}
-                <p class="help-text">The main Phi Beta Sigma seal shown in the header (recommended: 200x200px PNG)</p>
-            </div>
 
-            <!-- Chapter Logo -->
-            <div class="form-group">
-                <label for="{{ form.chapter_logo.id_for_label }}">Chapter Logo (Optional)</label>
-                {% if config.chapter_logo %}
-                <div class="current-image-preview">
-                    <img src="{{ config.chapter_logo.url }}" alt="Current Chapter Logo">
-                    <div class="image-info">
-                        <strong><i class="fas fa-check-circle"></i> Current image uploaded</strong>
-                        <span>{{ config.chapter_logo.name|truncatechars:50 }}</span>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="{{ form.chapter_region.id_for_label }}">Region</label>
+                        {{ form.chapter_region }}
+                        <p class="help-text">e.g., Great Lakes Region</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.city_state.id_for_label }}">City/State</label>
+                        {{ form.city_state }}
+                        <p class="help-text">e.g., Belleville, Illinois</p>
                     </div>
                 </div>
-                {% endif %}
-                {{ form.chapter_logo }}
-                <p class="help-text">Your chapter-specific logo (can be displayed alongside the PBS seal)</p>
-            </div>
 
-            <!-- Favicon -->
-            <div class="form-group">
-                <label for="{{ form.favicon.id_for_label }}">Site Favicon (Browser Tab Icon)</label>
-                {% if config.favicon %}
-                <div class="current-image-preview">
-                    <img src="{{ config.favicon.url }}" alt="Current Favicon" style="max-width: 48px; max-height: 48px;">
-                    <div class="image-info">
-                        <strong><i class="fas fa-check-circle"></i> Current favicon uploaded</strong>
-                        <span>{{ config.favicon.name|truncatechars:50 }}</span>
-                    </div>
+                <div class="form-group">
+                    <label for="{{ form.mailing_address.id_for_label }}">Mailing Address</label>
+                    {{ form.mailing_address }}
+                    <p class="help-text">Official chapter mailing address</p>
                 </div>
-                {% endif %}
-                {{ form.favicon }}
-                <p class="help-text">Small icon shown in browser tabs (recommended: 32x32 or 64x64 PNG)</p>
+
+                <div class="form-group">
+                    <label for="{{ form.service_areas.id_for_label }}">Service Areas</label>
+                    {{ form.service_areas }}
+                    <p class="help-text">Counties/areas served (e.g., St. Clair County, Madison County)</p>
+                </div>
             </div>
         </div>
 
-        <!-- Social Media Links Section -->
-        <div class="config-section">
-            <h3><i class="fas fa-share-alt"></i> Social Media Links</h3>
-            
-            <div class="form-row">
+        <!-- ABOUT CONTENT TAB -->
+        <div id="about" class="tab-content">
+            <div class="config-section">
+                <h3><i class="fas fa-file-alt"></i> About Us Content</h3>
+                <p class="help-text" style="margin-bottom: 20px;">This content appears on the About page and in the home page modal.</p>
+
                 <div class="form-group">
-                    <label for="{{ form.facebook_url.id_for_label }}"><i class="fab fa-facebook"></i> Facebook URL</label>
-                    {{ form.facebook_url }}
+                    <label for="{{ form.about_us_text.id_for_label }}">About Us Text</label>
+                    {{ form.about_us_text }}
+                    <p class="help-text">Main description of your chapter</p>
                 </div>
 
                 <div class="form-group">
-                    <label for="{{ form.instagram_url.id_for_label }}"><i class="fab fa-instagram"></i> Instagram URL</label>
-                    {{ form.instagram_url }}
+                    <label for="{{ form.mission_statement.id_for_label }}">Mission Statement</label>
+                    {{ form.mission_statement }}
+                    <p class="help-text">Your chapter's mission and values</p>
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.chapter_legacy.id_for_label }}">Chapter Legacy</label>
+                    {{ form.chapter_legacy }}
+                    <p class="help-text">Summary of chapter history and achievements</p>
                 </div>
             </div>
+        </div>
 
-            <div class="form-row">
+        <!-- CONTACT TAB -->
+        <div id="contact" class="tab-content">
+            <div class="config-section">
+                <h3><i class="fas fa-address-card"></i> Contact Information</h3>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="{{ form.email_address.id_for_label }}"><i class="fas fa-envelope"></i> Contact Email</label>
+                        {{ form.email_address }}
+                        <p class="help-text">Primary email address for chapter inquiries</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.phone_number.id_for_label }}"><i class="fas fa-phone"></i> Phone Number</label>
+                        {{ form.phone_number }}
+                        <p class="help-text">Chapter contact phone number</p>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="{{ form.meeting_location.id_for_label }}"><i class="fas fa-map-marker-alt"></i> Meeting Location</label>
+                        {{ form.meeting_location }}
+                        <p class="help-text">Where the chapter meets</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.meeting_schedule.id_for_label }}"><i class="fas fa-calendar"></i> Meeting Schedule</label>
+                        {{ form.meeting_schedule }}
+                        <p class="help-text">When the chapter meets</p>
+                    </div>
+                </div>
+
                 <div class="form-group">
+                    <label for="{{ form.pbs_hq_url.id_for_label }}"><i class="fas fa-globe"></i> PBS Headquarters URL</label>
+                    {{ form.pbs_hq_url }}
+                    <p class="help-text">Link to Phi Beta Sigma national website</p>
+                </div>
+
+                <div class="section-divider"></div>
+
+                <h3><i class="fas fa-share-alt"></i> Social Media Links</h3>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="{{ form.facebook_url.id_for_label }}"><i class="fab fa-facebook"></i> Facebook URL</label>
+                        {{ form.facebook_url }}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.instagram_url.id_for_label }}"><i class="fab fa-instagram"></i> Instagram URL</label>
+                        {{ form.instagram_url }}
+                    </div>
+                </div>
+
+                <div class="form-group" style="max-width: 50%;">
                     <label for="{{ form.twitter_url.id_for_label }}"><i class="fab fa-twitter"></i> Twitter/X URL</label>
                     {{ form.twitter_url }}
                 </div>
+            </div>
+        </div>
+
+        <!-- SEO TAB -->
+        <div id="seo" class="tab-content">
+            <div class="config-section">
+                <h3><i class="fas fa-search"></i> SEO & Meta Tags</h3>
+                <p class="help-text" style="margin-bottom: 20px;">Optimize your site for search engines and social sharing.</p>
 
                 <div class="form-group">
-                    <label for="{{ form.email_address.id_for_label }}"><i class="fas fa-envelope"></i> Contact Email</label>
-                    {{ form.email_address }}
+                    <label for="{{ form.meta_description.id_for_label }}">Meta Description</label>
+                    {{ form.meta_description }}
+                    <p class="help-text">Appears in search engine results (150-160 characters recommended)</p>
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.meta_keywords.id_for_label }}">Meta Keywords</label>
+                    {{ form.meta_keywords }}
+                    <p class="help-text">Comma-separated keywords for SEO</p>
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.og_image.id_for_label }}">Social Sharing Image</label>
+                    {% if config.og_image %}
+                    <div class="current-image-preview">
+                        <img src="{{ config.og_image.url }}" alt="Current OG Image">
+                        <div class="image-info">
+                            <strong><i class="fas fa-check-circle"></i> Current image uploaded</strong>
+                            <span>{{ config.og_image.name|truncatechars:50 }}</span>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {{ form.og_image }}
+                    <p class="help-text">Image displayed when sharing on social media (1200x630px recommended)</p>
                 </div>
             </div>
         </div>
 
-        <!-- Footer Section -->
-        <div class="config-section">
-            <h3><i class="fas fa-copyright"></i> Footer Content</h3>
-            
-            <div class="form-group">
-                <label for="{{ form.footer_text.id_for_label }}">Footer Text</label>
-                {{ form.footer_text }}
-                <p class="help-text">Copyright and organization text displayed at the bottom of every page</p>
+        <!-- CHATBOT TAB -->
+        <div id="chatbot" class="tab-content">
+            <div class="config-section">
+                <h3><i class="fas fa-robot"></i> Chatbot Settings</h3>
+
+                <div class="form-group">
+                    <div class="form-check">
+                        {{ form.chatbot_enabled }}
+                        <label class="form-check-label" for="{{ form.chatbot_enabled.id_for_label }}">
+                            <strong>Enable Chatbot</strong> - Show the chatbot widget on all pages
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.chatbot_welcome_message.id_for_label }}">Welcome Message</label>
+                    {{ form.chatbot_welcome_message }}
+                    <p class="help-text">Message displayed when users first open the chatbot</p>
+                </div>
+
+                <div class="form-group" style="max-width: 300px;">
+                    <label for="{{ form.chatbot_rate_limit.id_for_label }}">Rate Limit (requests/minute)</label>
+                    {{ form.chatbot_rate_limit }}
+                    <p class="help-text">Maximum requests per minute per IP to prevent abuse</p>
+                </div>
+            </div>
+
+            <!-- Quick Link to Q&A Management -->
+            <div class="config-section" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-left: 4px solid #28a745;">
+                <h4 style="margin: 0 0 10px 0; color: #28a745;"><i class="fas fa-question-circle"></i> Chatbot Knowledge Base</h4>
+                <p style="margin: 0 0 15px 0; color: #666;">Configure the questions and answers your chatbot can respond to.</p>
+                <a href="{% url 'manage_chatbot_qa' %}" class="btn-save" style="background: #28a745;">
+                    <i class="fas fa-cog"></i> Manage Q&A
+                </a>
             </div>
         </div>
 
-        <!-- Form Actions -->
+        <!-- THEME TAB -->
+        <div id="theme" class="tab-content">
+            <div class="config-section">
+                <h3><i class="fas fa-palette"></i> Theme & Appearance</h3>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="{{ form.primary_color.id_for_label }}">Primary Color</label>
+                        <div class="color-preview">
+                            {{ form.primary_color }}
+                            <span id="primary-color-hex">{{ config.primary_color|default:"#0047AB" }}</span>
+                        </div>
+                        <p class="help-text">Main brand color for headers, buttons, links</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.secondary_color.id_for_label }}">Secondary Color</label>
+                        <div class="color-preview">
+                            {{ form.secondary_color }}
+                            <span id="secondary-color-hex">{{ config.secondary_color|default:"#003380" }}</span>
+                        </div>
+                        <p class="help-text">Accent color for gradients and hover states</p>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="form-check">
+                        {{ form.dark_mode_default }}
+                        <label class="form-check-label" for="{{ form.dark_mode_default.id_for_label }}">
+                            <strong>Dark Mode Default</strong> - Make dark mode the default for new visitors
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- FEATURES TAB -->
+        <div id="features" class="tab-content">
+            <div class="config-section">
+                <h3><i class="fas fa-toggle-on"></i> Feature Toggles</h3>
+                <p class="help-text" style="margin-bottom: 20px;">Enable or disable major site features.</p>
+
+                <div class="form-group">
+                    <div class="form-check">
+                        {{ form.show_boutique }}
+                        <label class="form-check-label" for="{{ form.show_boutique.id_for_label }}">
+                            <strong><i class="fas fa-shopping-bag"></i> Show Boutique</strong> - Display the merchandise shop section
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="form-check">
+                        {{ form.show_events }}
+                        <label class="form-check-label" for="{{ form.show_events.id_for_label }}">
+                            <strong><i class="fas fa-calendar-alt"></i> Show Events</strong> - Display the events calendar section
+                        </label>
+                    </div>
+                </div>
+
+                <div class="section-divider"></div>
+
+                <h4 style="color: #dc3545;"><i class="fas fa-exclamation-triangle"></i> Maintenance Mode</h4>
+                
+                <div class="danger-toggle">
+                    <div class="form-check" style="background: transparent; padding: 0;">
+                        {{ form.maintenance_mode }}
+                        <label class="form-check-label" for="{{ form.maintenance_mode.id_for_label }}">
+                            <strong>Enable Maintenance Mode</strong> - Only staff members can access the site
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.maintenance_message.id_for_label }}">Maintenance Message</label>
+                    {{ form.maintenance_message }}
+                    <p class="help-text">Message displayed to visitors during maintenance</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Actions (Always visible) -->
         <div class="form-actions">
             <a href="{% url 'portal_dashboard' %}" class="btn-reset">
                 <i class="fas fa-arrow-left"></i> Back to Dashboard
@@ -343,6 +747,32 @@
         </div>
     </form>
 
+    <!-- Content Management Section -->
+    <div class="config-section" style="margin-top: 30px;">
+        <h3><i class="fas fa-edit"></i> Content Management</h3>
+        <p style="color: #666; margin-bottom: 20px;">Manage dynamic content without editing HTML code directly.</p>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <!-- Chapter History Management -->
+            <div style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 25px; border-radius: 12px; border-left: 4px solid #0047AB;">
+                <h4 style="margin: 0 0 10px 0; color: #0047AB;"><i class="fas fa-history"></i> Chapter History</h4>
+                <p style="margin: 0 0 15px 0; color: #666; font-size: 0.9em;">Add, edit, and organize your chapter's history page content. Import via CSV or enter manually.</p>
+                <a href="{% url 'manage_chapter_history' %}" style="display: inline-flex; align-items: center; gap: 8px; background: #0047AB; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600;">
+                    <i class="fas fa-cog"></i> Manage History
+                </a>
+            </div>
+            
+            <!-- Chatbot Q&A Management -->
+            <div style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 25px; border-radius: 12px; border-left: 4px solid #28a745;">
+                <h4 style="margin: 0 0 10px 0; color: #28a745;"><i class="fas fa-robot"></i> Chatbot Q&A</h4>
+                <p style="margin: 0 0 15px 0; color: #666; font-size: 0.9em;">Configure the chatbot's knowledge base. Add questions and answers visitors can ask about.</p>
+                <a href="{% url 'manage_chatbot_qa' %}" style="display: inline-flex; align-items: center; gap: 8px; background: #28a745; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600;">
+                    <i class="fas fa-cog"></i> Manage Chatbot
+                </a>
+            </div>
+        </div>
+    </div>
+
     {% if config.updated_at %}
     <p class="last-updated">
         <i class="fas fa-clock"></i> Last updated: {{ config.updated_at|date:"F d, Y at g:i A" }}
@@ -350,4 +780,40 @@
     </p>
     {% endif %}
 </div>
+
+<script>
+// Tab navigation
+document.querySelectorAll('.nav-tab').forEach(tab => {
+    tab.addEventListener('click', function() {
+        const targetTab = this.dataset.tab;
+        
+        // Update active states
+        document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        
+        this.classList.add('active');
+        document.getElementById(targetTab).classList.add('active');
+        
+        // Save active tab to localStorage
+        localStorage.setItem('siteConfigActiveTab', targetTab);
+    });
+});
+
+// Restore last active tab
+const savedTab = localStorage.getItem('siteConfigActiveTab');
+if (savedTab) {
+    const tabButton = document.querySelector(`.nav-tab[data-tab="${savedTab}"]`);
+    if (tabButton) {
+        tabButton.click();
+    }
+}
+
+// Color picker hex display update
+document.getElementById('{{ form.primary_color.id_for_label }}')?.addEventListener('input', function() {
+    document.getElementById('primary-color-hex').textContent = this.value;
+});
+document.getElementById('{{ form.secondary_color.id_for_label }}')?.addEventListener('input', function() {
+    document.getElementById('secondary-color-hex').textContent = this.value;
+});
+</script>
 {% endblock %}

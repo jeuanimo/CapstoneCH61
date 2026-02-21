@@ -2,7 +2,7 @@
 
 {% load static %}
 
-{% block title %}Chapter History - Phi Beta Sigma Fraternity, Inc. | Nu Gamma Sigma Chapter{% endblock %}
+{% block title %}Chapter History - Phi Beta Sigma Fraternity, Inc. | {{ site_config.chapter_name|default:"Nu Gamma Sigma Chapter" }}{% endblock %}
 
 {% block css %}
 <style>
@@ -81,6 +81,35 @@
         color: #e8edf7;
     }
     
+    .history-section {
+        margin-bottom: 2.5rem;
+    }
+    
+    .history-section h2 {
+        color: #164f90;
+        margin-top: 0;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #e9ecef;
+    }
+    
+    body.dark-mode .history-section h2 {
+        color: #87ceeb;
+        border-bottom-color: #2a4a7a;
+    }
+    
+    .history-section p {
+        margin-bottom: 1rem;
+    }
+    
+    .history-section .section-image {
+        max-width: 100%;
+        height: auto;
+        border-radius: 8px;
+        margin: 1rem 0;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+    
     .page-content h2 {
         color: #164f90;
         margin-top: 2rem;
@@ -93,6 +122,18 @@
     
     .page-content p {
         margin-bottom: 1.5rem;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: #6c757d;
+    }
+    
+    .empty-state i {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
     }
     
     @media (max-width: 768px) {
@@ -112,20 +153,40 @@
     <div class="content-wrapper">
         <div class="page-header">
             <h1>Chapter History</h1>
-            <p>The Story of Nu Gamma Sigma Chapter</p>
+            <p>The Story of {{ site_config.chapter_name|default:"Nu Gamma Sigma Chapter" }}</p>
         </div>
         
         <div class="page-content">
-            <p>Welcome to the Chapter History page. This is where we share the rich history and heritage of the Nu Gamma Sigma Chapter of Phi Beta Sigma Fraternity, Inc.</p>
-            
-            <h2>Our Beginning</h2>
-            <p>Add your chapter's founding story and historical background here...</p>
-            
-            <h2>Milestones & Achievements</h2>
-            <p>Share key milestones, achievements, and important events in your chapter's history...</p>
-            
-            <h2>Leadership Legacy</h2>
-            <p>Highlight past leaders and their contributions to the chapter's development...</p>
+            {% if history_sections %}
+                {% for section in history_sections %}
+                <div class="history-section">
+                    <h2>{{ section.title }}</h2>
+                    {% if section.image %}
+                    <img src="{{ section.image.url }}" alt="{{ section.title }}" class="section-image">
+                    {% endif %}
+                    {{ section.content|safe }}
+                </div>
+                {% endfor %}
+            {% else %}
+                <!-- Fallback content when no database entries exist -->
+                <div class="empty-state">
+                    <i class="fas fa-history"></i>
+                    <p>Chapter history content is being prepared.</p>
+                    <p>Please check back soon!</p>
+                </div>
+                
+                <!-- Default placeholder sections for reference -->
+                <noscript>
+                    <h2>Our Beginning</h2>
+                    <p>Add your chapter's founding story and historical background here...</p>
+                    
+                    <h2>Milestones & Achievements</h2>
+                    <p>Share key milestones, achievements, and important events in your chapter's history...</p>
+                    
+                    <h2>Leadership Legacy</h2>
+                    <p>Highlight past leaders and their contributions to the chapter's development...</p>
+                </noscript>
+            {% endif %}
         </div>
     </div>
 </div>

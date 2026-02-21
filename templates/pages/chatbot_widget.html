@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Fraternity Information Chatbot - Nu Gamma Sigma{% endblock %}
+{% block title %}Fraternity Information Chatbot - {{ site_config.chapter_name|default:"Nu Gamma Sigma" }}{% endblock %}
 
 {% block content %}
 <div class="chatbot-container">
@@ -9,7 +9,7 @@
         <!-- Header -->
         <div class="chatbot-header">
             <h2><i class="fas fa-comments"></i> Fraternity Information Assistant</h2>
-            <p>Ask us anything about Phi Beta Sigma Fraternity, Inc. - Nu Gamma Sigma Chapter</p>
+            <p>Ask us anything about {{ site_config.organization_name|default:"Phi Beta Sigma Fraternity, Inc" }}. - {{ site_config.chapter_name|default:"Nu Gamma Sigma Chapter" }}</p>
         </div>
 
         <!-- Chat Display -->
@@ -17,7 +17,7 @@
             <div class="message bot-message">
                 <div class="message-content">
                     <p><strong>Hello! 👋</strong></p>
-                    <p>I'm here to help answer questions about our fraternity. You can ask me about our history, membership, events, values, and more.</p>
+                    <p>{% if site_config and site_config.chatbot_welcome_message %}{{ site_config.chatbot_welcome_message }}{% else %}I'm here to help answer questions about our fraternity. You can ask me about our history, membership, events, values, and more.{% endif %}</p>
                     <p><small style="color: #888;">Powered by Public Knowledge Base</small></p>
                 </div>
             </div>

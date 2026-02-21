@@ -133,6 +133,14 @@ urlpatterns = [
     # SITE CONFIGURATION (Admin/Officer only)
     path('portal/site-configuration/', views.site_configuration, name='site_configuration'),
     
+    # CHAPTER HISTORY MANAGEMENT (Admin/Officer only)
+    path('portal/manage-history/', views.manage_chapter_history, name='manage_chapter_history'),
+    path('portal/manage-history/edit/<int:section_id>/', views.edit_history_section, name='edit_history_section'),
+    
+    # CHATBOT Q&A MANAGEMENT (Admin/Officer only)
+    path('portal/manage-chatbot/', views.manage_chatbot_qa, name='manage_chatbot_qa'),
+    path('portal/manage-chatbot/edit/<int:qa_id>/', views.edit_chatbot_qa, name='edit_chatbot_qa'),
+    
     # MEMBER PORTAL - MAIN SECTIONS (Login required)
     path('portal/', views.portal_dashboard, name='portal_dashboard'),
     

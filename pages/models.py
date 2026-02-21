@@ -22,6 +22,9 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 
+# Upload path constants
+SITE_BRANDING_PATH = 'site_branding/'
+
 
 class Category(models.Model):
     """
@@ -1088,6 +1091,70 @@ class OrderItem(models.Model):
         return self.price * self.quantity
 
 
+class ChapterHistorySection(models.Model):
+    """
+    Stores editable sections for the chapter history page.
+    
+    Officers can add/edit/delete history sections through the admin console
+    without needing to modify HTML directly.
+    """
+    
+    SECTION_TYPE_CHOICES = [
+        ('intro', 'Introduction'),
+        ('founding', 'Founding Story'),
+        ('milestones', 'Milestones & Achievements'),
+        ('leadership', 'Leadership Legacy'),
+        ('community', 'Community Service'),
+        ('national', 'National Connection'),
+        ('custom', 'Custom Section'),
+    ]
+    
+    title = models.CharField(
+        max_length=200,
+        help_text='Section heading (e.g., "Our Beginning")'
+    )
+    section_type = models.CharField(
+        max_length=20,
+        choices=SECTION_TYPE_CHOICES,
+        default='custom',
+        help_text='Type of content section'
+    )
+    content = models.TextField(
+        help_text='Section content (supports basic HTML formatting)'
+    )
+    display_order = models.PositiveIntegerField(
+        default=0,
+        help_text='Order in which sections appear (lower = first)'
+    )
+    is_active = models.BooleanField(
+        default=True,
+        help_text='Inactive sections will not display on the page'
+    )
+    image = models.ImageField(
+        upload_to='history_images/',
+        blank=True,
+        null=True,
+        help_text='Optional image for this section'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='history_sections_created'
+    )
+    
+    class Meta:
+        ordering = ['display_order', 'created_at']
+        verbose_name = 'Chapter History Section'
+        verbose_name_plural = 'Chapter History Sections'
+    
+    def __str__(self):
+        return f"{self.title} ({self.get_section_type_display()})"
+
+
 class SiteConfiguration(models.Model):
     """
     Singleton model for site-wide configuration and branding.
@@ -1095,8 +1162,13 @@ class SiteConfiguration(models.Model):
     
     Allows officers/admins to customize:
     - Chapter name and organization name
+    - Chapter details (president, charter date, address, etc.)
     - Logos (chapter logo, PBS seal, favicon)
     - Social media links
+    - Contact information
+    - SEO meta tags
+    - Chatbot settings
+    - Feature toggles
     - Footer text
     """
     
@@ -1112,21 +1184,75 @@ class SiteConfiguration(models.Model):
         help_text='Chapter name displayed below organization name'
     )
     
+    # Chapter Details
+    chapter_president = models.CharField(
+        max_length=200,
+        blank=True,
+        default='',
+        help_text='Name of the current chapter president'
+    )
+    charter_date = models.DateField(
+        blank=True,
+        null=True,
+        help_text='Date the chapter was chartered'
+    )
+    chapter_region = models.CharField(
+        max_length=100,
+        blank=True,
+        default='',
+        help_text='Regional affiliation (e.g., Great Lakes Region)'
+    )
+    mailing_address = models.CharField(
+        max_length=300,
+        blank=True,
+        default='',
+        help_text='Official chapter mailing address'
+    )
+    city_state = models.CharField(
+        max_length=200,
+        blank=True,
+        default='',
+        help_text='City and state (e.g., Belleville, Illinois)'
+    )
+    service_areas = models.CharField(
+        max_length=500,
+        blank=True,
+        default='',
+        help_text='Areas served by the chapter (e.g., St. Clair County, Madison County)'
+    )
+    
+    # About Us Content
+    about_us_text = models.TextField(
+        blank=True,
+        default='',
+        help_text='Main "About the Chapter" text displayed on the About page and home page modal'
+    )
+    mission_statement = models.TextField(
+        blank=True,
+        default='',
+        help_text='Chapter mission statement'
+    )
+    chapter_legacy = models.TextField(
+        blank=True,
+        default='',
+        help_text='Chapter legacy/history summary text'
+    )
+    
     # Logo Images
     chapter_logo = models.ImageField(
-        upload_to='site_branding/',
+        upload_to=SITE_BRANDING_PATH,
         blank=True,
         null=True,
         help_text='Chapter-specific logo (optional)'
     )
     pbs_seal = models.ImageField(
-        upload_to='site_branding/',
+        upload_to=SITE_BRANDING_PATH,
         blank=True,
         null=True,
         help_text='Phi Beta Sigma seal/logo displayed in header'
     )
     favicon = models.ImageField(
-        upload_to='site_branding/',
+        upload_to=SITE_BRANDING_PATH,
         blank=True,
         null=True,
         help_text='Site favicon (browser tab icon)'
@@ -1151,7 +1277,105 @@ class SiteConfiguration(models.Model):
     email_address = models.EmailField(
         blank=True, 
         default='',
-        help_text='Contact email address'
+        help_text='Contact email address (displayed site-wide and used for contact form)'
+    )
+    
+    # Contact Information
+    phone_number = models.CharField(
+        max_length=20,
+        blank=True,
+        default='',
+        help_text='Chapter phone number'
+    )
+    meeting_location = models.CharField(
+        max_length=300,
+        blank=True,
+        default='',
+        help_text='Where the chapter holds meetings'
+    )
+    meeting_schedule = models.CharField(
+        max_length=200,
+        blank=True,
+        default='',
+        help_text='When the chapter meets (e.g., First Saturday of each month at 10 AM)'
+    )
+    pbs_hq_url = models.URLField(
+        blank=True,
+        default='https://phibetasigma1914.org/',
+        help_text='Link to Phi Beta Sigma national headquarters website'
+    )
+    
+    # SEO & Meta Tags
+    meta_description = models.CharField(
+        max_length=300,
+        blank=True,
+        default='',
+        help_text='Site description for search engines (recommended 150-160 characters)'
+    )
+    meta_keywords = models.CharField(
+        max_length=500,
+        blank=True,
+        default='',
+        help_text='SEO keywords (comma-separated)'
+    )
+    og_image = models.ImageField(
+        upload_to=SITE_BRANDING_PATH,
+        blank=True,
+        null=True,
+        help_text='Default image for social media sharing'
+    )
+    
+    # Chatbot Settings
+    chatbot_enabled = models.BooleanField(
+        default=True,
+        help_text='Enable or disable the chatbot widget site-wide'
+    )
+    chatbot_welcome_message = models.TextField(
+        blank=True,
+        default="I'm here to help answer questions about our fraternity. You can ask me about our history, membership, events, values, and more.",
+        help_text='Welcome message displayed when chatbot opens'
+    )
+    chatbot_rate_limit = models.PositiveIntegerField(
+        default=30,
+        help_text='Maximum chatbot requests per minute per IP address'
+    )
+    
+    # Theme/Appearance
+    primary_color = models.CharField(
+        max_length=7,
+        blank=True,
+        default='#0047AB',
+        help_text='Primary brand color (hex code, e.g., #0047AB)'
+    )
+    secondary_color = models.CharField(
+        max_length=7,
+        blank=True,
+        default='#003380',
+        help_text='Secondary brand color (hex code)'
+    )
+    dark_mode_default = models.BooleanField(
+        default=False,
+        help_text='Make dark mode the default for visitors'
+    )
+    
+    # Feature Toggles
+    show_boutique = models.BooleanField(
+        default=True,
+        help_text='Show the merchandise boutique section'
+    )
+    show_events = models.BooleanField(
+        default=True,
+        help_text='Show the events calendar section'
+    )
+    maintenance_mode = models.BooleanField(
+        default=False,
+        help_text='Put the site in maintenance mode (only staff can access)'
+    )
+    maintenance_message = models.CharField(
+        max_length=500,
+        blank=True,
+        default='We are currently performing scheduled maintenance. Please check back soon.',
+        help_text='Message to display during maintenance mode'
     )
     
     # Footer Content

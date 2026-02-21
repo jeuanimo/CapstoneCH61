@@ -168,15 +168,31 @@
 {% block content %}
 <div class="about-container">
     <div class="about-card">
-        <h1>About The Nu Gamma Sigma Chapter</h1>
+        <h1>About The {{ site_config.chapter_name|default:"Nu Gamma Sigma Chapter" }}</h1>
         
-        <p>The <strong>Nu Gamma Sigma Chapter</strong> of Phi Beta Sigma Fraternity, Inc. proudly serves the Belleville, Illinois area and the surrounding communities throughout St. Clair County and Madison County, Illinois. Chartered on <strong>May 21, 2002</strong>, the chapter was established to extend Sigma's mission beyond the collegiate environment by delivering meaningful service, leadership development, and mentorship throughout the Metro East region.</p>
+        {% if site_config and site_config.about_us_text %}
+        <p>{{ site_config.about_us_text|linebreaksbr }}</p>
+        {% else %}
+        <p>The <strong>{{ site_config.chapter_name|default:"Nu Gamma Sigma Chapter" }}</strong> of {{ site_config.organization_name|default:"Phi Beta Sigma Fraternity, Inc" }}. proudly serves the {{ site_config.city_state|default:"Belleville, Illinois" }} area and the surrounding communities{% if site_config.service_areas %} throughout {{ site_config.service_areas }}{% endif %}. {% if site_config.charter_date %}Chartered on <strong>{{ site_config.charter_date|date:"F j, Y" }}</strong>, the{% else %}The{% endif %} chapter was established to extend Sigma's mission beyond the collegiate environment by delivering meaningful service, leadership development, and mentorship throughout the Metro East region.</p>
+        {% endif %}
         
-        <p>As an alumni chapter within the <strong>Great Lakes Region</strong>, Nu Gamma Sigma brings together professional men dedicated to advancing the fraternity's guiding principle, <strong>Culture for Service and Service for Humanity</strong>. Although not affiliated with an HBCU campus, the chapter maintains strong partnerships with local organizations, schools, and civic groups to support educational initiatives, youth development, community outreach, and economic empowerment programs.</p>
+        {% if site_config and site_config.mission_statement %}
+        <p>{{ site_config.mission_statement|linebreaksbr }}</p>
+        {% else %}
+        <p>As an alumni chapter within the <strong>{{ site_config.chapter_region|default:"Great Lakes Region" }}</strong>, {{ site_config.chapter_name|default:"Nu Gamma Sigma" }} brings together professional men dedicated to advancing the fraternity's guiding principle, <strong>Culture for Service and Service for Humanity</strong>. Although not affiliated with an HBCU campus, the chapter maintains strong partnerships with local organizations, schools, and civic groups to support educational initiatives, youth development, community outreach, and economic empowerment programs.</p>
+        {% endif %}
         
+        {% if site_config.chapter_president or site_config.mailing_address %}
+        <p>{% if site_config.chapter_president %}Under the leadership of Chapter President <strong>{{ site_config.chapter_president }}</strong>, the chapter continues to strengthen brotherhood while addressing the evolving needs of the communities it serves.{% endif %}{% if site_config.mailing_address %} The chapter's administrative mailing address is <strong>{{ site_config.mailing_address }}</strong>, and official correspondence may be directed through its established communication channels.{% endif %}</p>
+        {% else %}
         <p>Under the leadership of Chapter President <strong>Ronald McClellan</strong>, the chapter continues to strengthen brotherhood while addressing the evolving needs of the communities it serves. The chapter's administrative mailing address is <strong>P.O. Box 23183, Belleville, IL 62223-9294</strong>, and official correspondence may be directed through its established communication channels.</p>
+        {% endif %}
         
-        <p>Since its chartering, Nu Gamma Sigma has remained committed to upholding the legacy of Phi Beta Sigma Fraternity, Inc. through consistent community engagement, regional collaboration, and impactful service programming. Through dedication, unity, and action, the chapter continues to exemplify Sigma excellence across Belleville, St. Clair County, and Madison County.</p>
+        {% if site_config and site_config.chapter_legacy %}
+        <p>{{ site_config.chapter_legacy|linebreaksbr }}</p>
+        {% else %}
+        <p>Since its chartering, {{ site_config.chapter_name|default:"Nu Gamma Sigma" }} has remained committed to upholding the legacy of {{ site_config.organization_name|default:"Phi Beta Sigma Fraternity, Inc" }}. through consistent community engagement, regional collaboration, and impactful service programming. Through dedication, unity, and action, the chapter continues to exemplify Sigma excellence{% if site_config.service_areas %} across {{ site_config.service_areas }}{% else %} across Belleville, St. Clair County, and Madison County{% endif %}.</p>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

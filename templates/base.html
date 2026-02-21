@@ -3,6 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- SEO Meta Tags -->
+    {% if site_config and site_config.meta_description %}
+    <meta name="description" content="{{ site_config.meta_description }}">
+    {% else %}
+    <meta name="description" content="Phi Beta Sigma Fraternity, Inc. - Culture for Service and Service for Humanity">
+    {% endif %}
+    {% if site_config and site_config.meta_keywords %}
+    <meta name="keywords" content="{{ site_config.meta_keywords }}">
+    {% endif %}
+    
+    <!-- Open Graph / Social Sharing -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{% block og_title %}{% if site_config %}{{ site_config.organization_name }} - {{ site_config.chapter_name }}{% else %}Phi Beta Sigma Fraternity{% endif %}{% endblock %}">
+    {% if site_config and site_config.meta_description %}
+    <meta property="og:description" content="{{ site_config.meta_description }}">
+    {% endif %}
+    {% if site_config and site_config.og_image %}
+    <meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{{ site_config.og_image.url }}">
+    {% endif %}
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
 
     <title>{% block title %}Capstone CH61{% endblock %}</title>
     {% load static %}

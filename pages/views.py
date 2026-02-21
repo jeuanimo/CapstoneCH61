@@ -126,6 +126,7 @@ SYNC_MEMBERS_TEMPLATE = 'pages/portal/sync_members.html'
 # UI Message constants
 MSG_PHOTO_UPLOAD_SUCCESS = 'Photo uploaded successfully!'
 MSG_FORM_ERRORS = 'Please correct the errors below.'
+MSG_NO_MEMBER_PROFILE = "You don't have a member profile."
 TAG_SIGMA_BETA = 'sigma beta'
 
 # Date format constants
@@ -311,8 +312,20 @@ def programs(request):
     return render(request, 'pages/programs.html')
 
 def chapter_history(request):
-    """Chapter History page view"""
-    return render(request, 'pages/chapter_history.html')
+    """Chapter History page view - dynamically loads content from database"""
+    from .models import ChapterHistorySection, SiteConfiguration
+    
+    # Get active history sections ordered by display_order
+    history_sections = ChapterHistorySection.objects.filter(is_active=True)
+    
+    # Get site configuration for chapter name
+    site_config = SiteConfiguration.get_config()
+    
+    context = {
+        'history_sections': history_sections,
+        'site_config': site_config,
+    }
+    return render(request, 'pages/chapter_history.html', context)
 
 def chapter_leadership(request):
     """Display chapter leadership/officers"""
@@ -2748,66 +2761,90 @@ def message_detail(request, message_id):
     return render(request, 'pages/portal/message_detail.html', context)
 
 
+def _send_to_multiple_recipients(request, subject, content, parent_message):
+    """Helper function to send messages to multiple recipients."""
+    recipient_ids = request.POST.getlist('recipients')
+    message_count = 0
+    for rid in recipient_ids:
+        try:
+            recipient_user = User.objects.get(id=rid)
+            Message.objects.create(
+                sender=request.user,
+                recipient=recipient_user,
+                subject=subject,
+                content=content,
+                parent_message=parent_message
+            )
+            message_count += 1
+        except User.DoesNotExist:
+            continue
+    return message_count
+
+
+def _send_to_single_recipient(request, subject, content, parent_message):
+    """Helper function to send message to a single recipient."""
+    recipient_id = request.POST.get('recipient')
+    if not recipient_id:
+        return None
+    
+    recipient_user = User.objects.get(id=recipient_id)
+    Message.objects.create(
+        sender=request.user,
+        recipient=recipient_user,
+        subject=subject,
+        content=content,
+        parent_message=parent_message
+    )
+    return recipient_user
+
+
+def _handle_send_message_post(request):
+    """Handle POST request for send_message view. Returns redirect response or None."""
+    subject = request.POST.get('subject', '').strip()
+    content = request.POST.get('content', '').strip()
+    
+    if not content:
+        return None
+    
+    parent_id = request.POST.get('parent_id')
+    parent_message = Message.objects.filter(id=parent_id).first() if parent_id else None
+    send_to_multiple = request.POST.get('send_to_multiple') == 'on'
+    
+    if send_to_multiple:
+        return _process_multiple_recipients(request, subject, content, parent_message)
+    return _process_single_recipient(request, subject, content, parent_message)
+
+
+def _process_multiple_recipients(request, subject, content, parent_message):
+    """Process sending to multiple recipients. Returns redirect response."""
+    message_count = _send_to_multiple_recipients(request, subject, content, parent_message)
+    if message_count > 0:
+        messages.success(request, f"Message sent to {message_count} members!")
+        return redirect('messages_inbox')
+    messages.error(request, "Please select at least one recipient.")
+    return redirect('send_message')
+
+
+def _process_single_recipient(request, subject, content, parent_message):
+    """Process sending to single recipient. Returns redirect response."""
+    recipient_user = _send_to_single_recipient(request, subject, content, parent_message)
+    if recipient_user:
+        messages.success(request, f"Message sent to {recipient_user.username}!")
+        return redirect('messages_inbox')
+    messages.error(request, "Please select a recipient.")
+    return redirect('send_message')
+
+
 @login_required
 def send_message(request, recipient_username=None):
     """Send a message to one or multiple recipients"""
-    recipient = None
-    if recipient_username:
-        recipient = get_object_or_404(User, username=recipient_username)
+    recipient = get_object_or_404(User, username=recipient_username) if recipient_username else None
     
     if request.method == 'POST':
-        subject = request.POST.get('subject', '').strip()
-        content = request.POST.get('content', '').strip()
-        parent_id = request.POST.get('parent_id')
-        send_to_multiple = request.POST.get('send_to_multiple') == 'on'
-        
-        if content:
-            parent_message = None
-            if parent_id:
-                parent_message = Message.objects.filter(id=parent_id).first()
-            
-            if send_to_multiple:
-                # Handle multiple recipients
-                recipient_ids = request.POST.getlist('recipients')
-                message_count = 0
-                for rid in recipient_ids:
-                    try:
-                        recipient_user = User.objects.get(id=rid)
-                        Message.objects.create(
-                            sender=request.user,
-                            recipient=recipient_user,
-                            subject=subject,
-                            content=content,
-                            parent_message=parent_message
-                        )
-                        message_count += 1
-                    except User.DoesNotExist:
-                        continue
-                if message_count > 0:
-                    messages.success(request, f"Message sent to {message_count} members!")
-                else:
-                    messages.error(request, "Please select at least one recipient.")
-                    return redirect('send_message')
-            else:
-                # Handle single recipient
-                recipient_id = request.POST.get('recipient')
-                if recipient_id:
-                    recipient_user = User.objects.get(id=recipient_id)
-                    Message.objects.create(
-                        sender=request.user,
-                        recipient=recipient_user,
-                        subject=subject,
-                        content=content,
-                        parent_message=parent_message
-                    )
-                    messages.success(request, f"Message sent to {recipient_user.username}!")
-                else:
-                    messages.error(request, "Please select a recipient.")
-                    return redirect('send_message')
-            
-            return redirect('messages_inbox')
+        result = _handle_send_message_post(request)
+        if result:
+            return result
     
-    # Get all members for recipient selection
     all_members = User.objects.exclude(id=request.user.id).order_by('last_name', 'first_name', 'username')
     
     context = {
@@ -2815,7 +2852,6 @@ def send_message(request, recipient_username=None):
         'all_members': all_members,
     }
     return render(request, 'pages/portal/send_message.html', context)
-
 
 def _get_bulk_message_recipients(recipient_group, selected_members, current_user_id):
     """Helper function to get recipients for bulk messaging based on group selection."""
@@ -3355,7 +3391,7 @@ def rsvp_event(request, event_id):
     try:
         member_profile = MemberProfile.objects.get(user=request.user)
     except MemberProfile.DoesNotExist:
-        messages.error(request, "You don't have a member profile.")
+        messages.error(request, MSG_NO_MEMBER_PROFILE)
         return redirect('events')
     
     # Get or create attendance record
@@ -3385,7 +3421,7 @@ def edit_own_profile(request):
     try:
         member_profile = MemberProfile.objects.get(user=request.user)
     except MemberProfile.DoesNotExist:
-        messages.error(request, "You don't have a member profile.")
+        messages.error(request, MSG_NO_MEMBER_PROFILE)
         return redirect('portal_dashboard')
     
     if request.method == 'POST':
@@ -3423,7 +3459,7 @@ def update_cover_photo(request):
         try:
             member_profile = MemberProfile.objects.get(user=request.user)
         except MemberProfile.DoesNotExist:
-            messages.error(request, "You don't have a member profile.")
+            messages.error(request, MSG_NO_MEMBER_PROFILE)
             return redirect('portal_dashboard')
         
         if 'cover_image' in request.FILES:
@@ -4692,6 +4728,296 @@ def site_configuration(request):
         'config': config,
     }
     return render(request, 'pages/portal/site_configuration.html', context)
+
+
+# ============================================================================
+# CHAPTER HISTORY MANAGEMENT (Admin Console)
+# ============================================================================
+
+def _handle_history_add_section(request):
+    """Handle adding a new history section."""
+    from .models import ChapterHistorySection
+    from .forms import ChapterHistorySectionForm
+    
+    form = ChapterHistorySectionForm(request.POST, request.FILES)
+    if form.is_valid():
+        section = form.save(commit=False)
+        section.created_by = request.user
+        section.save()
+        messages.success(request, f'History section "{section.title}" added successfully!')
+        return True, form
+    messages.error(request, MSG_FORM_ERRORS)
+    return False, form
+
+
+def _handle_history_delete_section(request):
+    """Handle deleting a history section."""
+    from .models import ChapterHistorySection
+    
+    section_id = request.POST.get('section_id')
+    try:
+        section = ChapterHistorySection.objects.get(pk=section_id)
+        title = section.title
+        section.delete()
+        messages.success(request, f'Section "{title}" deleted successfully.')
+    except ChapterHistorySection.DoesNotExist:
+        messages.error(request, 'Section not found.')
+
+
+def _handle_history_csv_import(request):
+    """Handle CSV import for history sections."""
+    from .models import ChapterHistorySection
+    from .forms import ChapterHistoryCSVForm
+    import csv
+    import io
+    
+    csv_form = ChapterHistoryCSVForm(request.POST, request.FILES)
+    if not csv_form.is_valid():
+        messages.error(request, 'Invalid CSV file.')
+        return csv_form
+    
+    csv_file = csv_form.cleaned_data['csv_file']
+    decoded_file = csv_file.read().decode('utf-8')
+    io_string = io.StringIO(decoded_file)
+    reader = csv.DictReader(io_string)
+    
+    created_count = 0
+    errors = []
+    for row_num, row in enumerate(reader, start=2):
+        try:
+            ChapterHistorySection.objects.create(
+                title=row.get('title', '').strip(),
+                section_type=row.get('section_type', 'custom').strip(),
+                content=row.get('content', '').strip(),
+                display_order=int(row.get('display_order', 0)),
+                is_active=row.get('is_active', 'true').lower() in ('true', '1', 'yes'),
+                created_by=request.user
+            )
+            created_count += 1
+        except Exception as e:
+            errors.append(f"Row {row_num}: {str(e)}")
+    
+    if created_count > 0:
+        messages.success(request, f'Successfully imported {created_count} history section(s).')
+    if errors:
+        messages.warning(request, f'Some rows had errors: {"; ".join(errors[:3])}')
+    return csv_form
+
+
+@login_required
+@user_passes_test(is_officer_or_staff)
+def manage_chapter_history(request):
+    """Admin portal for managing chapter history sections."""
+    from .models import ChapterHistorySection
+    from .forms import ChapterHistorySectionForm, ChapterHistoryCSVForm
+    
+    sections = ChapterHistorySection.objects.all()
+    form = ChapterHistorySectionForm()
+    csv_form = ChapterHistoryCSVForm()
+    
+    if request.method == 'POST':
+        action = request.POST.get('action', '')
+        
+        if action == 'add_section':
+            success, form = _handle_history_add_section(request)
+            if success:
+                return redirect('manage_chapter_history')
+                
+        elif action == 'delete_section':
+            _handle_history_delete_section(request)
+            return redirect('manage_chapter_history')
+            
+        elif action == 'import_csv':
+            _handle_history_csv_import(request)
+            return redirect('manage_chapter_history')
+    
+    context = {
+        'sections': sections,
+        'form': form,
+        'csv_form': csv_form,
+    }
+    return render(request, 'pages/portal/manage_history.html', context)
+
+
+@login_required
+@user_passes_test(is_officer_or_staff)
+def edit_history_section(request, section_id):
+    """Edit a specific history section."""
+    from .models import ChapterHistorySection
+    from .forms import ChapterHistorySectionForm
+    
+    section = get_object_or_404(ChapterHistorySection, pk=section_id)
+    
+    if request.method == 'POST':
+        form = ChapterHistorySectionForm(request.POST, request.FILES, instance=section)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'Section "{section.title}" updated successfully!')
+            return redirect('manage_chapter_history')
+        messages.error(request, MSG_FORM_ERRORS)
+    else:
+        form = ChapterHistorySectionForm(instance=section)
+    
+    context = {
+        'form': form,
+        'section': section,
+    }
+    return render(request, 'pages/portal/edit_history_section.html', context)
+
+
+# ============================================================================
+# CHATBOT Q&A MANAGEMENT (Admin Console)
+# ============================================================================
+
+def _handle_chatbot_add_qa(request):
+    """Handle adding a new chatbot Q&A entry."""
+    from pages.models_chatbot import PublicAnswer
+    from .forms import ChatbotQAForm
+    
+    form = ChatbotQAForm(request.POST)
+    if form.is_valid():
+        qa = form.save(commit=False)
+        qa.created_by = request.user.username
+        qa.save()
+        messages.success(request, f'Q&A entry "{qa.question[:50]}" added successfully!')
+        return True, form
+    messages.error(request, MSG_FORM_ERRORS)
+    return False, form
+
+
+def _handle_chatbot_delete_qa(request):
+    """Handle deleting a chatbot Q&A entry."""
+    from pages.models_chatbot import PublicAnswer
+    
+    qa_id = request.POST.get('qa_id')
+    try:
+        qa = PublicAnswer.objects.get(pk=qa_id)
+        question = qa.question[:50]
+        qa.delete()
+        messages.success(request, f'Q&A entry "{question}" deleted successfully.')
+    except PublicAnswer.DoesNotExist:
+        messages.error(request, 'Q&A entry not found.')
+
+
+def _handle_chatbot_toggle_active(request):
+    """Handle toggling active status of a chatbot Q&A entry."""
+    from pages.models_chatbot import PublicAnswer
+    
+    qa_id = request.POST.get('qa_id')
+    try:
+        qa = PublicAnswer.objects.get(pk=qa_id)
+        qa.is_active = not qa.is_active
+        qa.save()
+        status = 'activated' if qa.is_active else 'deactivated'
+        messages.success(request, f'Q&A entry "{qa.question[:30]}" {status}.')
+    except PublicAnswer.DoesNotExist:
+        messages.error(request, 'Q&A entry not found.')
+
+
+def _handle_chatbot_csv_import(request):
+    """Handle CSV import for chatbot Q&A entries."""
+    from pages.models_chatbot import PublicAnswer
+    from .forms import ChatbotCSVForm
+    import csv
+    import io
+    
+    csv_form = ChatbotCSVForm(request.POST, request.FILES)
+    if not csv_form.is_valid():
+        messages.error(request, 'Invalid CSV file.')
+        return csv_form
+    
+    csv_file = csv_form.cleaned_data['csv_file']
+    decoded_file = csv_file.read().decode('utf-8')
+    io_string = io.StringIO(decoded_file)
+    reader = csv.DictReader(io_string)
+    
+    created_count = 0
+    errors = []
+    for row_num, row in enumerate(reader, start=2):
+        try:
+            PublicAnswer.objects.create(
+                question=row.get('question', '').strip(),
+                keywords=row.get('keywords', '').strip(),
+                answer=row.get('answer', '').strip(),
+                category=row.get('category', 'faq').strip(),
+                is_active=row.get('is_active', 'true').lower() in ('true', '1', 'yes'),
+                confidence_threshold=int(row.get('confidence_threshold', 30)),
+                created_by=request.user.username
+            )
+            created_count += 1
+        except Exception as e:
+            errors.append(f"Row {row_num}: {str(e)}")
+    
+    if created_count > 0:
+        messages.success(request, f'Successfully imported {created_count} Q&A entry/entries.')
+    if errors:
+        messages.warning(request, f'Some rows had errors: {"; ".join(errors[:3])}')
+    return csv_form
+
+
+@login_required
+@user_passes_test(is_officer_or_staff)
+def manage_chatbot_qa(request):
+    """Admin portal for managing chatbot Q&A entries."""
+    from pages.models_chatbot import PublicAnswer
+    from .forms import ChatbotQAForm, ChatbotCSVForm
+    
+    qa_entries = PublicAnswer.objects.all()
+    form = ChatbotQAForm()
+    csv_form = ChatbotCSVForm()
+    
+    if request.method == 'POST':
+        action = request.POST.get('action', '')
+        
+        if action == 'add_qa':
+            success, form = _handle_chatbot_add_qa(request)
+            if success:
+                return redirect('manage_chatbot_qa')
+                
+        elif action == 'delete_qa':
+            _handle_chatbot_delete_qa(request)
+            return redirect('manage_chatbot_qa')
+            
+        elif action == 'toggle_active':
+            _handle_chatbot_toggle_active(request)
+            return redirect('manage_chatbot_qa')
+            
+        elif action == 'import_csv':
+            _handle_chatbot_csv_import(request)
+            return redirect('manage_chatbot_qa')
+    
+    context = {
+        'qa_entries': qa_entries,
+        'form': form,
+        'csv_form': csv_form,
+    }
+    return render(request, 'pages/portal/manage_chatbot.html', context)
+
+
+@login_required
+@user_passes_test(is_officer_or_staff)
+def edit_chatbot_qa(request, qa_id):
+    """Edit a specific chatbot Q&A entry."""
+    from pages.models_chatbot import PublicAnswer
+    from .forms import ChatbotQAForm
+    
+    qa = get_object_or_404(PublicAnswer, pk=qa_id)
+    
+    if request.method == 'POST':
+        form = ChatbotQAForm(request.POST, instance=qa)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Q&A entry updated successfully!')
+            return redirect('manage_chatbot_qa')
+        messages.error(request, MSG_FORM_ERRORS)
+    else:
+        form = ChatbotQAForm(instance=qa)
+    
+    context = {
+        'form': form,
+        'qa': qa,
+    }
+    return render(request, 'pages/portal/edit_chatbot_qa.html', context)
 
 
 # ============================================================================

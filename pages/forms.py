@@ -37,6 +37,10 @@ from django import forms
 from .models import ChapterLeadership, MemberProfile, DuesPayment, StripeConfiguration, TwilioConfiguration, SMSPreference
 from django.contrib.auth.models import User
 
+# Constants for form widgets
+ACCEPT_IMAGE_ALL = 'image/*'
+ACCEPT_IMAGE_ICON = 'image/png,image/x-icon,image/svg+xml'
+
 class ContactForm(forms.Form):
     """Secure contact form with CSRF protection and validation"""
     
@@ -840,12 +844,32 @@ class SiteConfigurationForm(forms.ModelForm):
         from .models import SiteConfiguration
         model = SiteConfiguration
         fields = [
+            # Organization Branding
             'organization_name', 'chapter_name',
+            # Chapter Details
+            'chapter_president', 'charter_date', 'chapter_region',
+            'mailing_address', 'city_state', 'service_areas',
+            # About Us Content
+            'about_us_text', 'mission_statement', 'chapter_legacy',
+            # Logos
             'chapter_logo', 'pbs_seal', 'favicon',
+            # Social Media
             'facebook_url', 'instagram_url', 'twitter_url', 'email_address',
+            # Contact Info
+            'phone_number', 'meeting_location', 'meeting_schedule', 'pbs_hq_url',
+            # SEO
+            'meta_description', 'meta_keywords', 'og_image',
+            # Chatbot
+            'chatbot_enabled', 'chatbot_welcome_message', 'chatbot_rate_limit',
+            # Theme  
+            'primary_color', 'secondary_color', 'dark_mode_default',
+            # Feature Toggles
+            'show_boutique', 'show_events', 'maintenance_mode', 'maintenance_message',
+            # Footer
             'footer_text'
         ]
         widgets = {
+            # Organization Branding
             'organization_name': forms.TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'e.g., Phi Beta Sigma Fraternity, Inc'
@@ -854,18 +878,61 @@ class SiteConfigurationForm(forms.ModelForm):
                 'class': 'form-control',
                 'placeholder': 'e.g., Nu Gamma Sigma Chapter'
             }),
+            # Chapter Details
+            'chapter_president': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'e.g., John Smith'
+            }),
+            'charter_date': forms.DateInput(attrs={
+                'class': 'form-control',
+                'type': 'date'
+            }),
+            'chapter_region': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'e.g., Great Lakes Region'
+            }),
+            'mailing_address': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'e.g., P.O. Box 12345, City, State ZIP'
+            }),
+            'city_state': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'e.g., Belleville, Illinois'
+            }),
+            'service_areas': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'e.g., St. Clair County, Madison County'
+            }),
+            # About Us Content
+            'about_us_text': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 4,
+                'placeholder': 'Describe your chapter...'
+            }),
+            'mission_statement': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Your chapter mission statement...'
+            }),
+            'chapter_legacy': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Your chapter legacy and history summary...'
+            }),
+            # Logos
             'chapter_logo': forms.FileInput(attrs={
                 'class': 'form-control',
-                'accept': 'image/*'
+                'accept': ACCEPT_IMAGE_ALL
             }),
             'pbs_seal': forms.FileInput(attrs={
                 'class': 'form-control',
-                'accept': 'image/*'
+                'accept': ACCEPT_IMAGE_ALL
             }),
             'favicon': forms.FileInput(attrs={
                 'class': 'form-control',
-                'accept': 'image/png,image/x-icon,image/svg+xml'
+                'accept': ACCEPT_IMAGE_ICON
             }),
+            # Social Media
             'facebook_url': forms.URLInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'https://facebook.com/yourpage'
@@ -882,6 +949,80 @@ class SiteConfigurationForm(forms.ModelForm):
                 'class': 'form-control',
                 'placeholder': 'contact@example.com'
             }),
+            # Contact Info
+            'phone_number': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': '(555) 123-4567'
+            }),
+            'meeting_location': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'e.g., Community Center, 123 Main St'
+            }),
+            'meeting_schedule': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'e.g., First Saturday of each month at 10 AM'
+            }),
+            'pbs_hq_url': forms.URLInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'https://phibetasigma1914.org/'
+            }),
+            # SEO
+            'meta_description': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Brief site description for search engines (150-160 characters)',
+                'maxlength': '300'
+            }),
+            'meta_keywords': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'fraternity, chapter, community service, etc.'
+            }),
+            'og_image': forms.FileInput(attrs={
+                'class': 'form-control',
+                'accept': ACCEPT_IMAGE_ALL
+            }),
+            # Chatbot
+            'chatbot_enabled': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
+            'chatbot_welcome_message': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 2,
+                'placeholder': 'Welcome message for chatbot visitors...'
+            }),
+            'chatbot_rate_limit': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': 1,
+                'max': 100
+            }),
+            # Theme
+            'primary_color': forms.TextInput(attrs={
+                'class': 'form-control',
+                'type': 'color',
+                'style': 'width: 80px; height: 40px; padding: 2px;'
+            }),
+            'secondary_color': forms.TextInput(attrs={
+                'class': 'form-control',
+                'type': 'color',
+                'style': 'width: 80px; height: 40px; padding: 2px;'
+            }),
+            'dark_mode_default': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
+            # Feature Toggles
+            'show_boutique': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
+            'show_events': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
+            'maintenance_mode': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
+            'maintenance_message': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Message to display during maintenance'
+            }),
+            # Footer
             'footer_text': forms.TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': '© 2026 Your Organization Name'
@@ -890,6 +1031,15 @@ class SiteConfigurationForm(forms.ModelForm):
         labels = {
             'organization_name': 'Organization Name',
             'chapter_name': 'Chapter Name',
+            'chapter_president': 'Chapter President',
+            'charter_date': 'Charter Date',
+            'chapter_region': 'Region',
+            'mailing_address': 'Mailing Address',
+            'city_state': 'City/State',
+            'service_areas': 'Service Areas',
+            'about_us_text': 'About Us Text',
+            'mission_statement': 'Mission Statement',
+            'chapter_legacy': 'Chapter Legacy',
             'chapter_logo': 'Chapter Logo',
             'pbs_seal': 'Phi Beta Sigma Seal/Logo',
             'favicon': 'Site Favicon (Browser Icon)',
@@ -897,10 +1047,153 @@ class SiteConfigurationForm(forms.ModelForm):
             'instagram_url': 'Instagram URL',
             'twitter_url': 'Twitter/X URL',
             'email_address': 'Contact Email',
+            'phone_number': 'Phone Number',
+            'meeting_location': 'Meeting Location',
+            'meeting_schedule': 'Meeting Schedule',
+            'pbs_hq_url': 'PBS Headquarters URL',
+            'meta_description': 'Meta Description',
+            'meta_keywords': 'Meta Keywords',
+            'og_image': 'Social Sharing Image',
+            'chatbot_enabled': 'Enable Chatbot',
+            'chatbot_welcome_message': 'Chatbot Welcome Message',
+            'chatbot_rate_limit': 'Chatbot Rate Limit (requests/min)',
+            'primary_color': 'Primary Color',
+            'secondary_color': 'Secondary Color',
+            'dark_mode_default': 'Dark Mode Default',
+            'show_boutique': 'Show Boutique',
+            'show_events': 'Show Events',
+            'maintenance_mode': 'Maintenance Mode',
+            'maintenance_message': 'Maintenance Message',
             'footer_text': 'Footer Text',
         }
         help_texts = {
             'chapter_logo': 'Your chapter-specific logo (PNG or JPG recommended)',
             'pbs_seal': 'The Phi Beta Sigma seal shown in the header',
             'favicon': 'Small icon shown in browser tabs (PNG, ICO, or SVG)',
+            'og_image': 'Image displayed when sharing on social media (recommended 1200x630px)',
         }
+
+
+# =============================================================================
+# CHAPTER HISTORY MANAGEMENT FORMS
+# =============================================================================
+
+class ChapterHistorySectionForm(forms.ModelForm):
+    """Form for officers to manage chapter history sections"""
+    
+    class Meta:
+        from .models import ChapterHistorySection
+        model = ChapterHistorySection
+        fields = ['title', 'section_type', 'content', 'display_order', 'is_active', 'image']
+        widgets = {
+            'title': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'e.g., Our Beginning, Key Milestones'
+            }),
+            'section_type': forms.Select(attrs={
+                'class': 'form-control'
+            }),
+            'content': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 6,
+                'placeholder': 'Enter the section content here...'
+            }),
+            'display_order': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': 0,
+                'placeholder': '0'
+            }),
+            'is_active': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
+            'image': forms.FileInput(attrs={
+                'class': 'form-control',
+                'accept': 'image/*'
+            }),
+        }
+
+
+class ChapterHistoryCSVForm(forms.Form):
+    """Form for CSV import of chapter history sections"""
+    csv_file = forms.FileField(
+        label='CSV File',
+        help_text='Upload a CSV with columns: title, section_type, content, display_order',
+        widget=forms.FileInput(attrs={
+            'class': 'form-control',
+            'accept': '.csv'
+        })
+    )
+    
+    def clean_csv_file(self):
+        csv_file = self.cleaned_data['csv_file']
+        if not csv_file.name.endswith('.csv'):
+            raise forms.ValidationError('File must be a CSV file')
+        if csv_file.size > 5 * 1024 * 1024:  # 5MB limit
+            raise forms.ValidationError('File too large. Maximum 5MB.')
+        return csv_file
+
+
+# =============================================================================
+# CHATBOT Q&A MANAGEMENT FORMS
+# =============================================================================
+
+class ChatbotQAForm(forms.ModelForm):
+    """Form for officers to manage chatbot Q&A entries"""
+    
+    class Meta:
+        from pages.models_chatbot import PublicAnswer
+        model = PublicAnswer
+        fields = ['question', 'keywords', 'answer', 'category', 'is_active', 'confidence_threshold', 'internal_note']
+        widgets = {
+            'question': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Primary question visitors might ask'
+            }),
+            'keywords': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 2,
+                'placeholder': 'keyword1, keyword2, related phrase, etc.'
+            }),
+            'answer': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 4,
+                'placeholder': 'Public answer text (NO sensitive information)'
+            }),
+            'category': forms.Select(attrs={
+                'class': 'form-control'
+            }),
+            'is_active': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
+            'confidence_threshold': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': 0,
+                'max': 100,
+                'placeholder': '30'
+            }),
+            'internal_note': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 2,
+                'placeholder': 'Admin notes (not visible to public)'
+            }),
+        }
+
+
+class ChatbotCSVForm(forms.Form):
+    """Form for CSV import of chatbot Q&A"""
+    csv_file = forms.FileField(
+        label='CSV File',
+        help_text='Upload a CSV with columns: question, keywords, answer, category',
+        widget=forms.FileInput(attrs={
+            'class': 'form-control',
+            'accept': '.csv'
+        })
+    )
+    
+    def clean_csv_file(self):
+        csv_file = self.cleaned_data['csv_file']
+        if not csv_file.name.endswith('.csv'):
+            raise forms.ValidationError('File must be a CSV file')
+        if csv_file.size > 5 * 1024 * 1024:  # 5MB limit
+            raise forms.ValidationError('File too large. Maximum 5MB.')
+        return csv_file
