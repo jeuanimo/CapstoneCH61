@@ -238,6 +238,32 @@
                 </button>
             </div>
         </form>
+
+        <!-- Additional Actions -->
+        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e9ecef;">
+            <h4 style="color: #6c757d; margin-bottom: 15px;"><i class="fas fa-tools"></i> Additional Actions</h4>
+            <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                <!-- Duplicate Section -->
+                <form method="post" action="{% url 'manage_chapter_history' %}" style="display: inline;">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="duplicate_section">
+                    <input type="hidden" name="section_id" value="{{ section.id }}">
+                    <button type="submit" class="btn btn-secondary" title="Create a copy of this section">
+                        <i class="fas fa-copy"></i> Duplicate
+                    </button>
+                </form>
+                
+                <!-- Delete Section -->
+                <form method="post" action="{% url 'manage_chapter_history' %}" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this section? This cannot be undone.');">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="delete_section">
+                    <input type="hidden" name="section_id" value="{{ section.id }}">
+                    <button type="submit" class="btn" style="background: #dc3545; color: white;">
+                        <i class="fas fa-trash"></i> Delete Section
+                    </button>
+                </form>
+            </div>
+        </div>
     </div>
 
     <div style="margin-top: 20px; text-align: center; color: #6c757d; font-size: 0.9em;">

@@ -1091,6 +1091,54 @@ class OrderItem(models.Model):
         return self.price * self.quantity
 
 
+class ChapterHistoryBackup(models.Model):
+    """
+    Stores backups of chapter history sections for undo/restore functionality.
+    
+    A backup is created before import operations (CSV, TXT, DOCX) so users
+    can revert changes if something goes wrong.
+    """
+    
+    BACKUP_TYPE_CHOICES = [
+        ('pre_import', 'Before Import'),
+        ('pre_clear', 'Before Clear All'),
+        ('manual', 'Manual Backup'),
+    ]
+    
+    name = models.CharField(
+        max_length=200,
+        help_text='Descriptive name for this backup'
+    )
+    backup_type = models.CharField(
+        max_length=20,
+        choices=BACKUP_TYPE_CHOICES,
+        default='pre_import'
+    )
+    data = models.JSONField(
+        help_text='Serialized backup of all history sections'
+    )
+    section_count = models.PositiveIntegerField(
+        default=0,
+        help_text='Number of sections in this backup'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='history_backups_created'
+    )
+    
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Chapter History Backup'
+        verbose_name_plural = 'Chapter History Backups'
+    
+    def __str__(self):
+        return f"{self.name} ({self.section_count} sections) - {self.created_at.strftime('%Y-%m-%d %H:%M')}"
+
+
 class ChapterHistorySection(models.Model):
     """
     Stores editable sections for the chapter history page.

@@ -308,6 +308,14 @@
                 <div class="stat-card {% if pending_orders > 0 %}warning{% endif %}">
                     <div class="stat-value">{{ pending_orders }}</div>
                     <div class="stat-label">Pending Orders</div>
+                    {% if pending_orders > 0 %}
+                    <form method="post" action="{% url 'clear_abandoned_orders' %}" style="margin-top: 10px;" onsubmit="return confirm('Clear all {{ pending_orders }} abandoned/unpaid orders?\n\nThis will permanently delete orders that were never paid for.');">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm" style="background: #dc3545; color: white; font-size: 0.75rem; padding: 4px 10px;">
+                            <i class="fas fa-broom"></i> Clear Abandoned
+                        </button>
+                    </form>
+                    {% endif %}
                 </div>
             </div>
         </div>

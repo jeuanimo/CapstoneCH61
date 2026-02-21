@@ -1133,6 +1133,65 @@ class ChapterHistoryCSVForm(forms.Form):
         return csv_file
 
 
+class ChapterHistoryDocumentForm(forms.Form):
+    """Form for importing chapter history from TXT or DOCX files"""
+    
+    IMPORT_MODES = [
+        ('single', 'Import as single section'),
+        ('headings', 'Parse headings into separate sections (DOCX only)'),
+    ]
+    
+    document_file = forms.FileField(
+        label='Document File',
+        help_text='Upload a .txt or .docx file',
+        widget=forms.FileInput(attrs={
+            'class': 'form-control',
+            'accept': '.txt,.docx,text/plain,application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        })
+    )
+    
+    section_title = forms.CharField(
+        max_length=200,
+        required=False,
+        label='Section Title (optional)',
+        help_text='If blank, filename will be used as title',
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'e.g., Chapter History Overview'
+        })
+    )
+    
+    section_type = forms.ChoiceField(
+        choices=[
+            ('custom', 'Custom'),
+            ('intro', 'Introduction'),
+            ('founding', 'Founding Story'),
+            ('milestones', 'Key Milestones'),
+            ('leadership', 'Leadership History'),
+            ('community', 'Community Impact'),
+            ('national', 'National Connection'),
+        ],
+        initial='custom',
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    
+    import_mode = forms.ChoiceField(
+        choices=IMPORT_MODES,
+        initial='single',
+        widget=forms.RadioSelect(attrs={'class': 'form-check-input'})
+    )
+    
+    def clean_document_file(self):
+        doc_file = self.cleaned_data['document_file']
+        filename = doc_file.name.lower()
+        
+        if not (filename.endswith('.txt') or filename.endswith('.docx')):
+            raise forms.ValidationError('File must be a .txt or .docx file')
+        if doc_file.size > 10 * 1024 * 1024:  # 10MB limit
+            raise forms.ValidationError('File too large. Maximum 10MB.')
+        return doc_file
+
+
 # =============================================================================
 # CHATBOT Q&A MANAGEMENT FORMS
 # =============================================================================

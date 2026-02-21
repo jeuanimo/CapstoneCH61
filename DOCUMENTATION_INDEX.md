@@ -12,7 +12,12 @@
 - **System Architecture** → `BOUTIQUE_ARCHITECTURE_DIAGRAMS.txt`
 - **Implementation Checklist** → `BOUTIQUE_IMPLEMENTATION_CHECKLIST.md`
 
-### 📋 Document Descriptions
+### �️ Admin Console & Site Management
+- **Site Configuration & History** → `ADMIN_CONSOLE_FEATURES.md`
+- **Photo Management** → `PHOTO_MANAGEMENT_FEATURES.md`
+- **Chatbot Setup** → `CHATBOT_INTEGRATION_GUIDE.txt`
+
+### �📋 Document Descriptions
 
 #### 1. BOUTIQUE_FINAL_SUMMARY.txt
 **What**: High-level overview of all features
@@ -85,7 +90,19 @@
 - Deployment checklist
 - Feature completeness checklist
 
-#### 7. This File (INDEX.md)
+#### 7. ADMIN_CONSOLE_FEATURES.md
+**What**: Admin console, site configuration, and chapter history features
+**When to Read**: Managing site settings or chapter history
+**Contains**:
+- SiteConfiguration model (36 configurable fields)
+- Tabbed configuration interface
+- Chapter history CRUD operations
+- CSV/TXT/DOCX document import
+- Backup & restore system
+- URL reference
+- Security features
+
+#### 8. This File (INDEX.md)
 **What**: Navigation guide for all documentation
 **When to Read**: Don't know where to start
 
@@ -124,6 +141,28 @@
 3. See database schema
 4. Check form flow diagrams
 
+### Task: "How do I change site settings (name, logo, etc.)?"
+1. Read: `ADMIN_CONSOLE_FEATURES.md` → "Site Configuration"
+2. Go to: `/portal/admin/site-configuration/`
+3. Use tabs to find the setting category
+
+### Task: "How do I manage chapter history content?"
+1. Read: `ADMIN_CONSOLE_FEATURES.md` → "Chapter History Management"
+2. Go to: `/portal/admin/chapter-history/`
+3. Add sections manually or import from files
+
+### Task: "I uploaded wrong content, how do I undo?"
+1. Read: `ADMIN_CONSOLE_FEATURES.md` → "Backup & Restore System"
+2. Go to: `/portal/admin/chapter-history/`
+3. Find "Backup & Restore" section at bottom
+4. Click "Restore" on the desired backup
+
+### Task: "How do I import a Word document to history?"
+1. Read: `ADMIN_CONSOLE_FEATURES.md` → "Document Import"
+2. Go to: `/portal/admin/chapter-history/`
+3. Use "Import from Document" section
+4. Select DOCX file and import mode
+
 ---
 
 ## Feature Overview
@@ -156,6 +195,24 @@
 - Error reporting
 - See: `BOUTIQUE_CRUD_ADMIN_GUIDE.md` Bulk Operations
 
+### ⚙️ Site Configuration
+- 36 configurable fields in 8 categories
+- Tabbed interface with persistence
+- Controls branding, SEO, chatbot, themes
+- See: `ADMIN_CONSOLE_FEATURES.md` Site Configuration
+
+### 📜 Chapter History Management
+- Create/edit/delete history sections
+- Import from CSV, TXT, or DOCX files
+- Duplicate sections, bulk delete, clear all
+- See: `ADMIN_CONSOLE_FEATURES.md` Chapter History
+
+### 💾 Backup & Restore
+- Auto-backup before imports/clears
+- One-click restore to previous state
+- Last 10 backups retained
+- See: `ADMIN_CONSOLE_FEATURES.md` Backup & Restore
+
 ---
 
 ## System Status
@@ -182,35 +239,47 @@
 ```
 CapstoneCH61/
 ├── pages/
-│   ├── models.py (updated - is_officer field)
-│   ├── views.py (updated - 4 new CRUD views)
-│   ├── admin.py (updated - enhanced admin classes)
-│   ├── urls.py (updated - 3 new URL patterns)
-│   ├── forms_boutique.py (unchanged)
+│   ├── models.py (SiteConfiguration, ChapterHistoryBackup, etc.)
+│   ├── views.py (CRUD, site config, history management)
+│   ├── admin.py (enhanced admin classes)
+│   ├── urls.py (boutique, history, config routes)
+│   ├── forms.py (site config, history import forms)
+│   ├── forms_boutique.py (product forms)
 │   └── migrations/
-│       └── 0017_memberprofile_is_officer.py (NEW)
-├── templates/pages/boutique/
-│   ├── shop.html (updated)
-│   ├── product_detail.html (updated)
-│   ├── product_form.html (NEW)
-│   ├── delete_product_confirm.html (NEW)
-│   └── [other templates]
+│       ├── 0017_memberprofile_is_officer.py
+│       ├── 0029_extend_site_configuration.py
+│       └── 0030_history_backup_model.py
+├── templates/pages/
+│   ├── boutique/
+│   │   ├── shop.html
+│   │   ├── product_detail.html
+│   │   ├── product_form.html
+│   │   └── delete_product_confirm.html
+│   ├── portal/
+│   │   ├── site_configuration.html (tabbed UI)
+│   │   ├── manage_history.html (CRUD + import)
+│   │   └── edit_history_section.html
+│   ├── chapter_history.html
+│   ├── about.html (uses site_config)
+│   └── home.html (uses site_config)
+├── templates/base.html (SEO meta tags)
 ├── static/
-│   ├── css/ (unchanged)
-│   └── img/ (PBS_Seal_2019_Color.png required)
-├── config/ (unchanged)
-├── db.sqlite3 (updated with new field)
-├── manage.py (unchanged)
+│   ├── css/
+│   └── img/
+├── config/
+├── db.sqlite3
+├── requirements.txt (includes python-docx)
 │
-├── BOUTIQUE_FINAL_SUMMARY.txt (NEW - overview)
-├── BOUTIQUE_QUICK_REFERENCE.md (NEW - quick guide)
-├── BOUTIQUE_ADMIN_IMPLEMENTATION.txt (NEW - setup guide)
-├── BOUTIQUE_CRUD_ADMIN_GUIDE.md (NEW - detailed guide)
-├── BOUTIQUE_ARCHITECTURE_DIAGRAMS.txt (NEW - diagrams)
-├── BOUTIQUE_IMPLEMENTATION_CHECKLIST.md (NEW - checklist)
-├── BOUTIQUE_IMPLEMENTATION.md (existing)
-├── BOUTIQUE_QUICK_START.md (existing)
-└── [This file] DOCUMENTATION_INDEX.md (NEW - navigation)
+├── ADMIN_CONSOLE_FEATURES.md (NEW - site config & history)
+├── BOUTIQUE_FINAL_SUMMARY.txt
+├── BOUTIQUE_QUICK_REFERENCE.md
+├── BOUTIQUE_ADMIN_IMPLEMENTATION.txt
+├── BOUTIQUE_CRUD_ADMIN_GUIDE.md
+├── BOUTIQUE_ARCHITECTURE_DIAGRAMS.txt
+├── BOUTIQUE_IMPLEMENTATION_CHECKLIST.md
+├── PHOTO_MANAGEMENT_FEATURES.md
+├── CHATBOT_INTEGRATION_GUIDE.txt
+└── DOCUMENTATION_INDEX.md
 ```
 
 ---
@@ -225,6 +294,8 @@ CapstoneCH61/
 | BOUTIQUE_CRUD_ADMIN_GUIDE.md | Guide | Complete details | Long |
 | BOUTIQUE_ARCHITECTURE_DIAGRAMS.txt | Reference | System design | Long |
 | BOUTIQUE_IMPLEMENTATION_CHECKLIST.md | Checklist | Verification | Long |
+| ADMIN_CONSOLE_FEATURES.md | Guide | Site config & history | Long |
+| PHOTO_MANAGEMENT_FEATURES.md | Guide | Photo/album management | Medium |
 | DOCUMENTATION_INDEX.md | Navigation | This file | Medium |
 
 ---
@@ -232,7 +303,13 @@ CapstoneCH61/
 ## URLs Quick Reference
 
 ```
-Admin URLs (require staff or officer):
+Admin Console URLs (require staff or officer):
+  /portal/admin/site-configuration/
+  /portal/admin/chapter-history/
+  /portal/admin/chapter-history/edit/<id>/
+  /portal/admin/chatbot/
+
+Boutique Admin URLs (require staff or officer):
   /pages/boutique/admin/add-product/
   /pages/boutique/admin/edit-product/<id>/
   /pages/boutique/admin/delete-product/<id>/
@@ -241,14 +318,19 @@ Admin URLs (require staff or officer):
 Public URLs:
   /pages/boutique/
   /pages/boutique/product/<id>/
-  /pages/boutique/cart/
-  /pages/boutique/checkout/
-  /pages/boutique/orders/
+  /pages/history/
+  /pages/about/
+  
+Member Portal URLs:
+  /portal/
+  /portal/photos/
+  /portal/albums/create/
 
 Django Admin:
   /admin/pages/memberprofile/
   /admin/pages/product/
-  /admin/pages/order/
+  /admin/pages/siteconfiguration/
+  /admin/pages/chapterhistorysection/
 ```
 
 ---

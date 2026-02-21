@@ -4692,6 +4692,28 @@ def boutique_dashboard(request):
     return render(request, 'pages/boutique/dashboard.html', context)
 
 
+@login_required
+@user_passes_test(is_officer_or_staff)
+def clear_abandoned_orders(request):
+    """Clear abandoned/unpaid orders (pending status) from the system."""
+    if request.method == 'POST':
+        from datetime import timedelta
+        
+        # Delete all pending orders (orders that were never paid for)
+        # Optionally, you could add a time threshold to only delete old pending orders
+        pending_orders = Order.objects.filter(status='pending')
+        count = pending_orders.count()
+        
+        if count > 0:
+            # Delete the orders (will cascade to OrderItems)
+            pending_orders.delete()
+            messages.success(request, f'Successfully cleared {count} abandoned order(s).')
+        else:
+            messages.info(request, 'No abandoned orders to clear.')
+    
+    return redirect('boutique_dashboard')
+
+
 # ============================================================================
 # SITE CONFIGURATION / BRANDING ADMIN PORTAL
 # ============================================================================
@@ -4734,6 +4756,95 @@ def site_configuration(request):
 # CHAPTER HISTORY MANAGEMENT (Admin Console)
 # ============================================================================
 
+def _create_history_backup(request, backup_name, backup_type='pre_import'):
+    """
+    Create a backup of all current history sections.
+    Returns the backup object or None if no sections exist.
+    """
+    from .models import ChapterHistorySection, ChapterHistoryBackup
+    
+    sections = ChapterHistorySection.objects.all()
+    if not sections.exists():
+        return None
+    
+    # Serialize all sections
+    backup_data = []
+    for section in sections:
+        backup_data.append({
+            'title': section.title,
+            'section_type': section.section_type,
+            'content': section.content,
+            'display_order': section.display_order,
+            'is_active': section.is_active,
+            'image': section.image.name if section.image else None,
+        })
+    
+    backup = ChapterHistoryBackup.objects.create(
+        name=backup_name,
+        backup_type=backup_type,
+        data=backup_data,
+        section_count=len(backup_data),
+        created_by=request.user
+    )
+    
+    # Keep only the last 10 backups to prevent database bloat
+    old_backups = ChapterHistoryBackup.objects.all()[10:]
+    for old_backup in old_backups:
+        old_backup.delete()
+    
+    return backup
+
+
+def _handle_history_restore(request):
+    """Handle restoring history sections from a backup."""
+    from .models import ChapterHistorySection, ChapterHistoryBackup
+    
+    backup_id = request.POST.get('backup_id')
+    try:
+        backup = ChapterHistoryBackup.objects.get(pk=backup_id)
+        
+        # Clear current sections
+        ChapterHistorySection.objects.all().delete()
+        
+        # Restore from backup
+        restored_count = 0
+        for section_data in backup.data:
+            ChapterHistorySection.objects.create(
+                title=section_data['title'],
+                section_type=section_data['section_type'],
+                content=section_data['content'],
+                display_order=section_data['display_order'],
+                is_active=section_data['is_active'],
+                created_by=request.user
+            )
+            restored_count += 1
+        
+        messages.success(
+            request, 
+            f'Successfully restored {restored_count} section(s) from backup "{backup.name}".'
+        )
+        
+        # Delete the used backup (it's now the current state)
+        backup.delete()
+        
+    except ChapterHistoryBackup.DoesNotExist:
+        messages.error(request, 'Backup not found.')
+
+
+def _handle_history_delete_backup(request):
+    """Handle deleting a history backup."""
+    from .models import ChapterHistoryBackup
+    
+    backup_id = request.POST.get('backup_id')
+    try:
+        backup = ChapterHistoryBackup.objects.get(pk=backup_id)
+        name = backup.name
+        backup.delete()
+        messages.success(request, f'Backup "{name}" deleted.')
+    except ChapterHistoryBackup.DoesNotExist:
+        messages.error(request, 'Backup not found.')
+
+
 def _handle_history_add_section(request):
     """Handle adding a new history section."""
     from .models import ChapterHistorySection
@@ -4764,6 +4875,59 @@ def _handle_history_delete_section(request):
         messages.error(request, 'Section not found.')
 
 
+def _handle_history_duplicate_section(request):
+    """Handle duplicating a history section."""
+    from .models import ChapterHistorySection
+    
+    section_id = request.POST.get('section_id')
+    try:
+        original = ChapterHistorySection.objects.get(pk=section_id)
+        # Create a copy
+        ChapterHistorySection.objects.create(
+            title=f"{original.title} (Copy)",
+            section_type=original.section_type,
+            content=original.content,
+            display_order=original.display_order + 1,
+            is_active=False,  # Start as inactive so user can review
+            image=original.image if original.image else None,
+            created_by=request.user
+        )
+        messages.success(request, f'Section "{original.title}" duplicated. The copy is inactive - review and activate when ready.')
+    except ChapterHistorySection.DoesNotExist:
+        messages.error(request, 'Section not found.')
+
+
+def _handle_history_bulk_delete(request):
+    """Handle bulk deletion of history sections."""
+    from .models import ChapterHistorySection
+    
+    section_ids = request.POST.getlist('section_ids')
+    if not section_ids:
+        messages.warning(request, 'No sections selected for deletion.')
+        return
+    
+    deleted_count = ChapterHistorySection.objects.filter(pk__in=section_ids).delete()[0]
+    messages.success(request, f'Successfully deleted {deleted_count} section(s).')
+
+
+def _handle_history_clear_all(request):
+    """Handle clearing all history sections."""
+    from .models import ChapterHistorySection
+    
+    count = ChapterHistorySection.objects.count()
+    if count > 0:
+        # Create backup before clearing
+        _create_history_backup(
+            request,
+            f"Before clearing all ({count} sections)",
+            'pre_clear'
+        )
+        ChapterHistorySection.objects.all().delete()
+        messages.success(request, f'Cleared all {count} history section(s). A backup was created if you need to restore.')
+    else:
+        messages.info(request, 'No sections to clear.')
+
+
 def _handle_history_csv_import(request):
     """Handle CSV import for history sections."""
     from .models import ChapterHistorySection
@@ -4776,7 +4940,14 @@ def _handle_history_csv_import(request):
         messages.error(request, 'Invalid CSV file.')
         return csv_form
     
+    # Create backup before importing
     csv_file = csv_form.cleaned_data['csv_file']
+    _create_history_backup(
+        request, 
+        f"Before CSV import: {csv_file.name}",
+        'pre_import'
+    )
+    
     decoded_file = csv_file.read().decode('utf-8')
     io_string = io.StringIO(decoded_file)
     reader = csv.DictReader(io_string)
@@ -4798,22 +4969,174 @@ def _handle_history_csv_import(request):
             errors.append(f"Row {row_num}: {str(e)}")
     
     if created_count > 0:
-        messages.success(request, f'Successfully imported {created_count} history section(s).')
+        messages.success(request, f'Successfully imported {created_count} history section(s). A backup was created if you need to revert.')
     if errors:
         messages.warning(request, f'Some rows had errors: {"; ".join(errors[:3])}')
     return csv_form
+
+
+def _parse_txt_file(file_content):
+    """Parse a plain text file into content."""
+    return file_content.strip()
+
+
+def _parse_docx_file(docx_file):
+    """
+    Parse a DOCX file. Returns (full_text, sections_list).
+    sections_list contains dicts with 'title' and 'content' if headings found.
+    """
+    try:
+        from docx import Document
+    except ImportError:
+        return None, None
+    
+    document = Document(docx_file)
+    full_text_parts = []
+    sections = []
+    current_section = {'title': None, 'content': []}
+    
+    for para in document.paragraphs:
+        text = para.text.strip()
+        if not text:
+            continue
+            
+        # Check if paragraph is a heading
+        if para.style.name.startswith('Heading'):
+            # Save previous section if it has content
+            if current_section['title'] and current_section['content']:
+                sections.append({
+                    'title': current_section['title'],
+                    'content': '\n\n'.join(current_section['content'])
+                })
+            # Start new section
+            current_section = {'title': text, 'content': []}
+        else:
+            current_section['content'].append(text)
+        
+        full_text_parts.append(text)
+    
+    # Don't forget the last section
+    if current_section['title'] and current_section['content']:
+        sections.append({
+            'title': current_section['title'],
+            'content': '\n\n'.join(current_section['content'])
+        })
+    
+    full_text = '\n\n'.join(full_text_parts)
+    return full_text, sections
+
+
+def _handle_history_document_import(request):
+    """Handle TXT/DOCX import for history sections."""
+    from .models import ChapterHistorySection
+    from .forms import ChapterHistoryDocumentForm
+    
+    doc_form = ChapterHistoryDocumentForm(request.POST, request.FILES)
+    if not doc_form.is_valid():
+        for field, errors in doc_form.errors.items():
+            for error in errors:
+                messages.error(request, f'{field}: {error}')
+        return doc_form
+    
+    doc_file = doc_form.cleaned_data['document_file']
+    section_title = doc_form.cleaned_data.get('section_title', '').strip()
+    section_type = doc_form.cleaned_data.get('section_type', 'custom')
+    import_mode = doc_form.cleaned_data.get('import_mode', 'single')
+    
+    filename = doc_file.name
+    is_docx = filename.lower().endswith('.docx')
+    
+    # Create backup before importing
+    _create_history_backup(
+        request,
+        f"Before document import: {filename}",
+        'pre_import'
+    )
+    
+    # Default title from filename if not provided
+    if not section_title:
+        section_title = filename.rsplit('.', 1)[0].replace('_', ' ').replace('-', ' ').title()
+    
+    try:
+        if is_docx:
+            # Parse DOCX file
+            full_text, sections = _parse_docx_file(doc_file)
+            
+            if full_text is None:
+                messages.error(request, 'Could not parse DOCX file. Make sure python-docx is installed.')
+                return doc_form
+            
+            if import_mode == 'headings' and sections:
+                # Create multiple sections from headings
+                created_count = 0
+                max_order = ChapterHistorySection.objects.aggregate(
+                    max_order=models.Max('display_order')
+                )['max_order'] or 0
+                
+                for i, section in enumerate(sections):
+                    ChapterHistorySection.objects.create(
+                        title=section['title'],
+                        section_type=section_type,
+                        content=section['content'],
+                        display_order=max_order + i + 1,
+                        is_active=True,
+                        created_by=request.user
+                    )
+                    created_count += 1
+                
+                messages.success(request, f'Successfully imported {created_count} section(s) from document headings.')
+            else:
+                # Import as single section
+                max_order = ChapterHistorySection.objects.aggregate(
+                    max_order=models.Max('display_order')
+                )['max_order'] or 0
+                
+                ChapterHistorySection.objects.create(
+                    title=section_title,
+                    section_type=section_type,
+                    content=full_text,
+                    display_order=max_order + 1,
+                    is_active=True,
+                    created_by=request.user
+                )
+                messages.success(request, f'Successfully imported "{section_title}" from document.')
+        else:
+            # Parse TXT file
+            content = doc_file.read().decode('utf-8', errors='replace')
+            content = _parse_txt_file(content)
+            
+            max_order = ChapterHistorySection.objects.aggregate(
+                max_order=models.Max('display_order')
+            )['max_order'] or 0
+            
+            ChapterHistorySection.objects.create(
+                title=section_title,
+                section_type=section_type,
+                content=content,
+                display_order=max_order + 1,
+                is_active=True,
+                created_by=request.user
+            )
+            messages.success(request, f'Successfully imported "{section_title}" from text file.')
+            
+    except Exception as e:
+        messages.error(request, f'Error importing document: {str(e)}')
+    
+    return doc_form
 
 
 @login_required
 @user_passes_test(is_officer_or_staff)
 def manage_chapter_history(request):
     """Admin portal for managing chapter history sections."""
-    from .models import ChapterHistorySection
-    from .forms import ChapterHistorySectionForm, ChapterHistoryCSVForm
+    from .models import ChapterHistorySection, ChapterHistoryBackup
+    from .forms import ChapterHistorySectionForm, ChapterHistoryCSVForm, ChapterHistoryDocumentForm
     
     sections = ChapterHistorySection.objects.all()
+    backups = ChapterHistoryBackup.objects.all()[:10]  # Show last 10 backups
     form = ChapterHistorySectionForm()
     csv_form = ChapterHistoryCSVForm()
+    doc_form = ChapterHistoryDocumentForm()
     
     if request.method == 'POST':
         action = request.POST.get('action', '')
@@ -4827,14 +5150,40 @@ def manage_chapter_history(request):
             _handle_history_delete_section(request)
             return redirect('manage_chapter_history')
             
+        elif action == 'duplicate_section':
+            _handle_history_duplicate_section(request)
+            return redirect('manage_chapter_history')
+            
+        elif action == 'bulk_delete':
+            _handle_history_bulk_delete(request)
+            return redirect('manage_chapter_history')
+            
+        elif action == 'clear_all':
+            _handle_history_clear_all(request)
+            return redirect('manage_chapter_history')
+            
         elif action == 'import_csv':
             _handle_history_csv_import(request)
+            return redirect('manage_chapter_history')
+            
+        elif action == 'import_document':
+            _handle_history_document_import(request)
+            return redirect('manage_chapter_history')
+            
+        elif action == 'restore_backup':
+            _handle_history_restore(request)
+            return redirect('manage_chapter_history')
+            
+        elif action == 'delete_backup':
+            _handle_history_delete_backup(request)
             return redirect('manage_chapter_history')
     
     context = {
         'sections': sections,
+        'backups': backups,
         'form': form,
         'csv_form': csv_form,
+        'doc_form': doc_form,
     }
     return render(request, 'pages/portal/manage_history.html', context)
 

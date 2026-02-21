@@ -27,11 +27,13 @@
     .page-header h1 {
         margin: 0;
         font-size: 2rem;
+        color: white;
     }
 
     .page-header p {
         margin: 10px 0 0 0;
         opacity: 0.9;
+        color: white;
     }
 
     .content-grid {
@@ -263,6 +265,32 @@
         width: 18px;
         height: 18px;
     }
+
+    /* Backup section styles */
+    .backup-item {
+        transition: background-color 0.2s ease;
+    }
+
+    .backup-item:hover {
+        background: #e9ecef !important;
+    }
+
+    body.dark-mode .backup-item {
+        background: #0b1020 !important;
+    }
+
+    body.dark-mode .backup-item:hover {
+        background: #1a2a4a !important;
+    }
+
+    body.dark-mode .backup-info strong {
+        color: #e8edf7;
+    }
+
+    .btn-outline-danger:hover {
+        background: #dc3545 !important;
+        color: white !important;
+    }
 </style>
 {% endblock %}
 
@@ -352,6 +380,56 @@
                 Columns: <code>title</code>, <code>section_type</code>, <code>content</code>, <code>display_order</code>, <code>is_active</code><br><br>
                 <strong>Section types:</strong> intro, founding, milestones, leadership, community, national, custom
             </div>
+
+            <!-- Document Import (TXT/DOCX) -->
+            <hr style="margin: 30px 0;">
+            <h4><i class="fas fa-file-word"></i> Import from Text/Word Document</h4>
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="import_document">
+                
+                <div class="form-group">
+                    <label for="id_document_file">Document File (.txt or .docx)</label>
+                    {{ doc_form.document_file }}
+                </div>
+
+                <div class="form-group">
+                    <label for="id_section_title">Section Title (optional)</label>
+                    {{ doc_form.section_title }}
+                    <small class="text-muted">If blank, filename will be used</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="id_section_type">Section Type</label>
+                    {{ doc_form.section_type }}
+                </div>
+
+                <div class="form-group">
+                    <label>Import Mode</label>
+                    <div class="import-mode-options" style="margin-top: 8px;">
+                        {% for radio in doc_form.import_mode %}
+                        <div class="form-check" style="margin-bottom: 8px;">
+                            {{ radio.tag }}
+                            <label for="{{ radio.id_for_label }}" style="margin-left: 8px; font-weight: normal;">
+                                {{ radio.choice_label }}
+                            </label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <small class="text-muted">Heading parsing works best with properly formatted Word documents</small>
+                </div>
+
+                <button type="submit" class="btn btn-secondary">
+                    <i class="fas fa-upload"></i> Import Document
+                </button>
+            </form>
+
+            <div class="csv-help" style="margin-top: 15px;">
+                <strong>Document Import Tips:</strong><br>
+                <strong>• Single section:</strong> Imports entire document as one section<br>
+                <strong>• Parse headings (DOCX):</strong> Creates separate sections from Word headings (Heading 1, Heading 2, etc.)<br>
+                <strong>• TXT files:</strong> Plain text, imported as single section
+            </div>
         </div>
 
         <!-- Existing Sections -->
@@ -359,40 +437,64 @@
             <h3><i class="fas fa-list"></i> Existing Sections ({{ sections.count }})</h3>
             
             {% if sections %}
-            <div class="section-list">
-                {% for section in sections %}
-                <div class="section-item {% if not section.is_active %}inactive{% endif %}">
-                    <div class="section-info">
-                        <h4>
-                            {{ section.title }}
-                            {% if section.is_active %}
-                            <span class="badge badge-success">Active</span>
-                            {% else %}
-                            <span class="badge badge-secondary">Inactive</span>
-                            {% endif %}
-                        </h4>
-                        <div class="meta">
-                            <span><i class="fas fa-tag"></i> {{ section.get_section_type_display }}</span>
-                            &nbsp;|&nbsp;
-                            <span><i class="fas fa-sort-numeric-down"></i> Order: {{ section.display_order }}</span>
+            <!-- Bulk Actions -->
+            <form method="post" id="bulkForm">
+                {% csrf_token %}
+                <input type="hidden" name="action" id="bulkAction" value="">
+                
+                <div style="margin-bottom: 15px; padding: 10px; background: #f8f9fa; border-radius: 8px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+                    <label style="display: flex; align-items: center; gap: 5px; margin: 0; cursor: pointer;">
+                        <input type="checkbox" id="selectAll" style="width: 18px; height: 18px;">
+                        <span>Select All</span>
+                    </label>
+                    <span style="color: #6c757d;">|</span>
+                    <button type="button" onclick="bulkDelete()" class="btn btn-danger btn-sm" style="padding: 5px 12px;">
+                        <i class="fas fa-trash"></i> Delete Selected
+                    </button>
+                    <button type="button" onclick="clearAll()" class="btn btn-sm" style="padding: 5px 12px; background: #856404; color: white;">
+                        <i class="fas fa-broom"></i> Clear All
+                    </button>
+                </div>
+                
+                <div class="section-list">
+                    {% for section in sections %}
+                    <div class="section-item {% if not section.is_active %}inactive{% endif %}">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <input type="checkbox" name="section_ids" value="{{ section.id }}" class="section-checkbox" style="width: 18px; height: 18px;">
+                            <div class="section-info" style="flex: 1;">
+                                <h4>
+                                    {{ section.title }}
+                                    {% if section.is_active %}
+                                    <span class="badge badge-success">Active</span>
+                                    {% else %}
+                                    <span class="badge badge-secondary">Inactive</span>
+                                    {% endif %}
+                                </h4>
+                                <div class="meta">
+                                    <span><i class="fas fa-tag"></i> {{ section.get_section_type_display }}</span>
+                                    &nbsp;|&nbsp;
+                                    <span><i class="fas fa-sort-numeric-down"></i> Order: {{ section.display_order }}</span>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="section-actions">
-                        <a href="{% url 'edit_history_section' section.id %}" class="btn btn-secondary btn-sm">
-                            <i class="fas fa-edit"></i>
-                        </a>
-                        <form method="post" style="display: inline;" onsubmit="return confirm('Delete this section?');">
-                            {% csrf_token %}
-                            <input type="hidden" name="action" value="delete_section">
-                            <input type="hidden" name="section_id" value="{{ section.id }}">
-                            <button type="submit" class="btn btn-danger btn-sm">
+                        <div class="section-actions">
+                            <!-- Duplicate -->
+                            <button type="button" onclick="duplicateSection({{ section.id }})" class="btn btn-sm" style="background: #17a2b8; color: white;" title="Duplicate">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                            <!-- Edit -->
+                            <a href="{% url 'edit_history_section' section.id %}" class="btn btn-secondary btn-sm" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <!-- Delete -->
+                            <button type="button" onclick="deleteSection({{ section.id }}, '{{ section.title|escapejs }}')" class="btn btn-danger btn-sm" title="Delete">
                                 <i class="fas fa-trash"></i>
                             </button>
-                        </form>
+                        </div>
                     </div>
+                    {% endfor %}
                 </div>
-                {% endfor %}
-            </div>
+            </form>
             {% else %}
             <div class="empty-state">
                 <i class="fas fa-inbox" style="font-size: 3em; margin-bottom: 15px; opacity: 0.5;"></i>
@@ -402,10 +504,153 @@
         </div>
     </div>
 
+    <!-- Backup & Restore Section -->
+    {% if backups %}
+    <div class="section-card" style="margin-top: 30px;">
+        <h3><i class="fas fa-history"></i> Backup & Restore</h3>
+        <p class="text-muted" style="margin-bottom: 15px;">
+            Backups are automatically created before imports and clear operations. You can restore to any previous state.
+        </p>
+        
+        <div class="backup-list" style="display: grid; gap: 10px;">
+            {% for backup in backups %}
+            <div class="backup-item" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid {% if backup.backup_type == 'pre_clear' %}#dc3545{% else %}#17a2b8{% endif %};">
+                <div class="backup-info">
+                    <strong>{{ backup.name }}</strong>
+                    <div class="meta" style="font-size: 0.85em; color: #6c757d; margin-top: 3px;">
+                        <span><i class="fas fa-clock"></i> {{ backup.created_at|date:"M d, Y H:i" }}</span>
+                        &nbsp;|&nbsp;
+                        <span><i class="fas fa-list-ol"></i> {{ backup.section_count }} section{{ backup.section_count|pluralize }}</span>
+                        &nbsp;|&nbsp;
+                        <span class="badge {% if backup.backup_type == 'pre_clear' %}bg-danger{% else %}bg-info{% endif %}" style="font-size: 0.75em;">
+                            {{ backup.get_backup_type_display }}
+                        </span>
+                    </div>
+                </div>
+                <div class="backup-actions" style="display: flex; gap: 8px;">
+                    <button type="button" onclick="restoreBackup({{ backup.id }}, '{{ backup.name|escapejs }}', {{ backup.section_count }})" 
+                            class="btn btn-sm" style="background: #28a745; color: white;">
+                        <i class="fas fa-undo"></i> Restore
+                    </button>
+                    <button type="button" onclick="deleteBackup({{ backup.id }}, '{{ backup.name|escapejs }}')" 
+                            class="btn btn-sm btn-outline-danger" style="border: 1px solid #dc3545; color: #dc3545; background: transparent;">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <p class="text-muted" style="margin-top: 15px; font-size: 0.85em;">
+            <i class="fas fa-info-circle"></i> Only the last 10 backups are kept. Restoring will replace all current sections with the backup data.
+        </p>
+    </div>
+    {% endif %}
+
     <div style="margin-top: 30px; text-align: center;">
         <a href="{% url 'chapter_history' %}" class="btn btn-secondary" target="_blank">
             <i class="fas fa-external-link-alt"></i> Preview History Page
         </a>
     </div>
 </div>
+
+<!-- Hidden forms for single actions -->
+<form method="post" id="singleDeleteForm" style="display: none;">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="delete_section">
+    <input type="hidden" name="section_id" id="deleteSectionId" value="">
+</form>
+
+<form method="post" id="duplicateForm" style="display: none;">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="duplicate_section">
+    <input type="hidden" name="section_id" id="duplicateSectionId" value="">
+</form>
+
+<form method="post" id="restoreBackupForm" style="display: none;">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="restore_backup">
+    <input type="hidden" name="backup_id" id="restoreBackupId" value="">
+</form>
+
+<form method="post" id="deleteBackupForm" style="display: none;">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="delete_backup">
+    <input type="hidden" name="backup_id" id="deleteBackupId" value="">
+</form>
+
+<script>
+// Select all checkbox
+document.getElementById('selectAll')?.addEventListener('change', function() {
+    document.querySelectorAll('.section-checkbox').forEach(cb => {
+        cb.checked = this.checked;
+    });
+});
+
+// Update select all when individual checkboxes change
+document.querySelectorAll('.section-checkbox').forEach(cb => {
+    cb.addEventListener('change', function() {
+        const allChecked = document.querySelectorAll('.section-checkbox:checked').length === 
+                          document.querySelectorAll('.section-checkbox').length;
+        document.getElementById('selectAll').checked = allChecked;
+    });
+});
+
+function deleteSection(id, title) {
+    if (confirm('Delete section "' + title + '"? This cannot be undone.')) {
+        document.getElementById('deleteSectionId').value = id;
+        document.getElementById('singleDeleteForm').submit();
+    }
+}
+
+function duplicateSection(id) {
+    document.getElementById('duplicateSectionId').value = id;
+    document.getElementById('duplicateForm').submit();
+}
+
+function bulkDelete() {
+    const checked = document.querySelectorAll('.section-checkbox:checked');
+    if (checked.length === 0) {
+        alert('Please select at least one section to delete.');
+        return;
+    }
+    if (confirm('Delete ' + checked.length + ' selected section(s)? This cannot be undone.')) {
+        document.getElementById('bulkAction').value = 'bulk_delete';
+        document.getElementById('bulkForm').submit();
+    }
+}
+
+function clearAll() {
+    const count = document.querySelectorAll('.section-checkbox').length;
+    if (confirm('⚠️ WARNING: This will delete ALL ' + count + ' section(s)!\n\nThis action cannot be undone. Continue?')) {
+        if (confirm('Are you absolutely sure? Type OK to confirm deletion of all sections.')) {
+            document.getElementById('bulkAction').value = 'clear_all';
+            document.getElementById('bulkForm').submit();
+        }
+    }
+}
+
+function restoreBackup(id, name, sectionCount) {
+    const currentCount = document.querySelectorAll('.section-checkbox').length;
+    let message = '⚠️ RESTORE BACKUP\n\n';
+    message += 'Backup: "' + name + '"\n';
+    message += 'Sections to restore: ' + sectionCount + '\n';
+    if (currentCount > 0) {
+        message += '\nThis will REPLACE your current ' + currentCount + ' section(s)!\n';
+    }
+    message += '\nProceed with restore?';
+    
+    if (confirm(message)) {
+        document.getElementById('restoreBackupId').value = id;
+        document.getElementById('restoreBackupForm').submit();
+    }
+}
+
+function deleteBackup(id, name) {
+    if (confirm('Delete backup "' + name + '"?\n\nThis cannot be undone.')) {
+        document.getElementById('deleteBackupId').value = id;
+        document.getElementById('deleteBackupForm').submit();
+    }
+}
+</script>
 {% endblock %}

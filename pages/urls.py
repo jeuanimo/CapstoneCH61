@@ -98,6 +98,7 @@ urlpatterns = [
     path('about/', views.about, name='about'),       # About page
     path('contact/', views.contact, name='contact'),   # Contact page
     path('events/', views.events, name='events'),     # Events & Service page
+    path('history/', views.chapter_history, name='chapter_history'),  # Chapter History page
     path('chapter-programs/', views.chapter_programs, name='chapter_programs'),  # Chapter Programs page
     
     # PROGRAMS WITH PHOTOS
@@ -254,4 +255,5 @@ urlpatterns = [
     path('boutique/admin/delete-product/<int:pk>/', views.delete_product, name='delete_product'),
     path('boutique/admin/bulk-delete/', views.bulk_delete_products, name='bulk_delete_products'),
     path('boutique/admin/dashboard/', views.boutique_dashboard, name='boutique_dashboard'),
+    path('boutique/admin/clear-abandoned/', views.clear_abandoned_orders, name='clear_abandoned_orders'),
 ]
