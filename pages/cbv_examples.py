@@ -95,12 +95,9 @@ class MemberCreateView(StaffRequiredMixin, SuccessMessageMixin, CreateView):
         """
         response = super().form_valid(form)
         
-        # Get the created member profile
-        member_profile = self.object
-        
-        # TODO: Add custom logic here (leadership, invitations, etc.)
-        # if form.cleaned_data.get('leadership_position'):
-        #     # Create leadership record
+        # Custom logic can be added here for leadership, invitations, etc.
+        # Example: if form.cleaned_data.get('leadership_position'):
+        #     Create leadership record for self.object
         
         return response
 

@@ -41,50 +41,56 @@ class MemberSyncForm(forms.Form):
         
         return cleaned_data
     
+    def _read_csv_content(self, csv_file):
+        """Read and decode CSV file content."""
+        if isinstance(csv_file, io.BytesIO) or hasattr(csv_file, 'read'):
+            file_content = csv_file.read()
+            if isinstance(file_content, bytes):
+                file_content = file_content.decode('utf-8-sig')
+        else:
+            file_content = csv_file.read().decode('utf-8-sig')
+        csv_file.seek(0)
+        return file_content
+    
+    def _find_member_column(self, fieldnames):
+        """Find the member number column from CSV headers."""
+        valid_names = ['member#', 'member_number', 'member number', 'major_key']
+        for col in fieldnames:
+            if col.lower().strip() in valid_names:
+                return col
+        return None
+    
+    def _extract_member_numbers(self, csv_reader, member_column):
+        """Extract member numbers from CSV rows."""
+        member_numbers = set()
+        errors = []
+        for row_num, row in enumerate(csv_reader, start=2):
+            member_num = row.get(member_column, '').strip()
+            if member_num:
+                member_numbers.add(member_num)
+            else:
+                errors.append(f'Row {row_num}: Missing member number')
+        return member_numbers, errors
+    
     def parse_member_numbers(self):
         """Extract member numbers from CSV file"""
         csv_file = self.cleaned_data['csv_file']
-        member_numbers = set()
-        errors = []
         
         try:
-            # Read and decode CSV file
-            if isinstance(csv_file, io.BytesIO) or hasattr(csv_file, 'read'):
-                file_content = csv_file.read()
-                if isinstance(file_content, bytes):
-                    file_content = file_content.decode('utf-8-sig')
-            else:
-                file_content = csv_file.read().decode('utf-8-sig')
-            
-            # Reset file pointer for re-reading
-            csv_file.seek(0)
-            
-            # Parse CSV
+            file_content = self._read_csv_content(csv_file)
             csv_reader = csv.DictReader(io.StringIO(file_content))
             
             if not csv_reader.fieldnames:
                 raise ValidationError('CSV file is empty')
             
-            # Support multiple column names for member number
-            member_column = None
-            for col in csv_reader.fieldnames:
-                if col.lower().strip() in ['member#', 'member_number', 'member number', 'major_key']:
-                    member_column = col
-                    break
-            
+            member_column = self._find_member_column(csv_reader.fieldnames)
             if not member_column:
                 raise ValidationError(
                     f'CSV must contain a "Member#" or "Member Number" column. '
                     f'Found columns: {", ".join(csv_reader.fieldnames)}'
                 )
             
-            # Extract member numbers
-            for row_num, row in enumerate(csv_reader, start=2):
-                member_num = row.get(member_column, '').strip()
-                if member_num:
-                    member_numbers.add(member_num)
-                else:
-                    errors.append(f'Row {row_num}: Missing member number')
+            member_numbers, errors = self._extract_member_numbers(csv_reader, member_column)
             
             if not member_numbers:
                 raise ValidationError('No valid member numbers found in CSV')
@@ -93,5 +99,7 @@ class MemberSyncForm(forms.Form):
         
         except csv.Error as e:
             raise ValidationError(f'CSV parsing error: {str(e)}')
+        except ValidationError:
+            raise
         except Exception as e:
             raise ValidationError(f'Error processing CSV file: {str(e)}')

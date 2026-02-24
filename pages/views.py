@@ -85,6 +85,7 @@ from .models import (
     TwilioConfiguration, SMSPreference, SMSLog,
     Product, Cart, CartItem, Order, OrderItem, SiteConfiguration
 )
+from django.db.models import Max
 from .forms import ChapterLeadershipForm, MemberProfileForm, DuesPaymentForm, StripeConfigurationForm, TwilioConfigurationForm, SMSPreferenceForm, CreateBillForm, SiteConfigurationForm
 from .forms_profile import (
     EditProfileForm, CreatePostForm, InvitationSignupForm,
@@ -4983,7 +4984,7 @@ def _handle_history_csv_import(request):
         messages.success(request, f'Successfully imported {created_count} history section(s). A backup was created if you need to revert.')
     if errors:
         messages.warning(request, f'Some rows had errors: {"; ".join(errors[:3])}')
-    return csv_form
+    return None
 
 
 def _parse_txt_file(file_content):
@@ -5037,9 +5038,75 @@ def _parse_docx_file(docx_file):
     return full_text, sections
 
 
+def _create_sections_from_headings(sections, section_type, request):
+    """Create history sections from parsed document headings."""
+    from .models import ChapterHistorySection
+    
+    created_count = 0
+    max_order = ChapterHistorySection.objects.aggregate(
+        max_order=Max('display_order')
+    )['max_order'] or 0
+    
+    for i, section in enumerate(sections):
+        ChapterHistorySection.objects.create(
+            title=section['title'],
+            section_type=section_type,
+            content=section['content'],
+            display_order=max_order + i + 1,
+            is_active=True,
+            created_by=request.user
+        )
+        created_count += 1
+    
+    return created_count
+
+
+def _create_single_history_section(title, section_type, content, request):
+    """Create a single history section."""
+    from .models import ChapterHistorySection
+    
+    max_order = ChapterHistorySection.objects.aggregate(
+        max_order=Max('display_order')
+    )['max_order'] or 0
+    
+    ChapterHistorySection.objects.create(
+        title=title,
+        section_type=section_type,
+        content=content,
+        display_order=max_order + 1,
+        is_active=True,
+        created_by=request.user
+    )
+
+
+def _import_docx_content(doc_file, section_title, section_type, import_mode, request):
+    """Import content from a DOCX file. Returns success status."""
+    full_text, sections = _parse_docx_file(doc_file)
+    
+    if full_text is None:
+        messages.error(request, 'Could not parse DOCX file. Make sure python-docx is installed.')
+        return False
+    
+    if import_mode == 'headings' and sections:
+        created_count = _create_sections_from_headings(sections, section_type, request)
+        messages.success(request, f'Successfully imported {created_count} section(s) from document headings.')
+    else:
+        _create_single_history_section(section_title, section_type, full_text, request)
+        messages.success(request, f'Successfully imported "{section_title}" from document.')
+    
+    return True
+
+
+def _import_txt_content(doc_file, section_title, section_type, request):
+    """Import content from a TXT file."""
+    content = doc_file.read().decode('utf-8', errors='replace')
+    content = _parse_txt_file(content)
+    _create_single_history_section(section_title, section_type, content, request)
+    messages.success(request, f'Successfully imported "{section_title}" from text file.')
+
+
 def _handle_history_document_import(request):
     """Handle TXT/DOCX import for history sections."""
-    from .models import ChapterHistorySection
     from .forms import ChapterHistoryDocumentForm
     
     doc_form = ChapterHistoryDocumentForm(request.POST, request.FILES)
@@ -5058,11 +5125,7 @@ def _handle_history_document_import(request):
     is_docx = filename.lower().endswith('.docx')
     
     # Create backup before importing
-    _create_history_backup(
-        request,
-        f"Before document import: {filename}",
-        'pre_import'
-    )
+    _create_history_backup(request, f"Before document import: {filename}", 'pre_import')
     
     # Default title from filename if not provided
     if not section_title:
@@ -5070,70 +5133,14 @@ def _handle_history_document_import(request):
     
     try:
         if is_docx:
-            # Parse DOCX file
-            full_text, sections = _parse_docx_file(doc_file)
-            
-            if full_text is None:
-                messages.error(request, 'Could not parse DOCX file. Make sure python-docx is installed.')
-                return doc_form
-            
-            if import_mode == 'headings' and sections:
-                # Create multiple sections from headings
-                created_count = 0
-                max_order = ChapterHistorySection.objects.aggregate(
-                    max_order=models.Max('display_order')
-                )['max_order'] or 0
-                
-                for i, section in enumerate(sections):
-                    ChapterHistorySection.objects.create(
-                        title=section['title'],
-                        section_type=section_type,
-                        content=section['content'],
-                        display_order=max_order + i + 1,
-                        is_active=True,
-                        created_by=request.user
-                    )
-                    created_count += 1
-                
-                messages.success(request, f'Successfully imported {created_count} section(s) from document headings.')
-            else:
-                # Import as single section
-                max_order = ChapterHistorySection.objects.aggregate(
-                    max_order=models.Max('display_order')
-                )['max_order'] or 0
-                
-                ChapterHistorySection.objects.create(
-                    title=section_title,
-                    section_type=section_type,
-                    content=full_text,
-                    display_order=max_order + 1,
-                    is_active=True,
-                    created_by=request.user
-                )
-                messages.success(request, f'Successfully imported "{section_title}" from document.')
+            _import_docx_content(doc_file, section_title, section_type, import_mode, request)
         else:
-            # Parse TXT file
-            content = doc_file.read().decode('utf-8', errors='replace')
-            content = _parse_txt_file(content)
-            
-            max_order = ChapterHistorySection.objects.aggregate(
-                max_order=models.Max('display_order')
-            )['max_order'] or 0
-            
-            ChapterHistorySection.objects.create(
-                title=section_title,
-                section_type=section_type,
-                content=content,
-                display_order=max_order + 1,
-                is_active=True,
-                created_by=request.user
-            )
-            messages.success(request, f'Successfully imported "{section_title}" from text file.')
+            _import_txt_content(doc_file, section_title, section_type, request)
             
     except Exception as e:
         messages.error(request, f'Error importing document: {str(e)}')
     
-    return doc_form
+    return None
 
 
 @login_required
@@ -5312,7 +5319,7 @@ def _handle_chatbot_csv_import(request):
         messages.success(request, f'Successfully imported {created_count} Q&A entry/entries.')
     if errors:
         messages.warning(request, f'Some rows had errors: {"; ".join(errors[:3])}')
-    return csv_form
+    return None
 
 
 @login_required

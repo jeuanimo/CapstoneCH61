@@ -57,7 +57,6 @@ class BoutiqueImportForm(forms.Form):
     def parse_csv(self):
         """Parse CSV file and return list of product data. Supports both standard format and Shopify exports."""
         csv_file = self.cleaned_data['csv_file']
-        products_data = []
         
         try:
             # Reset file position to beginning
@@ -111,92 +110,77 @@ class BoutiqueImportForm(forms.Form):
         except Exception as e:
             raise ValidationError(f'Error processing CSV file: {str(e)}')
     
+    def _map_shopify_category(self, shopify_type):
+        """Map Shopify product type to our category."""
+        if not shopify_type:
+            return 'other'
+        shopify_type = shopify_type.lower()
+        apparel_words = ['shirt', 'apparel', 'clothing', 'jacket', 'hoodie', 'polo', 'tee']
+        accessory_words = ['accessory', 'accessories', 'hat', 'cap', 'bag', 'pin', 'lanyard']
+        drinkware_words = ['drinkware', 'mug', 'cup', 'tumbler', 'bottle', 'glass']
+        
+        if any(word in shopify_type for word in apparel_words):
+            return 'apparel'
+        if any(word in shopify_type for word in accessory_words):
+            return 'accessories'
+        if any(word in shopify_type for word in drinkware_words):
+            return 'drinkware'
+        return 'other'
+    
+    def _extract_option_value(self, row, option_name):
+        """Extract value from Shopify option columns by name (e.g., 'size', 'color')."""
+        for i in range(1, 4):
+            if row.get(f'Option{i} Name', '').strip().lower() == option_name:
+                return row.get(f'Option{i} Value', '').strip()
+        return ''
+    
+    def _parse_numeric_field(self, value, field_type='float'):
+        """Safely parse numeric fields."""
+        try:
+            if field_type == 'float':
+                num = float(value.replace('$', '').replace(',', '').strip() if isinstance(value, str) else value or 0)
+            else:
+                num = int(value or 0)
+            return max(0, num)
+        except (ValueError, TypeError):
+            return 0
+    
+    def _parse_shopify_row(self, row):
+        """Parse a single Shopify CSV row into product data."""
+        name = row.get('Title', '').strip()
+        if not name:
+            return None
+        
+        description = row.get('Body (HTML)', '').strip()
+        description = re.sub(r'<[^>]+>', '', description)
+        
+        return {
+            'name': name,
+            'category': self._map_shopify_category(row.get('Type', '')),
+            'price': self._parse_numeric_field(row.get('Variant Price', 0)),
+            'description': description[:1000] if description else '',
+            'inventory': self._parse_numeric_field(row.get('Variant Inventory Qty', 0), 'int'),
+            'sizes': self._extract_option_value(row, 'size'),
+            'colors': self._extract_option_value(row, 'color'),
+            'image_url': row.get('Image Src', '').strip(),
+            'image_path': '',
+        }
+    
     def _parse_shopify_csv(self, csv_reader):
         """Parse Shopify-format CSV export"""
         products_data = []
-        seen_handles = set()  # Track unique products (Shopify has multiple rows per product for variants)
-        
-        valid_categories = ['apparel', 'accessories', 'drinkware', 'other']
+        seen_handles = set()
         
         for row_num, row in enumerate(csv_reader, start=2):
             try:
                 handle = row.get('Handle', '').strip()
-                
-                # Skip variant rows (same handle = same product, different variant)
                 if handle in seen_handles:
                     continue
                 seen_handles.add(handle)
                 
-                # Map Shopify columns to our fields
-                name = row.get('Title', '').strip()
-                if not name:
-                    continue  # Skip rows without a title
-                
-                # Map Shopify "Type" to category, default to 'other'
-                shopify_type = row.get('Type', '').strip().lower()
-                category = 'other'
-                if shopify_type:
-                    # Try to match Shopify type to our categories
-                    if any(word in shopify_type for word in ['shirt', 'apparel', 'clothing', 'jacket', 'hoodie', 'polo', 'tee']):
-                        category = 'apparel'
-                    elif any(word in shopify_type for word in ['accessory', 'accessories', 'hat', 'cap', 'bag', 'pin', 'lanyard']):
-                        category = 'accessories'
-                    elif any(word in shopify_type for word in ['drinkware', 'mug', 'cup', 'tumbler', 'bottle', 'glass']):
-                        category = 'drinkware'
-                
-                # Get price from Variant Price
-                try:
-                    price = float(row.get('Variant Price', 0) or 0)
-                    if price < 0:
-                        price = 0
-                except (ValueError, TypeError):
-                    price = 0
-                
-                # Get inventory from Variant Inventory Qty
-                try:
-                    inventory = int(row.get('Variant Inventory Qty', 0) or 0)
-                    if inventory < 0:
-                        inventory = 0
-                except (ValueError, TypeError):
-                    inventory = 0
-                
-                # Get description from Body (HTML) - strip basic HTML tags
-                description = row.get('Body (HTML)', '').strip()
-                # Simple HTML tag removal
-                description = re.sub(r'<[^>]+>', '', description)
-                
-                # Get image URL
-                image_url = row.get('Image Src', '').strip()
-                
-                # Get sizes from Option1 if it's "Size"
-                sizes = ''
-                if row.get('Option1 Name', '').strip().lower() == 'size':
-                    sizes = row.get('Option1 Value', '').strip()
-                elif row.get('Option2 Name', '').strip().lower() == 'size':
-                    sizes = row.get('Option2 Value', '').strip()
-                elif row.get('Option3 Name', '').strip().lower() == 'size':
-                    sizes = row.get('Option3 Value', '').strip()
-                
-                # Get colors from Options
-                colors = ''
-                if row.get('Option1 Name', '').strip().lower() == 'color':
-                    colors = row.get('Option1 Value', '').strip()
-                elif row.get('Option2 Name', '').strip().lower() == 'color':
-                    colors = row.get('Option2 Value', '').strip()
-                elif row.get('Option3 Name', '').strip().lower() == 'color':
-                    colors = row.get('Option3 Value', '').strip()
-                
-                products_data.append({
-                    'name': name,
-                    'category': category,
-                    'price': price,
-                    'description': description[:1000] if description else '',  # Limit description length
-                    'inventory': inventory,
-                    'sizes': sizes,
-                    'colors': colors,
-                    'image_url': image_url,
-                    'image_path': '',
-                })
+                product = self._parse_shopify_row(row)
+                if product:
+                    products_data.append(product)
             
             except Exception as e:
                 raise ValidationError(f'Row {row_num}: {str(e)}')
@@ -206,62 +190,43 @@ class BoutiqueImportForm(forms.Form):
         
         return products_data
     
+    def _parse_standard_row(self, row_lower):
+        """Parse a single standard CSV row into product data."""
+        name = row_lower.get('name', '').strip()
+        if not name:
+            return None
+        
+        valid_categories = ['apparel', 'accessories', 'drinkware', 'other']
+        category = row_lower.get('category', 'other').strip().lower()
+        if category not in valid_categories:
+            category = 'other'
+        
+        return {
+            'name': name,
+            'category': category,
+            'price': self._parse_numeric_field(row_lower.get('price', '0')),
+            'description': row_lower.get('description', '').strip(),
+            'inventory': self._parse_numeric_field(row_lower.get('inventory', 0), 'int'),
+            'sizes': row_lower.get('sizes', '').strip(),
+            'colors': row_lower.get('colors', '').strip(),
+            'image_url': row_lower.get('image_url', '').strip(),
+            'image_path': row_lower.get('image_path', '').strip(),
+        }
+    
     def _parse_standard_csv(self, csv_reader):
         """Parse standard CSV format with forgiving error handling"""
         products_data = []
-        valid_categories = ['apparel', 'accessories', 'drinkware', 'other']
         skipped_rows = []
         
         for row_num, row in enumerate(csv_reader, start=2):
             try:
-                # Create lowercase key mapping for this row
                 row_lower = {k.lower().strip(): v for k, v in row.items()}
-                
-                # Name is the only truly required field
-                name = row_lower.get('name', '').strip()
-                if not name:
+                product = self._parse_standard_row(row_lower)
+                if product:
+                    products_data.append(product)
+                else:
                     skipped_rows.append(f'Row {row_num}: No product name')
-                    continue  # Skip row instead of failing
-                
-                # Default category to 'other' if invalid or missing
-                category = row_lower.get('category', 'other').strip().lower()
-                if category not in valid_categories:
-                    category = 'other'  # Default instead of error
-                
-                # Default price to 0 if invalid
-                try:
-                    price_str = row_lower.get('price', '0') or '0'
-                    price = float(price_str.replace('$', '').replace(',', '').strip())
-                    if price < 0:
-                        price = 0
-                except (ValueError, TypeError):
-                    price = 0  # Default instead of error
-                
-                try:
-                    inventory = int(row_lower.get('inventory', 0) or 0)
-                    if inventory < 0:
-                        inventory = 0
-                except (ValueError, TypeError):
-                    inventory = 0
-                
-                # Support both image_url (download from URL) and image_path (from ZIP)
-                image_url = row_lower.get('image_url', '').strip()
-                image_path = row_lower.get('image_path', '').strip()
-                
-                products_data.append({
-                    'name': name,
-                    'category': category,
-                    'price': price,
-                    'description': row_lower.get('description', '').strip(),
-                    'inventory': inventory,
-                    'sizes': row_lower.get('sizes', '').strip(),
-                    'colors': row_lower.get('colors', '').strip(),
-                    'image_url': image_url,
-                    'image_path': image_path,
-                })
-            
             except Exception as e:
-                # Skip problematic rows instead of failing entire import
                 skipped_rows.append(f'Row {row_num}: {str(e)}')
                 continue
         

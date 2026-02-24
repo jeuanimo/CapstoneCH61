@@ -34,7 +34,7 @@ def cart_context(request):
     }
 
 
-def site_config_context(request):
+def site_config_context(_request):
     """
     Add site configuration to all templates.
     Provides branding info (logos, chapter name, social links, etc.)

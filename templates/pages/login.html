@@ -2,7 +2,7 @@
 
 {% load static %}
 
-{% block title %}Login - Phi Beta Sigma Fraternity, Inc. | Nu Gamma Sigma Chapter{% endblock %}
+{% block title %}Login - Phi Beta Sigma Fraternity, Inc. | Nu Gamma Sigma Chapter{% endblock title %}
 
 {% block css %}
 <style>
@@ -309,8 +309,54 @@
             font-size: 1.5rem;
         }
     }
+    
+    .help-text-muted {
+        color: #666;
+        font-size: 0.85rem;
+        margin-top: 0.25rem;
+    }
+    
+    body.dark-mode .help-text-muted {
+        color: #aaa;
+    }
+    
+    .forgot-password-container {
+        text-align: center;
+        margin-top: 1rem;
+    }
+    
+    .forgot-password-link {
+        color: #164f90;
+        text-decoration: none;
+        font-size: 0.9rem;
+    }
+    
+    body.dark-mode .forgot-password-link {
+        color: #87ceeb;
+    }
+    
+    .info-notice {
+        background-color: #e3f2fd;
+        color: #1565c0;
+        padding: 0.75rem;
+        border-radius: 4px;
+        margin-bottom: 1.5rem;
+        border-left: 4px solid #1565c0;
+        font-size: 0.9rem;
+    }
+    
+    body.dark-mode .info-notice {
+        background-color: rgba(33, 150, 243, 0.1);
+        color: #64b5f6;
+        border-left-color: #64b5f6;
+    }
+    
+    .info-notice-link {
+        color: inherit;
+        font-weight: 600;
+    }
 </style>
-{% endblock %}
+{% endblock css %}
 
 {% block content %}
 <div class="login-container">
@@ -336,7 +382,7 @@
             </div>
             {% endif %}
             
-            <form method="POST" action="{% url 'login' %}">
+            <form method="post" action="{% url 'login' %}">
                 {% csrf_token %}
                 
                 <div class="form-group">
@@ -347,7 +393,7 @@
                             <span class="field-error">{{ error }}</span>
                         {% endfor %}
                     {% endif %}
-                    <p class="help-text" style="color: #666; font-size: 0.85rem; margin-top: 0.25rem;">Enter your username (member_XXXXX) or email address</p>
+                    <p class="help-text help-text-muted">Enter your username (member_XXXXX) or email address</p>
                 </div>
                 
                 <div class="form-group">
@@ -367,8 +413,8 @@
                 
                 <button type="submit" class="btn-login">Sign In</button>
                 
-                <div style="text-align: center; margin-top: 1rem;">
-                    <a href="{% url 'password_reset' %}" style="color: #164f90; text-decoration: none; font-size: 0.9rem;">
+                <div class="forgot-password-container">
+                    <a href="{% url 'password_reset' %}" class="forgot-password-link">
                         <i class="fas fa-key"></i> Forgot Password?
                     </a>
                 </div>
@@ -381,8 +427,8 @@
         
         <!-- SIGNUP FORM -->
         <div id="signup-form" class="form-section">
-            <div style="background-color: #e3f2fd; color: #1565c0; padding: 0.75rem; border-radius: 4px; margin-bottom: 1.5rem; border-left: 4px solid #1565c0; font-size: 0.9rem;">
-                <i class="fas fa-info-circle"></i> To create an account, you'll need an invitation code. Don't have one? <a href="{% url 'contact' %}" style="color: inherit; font-weight: 600;">Contact us</a> to request membership information.
+            <div class="info-notice">
+                <i class="fas fa-info-circle"></i> To create an account, you'll need an invitation code. Don't have one? <a href="{% url 'contact' %}" class="info-notice-link">Contact us</a> to request membership information.
             </div>
             
             {% if signup_form.non_field_errors %}
@@ -393,7 +439,7 @@
             </div>
             {% endif %}
             
-            <form method="POST" action="{% url 'signup' %}">
+            <form method="post" action="{% url 'signup' %}">
                 {% csrf_token %}
                 
                 <div class="form-group">
@@ -490,4 +536,4 @@
         });
     });
 </script>
-{% endblock %}
+{% endblock content %}
