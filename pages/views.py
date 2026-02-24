@@ -184,12 +184,23 @@ def generate_invitation_for_member(user, member_profile, created_by):
     Returns:
         InvitationCode object
     """
+    import secrets
+    from datetime import timedelta
+    
+    # Generate unique code
+    code = secrets.token_urlsafe(16)[:20].upper().replace('_', '').replace('-', '')
+    
+    # Set expiration to 7 days from now
+    expires_at = timezone.now() + timedelta(days=7)
+    
     invitation = InvitationCode.objects.create(
+        code=code,
         email=user.email,
         first_name=user.first_name,
         last_name=user.last_name,
         member_number=member_profile.member_number,
         created_by=created_by,
+        expires_at=expires_at,
         notes=f"Auto-generated for {user.get_full_name()}"
     )
     
@@ -1049,9 +1060,9 @@ def delete_invitation(request, pk):
 
 
 @login_required
-@user_passes_test(lambda u: u.is_staff)
+@user_passes_test(is_officer_or_staff)
 def generate_member_invitation(request, pk):
-    """Generate a new invitation code for an existing member (admin only)"""
+    """Generate a new invitation code for an existing member (officers and admin)"""
     member_profile = get_object_or_404(MemberProfile, pk=pk)
     user = member_profile.user
     
