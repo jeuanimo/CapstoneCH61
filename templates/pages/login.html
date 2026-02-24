@@ -340,13 +340,14 @@
                 {% csrf_token %}
                 
                 <div class="form-group">
-                    <label for="id_username">Username</label>
+                    <label for="id_username">Username or Email</label>
                     {{ form.username }}
                     {% if form.username.errors %}
                         {% for error in form.username.errors %}
                             <span class="field-error">{{ error }}</span>
                         {% endfor %}
                     {% endif %}
+                    <p class="help-text" style="color: #666; font-size: 0.85rem; margin-top: 0.25rem;">Enter your username (member_XXXXX) or email address</p>
                 </div>
                 
                 <div class="form-group">
@@ -365,6 +366,12 @@
                 </div>
                 
                 <button type="submit" class="btn-login">Sign In</button>
+                
+                <div style="text-align: center; margin-top: 1rem;">
+                    <a href="{% url 'password_reset' %}" style="color: #164f90; text-decoration: none; font-size: 0.9rem;">
+                        <i class="fas fa-key"></i> Forgot Password?
+                    </a>
+                </div>
                 
                 <div class="security-note">
                     <i class="fas fa-shield-alt"></i> Your connection is secure. All data is encrypted.

@@ -145,7 +145,8 @@ MIDDLEWARE = [
 # Authentication backends (order matters - tried in sequence)
 AUTHENTICATION_BACKENDS = [
     'axes.backends.AxesStandaloneBackend',                       # Axes brute-force protection
-    'django.contrib.auth.backends.ModelBackend',                 # Default Django authentication
+    'pages.backends.EmailBackend',                               # Email login support
+    'django.contrib.auth.backends.ModelBackend',                 # Default Django authentication (username)
 ]
 
 # Root URL configuration
