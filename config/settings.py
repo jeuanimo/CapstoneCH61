@@ -358,8 +358,8 @@ CONTACT_EMAIL = config('CONTACT_EMAIL', default='nugammasigma@example.com')     
 # Stripe API keys for payment processing
 # Development: Use test keys from https://dashboard.stripe.com/test/apikeys
 # Production: Use live keys (keep secret!)
-STRIPE_PUBLIC_KEY = config('STRIPE_PUBLIC_KEY', default='pk_test_placeholder')       # Stripe publishable key
-STRIPE_SECRET_KEY = config('STRIPE_SECRET_KEY', default='sk_test_placeholder')       # Stripe secret key (keep secret!)
+STRIPE_PUBLIC_KEY = config('STRIPE_PUBLIC_KEY', default='')       # Stripe publishable key
+STRIPE_SECRET_KEY = config('STRIPE_SECRET_KEY', default='')       # Stripe secret key (keep secret!)
 
 
 
