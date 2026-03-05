@@ -52,38 +52,38 @@
 
     <!-- Portal Features Grid -->
     <div class="row g-4 mb-4">
-        <div class="col-md-4">
+        <div class="col-md-4 col-6">
             <a href="{% url 'member_roster' %}" class="text-decoration-none">
                 <div class="card h-100 text-center portal-card" style="box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);">
                     <div class="card-body">
-                        <i class="fas fa-users fa-4x mb-3 text-primary"></i>
-                        <h4>Member Roster</h4>
-                        <p class="text-muted">View all active members and their profiles</p>
+                        <i class="fas fa-users fa-3x mb-3 text-primary"></i>
+                        <h5>Member Roster</h5>
+                        <p class="text-muted small">View all active members</p>
                     </div>
                 </div>
             </a>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-4 col-6">
             <a href="{% url 'announcements_view' %}" class="text-decoration-none">
                 <div class="card h-100 text-center portal-card {% if unread_announcements > 0 %}new-posts-card{% endif %}" style="box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);">
                     <div class="card-body">
-                        <i class="fas fa-bullhorn fa-4x mb-3 text-success"></i>
-                        <h4>Announcements</h4>
-                        <p class="text-muted">Stay updated with chapter news</p>
+                        <i class="fas fa-bullhorn fa-3x mb-3 text-success"></i>
+                        <h5>Announcements</h5>
+                        <p class="text-muted small">Chapter news</p>
                         {% if unread_announcements > 0 %}
-                        <span class="badge bg-success pulse-badge">{{ unread_announcements }} new post{{ unread_announcements|pluralize }}</span>
+                        <span class="badge bg-success pulse-badge">{{ unread_announcements }} new</span>
                         {% endif %}
                     </div>
                 </div>
             </a>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-4 col-6">
             <a href="{% url 'messages_inbox' %}" class="text-decoration-none">
                 <div class="card h-100 text-center portal-card" style="box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);">
                     <div class="card-body">
-                        <i class="fas fa-envelope fa-4x mb-3 text-info"></i>
-                        <h4>Messages</h4>
-                        <p class="text-muted">Chat with other members</p>
+                        <i class="fas fa-envelope fa-3x mb-3 text-info"></i>
+                        <h5>Messages</h5>
+                        <p class="text-muted small">Chat with members</p>
                         {% if unread_count > 0 %}
                         <span class="badge bg-danger">{{ unread_count }} new</span>
                         {% endif %}
@@ -91,62 +91,97 @@
                 </div>
             </a>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-4 col-6">
             <a href="{% url 'photo_gallery' %}" class="text-decoration-none">
                 <div class="card h-100 text-center portal-card" style="box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);">
                     <div class="card-body">
-                        <i class="fas fa-images fa-4x mb-3 text-warning"></i>
-                        <h4>Photo Gallery</h4>
-                        <p class="text-muted">Share and view member photos</p>
+                        <i class="fas fa-images fa-3x mb-3 text-warning"></i>
+                        <h5>Photo Gallery</h5>
+                        <p class="text-muted small">View & share photos</p>
                     </div>
                 </div>
             </a>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-4 col-6">
             <a href="{% url 'documents_view' %}" class="text-decoration-none">
                 <div class="card h-100 text-center portal-card" style="box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);">
                     <div class="card-body">
-                        <i class="fas fa-folder fa-4x mb-3 text-danger"></i>
-                        <h4>Documents</h4>
-                        <p class="text-muted">Access chapter documents and files</p>
+                        <i class="fas fa-folder fa-3x mb-3 text-danger"></i>
+                        <h5>Documents</h5>
+                        <p class="text-muted small">Chapter files</p>
                     </div>
                 </div>
             </a>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-4 col-6">
             <a href="{% url 'dues_view' %}" class="text-decoration-none">
                 <div class="card h-100 text-center portal-card" style="box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);">
                     <div class="card-body">
-                        <i class="fas fa-dollar-sign fa-4x mb-3 text-success"></i>
-                        <h4>Dues & Payments</h4>
-                        <p class="text-muted">Track your financial obligations</p>
+                        <i class="fas fa-dollar-sign fa-3x mb-3 text-success"></i>
+                        <h5>Dues & Payments</h5>
+                        <p class="text-muted small">Track payments</p>
                     </div>
                 </div>
             </a>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-4 col-6">
             <a href="{% url 'create_post' %}" class="text-decoration-none">
                 <div class="card h-100 text-center portal-card" style="box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);">
                     <div class="card-body">
-                        <i class="fas fa-edit fa-4x mb-3 text-primary"></i>
-                        <h4>Create Post</h4>
-                        <p class="text-muted">Share announcements with brothers</p>
+                        <i class="fas fa-edit fa-3x mb-3 text-primary"></i>
+                        <h5>Create Post</h5>
+                        <p class="text-muted small">Share announcements</p>
                     </div>
                 </div>
             </a>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-4 col-6">
             <a href="{% url 'my_posts' %}" class="text-decoration-none">
                 <div class="card h-100 text-center portal-card" style="box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);">
                     <div class="card-body">
-                        <i class="fas fa-newspaper fa-4x mb-3 text-secondary"></i>
-                        <h4>My Posts</h4>
-                        <p class="text-muted">Manage your announcements</p>
+                        <i class="fas fa-newspaper fa-3x mb-3 text-secondary"></i>
+                        <h5>My Posts</h5>
+                        <p class="text-muted small">Manage posts</p>
                     </div>
                 </div>
             </a>
         </div>
     </div>
+
+    <!-- Officer Tools Section -->
+    {% if user.is_staff or user.member_profile.is_officer %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card" style="box-shadow: 0 0 15px rgba(255, 255, 255, 0.8); border-left: 4px solid #c9a227;">
+                <div class="card-header bg-dark">
+                    <h5 class="mb-0 text-warning"><i class="fas fa-shield-alt"></i> Officer Tools</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex gap-2 flex-wrap">
+                        <a href="{% url 'analytics_dashboard' %}" class="btn btn-warning">
+                            <i class="fas fa-chart-line"></i> Analytics
+                        </a>
+                        <a href="{% url 'dues_and_payments' %}" class="btn btn-warning">
+                            <i class="fas fa-money-bill-wave"></i> Manage Dues
+                        </a>
+                        <a href="{% url 'manage_attendance' %}" class="btn btn-warning">
+                            <i class="fas fa-clipboard-list"></i> Attendance
+                        </a>
+                        <a href="{% url 'boutique_dashboard' %}" class="btn btn-warning">
+                            <i class="fas fa-store-alt"></i> Boutique
+                        </a>
+                        <a href="{% url 'site_configuration' %}" class="btn btn-warning">
+                            <i class="fas fa-cogs"></i> Site Config
+                        </a>
+                        <a href="{% url 'send_member_email' %}" class="btn btn-warning">
+                            <i class="fas fa-paper-plane"></i> Send Email
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
 
     <!-- Quick Actions -->
     <div class="row mb-4">

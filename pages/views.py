@@ -5651,7 +5651,7 @@ def set_cookie_consent(request):
 
 
 @login_required
-@user_passes_test(lambda u: u.is_staff)
+@user_passes_test(is_officer_or_staff)
 def analytics_dashboard(request):
     """
     Simple analytics dashboard for officers to view site statistics.

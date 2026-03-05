@@ -241,6 +241,10 @@
                     <i class="fas fa-cogs"></i>
                     <span>Site Config</span>
                 </a>
+                <a href="{% url 'analytics_dashboard' %}" class="portal-nav-link admin-link {% if request.resolver_match.url_name == 'analytics_dashboard' %}active{% endif %}">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Analytics</span>
+                </a>
                 {% endif %}
                 {% if user.is_staff %}
                 <a href="{% url 'manage_invitations' %}" class="portal-nav-link admin-link {% if request.resolver_match.url_name == 'manage_invitations' %}active{% endif %}">
