@@ -5711,3 +5711,19 @@ def analytics_dashboard(request):
     }
     
     return render(request, 'pages/portal/analytics_dashboard.html', context)
+
+
+@login_required
+def contact_directory(request):
+    """
+    Display contact information for all members.
+    Shows phone numbers and emergency contact info.
+    Only accessible to authenticated members.
+    """
+    members = MemberProfile.objects.financial_members().select_related('user').order_by('user__last_name', 'user__first_name')
+    
+    context = {
+        'members': members,
+    }
+    
+    return render(request, 'pages/portal/contact_directory.html', context)

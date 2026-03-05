@@ -8,16 +8,19 @@
     <div class="portal-header">
         <h1><i class="fas fa-users"></i> Member Roster</h1>
         <p>Connect with fellow brothers of Nu Gamma Sigma Chapter</p>
-        {% if is_staff or is_officer %}
         <div class="header-actions">
+            <a href="{% url 'contact_directory' %}" class="btn btn-info">
+                <i class="fas fa-address-book"></i> Contact Directory
+            </a>
+            {% if is_staff or is_officer %}
             <a href="{% url 'create_member' %}" class="btn btn-primary">
                 <i class="fas fa-plus"></i> Add New Member
             </a>
             <a href="{% url 'import_members' %}" class="btn btn-success">
                 <i class="fas fa-file-upload"></i> Import from CSV
             </a>
+            {% endif %}
         </div>
-        {% endif %}
     </div>
 
     <!-- Member Warning/Notification Banner -->

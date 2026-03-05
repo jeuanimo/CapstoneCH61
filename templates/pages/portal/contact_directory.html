@@ -1,0 +1,267 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Contact Directory - Nu Gamma Sigma{% endblock %}
+
+{% block extra_css %}
+<style>
+    .contact-directory-container {
+        padding: 2rem 0;
+    }
+    
+    .contact-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    
+    .contact-header h1 {
+        color: #1a3a5c;
+        margin-bottom: 0.5rem;
+    }
+    
+    body.dark-mode .contact-header h1 {
+        color: #fff;
+    }
+    
+    .contact-header p {
+        color: #666;
+    }
+    
+    body.dark-mode .contact-header p {
+        color: #aaa;
+    }
+    
+    .contact-table-container {
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
+    
+    body.dark-mode .contact-table-container {
+        background: #1a1a2e;
+    }
+    
+    .contact-table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+    }
+    
+    .contact-table thead {
+        background: linear-gradient(135deg, #1a3a5c 0%, #0d1f33 100%);
+        color: #fff;
+    }
+    
+    .contact-table th {
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 0.5px;
+    }
+    
+    .contact-table th:nth-child(1) { width: 20%; }
+    .contact-table th:nth-child(2) { width: 25%; }
+    .contact-table th:nth-child(3) { width: 20%; }
+    .contact-table th:nth-child(4) { width: 35%; }
+    
+    .contact-table td {
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid #eee;
+        vertical-align: top;
+        line-height: 1.5;
+    }
+    
+    body.dark-mode .contact-table td {
+        border-bottom-color: #333;
+        color: #ddd;
+    }
+    
+    .contact-table tbody tr:hover {
+        background-color: rgba(201, 162, 39, 0.1);
+    }
+    
+    .member-name {
+        font-weight: 600;
+        color: #1a3a5c;
+    }
+    
+    body.dark-mode .member-name {
+        color: #c9a227;
+    }
+    
+    .contact-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
+    }
+    
+    .contact-info {
+        color: #1a3a5c;
+        text-decoration: none;
+        white-space: nowrap;
+    }
+    
+    .contact-info:hover {
+        color: #c9a227;
+    }
+    
+    body.dark-mode .contact-info {
+        color: #5dade2;
+    }
+    
+    .emergency-contact {
+        background: #fff3cd;
+        padding: 0.4rem 0.6rem;
+        border-radius: 5px;
+        font-size: 0.85rem;
+        display: inline-block;
+    }
+    
+    body.dark-mode .emergency-contact {
+        background: #3d3015;
+        color: #ffd93d;
+    }
+    
+    .emergency-contact-name {
+        font-weight: 600;
+        display: inline;
+    }
+    
+    .emergency-contact a {
+        display: inline;
+        margin-left: 0.5rem;
+        color: inherit;
+        text-decoration: none;
+    }
+    
+    .emergency-contact a:hover {
+        text-decoration: underline;
+    }
+    
+    .no-contact {
+        color: #999;
+        font-style: italic;
+    }
+    
+    .print-btn {
+        margin-bottom: 1rem;
+    }
+    
+    @media print {
+        .portal-navbar, .main-nav, .print-btn, footer {
+            display: none !important;
+        }
+        
+        .contact-table-container {
+            box-shadow: none;
+        }
+        
+        .contact-table th {
+            background: #1a3a5c !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .contact-table th, .contact-table td {
+            padding: 0.75rem 0.5rem;
+            font-size: 0.85rem;
+        }
+        
+        .contact-info {
+            font-size: 0.85rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container contact-directory-container">
+    <div class="contact-header">
+        <h1><i class="fas fa-address-book"></i> Contact Directory</h1>
+        <p>Member contact information and emergency contacts</p>
+    </div>
+    
+    <div class="print-btn">
+        <button class="btn btn-outline-secondary" onclick="window.print()">
+            <i class="fas fa-print"></i> Print Directory
+        </button>
+        <a href="{% url 'member_roster' %}" class="btn btn-outline-primary">
+            <i class="fas fa-users"></i> Back to Roster
+        </a>
+    </div>
+    
+    <div class="contact-table-container">
+        <table class="contact-table">
+            <thead>
+                <tr>
+                    <th>Member Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Emergency Contact</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for member in members %}
+                <tr>
+                    <td>
+                        <span class="member-name">{{ member.user.get_full_name|default:member.user.username }}</span>
+                    </td>
+                    <td>
+                        {% if member.user.email %}
+                        <a href="mailto:{{ member.user.email }}" class="contact-info">
+                            <i class="fas fa-envelope"></i> {{ member.user.email }}
+                        </a>
+                        {% else %}
+                        <span class="no-contact">Not provided</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if member.phone %}
+                        <a href="tel:{{ member.phone }}" class="contact-info">
+                            <i class="fas fa-phone"></i> {{ member.phone }}
+                        </a>
+                        {% else %}
+                        <span class="no-contact">Not provided</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if member.emergency_contact_name or member.emergency_contact_phone %}
+                        <span class="emergency-contact">
+                            {% if member.emergency_contact_name %}
+                            <span class="emergency-contact-name">
+                                <i class="fas fa-user-shield"></i> {{ member.emergency_contact_name }}
+                            </span>
+                            {% endif %}
+                            {% if member.emergency_contact_phone %}
+                            <a href="tel:{{ member.emergency_contact_phone }}">
+                                <i class="fas fa-phone-alt"></i> {{ member.emergency_contact_phone }}
+                            </a>
+                            {% endif %}
+                        </span>
+                        {% else %}
+                        <span class="no-contact">Not provided</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center py-4">
+                        <i class="fas fa-users-slash fa-2x mb-2 text-muted"></i>
+                        <p class="text-muted">No members found.</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <div class="mt-3 text-muted text-center small">
+        <i class="fas fa-lock"></i> This information is confidential and for chapter use only.
+    </div>
+</div>
+{% endblock %}

@@ -147,6 +147,7 @@ urlpatterns = [
     
     # MEMBER ROSTER MANAGEMENT (Officer only)
     path('portal/roster/', views.MemberListView.as_view(), name='member_roster'),
+    path('portal/roster/contacts/', views.contact_directory, name='contact_directory'),
     path('portal/roster/create/', views.MemberCreateView.as_view(), name='create_member'),
     path('portal/roster/edit/<int:pk>/', views.MemberUpdateView.as_view(), name='edit_member'),
     path('portal/roster/delete/<int:pk>/', views.MemberDeleteView.as_view(), name='delete_member'),
