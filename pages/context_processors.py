@@ -49,3 +49,14 @@ def site_config_context(_request):
         return {
             'site_config': None,
         }
+
+
+def cookie_consent_context(request):
+    """
+    Add cookie consent status to all templates.
+    Shows banner for users who haven't given consent.
+    """
+    return {
+        'show_cookie_banner': getattr(request, 'show_cookie_banner', True),
+        'cookie_consent': getattr(request, 'cookie_consent', None),
+    }

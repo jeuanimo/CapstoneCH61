@@ -167,6 +167,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',  # Add messages to templates
                 'pages.context_processors.cart_context',          # Add cart info to templates
                 'pages.context_processors.site_config_context',   # Add site branding/config to templates
+                'pages.context_processors.cookie_consent_context',  # Add GDPR cookie consent to templates
             ],
         },
     },
