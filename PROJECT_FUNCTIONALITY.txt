@@ -1,0 +1,504 @@
+================================================================================
+PHI BETA SIGMA CHAPTER WEBSITE - COMPLETE FUNCTIONALITY DOCUMENTATION
+================================================================================
+Project: Capstone CH61
+Framework: Django (Python)
+Version: February 2026
+================================================================================
+
+TABLE OF CONTENTS
+-----------------
+1. PROJECT OVERVIEW
+2. PUBLIC PAGES
+3. MEMBER PORTAL
+4. OFFICER MANAGEMENT
+5. FINANCIAL MANAGEMENT
+6. COMMUNICATION SYSTEMS
+7. E-COMMERCE BOUTIQUE
+8. CHATBOT SYSTEM
+9. SECURITY FEATURES
+10. TECHNICAL SPECIFICATIONS
+
+================================================================================
+1. PROJECT OVERVIEW
+================================================================================
+
+This is a comprehensive fraternity chapter management and e-commerce platform
+built with Django. The application serves as a complete digital hub for chapter
+operations, member management, financial tracking, communications, and 
+merchandise sales.
+
+TARGET USERS:
+- Public visitors (prospective members, community)
+- Active chapter members
+- Chapter officers (administrative privileges)
+- Treasurer (financial management)
+- Chapter administrators
+
+CORE FUNCTIONALITY AREAS:
+- Public website with chapter information
+- Member portal with social features
+- Officer management console
+- Financial/dues management with Stripe integration
+- SMS notifications via Twilio
+- Email communication system
+- E-commerce boutique shop
+- AI-powered public chatbot
+
+================================================================================
+2. PUBLIC PAGES (No Authentication Required)
+================================================================================
+
+HOME PAGE (/)
+- Welcome message and chapter branding
+- Upcoming events display
+- Quick navigation to key sections
+- Chapter highlights and announcements
+
+ABOUT PAGE (/about/)
+- Chapter mission and vision
+- History and founding information
+- Chapter values and principles
+- Fraternity overview
+
+CHAPTER LEADERSHIP (/chapter-leadership/)
+- Current officer roster with photos
+- Leadership positions and bios
+- Term information
+- Contact details (selectively displayed)
+
+CHAPTER PROGRAMS (/chapter-programs/)
+- Overview of fraternity programs:
+  * Bigger Better Business (/programs/bigger-better-business/)
+  * Social Action (/programs/social-action/)
+  * Education (/programs/education/)
+  * Sigma Beta Club (/programs/sigma-beta-club/)
+- Program photo galleries
+- Program descriptions and accomplishments
+
+EVENTS & SERVICE (/events/)
+- Public event calendar
+- Event filtering by date/category
+- Event details and locations
+- RSVP information
+
+CONTACT US (/contact/)
+- Contact form submission
+- Chapter contact information
+- Location/meeting information
+
+CHAPTER HISTORY (/history/)
+- Detailed chapter history
+- Founding story and milestones
+- Leadership legacy
+- Community service history
+
+AUTHENTICATION
+- Login (/login/) - Member authentication
+- Signup (/signup/) - New member registration with invitation codes
+- Logout (/logout/) - Session termination
+
+================================================================================
+3. MEMBER PORTAL (Login Required)
+================================================================================
+
+DASHBOARD (/portal/)
+- Quick statistics overview
+- Dues status summary
+- Upcoming events
+- Recent announcements
+- Activity feed
+
+PROFILE MANAGEMENT
+- Edit Own Profile (/portal/profile/edit/)
+  * Personal information
+  * Contact details
+  * Profile photo upload
+  * Cover photo customization
+  * Bio and line information
+- View Member Profiles (/portal/profile/<username>/)
+- Member Roster (/portal/roster/)
+  * Searchable member directory
+  * Filter by status
+  * Member details view
+
+SOCIAL FEATURES
+- Wall Posts (/portal/posts/)
+  * Create posts (/portal/posts/create/)
+  * View my posts (/portal/posts/my-posts/)
+  * Edit posts (/portal/posts/edit/<id>/)
+  * Delete posts (/portal/posts/delete/<id>/)
+  * Comment system with likes
+
+- Photo Gallery (/portal/photos/)
+  * Upload photos (/portal/photos/upload/)
+  * Photo albums (/portal/albums/create/)
+  * Photo details with likes/comments
+  * Edit/delete photos
+  * Tag photos by event
+
+EVENT MANAGEMENT
+- View events with RSVP
+- Create events (/portal/events/create/)
+- Edit events (/portal/events/<id>/edit/)
+- Delete events (/portal/events/<id>/delete/)
+- RSVP to events (/portal/events/<id>/rsvp/)
+
+DOCUMENTS (/portal/documents/)
+- Chapter documents repository
+- Category-based organization:
+  * Meeting Minutes
+  * Calendars
+  * Officer Manuals
+  * Bylaws & Constitution
+  * Financial Documents
+  * Forms & Templates
+- Access control based on member status
+- Officer-only documents (/portal/documents/officer-only/)
+
+DUES STATUS (/portal/dues/)
+- View personal dues balance
+- Payment history
+- Upcoming bills
+- Online payment option
+
+DIRECT MESSAGING (/portal/messages/)
+- Inbox view
+- Message detail view
+- Send messages to members
+- Reply threading
+- Message priority levels
+- Message categories (General, Official, Event, Financial, Committee)
+- Bulk messaging (officers only)
+
+================================================================================
+4. OFFICER MANAGEMENT (Officers/Staff Only)
+================================================================================
+
+MEMBER MANAGEMENT
+- Member List (/portal/roster/)
+  * Full CRUD operations
+  * Status management (Financial, Non-Financial, Life Member, etc.)
+  * Bulk actions
+- Create Member (/portal/roster/create/)
+- Edit Member (/portal/roster/edit/<id>/)
+- Delete Member (/portal/roster/delete/<id>/)
+- Import Members via CSV (/portal/roster/import/)
+- Import Officers via CSV (/portal/officers/import/)
+- Bulk Operations:
+  * Bulk status update
+  * Bulk delete
+  * Export functionality
+
+LEADERSHIP MANAGEMENT
+- Add Officer (/leadership/add/)
+- Edit Officer (/leadership/edit/<id>/)
+- Delete Officer (/leadership/delete/<id>/)
+- Upload Officer Photos (/leadership/upload-photo/<id>/)
+- Position management with custom titles
+
+INVITATION CODE SYSTEM
+- Manage Invitations (/invitations/)
+- Create Invitation Codes (/invitations/create/)
+- Delete Invitations (/invitations/delete/<id>/)
+- Generate Member-Specific Invitations (/invitations/generate/<id>/)
+- Email invitation links to prospective members
+- Expiration tracking
+
+ATTENDANCE TRACKING
+- View Attendance (/portal/attendance/)
+- Manage Attendance (/portal/attendance/manage/)
+- Add Attendance Record (/portal/attendance/add/)
+- Edit Attendance (/portal/attendance/<id>/edit/)
+- Delete Attendance (/portal/attendance/<id>/delete/)
+- Points tracking per event
+- RSVP status tracking
+- Filtering by event, member, status
+
+PROGRAM PHOTO MANAGEMENT
+- Edit Program Photos (/programs/photo/<id>/edit/)
+- Delete Program Photos (/programs/photo/<id>/delete/)
+- Photo tagging by program type
+
+CHAPTER HISTORY MANAGEMENT
+- Manage History Sections (/portal/manage-history/)
+- Edit History Sections (/portal/manage-history/edit/<id>/)
+- Import history from CSV/TXT/DOCX
+- Backup/restore functionality
+
+SITE CONFIGURATION (/portal/site-configuration/)
+- Site branding settings
+- Chapter contact information
+- Social media links
+
+CHATBOT Q&A MANAGEMENT
+- Manage Q&A (/portal/manage-chatbot/)
+- Edit Q&A entries (/portal/manage-chatbot/edit/<id>/)
+- Category-based organization
+- Keyword configuration
+
+================================================================================
+5. FINANCIAL MANAGEMENT (Treasurer/Officers)
+================================================================================
+
+DUES & PAYMENTS MANAGEMENT
+- Dues Dashboard (/portal/dues-and-payments/)
+- View Member Dues Summary (/portal/member-dues-summary/)
+- Create Bill (/portal/dues-and-payments/create-bill/)
+  * Bill types: Monthly, Semester, Annual, Fine, House Charge, Event Fee, Other
+- Add Payment (/portal/dues-and-payments/add/)
+- Edit Payment (/portal/dues-and-payments/edit/<id>/)
+- Delete Payment (/portal/dues-and-payments/delete/<id>/)
+- Bulk Delete Payments (/portal/dues-and-payments/bulk-delete/)
+- Payment status tracking (Pending, Paid, Partial, Overdue, Waived)
+
+STRIPE PAYMENT INTEGRATION
+- Configure Stripe (/portal/stripe/config/)
+  * API key management
+  * Test mode toggle
+  * Bank account linking
+- Pay Dues Online (/portal/dues/<id>/pay/)
+- Stripe Webhook Processing (/portal/stripe/webhook/)
+- Payment Success Page (/portal/payment-success/<id>/)
+- Payment Cancelled Page (/portal/payment-cancelled/<id>/)
+- Payment tracking and reconciliation
+- Card information storage (last 4 digits only)
+
+MEMBER SYNCHRONIZATION (Admin)
+- Sync with HQ Member List (/portal/sync-members/)
+  * CSV upload of national roster
+  * Auto-mark non-compliant members
+  * 90-day grace period tracking
+- View Marked Members (/portal/marked-members/)
+  * Countdown timers
+  * Dues reminder emails
+  * Removal workflow
+
+================================================================================
+6. COMMUNICATION SYSTEMS
+================================================================================
+
+ANNOUNCEMENTS
+- View Announcements (/portal/announcements/)
+- Create/Edit Announcements (Officers)
+- Priority levels (Low, Normal, High, Urgent)
+- Pinned announcements
+- Expiration dates
+- Read tracking
+
+EMAIL SYSTEM
+- Send Member Emails (/portal/email/send-members/)
+- Recipient filtering (All, Financial, Non-Financial, Officers)
+- Email preview before sending
+- HTML email templates with plain-text fallback
+- Automatic dues reminder emails
+
+SMS NOTIFICATION SYSTEM (Twilio)
+- Configure Twilio (/portal/twilio/config/)
+  * Account SID
+  * Auth Token
+  * Phone number
+  * Test mode option
+- SMS Preferences (/portal/sms/preferences/)
+  * Member opt-in/opt-out
+  * Notification type preferences:
+    - Announcements
+    - Direct Messages
+    - Dues Reminders
+    - Event Alerts
+  * Quiet hours configuration
+- Send SMS Alert (/portal/sms/send-alert/)
+  * Broadcast to opted-in members
+- SMS Logs (/portal/sms/logs/)
+  * Delivery status tracking
+  * Error logging
+  * Audit trail
+
+================================================================================
+7. E-COMMERCE BOUTIQUE
+================================================================================
+
+SHOP FRONTEND (Public)
+- Shop Home (/boutique/)
+  * Product catalog
+  * Category filtering (Apparel, Accessories, Drinkware, Other)
+  * Price display
+  * Product images
+- Product Details (/boutique/product/<id>/)
+  * Full description
+  * Size options
+  * Color options
+  * Inventory status
+  * Add to cart
+
+SHOPPING CART (Guest & Member)
+- View Cart (/boutique/cart/)
+- Add to Cart (/boutique/add-to-cart/<id>/)
+- Update Quantity (/boutique/cart/update/<id>/)
+- Remove from Cart (/boutique/cart/remove/<id>/)
+- Session-based cart for guests
+- User-linked cart for members
+
+CHECKOUT PROCESS
+- Checkout (/boutique/checkout/)
+  * Shipping information
+  * Contact details
+  * Order review
+- Payment Processing (/boutique/payment/<id>/)
+  * Stripe integration
+  * Secure payment form
+- Payment Success (/boutique/payment-success/<id>/)
+- Order History (/boutique/orders/)
+  * View past orders
+  * Order status tracking
+
+ORDER STATUS TRACKING
+- Pending Payment
+- Payment Completed
+- Shipped
+- Delivered
+- Cancelled
+
+SHOP ADMINISTRATION (Officers)
+- Boutique Dashboard (/boutique/admin/dashboard/)
+  * Sales overview
+  * Order management
+- Import Products (/boutique/admin/import-products/)
+  * CSV bulk upload
+  * Image URL support
+- Add Product (/boutique/admin/add-product/)
+- Edit Product (/boutique/admin/edit-product/<id>/)
+- Delete Product (/boutique/admin/delete-product/<id>/)
+- Bulk Delete Products (/boutique/admin/bulk-delete/)
+- Clear Abandoned Orders (/boutique/admin/clear-abandoned/)
+
+================================================================================
+8. CHATBOT SYSTEM
+================================================================================
+
+PUBLIC CHATBOT
+- AI-powered question answering
+- Knowledge base of public information
+- Categories:
+  * About the Fraternity
+  * History & Traditions
+  * Membership
+  * Events & Programs
+  * Contact Information
+  * Values & Mission
+  * Frequently Asked Questions
+- Keyword matching with confidence scoring
+- No sensitive information exposed
+
+ADMIN MANAGEMENT
+- Add/Edit Q&A entries
+- Keyword configuration
+- Confidence threshold settings
+- Active/inactive toggle
+- Category organization
+
+================================================================================
+9. SECURITY FEATURES
+================================================================================
+
+AUTHENTICATION & AUTHORIZATION
+- Django built-in authentication
+- Password hashing (PBKDF2)
+- Session management
+- CSRF protection
+- Permission decorators:
+  * @login_required
+  * @user_passes_test(is_officer_or_staff)
+  * Staff-only access
+
+ACCESS CONTROL LEVELS
+- Public (no auth)
+- Member (authenticated users)
+- Officer (is_officer=True or is_staff=True)
+- Treasurer (financial permissions)
+- Admin (full access)
+
+DATA PROTECTION
+- Input validation on all forms
+- SQL injection prevention via Django ORM
+- XSS protection via template auto-escaping
+- Secure password reset
+- File upload validation
+- Safe redirect URL validation
+
+AUDIT TRAILS
+- User action logging
+- Login attempt tracking
+- Payment transaction logs
+- SMS delivery logs
+- Document access tracking
+
+OWASP TOP 10 COMPLIANCE
+- Broken Access Control - Permission checks on all views
+- Cryptographic Failures - Hashed passwords, HTTPS ready
+- Injection - Parameterized queries via ORM
+- Insecure Design - Security-first architecture
+- Security Misconfiguration - Production settings guide
+- Vulnerable Components - Dependency tracking
+- Authentication Failures - Strong password requirements
+- Data Integrity - Validated inputs and outputs
+- Logging Failures - Comprehensive logging
+- SSRF - URL validation for redirects
+
+================================================================================
+10. TECHNICAL SPECIFICATIONS
+================================================================================
+
+TECHNOLOGY STACK
+- Backend: Django 4.x (Python 3.14)
+- Database: SQLite (development) / PostgreSQL (production)
+- Frontend: HTML5, CSS3, Bootstrap
+- JavaScript: Vanilla JS for interactivity
+- Payment: Stripe API
+- SMS: Twilio API
+- Email: Django SMTP with HTML templates
+
+DATABASE MODELS
+- Event, Category, EventAttendance
+- ChapterLeadership
+- MemberProfile, InvitationCode
+- DuesPayment, StripePayment, StripeConfiguration
+- Announcement, AnnouncementView
+- Document
+- Message
+- ProfileComment, CommentLike
+- PhotoAlbum, Photo, PhotoComment, PhotoLike
+- TwilioConfiguration, SMSPreference, SMSLog
+- Product, Cart, CartItem, Order, OrderItem
+- ChapterHistorySection, ChapterHistoryBackup
+- PublicAnswer (Chatbot)
+- SiteConfiguration
+
+KEY FEATURES
+- Responsive design (mobile-friendly)
+- Dark mode CSS theme
+- CSV import/export functionality
+- Image upload with validation
+- Real-time payment processing
+- Bulk operations support
+- Search and filtering throughout
+- 90-day member removal tracking
+- Multi-factor authentication ready
+
+FILE STRUCTURE
+/config/           - Django settings and configuration
+/pages/            - Main application (views, models, forms)
+/templates/        - HTML templates
+/static/           - CSS, JavaScript, images
+/media/            - User uploaded files
+/logs/             - Application logs
+
+TOTAL ENDPOINTS: 80+ pages/routes
+
+================================================================================
+END OF DOCUMENTATION
+================================================================================
+
+Generated: February 2026
+For questions or updates, contact the development team.
+================================================================================

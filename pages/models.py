@@ -1463,3 +1463,140 @@ class SiteConfiguration(models.Model):
         """Get the site configuration, creating default if none exists"""
         config, _ = cls.objects.get_or_create(pk=1)
         return config
+
+
+# ============================================================================
+# ANALYTICS & PRIVACY MODELS
+# ============================================================================
+
+class PageView(models.Model):
+    """
+    Track page views for DIY analytics.
+    Privacy-respecting: no personal identifiers stored for anonymous users.
+    """
+    path = models.CharField(max_length=500, db_index=True, help_text="URL path visited")
+    method = models.CharField(max_length=10, default='GET')
+    user = models.ForeignKey(
+        User, 
+        null=True, 
+        blank=True, 
+        on_delete=models.SET_NULL,
+        related_name='page_views',
+        help_text="Logged in user (null for anonymous)"
+    )
+    session_key = models.CharField(
+        max_length=40, 
+        blank=True, 
+        default='',
+        help_text="Session key (hashed for privacy)"
+    )
+    referrer = models.CharField(max_length=500, blank=True, default='')
+    user_agent = models.CharField(max_length=500, blank=True, default='')
+    ip_hash = models.CharField(
+        max_length=64, 
+        blank=True, 
+        default='',
+        help_text="Hashed IP for privacy (not reversible)"
+    )
+    timestamp = models.DateTimeField(auto_now_add=True)
+    response_code = models.IntegerField(default=200)
+    
+    # Device info (parsed from user agent)
+    is_mobile = models.BooleanField(default=False)
+    is_bot = models.BooleanField(default=False)
+    
+    class Meta:
+        ordering = ['-timestamp']
+        verbose_name = 'Page View'
+        verbose_name_plural = 'Page Views'
+        indexes = [
+            models.Index(fields=['path', '-timestamp']),
+            models.Index(fields=['-timestamp']),
+            models.Index(fields=['user', '-timestamp']),
+        ]
+    
+    def __str__(self):
+        user_str = self.user.username if self.user else 'Anonymous'
+        return f"{self.path} - {user_str} - {self.timestamp.strftime('%Y-%m-%d %H:%M')}"
+    
+    @classmethod
+    def get_popular_pages(cls, days=30, limit=10):
+        """Get most visited pages in the last N days"""
+        from django.utils import timezone
+        from django.db.models import Count
+        from datetime import timedelta
+        
+        cutoff = timezone.now() - timedelta(days=days)
+        return cls.objects.filter(
+            timestamp__gte=cutoff,
+            is_bot=False
+        ).values('path').annotate(
+            views=Count('id')
+        ).order_by('-views')[:limit]
+    
+    @classmethod
+    def get_daily_stats(cls, days=30):
+        """Get daily page view counts"""
+        from django.utils import timezone
+        from django.db.models import Count
+        from django.db.models.functions import TruncDate
+        from datetime import timedelta
+        
+        cutoff = timezone.now() - timedelta(days=days)
+        return cls.objects.filter(
+            timestamp__gte=cutoff,
+            is_bot=False
+        ).annotate(
+            date=TruncDate('timestamp')
+        ).values('date').annotate(
+            views=Count('id')
+        ).order_by('date')
+
+
+class CookieConsent(models.Model):
+    """
+    Track user cookie consent preferences for GDPR compliance.
+    """
+    CONSENT_CHOICES = [
+        ('essential', 'Essential Only'),
+        ('functional', 'Essential + Functional'),
+        ('analytics', 'Essential + Functional + Analytics'),
+        ('all', 'All Cookies'),
+    ]
+    
+    session_key = models.CharField(
+        max_length=40, 
+        unique=True, 
+        db_index=True,
+        help_text="Browser session key"
+    )
+    user = models.ForeignKey(
+        User,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='cookie_consents'
+    )
+    consent_level = models.CharField(
+        max_length=20,
+        choices=CONSENT_CHOICES,
+        default='essential'
+    )
+    consent_given = models.BooleanField(default=False)
+    consent_date = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    ip_hash = models.CharField(max_length=64, blank=True, default='')
+    
+    # Granular consent tracking
+    essential_cookies = models.BooleanField(default=True)  # Always true
+    functional_cookies = models.BooleanField(default=False)
+    analytics_cookies = models.BooleanField(default=False)
+    
+    class Meta:
+        verbose_name = 'Cookie Consent'
+        verbose_name_plural = 'Cookie Consents'
+        ordering = ['-consent_date']
+    
+    def __str__(self):
+        user_str = self.user.username if self.user else f'Session {self.session_key[:8]}...'
+        return f"{user_str} - {self.get_consent_level_display()}"

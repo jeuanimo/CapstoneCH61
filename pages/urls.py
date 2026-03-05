@@ -256,4 +256,8 @@ urlpatterns = [
     path('boutique/admin/bulk-delete/', views.bulk_delete_products, name='bulk_delete_products'),
     path('boutique/admin/dashboard/', views.boutique_dashboard, name='boutique_dashboard'),
     path('boutique/admin/clear-abandoned/', views.clear_abandoned_orders, name='clear_abandoned_orders'),
+    
+    # GDPR & ANALYTICS
+    path('api/cookie-consent/', views.set_cookie_consent, name='set_cookie_consent'),
+    path('portal/analytics/', views.analytics_dashboard, name='analytics_dashboard'),
 ]

@@ -5587,3 +5587,127 @@ def send_member_email(request):
         'is_preview': False,
     }
     return render(request, 'pages/portal/send_member_email.html', context)
+
+
+# ==================== GDPR / COOKIE CONSENT ====================
+
+@ensure_csrf_cookie
+def set_cookie_consent(request):
+    """
+    Handle cookie consent preferences from GDPR banner.
+    Accepts POST with JSON body containing consent choices.
+    """
+    if request.method != 'POST':
+        return JsonResponse({'error': 'POST required'}, status=405)
+    
+    try:
+        import json
+        from pages.models import CookieConsent
+        from pages.middleware import hash_ip, get_client_ip
+        
+        data = json.loads(request.body)
+        
+        # Ensure session exists
+        if not request.session.session_key:
+            request.session.save()
+        
+        session_key = request.session.session_key
+        
+        # Determine consent level
+        consent_level = data.get('consent_level', 'essential')
+        functional = data.get('functional', False)
+        analytics = data.get('analytics', False)
+        
+        # Create or update consent record
+        _, _ = CookieConsent.objects.update_or_create(
+            session_key=session_key,
+            defaults={
+                'user': request.user if request.user.is_authenticated else None,
+                'consent_level': consent_level,
+                'consent_given': True,
+                'essential_cookies': True,  # Always required
+                'functional_cookies': functional,
+                'analytics_cookies': analytics,
+                'ip_hash': hash_ip(get_client_ip(request)),
+            }
+        )
+        
+        logger.info(
+            f"Cookie consent recorded: session={session_key[:8]}..., "
+            f"level={consent_level}, analytics={analytics}"
+        )
+        
+        return JsonResponse({
+            'success': True,
+            'consent_level': consent_level,
+            'message': 'Cookie preferences saved'
+        })
+        
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+    except Exception as e:
+        logger.error(f"Cookie consent error: {e}")
+        return JsonResponse({'error': 'Server error'}, status=500)
+
+
+@login_required
+@user_passes_test(lambda u: u.is_staff)
+def analytics_dashboard(request):
+    """
+    Simple analytics dashboard for officers to view site statistics.
+    """
+    from pages.models import PageView
+    from django.db.models import Count
+    from django.db.models.functions import TruncDate
+    from datetime import timedelta
+    
+    # Get date range (default 30 days)
+    days = int(request.GET.get('days', 30))
+    cutoff = timezone.now() - timedelta(days=days)
+    
+    # Popular pages
+    popular_pages = PageView.objects.filter(
+        timestamp__gte=cutoff,
+        is_bot=False
+    ).values('path').annotate(
+        views=Count('id')
+    ).order_by('-views')[:20]
+    
+    # Daily views
+    daily_stats = PageView.objects.filter(
+        timestamp__gte=cutoff,
+        is_bot=False
+    ).annotate(
+        date=TruncDate('timestamp')
+    ).values('date').annotate(
+        views=Count('id')
+    ).order_by('date')
+    
+    # Total stats
+    total_views = PageView.objects.filter(
+        timestamp__gte=cutoff,
+        is_bot=False
+    ).count()
+    
+    unique_visitors = PageView.objects.filter(
+        timestamp__gte=cutoff,
+        is_bot=False
+    ).values('session_key').distinct().count()
+    
+    mobile_views = PageView.objects.filter(
+        timestamp__gte=cutoff,
+        is_bot=False,
+        is_mobile=True
+    ).count()
+    
+    context = {
+        'popular_pages': popular_pages,
+        'daily_stats': list(daily_stats),
+        'total_views': total_views,
+        'unique_visitors': unique_visitors,
+        'mobile_views': mobile_views,
+        'mobile_percent': round(mobile_views / total_views * 100, 1) if total_views > 0 else 0,
+        'days': days,
+    }
+    
+    return render(request, 'pages/portal/analytics_dashboard.html', context)

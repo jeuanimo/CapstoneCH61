@@ -140,6 +140,8 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',       # Messages (alerts/notifications)
     'django.middleware.clickjacking.XFrameOptionsMiddleware',    # Clickjacking protection
     'axes.middleware.AxesMiddleware',                            # Brute-force attack prevention
+    'pages.middleware.CookieConsentMiddleware',                  # GDPR cookie consent tracking
+    'pages.middleware.AnalyticsMiddleware',                      # DIY analytics tracking
 ]
 
 # Authentication backends (order matters - tried in sequence)

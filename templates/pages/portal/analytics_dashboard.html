@@ -1,0 +1,336 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Site Analytics - Portal{% endblock %}
+
+{% block css %}
+<style>
+    .analytics-container {
+        max-width: 1200px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+
+    .analytics-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .analytics-header h1 {
+        color: #164f90;
+        margin: 0;
+    }
+
+    body.dark-mode .analytics-header h1 {
+        color: #7eb8da;
+    }
+
+    .date-filter {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .date-filter a {
+        padding: 0.5rem 1rem;
+        background: #f0f0f0;
+        color: #333;
+        text-decoration: none;
+        border-radius: 4px;
+        font-size: 0.9rem;
+    }
+
+    .date-filter a:hover,
+    .date-filter a.active {
+        background: #164f90;
+        color: #fff;
+    }
+
+    body.dark-mode .date-filter a {
+        background: #2a3a5a;
+        color: #e0e0e0;
+    }
+
+    body.dark-mode .date-filter a:hover,
+    body.dark-mode .date-filter a.active {
+        background: #c9a227;
+        color: #1a1a2e;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        text-align: center;
+    }
+
+    body.dark-mode .stat-card {
+        background: #1e2a3a;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .stat-card .stat-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #164f90;
+        margin-bottom: 0.5rem;
+    }
+
+    body.dark-mode .stat-card .stat-value {
+        color: #c9a227;
+    }
+
+    .stat-card .stat-label {
+        font-size: 0.95rem;
+        color: #666;
+    }
+
+    body.dark-mode .stat-card .stat-label {
+        color: #aaa;
+    }
+
+    .analytics-section {
+        background: #fff;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    body.dark-mode .analytics-section {
+        background: #1e2a3a;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .analytics-section h2 {
+        color: #164f90;
+        margin-top: 0;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid #f0f0f0;
+    }
+
+    body.dark-mode .analytics-section h2 {
+        color: #7eb8da;
+        border-bottom-color: #2a3a5a;
+    }
+
+    .pages-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .pages-table th,
+    .pages-table td {
+        padding: 0.75rem 1rem;
+        text-align: left;
+        border-bottom: 1px solid #eee;
+    }
+
+    body.dark-mode .pages-table th,
+    body.dark-mode .pages-table td {
+        border-bottom-color: #2a3a5a;
+    }
+
+    .pages-table th {
+        background: #f8f9fa;
+        font-weight: 600;
+        color: #333;
+    }
+
+    body.dark-mode .pages-table th {
+        background: #16213e;
+        color: #e0e0e0;
+    }
+
+    .pages-table td {
+        color: #555;
+    }
+
+    body.dark-mode .pages-table td {
+        color: #ccc;
+    }
+
+    .pages-table tr:hover td {
+        background: #f8f9fa;
+    }
+
+    body.dark-mode .pages-table tr:hover td {
+        background: #1a2a40;
+    }
+
+    .view-count {
+        display: inline-block;
+        background: #164f90;
+        color: #fff;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    body.dark-mode .view-count {
+        background: #c9a227;
+        color: #1a1a2e;
+    }
+
+    .chart-container {
+        height: 300px;
+        display: flex;
+        align-items: flex-end;
+        gap: 4px;
+        padding: 1rem 0;
+        border-bottom: 1px solid #ddd;
+    }
+
+    body.dark-mode .chart-container {
+        border-bottom-color: #2a3a5a;
+    }
+
+    .chart-bar {
+        flex: 1;
+        background: linear-gradient(to top, #164f90, #2d7dd2);
+        border-radius: 4px 4px 0 0;
+        min-width: 8px;
+        position: relative;
+    }
+
+    body.dark-mode .chart-bar {
+        background: linear-gradient(to top, #c9a227, #e8c547);
+    }
+
+    .chart-bar:hover {
+        opacity: 0.8;
+    }
+
+    .no-data {
+        text-align: center;
+        padding: 3rem;
+        color: #888;
+    }
+
+    body.dark-mode .no-data {
+        color: #aaa;
+    }
+
+    .privacy-note {
+        background: #e8f4fd;
+        border-left: 4px solid #164f90;
+        padding: 1rem;
+        margin-bottom: 2rem;
+        border-radius: 0 8px 8px 0;
+    }
+
+    body.dark-mode .privacy-note {
+        background: #16213e;
+        border-left-color: #c9a227;
+    }
+
+    .privacy-note p {
+        margin: 0;
+        color: #555;
+        font-size: 0.9rem;
+    }
+
+    body.dark-mode .privacy-note p {
+        color: #ccc;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="analytics-container">
+    <div class="analytics-header">
+        <h1><i class="fas fa-chart-line"></i> Site Analytics</h1>
+        <div class="date-filter">
+            <a href="?days=7" {% if days == 7 %}class="active"{% endif %}>7 Days</a>
+            <a href="?days=30" {% if days == 30 %}class="active"{% endif %}>30 Days</a>
+            <a href="?days=90" {% if days == 90 %}class="active"{% endif %}>90 Days</a>
+        </div>
+    </div>
+
+    <div class="privacy-note">
+        <p><i class="fas fa-shield-alt"></i> <strong>Privacy-First Analytics:</strong> All data is collected anonymously. IP addresses are hashed (not stored), and detailed tracking only occurs for users who consent to analytics cookies.</p>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-value">{{ total_views|default:"0" }}</div>
+            <div class="stat-label">Total Page Views</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ unique_visitors|default:"0" }}</div>
+            <div class="stat-label">Unique Visitors</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ mobile_percent|default:"0" }}%</div>
+            <div class="stat-label">Mobile Users</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ popular_pages|length|default:"0" }}</div>
+            <div class="stat-label">Active Pages</div>
+        </div>
+    </div>
+
+    <div class="analytics-section">
+        <h2><i class="fas fa-chart-bar"></i> Daily Page Views (Last {{ days }} Days)</h2>
+        {% if daily_stats %}
+        <div class="chart-container">
+            {% with max_views=daily_stats|dictsort:'views'|last %}
+            {% for day in daily_stats %}
+            <div class="chart-bar" 
+                 style="height: {% if max_views.views > 0 %}{{ day.views|divisibleby:max_views.views|default:1 }}{% else %}10{% endif %}%;"
+                 title="{{ day.date|date:'M d' }}: {{ day.views }} views">
+            </div>
+            {% endfor %}
+            {% endwith %}
+        </div>
+        {% else %}
+        <div class="no-data">
+            <i class="fas fa-chart-bar fa-3x"></i>
+            <p>No data available for this period</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="analytics-section">
+        <h2><i class="fas fa-fire"></i> Popular Pages</h2>
+        {% if popular_pages %}
+        <table class="pages-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Page</th>
+                    <th>Views</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for page in popular_pages %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ page.path }}</td>
+                    <td><span class="view-count">{{ page.views }}</span></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="no-data">
+            <i class="fas fa-file fa-3x"></i>
+            <p>No page view data available</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
