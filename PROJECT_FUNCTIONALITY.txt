@@ -334,13 +334,17 @@ SMS NOTIFICATION SYSTEM (Twilio)
 7. VIRTUAL MEETINGS & POLLS
 ================================================================================
 
-VIRTUAL MEETINGS (Members)
+** IMPORTANT: All meetings and voting require FINANCIAL MEMBER status. **
+** Non-financial members are shown a message directing them to pay dues. **
+
+VIRTUAL MEETINGS (Financial Members Only)
 - Meeting List (/portal/meetings/)
-  * View scheduled meetings
+  * View scheduled meetings (financial members only)
   * Platform badges (Zoom, Google Meet, Teams, etc.)
   * Meeting status indicators (Scheduled, Live, Completed)
-  * Access restriction badges (Members Only, Financial Only)
+  * Non-financial members see "Financial Status Required" message
 - Join Meeting (/portal/meetings/<id>/join/)
+  * Financial status verified before allowing access
   * Embedded Zoom meetings (in-page experience)
   * External platform links (Google Meet, Teams, Webex)
   * Live polls sidebar
@@ -362,19 +366,19 @@ VIRTUAL MEETINGS MANAGEMENT (Officers)
   * Meeting URL (for external platforms)
   * Password (optional)
   * Link to Events (optional)
-  * Access control (Members Only, Financial Only)
 - Edit Meeting (/portal/meetings/edit/<id>/)
 - Delete Meeting (/portal/meetings/delete/<id>/)
 - Zoom SDK Configuration (/portal/zoom-config/)
   * SDK Key and Secret management
   * Active/inactive toggle
 
-POLLING/VOTING SYSTEM (Members)
+POLLING/VOTING SYSTEM (Financial Members Only)
 - View Polls (/portal/polls/)
-  * Active polls listing
+  * Active polls listing (financial members only)
   * Closed polls with results
-  * Financial-only poll filtering
+  * Non-financial members see "Financial Status Required" message
 - Vote on Poll (/portal/polls/<id>/)
+  * Financial status verified before voting
   * Single choice voting
   * Multiple choice voting
   * Anonymous voting option
@@ -394,15 +398,20 @@ POLLING MANAGEMENT (Officers)
   * Privacy settings:
     - Anonymous voting (hide voter names)
     - Show results during voting
-  * Voting restrictions:
-    - Financial members only
+  * Additional settings:
     - Multiple selection limits
-  * Voting window (start/end times)
+    - Voting window (start/end times)
 - Edit Poll (/portal/polls/edit/<id>/)
 - Delete Poll (/portal/polls/delete/<id>/)
 - View Voters (/portal/polls/<id>/voters/)
   * See who voted (non-anonymous polls)
   * Vote timestamps
+
+ACCESS CONTROL SUMMARY
+- Staff: Full access to all meetings/polls/management
+- Officers: Full access to all meetings/polls/management  
+- Financial Members: Can attend meetings and vote in polls
+- Non-Financial/Life Members: Cannot attend meetings or vote (shown dues payment link)
 
 POLL RESULTS
 - Real-time Results (/portal/polls/<id>/results/json/)

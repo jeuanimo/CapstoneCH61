@@ -18,6 +18,18 @@
         </div>
     </div>
 
+    {% if is_financial == False %}
+    <!-- Non-Financial Member Notice -->
+    <div class="text-center py-5">
+        <i class="fas fa-exclamation-circle fa-4x text-warning mb-3"></i>
+        <h4 class="text-warning">Financial Status Required</h4>
+        <p class="text-muted">Only financial members can participate in chapter voting.</p>
+        <p class="text-muted">Please ensure your dues are current to access polls and voting.</p>
+        <a href="{% url 'dues_status' %}" class="btn btn-primary mt-3">
+            <i class="fas fa-dollar-sign"></i> View Dues Status
+        </a>
+    </div>
+    {% else %}
     <!-- Open Polls -->
     <div class="card shadow mb-4">
         <div class="card-header bg-success text-white">
@@ -39,9 +51,6 @@
                                 </span>
                                 {% if poll.is_anonymous %}
                                 <span class="badge bg-secondary"><i class="fas fa-user-secret"></i> Anonymous</span>
-                                {% endif %}
-                                {% if poll.financial_only %}
-                                <span class="badge bg-warning text-dark"><i class="fas fa-dollar-sign"></i> Financial Only</span>
                                 {% endif %}
                             </div>
                             
@@ -118,6 +127,7 @@
             </div>
         </div>
     </div>
+    {% endif %}
     {% endif %}
 </div>
 {% endblock %}

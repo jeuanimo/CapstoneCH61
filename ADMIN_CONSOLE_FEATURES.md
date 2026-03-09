@@ -305,25 +305,27 @@ Multi-platform virtual meeting system with integrated voting/polling functionali
 | `show_results_during` | Show live results while voting |
 | `allow_multiple` | Allow selecting multiple options |
 | `max_selections` | Limit selections if multiple allowed |
-| `financial_only` | Restrict to financial members |
+| `financial_only` | (Legacy) Previously used for per-poll restrictions |
 | `starts_at`, `ends_at` | Voting window |
 | `is_active` | Poll visibility |
 
 ### Access Control
 
+**Important: All meetings and voting require financial member status.**
+
 | Role | Permissions |
 |------|-------------|
-| **Staff** | Full access: create/edit/delete meetings/polls, configure Zoom |
-| **Officers** | Full access: create/edit/delete meetings/polls, configure Zoom |
-| **Financial Members** | Join meetings, vote in all polls |
-| **Non-Financial Members** | Join non-restricted meetings, vote in non-restricted polls |
+| **Staff** | Full access: create/edit/delete meetings/polls, configure Zoom, join meetings, vote |
+| **Officers** | Full access: create/edit/delete meetings/polls, configure Zoom, join meetings, vote |
+| **Financial Members** | Join meetings, vote in all polls, view results |
+| **Non-Financial Members** | Cannot access meetings or vote. See "Financial Status Required" message with link to dues. |
 
 ### Key Features
 
 #### Meeting Management
 - **Create meetings** with any supported platform
 - **Platform-aware forms**: Dynamic fields based on selected platform
-- **Access restrictions**: Members-only, financial-only options
+- **Financial requirement**: Only financial members can attend meetings
 - **Meeting lifecycle**: scheduled → in_progress → completed
 - **Link to events**: Optional association with chapter events
 

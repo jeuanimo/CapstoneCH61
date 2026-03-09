@@ -5867,13 +5867,26 @@ def meeting_list(request):
     """List upcoming meetings for members."""
     from .models import ZoomMeeting
     
+    # Check if user is financial
+    is_financial = request.user.is_staff
+    if not is_financial and hasattr(request.user, 'member_profile'):
+        is_financial = request.user.member_profile.status in ['financial', 'financial_life_member']
+    
+    # Non-financial members see a message instead of meetings
+    if not is_financial:
+        messages.warning(
+            request, 
+            'Only financial members can attend meetings. Please ensure your dues are current to access chapter meetings.'
+        )
+    
     meetings = ZoomMeeting.objects.filter(
         status__in=['scheduled', 'in_progress'],
         scheduled_time__gte=timezone.now() - timezone.timedelta(hours=2)  # Include meetings that started recently
     ).order_by('scheduled_time')
     
     context = {
-        'meetings': meetings,
+        'meetings': meetings if is_financial else [],
+        'is_financial': is_financial,
     }
     return render(request, 'pages/portal/zoom/meeting_list.html', context)
 
@@ -5917,14 +5930,18 @@ def _generate_zoom_signature(meeting_number, role):
 
 def _check_meeting_access(user, meeting):
     """Check if user can access a meeting. Returns (allowed, error_message)."""
+    # Staff always have access
+    if user.is_staff:
+        return True, None
+    
     if meeting.members_only and not user.is_authenticated:
         return False, "This meeting is for members only."
     
-    if meeting.financial_only:
-        if not hasattr(user, 'member_profile'):
-            return False, "Only financial members can join this meeting."
-        if user.member_profile.status not in ['financial', 'financial_life_member']:
-            return False, "Only financial members can join this meeting."
+    # All meetings require financial status (unless staff)
+    if not hasattr(user, 'member_profile'):
+        return False, "Only financial members can join meetings."
+    if user.member_profile.status not in ['financial', 'financial_life_member']:
+        return False, "Only financial members can join meetings. Please ensure your dues are current."
     
     return True, None
 
@@ -6026,24 +6043,32 @@ def polls_list(request):
     """List all polls available to the current user."""
     from .models import Poll
     
+    # Check if user is financial (staff always have access)
+    is_financial = request.user.is_staff
+    if not is_financial and hasattr(request.user, 'member_profile'):
+        is_financial = request.user.member_profile.status in ['financial', 'financial_life_member']
+    
+    # Non-financial members see a message instead of polls
+    if not is_financial:
+        messages.warning(
+            request, 
+            'Only financial members can vote in polls. Please ensure your dues are current to participate in chapter voting.'
+        )
+        context = {
+            'open_polls': [],
+            'closed_polls': [],
+            'is_financial': False,
+        }
+        return render(request, 'pages/portal/polls/poll_list.html', context)
+    
     # Get all active polls
     polls = Poll.objects.filter(is_active=True)
-    
-    # Filter by financial status if needed
-    if hasattr(request.user, 'member_profile'):
-        is_financial = request.user.member_profile.status in ['financial', 'financial_life_member']
-    else:
-        is_financial = False
     
     # Separate open and closed polls
     open_polls = []
     closed_polls = []
     
     for poll in polls:
-        # Skip financial-only polls for non-financial members
-        if poll.financial_only and not is_financial and not request.user.is_staff:
-            continue
-        
         if poll.is_open:
             open_polls.append(poll)
         else:
@@ -6052,6 +6077,7 @@ def polls_list(request):
     context = {
         'open_polls': open_polls,
         'closed_polls': closed_polls[:10],  # Last 10 closed polls
+        'is_financial': True,
     }
     return render(request, 'pages/portal/polls/poll_list.html', context)
 
@@ -6159,11 +6185,17 @@ def _check_poll_access(user, poll):
     if not poll.is_open:
         return False, "This poll is closed."
     
-    if poll.financial_only:
-        if not hasattr(user, 'member_profile'):
-            return False, "Only financial members can vote on this poll."
-        if user.member_profile.status not in ['financial', 'financial_life_member']:
-            return False, "Only financial members can vote on this poll."
+    # Staff always have access
+    if user.is_staff:
+        if poll.user_has_voted(user) and not poll.allow_multiple:
+            return False, "You have already voted on this poll."
+        return True, None
+    
+    # All voting requires financial status (unless staff)
+    if not hasattr(user, 'member_profile'):
+        return False, "Only financial members can vote."
+    if user.member_profile.status not in ['financial', 'financial_life_member']:
+        return False, "Only financial members can vote. Please ensure your dues are current."
     
     if poll.user_has_voted(user) and not poll.allow_multiple:
         return False, "You have already voted on this poll."
