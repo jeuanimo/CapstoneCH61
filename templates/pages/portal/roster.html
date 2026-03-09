@@ -80,9 +80,6 @@
                             <i class="fas fa-user"></i>
                         </div>
                         {% endif %}
-                        {% if member.is_online %}
-                        <span class="online-indicator" title="Online now"></span>
-                        {% endif %}
                     </td>
                     <td class="member-name">
                         <strong>{{ member.user.get_full_name|default:member.user.username }}</strong>
@@ -191,8 +188,9 @@
         text-align: left;
         font-weight: 600;
         text-transform: uppercase;
-        font-size: 0.85rem;
+        font-size: 0.8rem;
         letter-spacing: 0.5px;
+        white-space: nowrap;
     }
 
     .roster-table tbody tr {
@@ -234,30 +232,7 @@
         color: white;
     }
 
-    /* Online Status Indicators */
-    .member-photo {
-        position: relative;
-    }
-    
-    .online-indicator {
-        position: absolute;
-        bottom: 2px;
-        right: 2px;
-        width: 14px;
-        height: 14px;
-        background: #28a745;
-        border-radius: 50%;
-        border: 2px solid #fff;
-        box-shadow: 0 0 0 2px #28a745;
-        animation: pulse-online 2s infinite;
-    }
-    
-    @keyframes pulse-online {
-        0% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.4); }
-        70% { box-shadow: 0 0 0 6px rgba(40, 167, 69, 0); }
-        100% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
-    }
-    
+    /* Online Status Badge */
     .online-badge {
         display: inline-block;
         padding: 0.15rem 0.4rem;
@@ -268,6 +243,13 @@
         border-radius: 10px;
         margin-left: 0.3rem;
         text-transform: uppercase;
+        animation: pulse-badge 2s infinite;
+    }
+    
+    @keyframes pulse-badge {
+        0% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.6); }
+        70% { box-shadow: 0 0 0 8px rgba(40, 167, 69, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
     }
     
     .last-seen-badge {
@@ -384,7 +366,11 @@
             font-size: 0.9rem;
         }
         
-        .roster-table th,
+        .roster-table th {
+            font-size: 0.7rem;
+            padding: 0.75rem 0.4rem;
+        }
+        
         .roster-table td {
             padding: 0.75rem 0.5rem;
         }
@@ -397,6 +383,11 @@
     @media (max-width: 768px) {
         .contact-info div:first-child {
             display: none;
+        }
+        
+        .roster-table th {
+            font-size: 0.65rem;
+            padding: 0.5rem 0.3rem;
         }
     }
 
@@ -432,10 +423,6 @@
 
     body.dark-mode .line-name {
         color: #b0b8c8;
-    }
-
-    body.dark-mode .online-indicator {
-        border-color: #1e1e2e;
     }
 
     body.dark-mode .last-seen-badge {
