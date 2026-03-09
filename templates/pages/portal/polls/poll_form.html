@@ -36,6 +36,35 @@
                     <form method="post">
                         {% csrf_token %}
                         
+                        {% if form.errors %}
+                        <div class="alert alert-danger">
+                            <strong>Please correct the errors below:</strong>
+                            <ul class="mb-0">
+                            {% for field, errors in form.errors.items %}
+                                {% for error in errors %}
+                                <li>{{ field }}: {{ error }}</li>
+                                {% endfor %}
+                            {% endfor %}
+                            </ul>
+                        </div>
+                        {% endif %}
+                        
+                        {% if formset.errors %}
+                        <div class="alert alert-warning">
+                            <strong>Poll Options:</strong>
+                            <ul class="mb-0">
+                            {% for error in formset.errors %}
+                                {% if error %}<li>{{ error }}</li>{% endif %}
+                            {% endfor %}
+                            {% if formset.non_form_errors %}
+                                {% for error in formset.non_form_errors %}
+                                <li>{{ error }}</li>
+                                {% endfor %}
+                            {% endif %}
+                            </ul>
+                        </div>
+                        {% endif %}
+                        
                         <!-- Basic Info -->
                         <div class="mb-3">
                             <label class="form-label">Poll Title *</label>
@@ -71,7 +100,7 @@
                                 <div class="option-row">
                                     {{ option_form.id }}
                                     {{ option_form.text }}
-                                    <input type="hidden" name="{{ option_form.order.html_name }}" value="{{ forloop.counter0 }}">
+                                    {{ option_form.order }}
                                     {% if option_form.instance.pk %}
                                     <div class="form-check">
                                         {{ option_form.DELETE }}

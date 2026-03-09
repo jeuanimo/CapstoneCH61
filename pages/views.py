@@ -6100,7 +6100,7 @@ def manage_polls(request):
 @user_passes_test(is_officer_or_staff)
 def create_poll(request):
     """Create a new poll with options."""
-    from .models import Poll
+    from .models import Poll, PollOption
     from .forms import PollForm, PollOptionFormSet
     
     if request.method == 'POST':
@@ -6112,11 +6112,30 @@ def create_poll(request):
             poll.created_by = request.user
             poll.save()
             
-            formset.instance = poll
-            formset.save()
+            # Save options, filtering out empty ones
+            order = 0
+            for option_form in formset:
+                if option_form.cleaned_data and not option_form.cleaned_data.get('DELETE', False):
+                    text = option_form.cleaned_data.get('text', '').strip()
+                    if text:
+                        PollOption.objects.create(
+                            poll=poll,
+                            text=text,
+                            order=order
+                        )
+                        order += 1
             
             messages.success(request, f'Poll "{poll.title}" created successfully!')
             return redirect('manage_polls')
+        else:
+            # Show validation errors
+            if form.errors:
+                for field, errors in form.errors.items():
+                    for error in errors:
+                        messages.error(request, f'{field}: {error}')
+            if formset.non_form_errors():
+                for error in formset.non_form_errors():
+                    messages.error(request, f'Options: {error}')
     else:
         form = PollForm()
         formset = PollOptionFormSet()
@@ -6133,7 +6152,7 @@ def create_poll(request):
 @user_passes_test(is_officer_or_staff)
 def edit_poll(request, poll_id):
     """Edit an existing poll."""
-    from .models import Poll
+    from .models import Poll, PollOption
     from .forms import PollForm, PollOptionFormSet
     
     poll = get_object_or_404(Poll, pk=poll_id)
@@ -6144,7 +6163,31 @@ def edit_poll(request, poll_id):
         
         if form.is_valid() and formset.is_valid():
             form.save()
-            formset.save()
+            
+            # Handle existing options (delete those marked for deletion)
+            for option_form in formset:
+                if option_form.cleaned_data:
+                    if option_form.cleaned_data.get('DELETE', False):
+                        if option_form.instance.pk:
+                            option_form.instance.delete()
+                    elif option_form.instance.pk:
+                        # Update existing option
+                        text = option_form.cleaned_data.get('text', '').strip()
+                        if text:
+                            option_form.instance.text = text
+                            option_form.instance.save()
+                        else:
+                            option_form.instance.delete()
+                    else:
+                        # Create new option
+                        text = option_form.cleaned_data.get('text', '').strip()
+                        if text:
+                            PollOption.objects.create(
+                                poll=poll,
+                                text=text,
+                                order=poll.options.count()
+                            )
+            
             messages.success(request, f'Poll "{poll.title}" updated!')
             return redirect('manage_polls')
     else:

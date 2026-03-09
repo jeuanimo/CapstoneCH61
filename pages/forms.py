@@ -1397,6 +1397,16 @@ class ZoomMeetingForm(forms.ModelForm):
 class PollForm(forms.ModelForm):
     """Form for creating/editing polls"""
     
+    title = forms.CharField(
+        max_length=200,
+        required=True,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'What are members voting on?'
+        }),
+        error_messages={'required': 'Please enter a title for this poll'}
+    )
+    
     class Meta:
         from .models import Poll
         model = Poll
@@ -1407,10 +1417,6 @@ class PollForm(forms.ModelForm):
             'starts_at', 'ends_at', 'is_active'
         ]
         widgets = {
-            'title': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'What are members voting on?'
-            }),
             'description': forms.Textarea(attrs={
                 'class': 'form-control',
                 'rows': 3,
@@ -1442,11 +1448,11 @@ class PollForm(forms.ModelForm):
             'starts_at': forms.DateTimeInput(attrs={
                 'class': 'form-control',
                 'type': 'datetime-local'
-            }),
+            }, format='%Y-%m-%dT%H:%M'),
             'ends_at': forms.DateTimeInput(attrs={
                 'class': 'form-control',
                 'type': 'datetime-local'
-            }),
+            }, format='%Y-%m-%dT%H:%M'),
             'is_active': forms.CheckboxInput(attrs={
                 'class': 'form-check-input'
             }),
@@ -1461,6 +1467,10 @@ class PollForm(forms.ModelForm):
         ).order_by('-scheduled_time')
         self.fields['meeting'].required = False
         self.fields['ends_at'].required = False
+        
+        # Allow datetime-local format for date fields
+        self.fields['starts_at'].input_formats = ['%Y-%m-%dT%H:%M', '%Y-%m-%d %H:%M:%S', '%Y-%m-%d %H:%M']
+        self.fields['ends_at'].input_formats = ['%Y-%m-%dT%H:%M', '%Y-%m-%d %H:%M:%S', '%Y-%m-%d %H:%M']
     
     def clean(self):
         cleaned_data = super().clean()
@@ -1485,26 +1495,49 @@ class PollOptionForm(forms.ModelForm):
                 'class': 'form-control',
                 'placeholder': 'Option text'
             }),
-            'order': forms.NumberInput(attrs={
-                'class': 'form-control',
-                'min': 0
-            }),
+            'order': forms.HiddenInput(),
         }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Text is only required if there's any data in the form
+        self.fields['text'].required = False
 
 
 # Formset for managing multiple poll options
-from django.forms import inlineformset_factory
+from django.forms import inlineformset_factory, BaseInlineFormSet
 from .models import Poll, PollOption
+
+
+class BasePollOptionFormSet(BaseInlineFormSet):
+    """Custom formset to validate minimum options"""
+    
+    def clean(self):
+        super().clean()
+        if any(self.errors):
+            return
+        
+        # Count non-empty, non-deleted options
+        valid_options = 0
+        for form in self.forms:
+            if form.cleaned_data and not form.cleaned_data.get('DELETE', False):
+                if form.cleaned_data.get('text', '').strip():
+                    valid_options += 1
+        
+        if valid_options < 2:
+            raise forms.ValidationError('Please provide at least 2 poll options.')
+
 
 PollOptionFormSet = inlineformset_factory(
     Poll,
     PollOption,
     form=PollOptionForm,
+    formset=BasePollOptionFormSet,
     fields=['text', 'order'],
     extra=4,  # Start with 4 empty options
     can_delete=True,
-    min_num=2,  # At least 2 options required
-    validate_min=True
+    min_num=0,
+    validate_min=False
 )
 
 

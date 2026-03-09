@@ -1932,8 +1932,8 @@ class Poll(models.Model):
         """Get vote counts per option"""
         from django.db.models import Count
         return self.options.annotate(
-            vote_count=Count('votes')
-        ).order_by('-vote_count')
+            votes_count=Count('votes')
+        ).order_by('-votes_count')
 
 
 class PollOption(models.Model):
@@ -2000,3 +2000,145 @@ class Vote(models.Model):
     def __str__(self):
         voter_name = self.voter.username if self.voter else 'Anonymous'
         return f"{voter_name} -> {self.option.text}"
+
+
+class MeetingVoteRecord(models.Model):
+    """
+    Official record of motion votes for meeting minutes.
+    Captures who voted, the motion, date, and final result.
+    """
+    RESULT_CHOICES = [
+        ('passed', 'Passed'),
+        ('failed', 'Failed'),
+        ('tabled', 'Tabled'),
+        ('withdrawn', 'Withdrawn'),
+    ]
+    
+    # Motion details
+    motion_title = models.CharField(
+        max_length=300,
+        help_text="The motion being voted on"
+    )
+    motion_description = models.TextField(
+        blank=True,
+        default='',
+        help_text="Additional details about the motion"
+    )
+    
+    # Meeting info
+    meeting = models.ForeignKey(
+        ZoomMeeting,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='vote_records',
+        help_text="Associated meeting (optional)"
+    )
+    meeting_date = models.DateField(
+        help_text="Date of the meeting/vote"
+    )
+    
+    # Voting results
+    result = models.CharField(
+        max_length=20,
+        choices=RESULT_CHOICES,
+        default='passed'
+    )
+    votes_for = models.PositiveIntegerField(default=0)
+    votes_against = models.PositiveIntegerField(default=0)
+    abstentions = models.PositiveIntegerField(default=0)
+    
+    # Who voted how (for recorded votes)
+    voters_for = models.TextField(
+        blank=True,
+        default='',
+        help_text="Names of members who voted in favor (comma-separated)"
+    )
+    voters_against = models.TextField(
+        blank=True,
+        default='',
+        help_text="Names of members who voted against (comma-separated)"
+    )
+    voters_abstained = models.TextField(
+        blank=True,
+        default='',
+        help_text="Names of members who abstained (comma-separated)"
+    )
+    
+    # Motion maker/seconder
+    moved_by = models.CharField(
+        max_length=100,
+        blank=True,
+        default='',
+        help_text="Name of member who made the motion"
+    )
+    seconded_by = models.CharField(
+        max_length=100,
+        blank=True,
+        default='',
+        help_text="Name of member who seconded"
+    )
+    
+    # Link to poll if created from one
+    poll = models.ForeignKey(
+        Poll,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='vote_records',
+        help_text="Associated poll if voted electronically"
+    )
+    
+    # Metadata
+    recorded_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='recorded_votes'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    notes = models.TextField(
+        blank=True,
+        default='',
+        help_text="Additional notes for the record"
+    )
+    
+    class Meta:
+        verbose_name = 'Meeting Vote Record'
+        verbose_name_plural = 'Meeting Vote Records'
+        ordering = ['-meeting_date', '-created_at']
+    
+    def __str__(self):
+        return f"{self.motion_title} - {self.get_result_display()} ({self.meeting_date})"
+    
+    @property
+    def meeting_month_year(self):
+        """Return formatted month and year"""
+        return self.meeting_date.strftime('%B %Y')
+    
+    @property
+    def total_votes(self):
+        """Total votes cast"""
+        return self.votes_for + self.votes_against + self.abstentions
+    
+    @property
+    def voters_for_list(self):
+        """Return list of names who voted for"""
+        if not self.voters_for:
+            return []
+        return [name.strip() for name in self.voters_for.split(',') if name.strip()]
+    
+    @property
+    def voters_against_list(self):
+        """Return list of names who voted against"""
+        if not self.voters_against:
+            return []
+        return [name.strip() for name in self.voters_against.split(',') if name.strip()]
+    
+    @property
+    def voters_abstained_list(self):
+        """Return list of names who abstained"""
+        if not self.voters_abstained:
+            return []
+        return [name.strip() for name in self.voters_abstained.split(',') if name.strip()]

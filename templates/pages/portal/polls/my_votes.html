@@ -2,52 +2,89 @@
 
 {% block title %}My Voting History{% endblock %}
 
+{% block css %}
+<style>
+    .votes-table {
+        width: 100%;
+    }
+    .votes-table th {
+        vertical-align: middle;
+        padding: 12px;
+    }
+    .votes-table td {
+        vertical-align: top;
+        padding: 12px;
+    }
+    .poll-col {
+        width: 35%;
+        min-width: 200px;
+    }
+    .vote-col {
+        width: 25%;
+        min-width: 150px;
+    }
+    .date-col {
+        width: 20%;
+        min-width: 120px;
+        white-space: nowrap;
+    }
+    .action-col {
+        width: 20%;
+        min-width: 100px;
+        text-align: center;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container my-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+<div class="container-fluid my-5 px-4">
+    <div class="mb-4">
         <h2><i class="fas fa-history"></i> My Voting History</h2>
-        <a href="{% url 'polls_list' %}" class="btn btn-outline-primary">
+    </div>
+    <div class="mb-3">
+        <a href="{% url 'polls_list' %}" class="btn btn-outline-primary btn-sm">
             <i class="fas fa-poll"></i> View All Polls
         </a>
     </div>
 
     <div class="card shadow">
         <div class="card-header bg-primary text-white">
-            <h5 class="mb-0">Your Votes</h5>
+            <h5 class="mb-0 text-white">Your Votes</h5>
         </div>
         <div class="card-body">
             {% if votes %}
             <div class="table-responsive">
-                <table class="table table-hover">
+                <table class="table table-hover votes-table">
                     <thead>
                         <tr>
-                            <th>Poll</th>
-                            <th>Your Vote</th>
-                            <th>Date</th>
-                            <th>Action</th>
+                            <th class="poll-col">Poll</th>
+                            <th class="vote-col">Your Vote</th>
+                            <th class="date-col">Date</th>
+                            <th class="action-col">Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for vote in votes %}
                         <tr>
-                            <td>
+                            <td class="poll-col">
                                 <strong>{{ vote.poll.title }}</strong>
-                                <br>
-                                <span class="badge bg-info">{{ vote.poll.get_poll_type_display }}</span>
-                                {% if vote.poll.is_open %}
-                                <span class="badge bg-success">Open</span>
-                                {% else %}
-                                <span class="badge bg-secondary">Closed</span>
-                                {% endif %}
+                                <div class="mt-1">
+                                    <span class="badge bg-info">{{ vote.poll.get_poll_type_display }}</span>
+                                    {% if vote.poll.is_open %}
+                                    <span class="badge bg-success">Open</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">Closed</span>
+                                    {% endif %}
+                                </div>
                             </td>
-                            <td>
+                            <td class="vote-col">
                                 <span class="badge bg-primary">{{ vote.option.text }}</span>
                             </td>
-                            <td>
+                            <td class="date-col">
                                 {{ vote.voted_at|date:"M d, Y" }}
                                 <br><small class="text-muted">{{ vote.voted_at|time:"g:i A" }}</small>
                             </td>
-                            <td>
+                            <td class="action-col">
                                 <a href="{% url 'view_poll' vote.poll.id %}" class="btn btn-sm btn-outline-primary">
                                     <i class="fas fa-eye"></i> View
                                 </a>

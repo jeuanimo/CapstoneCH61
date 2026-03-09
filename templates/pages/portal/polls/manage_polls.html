@@ -2,11 +2,59 @@
 
 {% block title %}Manage Polls - Admin{% endblock %}
 
+{% block css %}
+<style>
+    .polls-table {
+        width: 100%;
+    }
+    .polls-table th {
+        white-space: nowrap;
+        padding: 12px 8px;
+        font-weight: 600;
+        text-align: left;
+        vertical-align: middle;
+    }
+    .polls-table td {
+        padding: 12px 8px;
+        vertical-align: middle;
+    }
+    .polls-table .poll-title-col {
+        min-width: 200px;
+        max-width: 300px;
+    }
+    .polls-table .poll-title-text {
+        font-weight: 600;
+        color: #164f90;
+        display: block;
+        margin-bottom: 4px;
+    }
+    .polls-table .poll-desc-text {
+        font-size: 0.85rem;
+        color: #6c757d;
+        display: block;
+    }
+    .polls-table .type-col,
+    .polls-table .status-col,
+    .polls-table .privacy-col,
+    .polls-table .votes-col,
+    .polls-table .date-col {
+        white-space: nowrap;
+        text-align: center;
+    }
+    .polls-table .actions-col {
+        white-space: nowrap;
+        text-align: right;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container my-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="mb-3">
         <h2><i class="fas fa-poll-h"></i> Manage Polls</h2>
-        <a href="{% url 'create_poll' %}" class="btn btn-primary">
+    </div>
+    <div class="mb-4">
+        <a href="{% url 'create_poll' %}" class="btn btn-primary btn-sm">
             <i class="fas fa-plus"></i> Create Poll
         </a>
     </div>
@@ -18,29 +66,32 @@
         <div class="card-body">
             {% if polls %}
             <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
+                <table class="table table-hover polls-table">
+                    <thead class="table-light">
                         <tr>
-                            <th>Title</th>
-                            <th>Type</th>
-                            <th>Status</th>
-                            <th>Privacy</th>
-                            <th>Votes</th>
-                            <th>Created</th>
-                            <th>Actions</th>
+                            <th class="poll-title-col">Title</th>
+                            <th class="type-col">Type</th>
+                            <th class="status-col">Status</th>
+                            <th class="privacy-col">Privacy</th>
+                            <th class="votes-col">Votes</th>
+                            <th class="date-col">Created</th>
+                            <th class="actions-col">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for poll in polls %}
                         <tr>
-                            <td>
-                                <strong>{{ poll.title }}</strong>
+                            <td class="poll-title-col">
+                                <span class="poll-title-text">{{ poll.title }}</span>
+                                {% if poll.description %}
+                                <span class="poll-desc-text">{{ poll.description|truncatewords:12 }}</span>
+                                {% endif %}
                                 {% if poll.meeting %}
-                                <br><small class="text-muted">Meeting: {{ poll.meeting.title }}</small>
+                                <small class="text-muted d-block mt-1"><i class="fas fa-video"></i> {{ poll.meeting.title|truncatewords:5 }}</small>
                                 {% endif %}
                             </td>
-                            <td><span class="badge bg-info">{{ poll.get_poll_type_display }}</span></td>
-                            <td>
+                            <td class="type-col"><span class="badge bg-info">{{ poll.get_poll_type_display }}</span></td>
+                            <td class="status-col">
                                 {% if poll.is_open %}
                                 <span class="badge bg-success">Open</span>
                                 {% elif poll.is_active %}
@@ -49,16 +100,16 @@
                                 <span class="badge bg-secondary">Closed</span>
                                 {% endif %}
                             </td>
-                            <td>
+                            <td class="privacy-col">
                                 {% if poll.is_anonymous %}
                                 <span class="badge bg-dark"><i class="fas fa-user-secret"></i> Anonymous</span>
                                 {% else %}
                                 <span class="badge bg-light text-dark"><i class="fas fa-eye"></i> Recorded</span>
                                 {% endif %}
                             </td>
-                            <td>{{ poll.total_voters }}</td>
-                            <td>{{ poll.created_at|date:"M d, Y" }}</td>
-                            <td>
+                            <td class="votes-col">{{ poll.total_voters }}</td>
+                            <td class="date-col">{{ poll.created_at|date:"M d, Y" }}</td>
+                            <td class="actions-col">
                                 <div class="btn-group btn-group-sm">
                                     <a href="{% url 'view_poll' poll.id %}" class="btn btn-outline-primary" title="View">
                                         <i class="fas fa-eye"></i>
