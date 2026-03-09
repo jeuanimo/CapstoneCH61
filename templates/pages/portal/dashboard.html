@@ -1,11 +1,11 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 
-{% block title %}Member Portal - Dashboard{% endblock %}
+{% block title %}Member Portal - Dashboard{% endblock title %}
 
 {% block content %}
 <div class="container my-5">
     <!-- Member Warning/Notification Banner -->
-    {% include 'pages/portal/member_notification_banner.html' %}
+    {% include "pages/portal/member_notification_banner.html" %}
 
     <div class="row mb-4">
         <div class="col-12">
@@ -17,7 +17,7 @@
     <!-- Quick Stats -->
     <div class="row mb-4">
         <div class="col-md-3">
-            <div class="card text-center" style="box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);">
+            <div class="card text-center card-glow">
                 <div class="card-body">
                     <h3 class="text-primary">{{ unread_count }}</h3>
                     <p class="mb-0">Unread Messages</p>
@@ -25,7 +25,7 @@
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card text-center" style="box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);">
+            <div class="card text-center card-glow">
                 <div class="card-body">
                     <h3 class="text-success">{{ total_points }}</h3>
                     <p class="mb-0">Points Earned</p>
@@ -33,7 +33,7 @@
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card text-center" style="box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);">
+            <div class="card text-center card-glow">
                 <div class="card-body">
                     <h3 class="text-info">{{ total_events }}</h3>
                     <p class="mb-0">Events Attended</p>
@@ -41,7 +41,7 @@
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card text-center" style="box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);">
+            <div class="card text-center card-glow">
                 <div class="card-body">
                     <h3 class="text-warning">{{ total_dues }}</h3>
                     <p class="mb-0">Dues Payments</p>
@@ -54,7 +54,7 @@
     <div class="row g-4 mb-4">
         <div class="col-md-3 col-6">
             <a href="{% url 'member_roster' %}" class="text-decoration-none">
-                <div class="card h-100 text-center portal-card" style="box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);">
+                <div class="card h-100 text-center portal-card card-glow">
                     <div class="card-body">
                         <i class="fas fa-users fa-3x mb-3 text-primary"></i>
                         <h5>Member Roster</h5>
@@ -65,7 +65,7 @@
         </div>
         <div class="col-md-3 col-6">
             <a href="{% url 'announcements_view' %}" class="text-decoration-none">
-                <div class="card h-100 text-center portal-card {% if unread_announcements > 0 %}new-posts-card{% endif %}" style="box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);">
+                <div class="card h-100 text-center portal-card card-glow {% if unread_announcements > 0 %}new-posts-card{% endif %}">
                     <div class="card-body">
                         <i class="fas fa-bullhorn fa-3x mb-3 text-success"></i>
                         <h5>Announcements</h5>
@@ -79,7 +79,7 @@
         </div>
         <div class="col-md-3 col-6">
             <a href="{% url 'messages_inbox' %}" class="text-decoration-none">
-                <div class="card h-100 text-center portal-card" style="box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);">
+                <div class="card h-100 text-center portal-card card-glow">
                     <div class="card-body">
                         <i class="fas fa-envelope fa-3x mb-3 text-info"></i>
                         <h5>Messages</h5>
@@ -93,7 +93,7 @@
         </div>
         <div class="col-md-3 col-6">
             <a href="{% url 'photo_gallery' %}" class="text-decoration-none">
-                <div class="card h-100 text-center portal-card" style="box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);">
+                <div class="card h-100 text-center portal-card card-glow">
                     <div class="card-body">
                         <i class="fas fa-images fa-3x mb-3 text-warning"></i>
                         <h5>Photo Gallery</h5>
@@ -104,7 +104,7 @@
         </div>
         <div class="col-md-3 col-6">
             <a href="{% url 'documents_view' %}" class="text-decoration-none">
-                <div class="card h-100 text-center portal-card" style="box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);">
+                <div class="card h-100 text-center portal-card card-glow">
                     <div class="card-body">
                         <i class="fas fa-folder fa-3x mb-3 text-danger"></i>
                         <h5>Documents</h5>
@@ -115,7 +115,7 @@
         </div>
         <div class="col-md-3 col-6">
             <a href="{% url 'dues_view' %}" class="text-decoration-none">
-                <div class="card h-100 text-center portal-card" style="box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);">
+                <div class="card h-100 text-center portal-card card-glow">
                     <div class="card-body">
                         <i class="fas fa-dollar-sign fa-3x mb-3 text-success"></i>
                         <h5>Dues & Payments</h5>
@@ -126,7 +126,7 @@
         </div>
         <div class="col-md-3 col-6">
             <a href="{% url 'create_post' %}" class="text-decoration-none">
-                <div class="card h-100 text-center portal-card" style="box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);">
+                <div class="card h-100 text-center portal-card card-glow">
                     <div class="card-body">
                         <i class="fas fa-edit fa-3x mb-3 text-primary"></i>
                         <h5>Create Post</h5>
@@ -137,7 +137,7 @@
         </div>
         <div class="col-md-3 col-6">
             <a href="{% url 'my_posts' %}" class="text-decoration-none">
-                <div class="card h-100 text-center portal-card" style="box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);">
+                <div class="card h-100 text-center portal-card card-glow">
                     <div class="card-body">
                         <i class="fas fa-newspaper fa-3x mb-3 text-secondary"></i>
                         <h5>My Posts</h5>
@@ -152,7 +152,7 @@
     {% if user.is_staff or user.member_profile.is_officer %}
     <div class="row mb-4">
         <div class="col-12">
-            <div class="card" style="box-shadow: 0 0 15px rgba(255, 255, 255, 0.8); border-left: 4px solid #c9a227;">
+            <div class="card card-glow officer-card">
                 <div class="card-header bg-dark">
                     <h5 class="mb-0 text-warning"><i class="fas fa-shield-alt"></i> Officer Tools</h5>
                 </div>
@@ -186,7 +186,7 @@
     <!-- Quick Actions -->
     <div class="row mb-4">
         <div class="col-12">
-            <div class="card" style="box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);">
+            <div class="card card-glow">
                 <div class="card-header">
                     <h4 class="mb-0"><i class="fas fa-bolt"></i> Quick Actions</h4>
                 </div>
@@ -212,7 +212,7 @@
 
     <!-- Recent Announcements -->
     {% if recent_announcements %}
-    <div class="card" style="box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);">
+    <div class="card card-glow">
         <div class="card-header">
             <h4 class="mb-0">
                 Recent Announcements
@@ -247,6 +247,14 @@
 </div>
 
 <style>
+.card-glow {
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+}
+
+.officer-card {
+    border-left: 4px solid #c9a227;
+}
+
 .portal-card {
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     cursor: pointer;
@@ -310,4 +318,4 @@
     }
 }
 </style>
-{% endblock %}
+{% endblock content %}

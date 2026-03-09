@@ -5727,3 +5727,580 @@ def contact_directory(request):
     }
     
     return render(request, 'pages/portal/contact_directory.html', context)
+
+
+# =============================================================================
+# ZOOM MEETING INTEGRATION VIEWS
+# =============================================================================
+
+@login_required
+@user_passes_test(is_officer_or_staff)
+def setup_zoom_config(request):
+    """Admin/Officer view to configure Zoom SDK credentials."""
+    from .models import ZoomConfiguration
+    from .forms import ZoomConfigurationForm
+    
+    try:
+        config = ZoomConfiguration.objects.get(is_active=True)
+    except ZoomConfiguration.DoesNotExist:
+        config = None
+    
+    if request.method == 'POST':
+        form = ZoomConfigurationForm(request.POST, instance=config)
+        if form.is_valid():
+            zoom_config = form.save(commit=False)
+            zoom_config.admin = request.user
+            zoom_config.save()
+            messages.success(request, 'Zoom configuration saved successfully!')
+            return redirect('setup_zoom_config')
+    else:
+        form = ZoomConfigurationForm(instance=config)
+    
+    context = {
+        'form': form,
+        'config': config,
+    }
+    return render(request, 'pages/portal/zoom/zoom_config.html', context)
+
+
+@login_required
+@user_passes_test(is_officer_or_staff)
+def manage_zoom_meetings(request):
+    """List all Zoom meetings - officers/staff only."""
+    from .models import ZoomMeeting
+    from django.db.models import Q
+    
+    now = timezone.now()
+    
+    # Upcoming: scheduled and in the future
+    upcoming = ZoomMeeting.objects.filter(
+        status='scheduled',
+        scheduled_time__gte=now
+    ).order_by('scheduled_time')
+    
+    # Past: either not scheduled status OR scheduled but in the past
+    past = ZoomMeeting.objects.filter(
+        Q(status__in=['completed', 'cancelled', 'in_progress']) |
+        Q(status='scheduled', scheduled_time__lt=now)
+    ).order_by('-scheduled_time')[:20]
+    
+    context = {
+        'upcoming_meetings': upcoming,
+        'past_meetings': past,
+    }
+    return render(request, 'pages/portal/zoom/manage_meetings.html', context)
+
+
+@login_required
+@user_passes_test(is_officer_or_staff)
+def create_zoom_meeting(request):
+    """Create a new Zoom meeting."""
+    from .models import ZoomMeeting
+    from .forms import ZoomMeetingForm
+    
+    if request.method == 'POST':
+        form = ZoomMeetingForm(request.POST)
+        if form.is_valid():
+            meeting = form.save(commit=False)
+            meeting.host = request.user
+            meeting.save()
+            messages.success(request, f'Meeting "{meeting.title}" created successfully!')
+            return redirect('manage_zoom_meetings')
+    else:
+        form = ZoomMeetingForm()
+    
+    context = {
+        'form': form,
+        'title': 'Create Meeting',
+    }
+    return render(request, 'pages/portal/zoom/meeting_form.html', context)
+
+
+@login_required
+@user_passes_test(is_officer_or_staff)
+def edit_zoom_meeting(request, meeting_id):
+    """Edit an existing Zoom meeting."""
+    from .models import ZoomMeeting
+    from .forms import ZoomMeetingForm
+    
+    meeting = get_object_or_404(ZoomMeeting, pk=meeting_id)
+    
+    if request.method == 'POST':
+        form = ZoomMeetingForm(request.POST, instance=meeting)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'Meeting "{meeting.title}" updated!')
+            return redirect('manage_zoom_meetings')
+    else:
+        form = ZoomMeetingForm(instance=meeting)
+    
+    context = {
+        'form': form,
+        'meeting': meeting,
+        'title': f'Edit: {meeting.title}',
+    }
+    return render(request, 'pages/portal/zoom/meeting_form.html', context)
+
+
+@login_required
+@user_passes_test(is_officer_or_staff)
+def delete_zoom_meeting(request, meeting_id):
+    """Delete a Zoom meeting."""
+    from .models import ZoomMeeting
+    
+    meeting = get_object_or_404(ZoomMeeting, pk=meeting_id)
+    
+    if request.method == 'POST':
+        title = meeting.title
+        meeting.delete()
+        messages.success(request, f'Meeting "{title}" deleted.')
+        return redirect('manage_zoom_meetings')
+    
+    context = {
+        'meeting': meeting,
+    }
+    return render(request, 'pages/portal/zoom/delete_meeting_confirm.html', context)
+
+
+@login_required
+def meeting_list(request):
+    """List upcoming meetings for members."""
+    from .models import ZoomMeeting
+    
+    meetings = ZoomMeeting.objects.filter(
+        status__in=['scheduled', 'in_progress'],
+        scheduled_time__gte=timezone.now() - timezone.timedelta(hours=2)  # Include meetings that started recently
+    ).order_by('scheduled_time')
+    
+    context = {
+        'meetings': meetings,
+    }
+    return render(request, 'pages/portal/zoom/meeting_list.html', context)
+
+
+def _generate_zoom_signature(meeting_number, role):
+    """
+    Generate JWT signature for Zoom Web SDK.
+    Role: 0 = participant, 1 = host
+    """
+    import time
+    import base64
+    import hmac
+    import hashlib
+    from .models import ZoomConfiguration
+    
+    try:
+        config = ZoomConfiguration.objects.get(is_active=True)
+    except ZoomConfiguration.DoesNotExist:
+        return None
+    
+    timestamp = int(round(time.time() * 1000)) - 30000  # 30 second buffer
+    expires = timestamp + (60 * 60 * 2 * 1000)  # 2 hours
+    
+    message = f"{config.sdk_key}{meeting_number}{timestamp}{role}{expires}"
+    
+    signature = base64.b64encode(
+        hmac.new(
+            config.sdk_secret.encode('utf-8'),
+            message.encode('utf-8'),
+            hashlib.sha256
+        ).digest()
+    ).decode('utf-8')
+    
+    # Create properly formatted signature for SDK
+    final_signature = base64.b64encode(
+        f"{config.sdk_key}.{meeting_number}.{timestamp}.{role}.{expires}.{signature}".encode('utf-8')
+    ).decode('utf-8')
+    
+    return final_signature
+
+
+def _check_meeting_access(user, meeting):
+    """Check if user can access a meeting. Returns (allowed, error_message)."""
+    if meeting.members_only and not user.is_authenticated:
+        return False, "This meeting is for members only."
+    
+    if meeting.financial_only:
+        if not hasattr(user, 'member_profile'):
+            return False, "Only financial members can join this meeting."
+        if user.member_profile.status not in ['financial', 'financial_life_member']:
+            return False, "Only financial members can join this meeting."
+    
+    return True, None
+
+
+@login_required
+def join_zoom_meeting(request, meeting_id):
+    """Join a virtual meeting - embedded for Zoom with ID, external link for others."""
+    from .models import ZoomMeeting, ZoomConfiguration
+    
+    meeting = get_object_or_404(ZoomMeeting, pk=meeting_id)
+    
+    # Check access permissions
+    allowed, error = _check_meeting_access(request.user, meeting)
+    if not allowed:
+        messages.error(request, error)
+        return redirect('meeting_list')
+    
+    # Determine if user is host
+    is_host = request.user == meeting.host or request.user.is_staff
+    
+    # Get user display name
+    if hasattr(request.user, 'member_profile') and request.user.member_profile:
+        display_name = request.user.member_profile.get_full_name() or request.user.username
+    else:
+        display_name = request.user.get_full_name() or request.user.username
+    
+    # Get active polls for this meeting
+    polls = meeting.polls.filter(is_active=True)
+    
+    # Check if this is an embedded Zoom meeting
+    is_embedded_zoom = meeting.is_zoom_embedded
+    
+    context = {
+        'meeting': meeting,
+        'is_host': is_host,
+        'polls': polls,
+        'is_embedded_zoom': is_embedded_zoom,
+        'user_name': display_name,
+        'user_email': request.user.email,
+    }
+    
+    # For embedded Zoom meetings, get SDK configuration
+    if is_embedded_zoom:
+        try:
+            config = ZoomConfiguration.objects.get(is_active=True)
+        except ZoomConfiguration.DoesNotExist:
+            messages.error(request, 'Zoom is not configured. Please contact an administrator.')
+            return redirect('meeting_list')
+        
+        role = 1 if is_host else 0
+        signature = _generate_zoom_signature(meeting.meeting_number, role)
+        
+        if not signature:
+            messages.error(request, 'Could not generate meeting signature.')
+            return redirect('meeting_list')
+        
+        context.update({
+            'sdk_key': config.sdk_key,
+            'signature': signature,
+            'meeting_number': meeting.meeting_number,
+            'password': meeting.meeting_password,
+        })
+    
+    return render(request, 'pages/portal/zoom/join_meeting.html', context)
+
+
+@login_required
+@user_passes_test(is_officer_or_staff)
+def start_zoom_meeting(request, meeting_id):
+    """Mark meeting as in progress (host action)."""
+    from .models import ZoomMeeting
+    
+    meeting = get_object_or_404(ZoomMeeting, pk=meeting_id)
+    meeting.status = 'in_progress'
+    meeting.save()
+    messages.success(request, f'Meeting "{meeting.title}" is now in progress.')
+    return redirect('join_zoom_meeting', meeting_id=meeting_id)
+
+
+@login_required
+@user_passes_test(is_officer_or_staff)
+def end_zoom_meeting(request, meeting_id):
+    """Mark meeting as completed (host action)."""
+    from .models import ZoomMeeting
+    
+    meeting = get_object_or_404(ZoomMeeting, pk=meeting_id)
+    meeting.status = 'completed'
+    meeting.save()
+    messages.success(request, f'Meeting "{meeting.title}" has ended.')
+    return redirect('manage_zoom_meetings')
+
+
+# =============================================================================
+# POLLING / VOTING VIEWS
+# =============================================================================
+
+@login_required
+def polls_list(request):
+    """List all polls available to the current user."""
+    from .models import Poll
+    
+    # Get all active polls
+    polls = Poll.objects.filter(is_active=True)
+    
+    # Filter by financial status if needed
+    if hasattr(request.user, 'member_profile'):
+        is_financial = request.user.member_profile.status in ['financial', 'financial_life_member']
+    else:
+        is_financial = False
+    
+    # Separate open and closed polls
+    open_polls = []
+    closed_polls = []
+    
+    for poll in polls:
+        # Skip financial-only polls for non-financial members
+        if poll.financial_only and not is_financial and not request.user.is_staff:
+            continue
+        
+        if poll.is_open:
+            open_polls.append(poll)
+        else:
+            closed_polls.append(poll)
+    
+    context = {
+        'open_polls': open_polls,
+        'closed_polls': closed_polls[:10],  # Last 10 closed polls
+    }
+    return render(request, 'pages/portal/polls/poll_list.html', context)
+
+
+@login_required
+@user_passes_test(is_officer_or_staff)
+def manage_polls(request):
+    """Admin view to manage all polls."""
+    from .models import Poll
+    
+    polls = Poll.objects.all().order_by('-created_at')
+    
+    context = {
+        'polls': polls,
+    }
+    return render(request, 'pages/portal/polls/manage_polls.html', context)
+
+
+@login_required
+@user_passes_test(is_officer_or_staff)
+def create_poll(request):
+    """Create a new poll with options."""
+    from .models import Poll
+    from .forms import PollForm, PollOptionFormSet
+    
+    if request.method == 'POST':
+        form = PollForm(request.POST)
+        formset = PollOptionFormSet(request.POST)
+        
+        if form.is_valid() and formset.is_valid():
+            poll = form.save(commit=False)
+            poll.created_by = request.user
+            poll.save()
+            
+            formset.instance = poll
+            formset.save()
+            
+            messages.success(request, f'Poll "{poll.title}" created successfully!')
+            return redirect('manage_polls')
+    else:
+        form = PollForm()
+        formset = PollOptionFormSet()
+    
+    context = {
+        'form': form,
+        'formset': formset,
+        'title': 'Create Poll',
+    }
+    return render(request, 'pages/portal/polls/poll_form.html', context)
+
+
+@login_required
+@user_passes_test(is_officer_or_staff)
+def edit_poll(request, poll_id):
+    """Edit an existing poll."""
+    from .models import Poll
+    from .forms import PollForm, PollOptionFormSet
+    
+    poll = get_object_or_404(Poll, pk=poll_id)
+    
+    if request.method == 'POST':
+        form = PollForm(request.POST, instance=poll)
+        formset = PollOptionFormSet(request.POST, instance=poll)
+        
+        if form.is_valid() and formset.is_valid():
+            form.save()
+            formset.save()
+            messages.success(request, f'Poll "{poll.title}" updated!')
+            return redirect('manage_polls')
+    else:
+        form = PollForm(instance=poll)
+        formset = PollOptionFormSet(instance=poll)
+    
+    context = {
+        'form': form,
+        'formset': formset,
+        'poll': poll,
+        'title': f'Edit: {poll.title}',
+    }
+    return render(request, 'pages/portal/polls/poll_form.html', context)
+
+
+@login_required
+@user_passes_test(is_officer_or_staff)
+def delete_poll(request, poll_id):
+    """Delete a poll."""
+    from .models import Poll
+    
+    poll = get_object_or_404(Poll, pk=poll_id)
+    
+    if request.method == 'POST':
+        title = poll.title
+        poll.delete()
+        messages.success(request, f'Poll "{title}" deleted.')
+        return redirect('manage_polls')
+    
+    context = {
+        'poll': poll,
+    }
+    return render(request, 'pages/portal/polls/delete_poll_confirm.html', context)
+
+
+def _check_poll_access(user, poll):
+    """Check if user can vote on a poll. Returns (allowed, error_message)."""
+    if not poll.is_open:
+        return False, "This poll is closed."
+    
+    if poll.financial_only:
+        if not hasattr(user, 'member_profile'):
+            return False, "Only financial members can vote on this poll."
+        if user.member_profile.status not in ['financial', 'financial_life_member']:
+            return False, "Only financial members can vote on this poll."
+    
+    if poll.user_has_voted(user) and not poll.allow_multiple:
+        return False, "You have already voted on this poll."
+    
+    return True, None
+
+
+@login_required
+def view_poll(request, poll_id):
+    """View poll and cast vote."""
+    from .models import Poll, Vote
+    from .forms import VoteForm
+    
+    poll = get_object_or_404(Poll, pk=poll_id)
+    
+    # Check access
+    allowed, error = _check_poll_access(request.user, poll)
+    has_voted = poll.user_has_voted(request.user)
+    
+    if request.method == 'POST' and allowed:
+        form = VoteForm(poll, request.POST)
+        if form.is_valid():
+            selected_options = form.cleaned_data['option']
+            
+            # Handle multiple selections
+            if poll.allow_multiple:
+                for option in selected_options:
+                    Vote.objects.create(
+                        poll=poll,
+                        option=option,
+                        voter=request.user if not poll.is_anonymous else None
+                    )
+            else:
+                Vote.objects.create(
+                    poll=poll,
+                    option=selected_options,
+                    voter=request.user if not poll.is_anonymous else None
+                )
+            
+            messages.success(request, 'Your vote has been recorded!')
+            return redirect('view_poll', poll_id=poll_id)
+    else:
+        form = VoteForm(poll) if allowed else None
+    
+    # Get results
+    results = poll.get_results() if poll.show_results_during or not poll.is_open else None
+    
+    context = {
+        'poll': poll,
+        'form': form,
+        'has_voted': has_voted,
+        'can_vote': allowed and not has_voted,
+        'error_message': error if not allowed else None,
+        'results': results,
+        'total_votes': poll.total_votes,
+        'total_voters': poll.total_voters,
+    }
+    return render(request, 'pages/portal/polls/view_poll.html', context)
+
+
+@login_required
+def poll_results_json(request, poll_id):
+    """Return poll results as JSON for AJAX updates."""
+    from .models import Poll
+    
+    poll = get_object_or_404(Poll, pk=poll_id)
+    
+    # Only return results if allowed
+    if not poll.show_results_during and poll.is_open:
+        if not request.user.is_staff:
+            return JsonResponse({'error': 'Results not available'}, status=403)
+    
+    results = []
+    for option in poll.get_results():
+        results.append({
+            'id': option.id,
+            'text': option.text,
+            'votes': option.vote_count,
+            'percentage': option.percentage,
+        })
+    
+    return JsonResponse({
+        'poll_id': poll.id,
+        'title': poll.title,
+        'is_open': poll.is_open,
+        'total_votes': poll.total_votes,
+        'total_voters': poll.total_voters,
+        'results': results,
+    })
+
+
+@login_required
+@user_passes_test(is_officer_or_staff)
+def poll_voters(request, poll_id):
+    """View who voted on a poll (officers only, non-anonymous polls)."""
+    from .models import Poll
+    
+    poll = get_object_or_404(Poll, pk=poll_id)
+    
+    if poll.is_anonymous:
+        messages.warning(request, 'This is an anonymous poll. Individual votes are not recorded.')
+        return redirect('manage_polls')
+    
+    votes = poll.votes.select_related('option', 'voter').order_by('-voted_at')
+    
+    context = {
+        'poll': poll,
+        'votes': votes,
+    }
+    return render(request, 'pages/portal/polls/poll_voters.html', context)
+
+
+@login_required
+@user_passes_test(is_officer_or_staff)
+def toggle_poll_status(request, poll_id):
+    """Toggle poll active status."""
+    from .models import Poll
+    
+    poll = get_object_or_404(Poll, pk=poll_id)
+    poll.is_active = not poll.is_active
+    poll.save()
+    
+    status = 'activated' if poll.is_active else 'deactivated'
+    messages.success(request, f'Poll "{poll.title}" {status}.')
+    return redirect('manage_polls')
+
+
+@login_required
+def my_votes(request):
+    """View member's voting history."""
+    from .models import Vote
+    
+    votes = Vote.objects.filter(voter=request.user).select_related(
+        'poll', 'option'
+    ).order_by('-voted_at')
+    
+    context = {
+        'votes': votes,
+    }
+    return render(request, 'pages/portal/polls/my_votes.html', context)

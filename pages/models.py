@@ -178,6 +178,7 @@ class MemberProfile(models.Model):
     bio = models.TextField(blank=True, default='')
     dues_current = models.BooleanField(default=False, help_text="Are dues paid up to date?")
     is_officer = models.BooleanField(default=False, help_text="Is this member an officer with admin privileges?")
+    last_seen = models.DateTimeField(blank=True, null=True, help_text="Last activity timestamp for online status")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -230,6 +231,39 @@ class MemberProfile(models.Model):
         from django.utils import timezone
         removal_deadline = self.marked_for_removal_date + timedelta(days=90)
         return timezone.now() >= removal_deadline
+    
+    @property
+    def is_online(self):
+        """Check if member is online (active within last 5 minutes)"""
+        if not self.last_seen:
+            return False
+        from datetime import timedelta
+        from django.utils import timezone
+        return timezone.now() - self.last_seen < timedelta(minutes=5)
+    
+    @property
+    def last_seen_display(self):
+        """Human-readable last seen time"""
+        if not self.last_seen:
+            return "Never"
+        from django.utils import timezone
+        from datetime import timedelta
+        now = timezone.now()
+        diff = now - self.last_seen
+        
+        if diff < timedelta(minutes=1):
+            return "Just now"
+        elif diff < timedelta(minutes=5):
+            return "Online"
+        elif diff < timedelta(hours=1):
+            minutes = int(diff.total_seconds() / 60)
+            return f"{minutes} min ago"
+        elif diff < timedelta(days=1):
+            hours = int(diff.total_seconds() / 3600)
+            return f"{hours} hr ago"
+        else:
+            days = diff.days
+            return f"{days} day{'s' if days > 1 else ''} ago"
     
     def save(self, *args, **kwargs):
         # Automatically update status based on dues_current (unless Life Member, New Member, or Suspended)
@@ -1600,3 +1634,369 @@ class CookieConsent(models.Model):
     def __str__(self):
         user_str = self.user.username if self.user else f'Session {self.session_key[:8]}...'
         return f"{user_str} - {self.get_consent_level_display()}"
+
+
+# =============================================================================
+# ZOOM INTEGRATION MODELS
+# =============================================================================
+
+class ZoomConfiguration(models.Model):
+    """
+    Store Zoom SDK credentials for embedded meetings.
+    Only one active configuration should exist at a time.
+    """
+    admin = models.ForeignKey(
+        User, 
+        on_delete=models.SET_NULL, 
+        null=True,
+        related_name='zoom_configs',
+        help_text="Admin who configured this"
+    )
+    sdk_key = models.CharField(
+        max_length=255,
+        help_text="Zoom Meeting SDK Key (Client ID)"
+    )
+    sdk_secret = models.CharField(
+        max_length=255,
+        help_text="Zoom Meeting SDK Secret (Client Secret)"
+    )
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = 'Zoom Configuration'
+        verbose_name_plural = 'Zoom Configurations'
+    
+    def __str__(self):
+        status = "Active" if self.is_active else "Inactive"
+        return f"Zoom Config ({status})"
+    
+    def save(self, *args, **kwargs):
+        # Ensure only one active config
+        if self.is_active:
+            ZoomConfiguration.objects.filter(is_active=True).exclude(pk=self.pk).update(is_active=False)
+        super().save(*args, **kwargs)
+
+
+class ZoomMeeting(models.Model):
+    """
+    Stores virtual meeting information for chapter meetings.
+    Supports multiple platforms: Zoom (embedded), Google Meet, Teams, etc.
+    """
+    PLATFORM_CHOICES = [
+        ('zoom', 'Zoom (Embedded)'),
+        ('google_meet', 'Google Meet'),
+        ('teams', 'Microsoft Teams'),
+        ('webex', 'Cisco Webex'),
+        ('other', 'Other'),
+    ]
+    
+    STATUS_CHOICES = [
+        ('scheduled', 'Scheduled'),
+        ('in_progress', 'In Progress'),
+        ('completed', 'Completed'),
+        ('cancelled', 'Cancelled'),
+    ]
+    
+    title = models.CharField(max_length=200)
+    description = models.TextField(blank=True, default='')
+    
+    # Platform selection
+    platform = models.CharField(
+        max_length=20,
+        choices=PLATFORM_CHOICES,
+        default='zoom',
+        help_text="Select the meeting platform"
+    )
+    
+    # For Zoom embedded meetings
+    meeting_number = models.CharField(
+        max_length=50,
+        blank=True,
+        default='',
+        help_text="Zoom Meeting ID (for Zoom only)"
+    )
+    meeting_password = models.CharField(
+        max_length=50,
+        blank=True,
+        default='',
+        help_text="Meeting password (if required)"
+    )
+    
+    # For external platforms (Google Meet, Teams, etc.)
+    meeting_url = models.URLField(
+        max_length=500,
+        blank=True,
+        default='',
+        help_text="Meeting link for Google Meet, Teams, or other platforms"
+    )
+    
+    host = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='hosted_meetings'
+    )
+    event = models.ForeignKey(
+        'Event',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='zoom_meetings',
+        help_text="Link to an event (optional)"
+    )
+    scheduled_time = models.DateTimeField()
+    duration_minutes = models.PositiveIntegerField(
+        default=60,
+        help_text="Expected meeting duration in minutes"
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='scheduled'
+    )
+    # Access control
+    members_only = models.BooleanField(
+        default=True,
+        help_text="Only logged-in members can join"
+    )
+    financial_only = models.BooleanField(
+        default=False,
+        help_text="Only financial members can join"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = 'Virtual Meeting'
+        verbose_name_plural = 'Virtual Meetings'
+        ordering = ['-scheduled_time']
+    
+    def __str__(self):
+        return f"{self.title} - {self.scheduled_time.strftime('%Y-%m-%d %H:%M')}"
+    
+    @property
+    def is_upcoming(self):
+        return self.status == 'scheduled' and self.scheduled_time > timezone.now()
+    
+    @property
+    def is_active(self):
+        return self.status == 'in_progress'
+    
+    @property
+    def is_zoom_embedded(self):
+        """Check if this meeting uses embedded Zoom"""
+        return self.platform == 'zoom' and bool(self.meeting_number)
+    
+    @property
+    def is_external_link(self):
+        """Check if this meeting uses an external link"""
+        return self.platform != 'zoom' or (self.platform == 'zoom' and not self.meeting_number and bool(self.meeting_url))
+    
+    def get_join_url(self):
+        """Get the URL to join this meeting (for external platforms)"""
+        if self.meeting_url:
+            return self.meeting_url
+        return None
+    
+    def get_platform_icon(self):
+        """Get Font Awesome icon for platform"""
+        icons = {
+            'zoom': 'fa-video',
+            'google_meet': 'fa-google',
+            'teams': 'fa-microsoft',
+            'webex': 'fa-video',
+            'other': 'fa-link',
+        }
+        return icons.get(self.platform, 'fa-video')
+    
+    def get_end_time(self):
+        from datetime import timedelta
+        return self.scheduled_time + timedelta(minutes=self.duration_minutes)
+
+
+# =============================================================================
+# POLLING / VOTING MODELS
+# =============================================================================
+
+class Poll(models.Model):
+    """
+    A poll or vote for members to participate in.
+    Can be linked to a meeting for live voting.
+    """
+    POLL_TYPE_CHOICES = [
+        ('meeting', 'Meeting Poll'),
+        ('general', 'General Poll'),
+        ('election', 'Election'),
+        ('motion', 'Motion Vote'),
+    ]
+    
+    title = models.CharField(max_length=200)
+    description = models.TextField(
+        blank=True,
+        default='',
+        help_text="Explain what members are voting on"
+    )
+    poll_type = models.CharField(
+        max_length=20,
+        choices=POLL_TYPE_CHOICES,
+        default='general'
+    )
+    meeting = models.ForeignKey(
+        ZoomMeeting,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='polls',
+        help_text="Associate with a meeting (optional)"
+    )
+    created_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='created_polls'
+    )
+    
+    # Privacy settings (configurable per poll)
+    is_anonymous = models.BooleanField(
+        default=False,
+        help_text="If true, individual votes are not recorded"
+    )
+    show_results_during = models.BooleanField(
+        default=True,
+        help_text="Show live results while voting is open"
+    )
+    
+    # Voting rules
+    allow_multiple = models.BooleanField(
+        default=False,
+        help_text="Allow selecting multiple options"
+    )
+    max_selections = models.PositiveIntegerField(
+        default=1,
+        help_text="Maximum selections if multiple allowed"
+    )
+    
+    # Access control
+    financial_only = models.BooleanField(
+        default=False,
+        help_text="Only financial members can vote"
+    )
+    
+    # Timing
+    is_active = models.BooleanField(default=True)
+    starts_at = models.DateTimeField(default=timezone.now)
+    ends_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="Leave blank for no deadline"
+    )
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = 'Poll'
+        verbose_name_plural = 'Polls'
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"{self.title} ({self.get_poll_type_display()})"
+    
+    @property
+    def is_open(self):
+        """Check if voting is currently open"""
+        now = timezone.now()
+        if not self.is_active:
+            return False
+        if self.starts_at > now:
+            return False
+        if self.ends_at and self.ends_at < now:
+            return False
+        return True
+    
+    @property
+    def total_votes(self):
+        return self.votes.count()
+    
+    @property
+    def total_voters(self):
+        return self.votes.values('voter').distinct().count()
+    
+    def user_has_voted(self, user):
+        """Check if a user has already voted"""
+        return self.votes.filter(voter=user).exists()
+    
+    def get_results(self):
+        """Get vote counts per option"""
+        from django.db.models import Count
+        return self.options.annotate(
+            vote_count=Count('votes')
+        ).order_by('-vote_count')
+
+
+class PollOption(models.Model):
+    """
+    An option/choice within a poll.
+    """
+    poll = models.ForeignKey(
+        Poll,
+        on_delete=models.CASCADE,
+        related_name='options'
+    )
+    text = models.CharField(max_length=200)
+    order = models.PositiveIntegerField(default=0)
+    
+    class Meta:
+        verbose_name = 'Poll Option'
+        verbose_name_plural = 'Poll Options'
+        ordering = ['order', 'id']
+    
+    def __str__(self):
+        return f"{self.poll.title}: {self.text}"
+    
+    @property
+    def vote_count(self):
+        return self.votes.count()
+    
+    @property
+    def percentage(self):
+        total = self.poll.total_votes
+        if total == 0:
+            return 0
+        return round((self.vote_count / total) * 100, 1)
+
+
+class Vote(models.Model):
+    """
+    A member's vote on a poll option.
+    """
+    poll = models.ForeignKey(
+        Poll,
+        on_delete=models.CASCADE,
+        related_name='votes'
+    )
+    option = models.ForeignKey(
+        PollOption,
+        on_delete=models.CASCADE,
+        related_name='votes'
+    )
+    voter = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='poll_votes'
+    )
+    voted_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        verbose_name = 'Vote'
+        verbose_name_plural = 'Votes'
+        # For single-choice polls, enforce one vote per user per poll
+        # Multiple choice handled at view level
+        ordering = ['-voted_at']
+    
+    def __str__(self):
+        voter_name = self.voter.username if self.voter else 'Anonymous'
+        return f"{voter_name} -> {self.option.text}"

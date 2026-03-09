@@ -1,7 +1,7 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% load static %}
 
-{% block title %}Site Analytics - Portal{% endblock %}
+{% block title %}Site Analytics - Portal{% endblock title %}
 
 {% block css %}
 <style>
@@ -247,7 +247,7 @@
         color: #ccc;
     }
 </style>
-{% endblock %}
+{% endblock css %}
 
 {% block content %}
 <div class="analytics-container">
@@ -333,4 +333,4 @@
         {% endif %}
     </div>
 </div>
-{% endblock %}
+{% endblock content %}

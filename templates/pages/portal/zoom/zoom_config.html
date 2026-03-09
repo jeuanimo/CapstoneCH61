@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block title %}Zoom Configuration - Admin{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-video"></i> Zoom SDK Configuration</h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <strong><i class="fas fa-info-circle"></i> Setup Instructions:</strong>
+                        <ol class="mb-0 mt-2">
+                            <li>Go to <a href="https://marketplace.zoom.us/" target="_blank">Zoom App Marketplace</a></li>
+                            <li>Sign in and click "Develop" → "Build App"</li>
+                            <li>Choose "Meeting SDK" as the app type</li>
+                            <li>Complete the app setup and copy your SDK Key and Secret</li>
+                        </ol>
+                    </div>
+
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label class="form-label">SDK Key (Client ID)</label>
+                            {{ form.sdk_key }}
+                            <small class="form-text text-muted">{{ form.sdk_key.help_text }}</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">SDK Secret (Client Secret)</label>
+                            {{ form.sdk_secret }}
+                            <small class="form-text text-muted">{{ form.sdk_secret.help_text }}</small>
+                        </div>
+                        
+                        <div class="mb-3 form-check">
+                            {{ form.is_active }}
+                            <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
+                                Active Configuration
+                            </label>
+                        </div>
+                        
+                        {% if config %}
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle"></i> Configuration exists. 
+                            Last updated: {{ config.updated_at|date:"M d, Y H:i" }}
+                        </div>
+                        {% endif %}
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'manage_zoom_meetings' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left"></i> Back to Meetings
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Save Configuration
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

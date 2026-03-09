@@ -1,0 +1,170 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - Polls{% endblock %}
+
+{% block css %}
+<style>
+    .option-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+    .option-row .form-control {
+        flex: 1;
+    }
+    .option-row .btn-delete {
+        color: #dc3545;
+    }
+    .formset-container {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-poll"></i> {{ title }}</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <!-- Basic Info -->
+                        <div class="mb-3">
+                            <label class="form-label">Poll Title *</label>
+                            {{ form.title }}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            {{ form.description }}
+                            <small class="form-text text-muted">Help voters understand what they're voting on</small>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Poll Type</label>
+                                {{ form.poll_type }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Link to Meeting (Optional)</label>
+                                {{ form.meeting }}
+                            </div>
+                        </div>
+                        
+                        <!-- Options -->
+                        <div class="formset-container mb-4">
+                            <h5><i class="fas fa-list"></i> Poll Options</h5>
+                            <p class="text-muted small">Add at least 2 options for voters to choose from</p>
+                            
+                            {{ formset.management_form }}
+                            
+                            <div id="options-container">
+                                {% for option_form in formset %}
+                                <div class="option-row">
+                                    {{ option_form.id }}
+                                    {{ option_form.text }}
+                                    <input type="hidden" name="{{ option_form.order.html_name }}" value="{{ forloop.counter0 }}">
+                                    {% if option_form.instance.pk %}
+                                    <div class="form-check">
+                                        {{ option_form.DELETE }}
+                                        <label class="form-check-label text-danger btn-delete" for="{{ option_form.DELETE.id_for_label }}">
+                                            <i class="fas fa-trash"></i>
+                                        </label>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <!-- Settings -->
+                        <div class="card bg-light mb-4">
+                            <div class="card-body">
+                                <h6><i class="fas fa-cog"></i> Poll Settings</h6>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-check mb-2">
+                                            {{ form.is_anonymous }}
+                                            <label class="form-check-label" for="{{ form.is_anonymous.id_for_label }}">
+                                                <i class="fas fa-user-secret"></i> Anonymous Voting
+                                                <small class="d-block text-muted">Individual votes won't be recorded</small>
+                                            </label>
+                                        </div>
+                                        
+                                        <div class="form-check mb-2">
+                                            {{ form.show_results_during }}
+                                            <label class="form-check-label" for="{{ form.show_results_during.id_for_label }}">
+                                                <i class="fas fa-chart-bar"></i> Show Live Results
+                                                <small class="d-block text-muted">Voters see results before poll closes</small>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-6">
+                                        <div class="form-check mb-2">
+                                            {{ form.allow_multiple }}
+                                            <label class="form-check-label" for="{{ form.allow_multiple.id_for_label }}">
+                                                <i class="fas fa-check-double"></i> Allow Multiple Selections
+                                            </label>
+                                        </div>
+                                        
+                                        <div class="mb-2">
+                                            <label class="form-label small">Max Selections (if multiple)</label>
+                                            {{ form.max_selections }}
+                                        </div>
+                                        
+                                        <div class="form-check">
+                                            {{ form.financial_only }}
+                                            <label class="form-check-label" for="{{ form.financial_only.id_for_label }}">
+                                                <i class="fas fa-dollar-sign"></i> Financial Members Only
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Timing -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label">Start Date/Time</label>
+                                {{ form.starts_at }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">End Date/Time (Optional)</label>
+                                {{ form.ends_at }}
+                                <small class="form-text text-muted">Leave blank for no deadline</small>
+                            </div>
+                        </div>
+                        
+                        <div class="form-check mb-4">
+                            {{ form.is_active }}
+                            <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
+                                <strong>Poll is Active</strong> (uncheck to save as draft)
+                            </label>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'manage_polls' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Save Poll
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

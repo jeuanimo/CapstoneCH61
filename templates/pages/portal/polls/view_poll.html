@@ -1,0 +1,251 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ poll.title }} - Vote{% endblock %}
+
+{% block css %}
+<style>
+    .poll-option {
+        display: flex;
+        align-items: center;
+        padding: 15px;
+        margin: 10px 0;
+        border: 2px solid #dee2e6;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .poll-option:hover {
+        background: #f8f9fa;
+        border-color: #0047AB;
+    }
+    
+    .poll-option.selected {
+        background: #e7f1ff;
+        border-color: #0047AB;
+    }
+    
+    .poll-option input[type="radio"],
+    .poll-option input[type="checkbox"] {
+        margin-right: 15px;
+        transform: scale(1.3);
+    }
+    
+    .poll-option label {
+        margin-bottom: 0;
+        flex: 1;
+        cursor: pointer;
+    }
+    
+    .result-bar {
+        height: 40px;
+        border-radius: 6px;
+        margin: 8px 0;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .result-bar .progress-bar {
+        transition: width 0.5s ease;
+    }
+    
+    .result-bar .result-text {
+        position: absolute;
+        left: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-weight: 500;
+        z-index: 2;
+    }
+    
+    .result-bar .result-count {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-weight: 600;
+        z-index: 2;
+    }
+    
+    .voted-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        background: #d4edda;
+        color: #155724;
+        border-radius: 20px;
+        font-weight: 500;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0"><i class="fas fa-poll"></i> {{ poll.title }}</h4>
+                        {% if poll.is_open %}
+                        <span class="badge bg-success">Open</span>
+                        {% else %}
+                        <span class="badge bg-secondary">Closed</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if poll.description %}
+                    <p class="lead">{{ poll.description }}</p>
+                    {% endif %}
+                    
+                    <div class="d-flex flex-wrap gap-2 mb-4">
+                        <span class="badge bg-info">{{ poll.get_poll_type_display }}</span>
+                        {% if poll.is_anonymous %}
+                        <span class="badge bg-dark"><i class="fas fa-user-secret"></i> Anonymous</span>
+                        {% endif %}
+                        {% if poll.allow_multiple %}
+                        <span class="badge bg-secondary">Multiple Choice (max {{ poll.max_selections }})</span>
+                        {% endif %}
+                        {% if poll.financial_only %}
+                        <span class="badge bg-warning text-dark"><i class="fas fa-dollar-sign"></i> Financial Only</span>
+                        {% endif %}
+                    </div>
+                    
+                    {% if poll.ends_at %}
+                    <p class="text-muted mb-3">
+                        <i class="fas fa-clock"></i> 
+                        {% if poll.is_open %}
+                        Voting ends: {{ poll.ends_at|date:"F d, Y \a\t g:i A" }}
+                        {% else %}
+                        Voting ended: {{ poll.ends_at|date:"F d, Y \a\t g:i A" }}
+                        {% endif %}
+                    </p>
+                    {% endif %}
+                    
+                    {% if error_message %}
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i> {{ error_message }}
+                    </div>
+                    {% endif %}
+                    
+                    {% if has_voted %}
+                    <div class="mb-4">
+                        <span class="voted-badge">
+                            <i class="fas fa-check-circle"></i> You've already voted
+                        </span>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Voting Form -->
+                    {% if can_vote and form %}
+                    <form method="post" id="vote-form">
+                        {% csrf_token %}
+                        
+                        {% if poll.allow_multiple %}
+                        <p class="text-muted mb-3">Select up to {{ poll.max_selections }} option(s):</p>
+                        {% else %}
+                        <p class="text-muted mb-3">Select one option:</p>
+                        {% endif %}
+                        
+                        {% for option in poll.options.all %}
+                        <div class="poll-option" onclick="selectOption(this, '{{ option.id }}')">
+                            {% if poll.allow_multiple %}
+                            <input type="checkbox" name="option" value="{{ option.id }}" id="option_{{ option.id }}" class="form-check-input">
+                            {% else %}
+                            <input type="radio" name="option" value="{{ option.id }}" id="option_{{ option.id }}" class="form-check-input" required>
+                            {% endif %}
+                            <label for="option_{{ option.id }}" class="form-check-label">{{ option.text }}</label>
+                        </div>
+                        {% endfor %}
+                        
+                        <button type="submit" class="btn btn-primary btn-lg w-100 mt-4">
+                            <i class="fas fa-vote-yea"></i> Submit Vote
+                        </button>
+                    </form>
+                    {% endif %}
+                    
+                    <!-- Results -->
+                    {% if results %}
+                    <div class="mt-4" id="results-section">
+                        <h5><i class="fas fa-chart-bar"></i> Results</h5>
+                        <p class="text-muted">{{ total_voters }} voter{{ total_voters|pluralize }} | {{ total_votes }} vote{{ total_votes|pluralize }}</p>
+                        
+                        {% for option in results %}
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span>{{ option.text }}</span>
+                                <span class="text-muted">{{ option.vote_count }} ({{ option.percentage }}%)</span>
+                            </div>
+                            <div class="progress result-bar">
+                                <div class="progress-bar bg-primary" role="progressbar" 
+                                     style="width: {{ option.percentage }}%" 
+                                     aria-valuenow="{{ option.percentage }}" 
+                                     aria-valuemin="0" aria-valuemax="100">
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% elif not poll.show_results_during and poll.is_open %}
+                    <div class="alert alert-info mt-4">
+                        <i class="fas fa-eye-slash"></i> Results will be shown after voting closes.
+                    </div>
+                    {% endif %}
+                    
+                    <div class="mt-4 pt-3 border-top">
+                        <a href="{% url 'polls_list' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left"></i> Back to Polls
+                        </a>
+                        {% if user.is_staff or user.member_profile.is_officer %}
+                        <a href="{% url 'edit_poll' poll.id %}" class="btn btn-outline-primary">
+                            <i class="fas fa-edit"></i> Edit Poll
+                        </a>
+                        {% if not poll.is_anonymous %}
+                        <a href="{% url 'poll_voters' poll.id %}" class="btn btn-outline-info">
+                            <i class="fas fa-users"></i> View Voters
+                        </a>
+                        {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function selectOption(element, optionId) {
+    const input = element.querySelector('input');
+    const isMultiple = input.type === 'checkbox';
+    
+    if (isMultiple) {
+        element.classList.toggle('selected');
+    } else {
+        document.querySelectorAll('.poll-option').forEach(opt => opt.classList.remove('selected'));
+        element.classList.add('selected');
+        input.checked = true;
+    }
+}
+
+// Auto-refresh results every 5 seconds for live polls
+{% if poll.is_open and poll.show_results_during %}
+setInterval(function() {
+    fetch('{% url "poll_results_json" poll.id %}')
+        .then(response => response.json())
+        .then(data => {
+            if (data.results) {
+                data.results.forEach(function(result) {
+                    const bar = document.querySelector(`[aria-valuenow][style*="${result.id}"]`);
+                    if (bar) {
+                        bar.style.width = result.percentage + '%';
+                        bar.setAttribute('aria-valuenow', result.percentage);
+                    }
+                });
+            }
+        });
+}, 5000);
+{% endif %}
+</script>
+{% endblock %}

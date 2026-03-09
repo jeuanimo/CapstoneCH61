@@ -3,7 +3,7 @@ PHI BETA SIGMA CHAPTER WEBSITE - COMPLETE FUNCTIONALITY DOCUMENTATION
 ================================================================================
 Project: Capstone CH61
 Framework: Django (Python)
-Version: February 2026
+Version: March 2026
 ================================================================================
 
 TABLE OF CONTENTS
@@ -14,10 +14,11 @@ TABLE OF CONTENTS
 4. OFFICER MANAGEMENT
 5. FINANCIAL MANAGEMENT
 6. COMMUNICATION SYSTEMS
-7. E-COMMERCE BOUTIQUE
-8. CHATBOT SYSTEM
-9. SECURITY FEATURES
-10. TECHNICAL SPECIFICATIONS
+7. VIRTUAL MEETINGS & POLLS
+8. E-COMMERCE BOUTIQUE
+9. CHATBOT SYSTEM
+10. SECURITY FEATURES
+11. TECHNICAL SPECIFICATIONS
 
 ================================================================================
 1. PROJECT OVERVIEW
@@ -121,6 +122,12 @@ PROFILE MANAGEMENT
   * Searchable member directory
   * Filter by status
   * Member details view
+  * Online status indicators (green dot for active members)
+  * Last seen timestamps
+- Contact Directory (/portal/roster/contacts/)
+  * Phone numbers display
+  * Emergency contact information
+  * Organized table layout
 
 SOCIAL FEATURES
 - Wall Posts (/portal/posts/)
@@ -237,6 +244,15 @@ CHATBOT Q&A MANAGEMENT
 - Category-based organization
 - Keyword configuration
 
+ANALYTICS DASHBOARD (/portal/analytics/)
+- DIY privacy-focused page view tracking
+- Visitor statistics (today, week, month, all-time)
+- Top pages report
+- Traffic trends visualization
+- Cookie consent tracking statistics
+- No third-party tracking services
+- IP addresses hashed for privacy
+
 ================================================================================
 5. FINANCIAL MANAGEMENT (Treasurer/Officers)
 ================================================================================
@@ -315,7 +331,91 @@ SMS NOTIFICATION SYSTEM (Twilio)
   * Audit trail
 
 ================================================================================
-7. E-COMMERCE BOUTIQUE
+7. VIRTUAL MEETINGS & POLLS
+================================================================================
+
+VIRTUAL MEETINGS (Members)
+- Meeting List (/portal/meetings/)
+  * View scheduled meetings
+  * Platform badges (Zoom, Google Meet, Teams, etc.)
+  * Meeting status indicators (Scheduled, Live, Completed)
+  * Access restriction badges (Members Only, Financial Only)
+- Join Meeting (/portal/meetings/<id>/join/)
+  * Embedded Zoom meetings (in-page experience)
+  * External platform links (Google Meet, Teams, Webex)
+  * Live polls sidebar
+  * Host controls (for meeting hosts)
+
+VIRTUAL MEETINGS MANAGEMENT (Officers)
+- Manage Meetings (/portal/meetings/manage/)
+  * View all upcoming and past meetings
+  * Start/end meeting controls
+  * Edit/delete meetings
+- Create Meeting (/portal/meetings/create/)
+  * Multi-platform support:
+    - Zoom (Embedded) - Meeting embedded directly on page
+    - Google Meet - Opens in new tab
+    - Microsoft Teams - Opens in new tab
+    - Cisco Webex - Opens in new tab
+    - Other - Custom meeting URL
+  * Meeting ID (for Zoom embedded)
+  * Meeting URL (for external platforms)
+  * Password (optional)
+  * Link to Events (optional)
+  * Access control (Members Only, Financial Only)
+- Edit Meeting (/portal/meetings/edit/<id>/)
+- Delete Meeting (/portal/meetings/delete/<id>/)
+- Zoom SDK Configuration (/portal/zoom-config/)
+  * SDK Key and Secret management
+  * Active/inactive toggle
+
+POLLING/VOTING SYSTEM (Members)
+- View Polls (/portal/polls/)
+  * Active polls listing
+  * Closed polls with results
+  * Financial-only poll filtering
+- Vote on Poll (/portal/polls/<id>/)
+  * Single choice voting
+  * Multiple choice voting
+  * Anonymous voting option
+  * Live results display (if enabled)
+- My Votes (/portal/polls/my-votes/)
+  * Personal voting history
+
+POLLING MANAGEMENT (Officers)
+- Manage Polls (/portal/polls/manage/)
+  * All polls overview
+  * Active/inactive toggle
+  * Delete polls
+- Create Poll (/portal/polls/create/)
+  * Poll types: Yes/No, Single Choice, Multiple Choice
+  * Add unlimited options
+  * Link to meeting (optional)
+  * Privacy settings:
+    - Anonymous voting (hide voter names)
+    - Show results during voting
+  * Voting restrictions:
+    - Financial members only
+    - Multiple selection limits
+  * Voting window (start/end times)
+- Edit Poll (/portal/polls/edit/<id>/)
+- Delete Poll (/portal/polls/delete/<id>/)
+- View Voters (/portal/polls/<id>/voters/)
+  * See who voted (non-anonymous polls)
+  * Vote timestamps
+
+POLL RESULTS
+- Real-time Results (/portal/polls/<id>/results/json/)
+  * AJAX updates every 10 seconds
+  * Percentage calculations
+  * Vote counts per option
+- Results Display
+  * Progress bar visualization
+  * Total vote count
+  * Winner indication
+
+================================================================================
+8. E-COMMERCE BOUTIQUE
 ================================================================================
 
 SHOP FRONTEND (Public)
@@ -373,7 +473,7 @@ SHOP ADMINISTRATION (Officers)
 - Clear Abandoned Orders (/boutique/admin/clear-abandoned/)
 
 ================================================================================
-8. CHATBOT SYSTEM
+9. CHATBOT SYSTEM
 ================================================================================
 
 PUBLIC CHATBOT
@@ -398,7 +498,7 @@ ADMIN MANAGEMENT
 - Category organization
 
 ================================================================================
-9. SECURITY FEATURES
+10. SECURITY FEATURES
 ================================================================================
 
 AUTHENTICATION & AUTHORIZATION
@@ -445,8 +545,29 @@ OWASP TOP 10 COMPLIANCE
 - Logging Failures - Comprehensive logging
 - SSRF - URL validation for redirects
 
+GDPR COOKIE CONSENT
+- Cookie consent banner on first visit
+- Three consent tiers:
+  * Necessary Only - Essential cookies only
+  * Analytics - Includes page view tracking
+  * All Cookies - Full functionality
+- Consent stored in database (CookieConsent model)
+- Middleware-based consent checking
+- Re-prompt option for preference changes
+
+ROBOTS.TXT (Web Crawler Control)
+- Allows public pages:
+  * /, /about/, /contact/, /events/
+  * /chapter-programs/, /programs/
+  * /chapter-leadership/, /shop/
+- Blocks private areas:
+  * /portal/, /admin/, /login/, /logout/
+  * /signup/, /activate/, /chatbot/
+  * /media/member_photos/, /media/documents/
+- 10-second crawl delay configured
+
 ================================================================================
-10. TECHNICAL SPECIFICATIONS
+11. TECHNICAL SPECIFICATIONS
 ================================================================================
 
 TECHNOLOGY STACK
@@ -473,6 +594,13 @@ DATABASE MODELS
 - ChapterHistorySection, ChapterHistoryBackup
 - PublicAnswer (Chatbot)
 - SiteConfiguration
+- PageView (Analytics)
+- CookieConsent (GDPR Compliance)
+- ZoomConfiguration (SDK credentials)
+- ZoomMeeting (Virtual meetings - Zoom, Google Meet, Teams, etc.)
+- Poll (Voting questions)
+- PollOption (Poll answer choices)
+- Vote (Member votes)
 
 KEY FEATURES
 - Responsive design (mobile-friendly)
@@ -484,6 +612,13 @@ KEY FEATURES
 - Search and filtering throughout
 - 90-day member removal tracking
 - Multi-factor authentication ready
+- DIY privacy-focused analytics
+- GDPR-compliant cookie consent system
+- robots.txt for crawler control
+- Member online status tracking
+- Multi-platform virtual meetings (Zoom embedded, Google Meet, Teams, Webex)
+- In-meeting polling with anonymous voting option
+- Live poll results with real-time updates
 
 FILE STRUCTURE
 /config/           - Django settings and configuration
@@ -493,12 +628,12 @@ FILE STRUCTURE
 /media/            - User uploaded files
 /logs/             - Application logs
 
-TOTAL ENDPOINTS: 80+ pages/routes
+TOTAL ENDPOINTS: 100+ pages/routes
 
 ================================================================================
 END OF DOCUMENTATION
 ================================================================================
 
-Generated: February 2026
+Generated: March 2026
 For questions or updates, contact the development team.
 ================================================================================

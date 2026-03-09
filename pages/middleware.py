@@ -159,6 +159,7 @@ class CookieConsentMiddleware(MiddlewareMixin):
     """
     Middleware to check and provide cookie consent status to templates.
     Adds 'cookie_consent' to request for template access.
+    Handles session rotation on login by also checking user-linked consent.
     """
     
     def process_request(self, request):
@@ -172,13 +173,64 @@ class CookieConsentMiddleware(MiddlewareMixin):
         
         session_key = request.session.session_key
         
-        if session_key:
-            try:
-                from pages.models import CookieConsent
-                consent = CookieConsent.objects.get(session_key=session_key)
+        try:
+            from pages.models import CookieConsent
+            consent = None
+            
+            # First, check for user-linked consent (survives session rotation on login)
+            if request.user.is_authenticated:
+                consent = CookieConsent.objects.filter(
+                    user=request.user, 
+                    consent_given=True
+                ).first()
+                
+                # If found, update session_key to current session for future lookups
+                if consent and consent.session_key != session_key:
+                    consent.session_key = session_key
+                    consent.save(update_fields=['session_key', 'updated_at'])
+            
+            # Fall back to session-based consent lookup
+            if not consent and session_key:
+                try:
+                    consent = CookieConsent.objects.get(session_key=session_key)
+                    # Link to user if logged in but consent wasn't linked yet
+                    if request.user.is_authenticated and consent.user is None:
+                        consent.user = request.user
+                        consent.save(update_fields=['user', 'updated_at'])
+                except CookieConsent.DoesNotExist:
+                    pass
+            
+            if consent:
                 request.cookie_consent = consent
                 request.show_cookie_banner = not consent.consent_given
-            except Exception:
-                pass
+                
+        except Exception as e:
+            logger.debug(f"CookieConsentMiddleware error: {e}")
+        
+        return None
+
+
+class LastSeenMiddleware(MiddlewareMixin):
+    """
+    Middleware to track when authenticated members were last active.
+    Updates last_seen field on MemberProfile for online status display.
+    """
+    
+    def process_request(self, request):
+        """Update last_seen for authenticated users with member profiles."""
+        if request.user.is_authenticated:
+            try:
+                from django.utils import timezone
+                from pages.models import MemberProfile
+                
+                # Only update every 60 seconds to reduce DB writes
+                profile = getattr(request.user, 'member_profile', None)
+                if profile:
+                    now = timezone.now()
+                    # Update if never seen or if more than 60 seconds since last update
+                    if not profile.last_seen or (now - profile.last_seen).total_seconds() > 60:
+                        MemberProfile.objects.filter(pk=profile.pk).update(last_seen=now)
+            except Exception as e:
+                logger.debug(f"LastSeenMiddleware error: {e}")
         
         return None

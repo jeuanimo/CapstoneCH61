@@ -261,4 +261,27 @@ urlpatterns = [
     # GDPR & ANALYTICS
     path('api/cookie-consent/', views.set_cookie_consent, name='set_cookie_consent'),
     path('portal/analytics/', views.analytics_dashboard, name='analytics_dashboard'),
+    
+    # ZOOM MEETING INTEGRATION
+    path('portal/zoom/config/', views.setup_zoom_config, name='setup_zoom_config'),
+    path('portal/zoom/meetings/', views.manage_zoom_meetings, name='manage_zoom_meetings'),
+    path('portal/zoom/meetings/create/', views.create_zoom_meeting, name='create_zoom_meeting'),
+    path('portal/zoom/meetings/<int:meeting_id>/edit/', views.edit_zoom_meeting, name='edit_zoom_meeting'),
+    path('portal/zoom/meetings/<int:meeting_id>/delete/', views.delete_zoom_meeting, name='delete_zoom_meeting'),
+    path('portal/zoom/meetings/<int:meeting_id>/start/', views.start_zoom_meeting, name='start_zoom_meeting'),
+    path('portal/zoom/meetings/<int:meeting_id>/end/', views.end_zoom_meeting, name='end_zoom_meeting'),
+    path('portal/meetings/', views.meeting_list, name='meeting_list'),
+    path('portal/meetings/<int:meeting_id>/join/', views.join_zoom_meeting, name='join_zoom_meeting'),
+    
+    # POLLING / VOTING SYSTEM
+    path('portal/polls/', views.polls_list, name='polls_list'),
+    path('portal/polls/manage/', views.manage_polls, name='manage_polls'),
+    path('portal/polls/create/', views.create_poll, name='create_poll'),
+    path('portal/polls/<int:poll_id>/', views.view_poll, name='view_poll'),
+    path('portal/polls/<int:poll_id>/edit/', views.edit_poll, name='edit_poll'),
+    path('portal/polls/<int:poll_id>/delete/', views.delete_poll, name='delete_poll'),
+    path('portal/polls/<int:poll_id>/toggle/', views.toggle_poll_status, name='toggle_poll_status'),
+    path('portal/polls/<int:poll_id>/voters/', views.poll_voters, name='poll_voters'),
+    path('portal/polls/<int:poll_id>/results.json', views.poll_results_json, name='poll_results_json'),
+    path('portal/my-votes/', views.my_votes, name='my_votes'),
 ]

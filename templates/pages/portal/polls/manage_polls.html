@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Polls - Admin{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-poll-h"></i> Manage Polls</h2>
+        <a href="{% url 'create_poll' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Create Poll
+        </a>
+    </div>
+
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">All Polls</h5>
+        </div>
+        <div class="card-body">
+            {% if polls %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Type</th>
+                            <th>Status</th>
+                            <th>Privacy</th>
+                            <th>Votes</th>
+                            <th>Created</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for poll in polls %}
+                        <tr>
+                            <td>
+                                <strong>{{ poll.title }}</strong>
+                                {% if poll.meeting %}
+                                <br><small class="text-muted">Meeting: {{ poll.meeting.title }}</small>
+                                {% endif %}
+                            </td>
+                            <td><span class="badge bg-info">{{ poll.get_poll_type_display }}</span></td>
+                            <td>
+                                {% if poll.is_open %}
+                                <span class="badge bg-success">Open</span>
+                                {% elif poll.is_active %}
+                                <span class="badge bg-warning text-dark">Scheduled</span>
+                                {% else %}
+                                <span class="badge bg-secondary">Closed</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if poll.is_anonymous %}
+                                <span class="badge bg-dark"><i class="fas fa-user-secret"></i> Anonymous</span>
+                                {% else %}
+                                <span class="badge bg-light text-dark"><i class="fas fa-eye"></i> Recorded</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ poll.total_voters }}</td>
+                            <td>{{ poll.created_at|date:"M d, Y" }}</td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{% url 'view_poll' poll.id %}" class="btn btn-outline-primary" title="View">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{% url 'edit_poll' poll.id %}" class="btn btn-outline-secondary" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="{% url 'toggle_poll_status' poll.id %}" class="btn btn-outline-{% if poll.is_active %}warning{% else %}success{% endif %}" title="{% if poll.is_active %}Deactivate{% else %}Activate{% endif %}">
+                                        <i class="fas fa-{% if poll.is_active %}pause{% else %}play{% endif %}"></i>
+                                    </a>
+                                    {% if not poll.is_anonymous %}
+                                    <a href="{% url 'poll_voters' poll.id %}" class="btn btn-outline-info" title="View Voters">
+                                        <i class="fas fa-users"></i>
+                                    </a>
+                                    {% endif %}
+                                    <a href="{% url 'delete_poll' poll.id %}" class="btn btn-outline-danger" title="Delete">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-poll fa-4x text-muted mb-3"></i>
+                <h5 class="text-muted">No Polls Created Yet</h5>
+                <p class="text-muted">Create your first poll to start collecting votes from members.</p>
+                <a href="{% url 'create_poll' %}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Create First Poll
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

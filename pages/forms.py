@@ -34,6 +34,7 @@ All forms use crispy_forms for Bootstrap styling and include:
 """
 
 from django import forms
+from django.utils import timezone
 from .models import ChapterLeadership, MemberProfile, DuesPayment, StripeConfiguration, TwilioConfiguration, SMSPreference
 from django.contrib.auth.models import User
 
@@ -1256,3 +1257,290 @@ class ChatbotCSVForm(forms.Form):
         if csv_file.size > 5 * 1024 * 1024:  # 5MB limit
             raise forms.ValidationError('File too large. Maximum 5MB.')
         return csv_file
+
+
+# =============================================================================
+# ZOOM INTEGRATION FORMS
+# =============================================================================
+
+class ZoomConfigurationForm(forms.ModelForm):
+    """Form for configuring Zoom SDK credentials"""
+    
+    class Meta:
+        from .models import ZoomConfiguration
+        model = ZoomConfiguration
+        fields = ['sdk_key', 'sdk_secret', 'is_active']
+        widgets = {
+            'sdk_key': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter your Zoom SDK Key (Client ID)'
+            }),
+            'sdk_secret': forms.PasswordInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter your Zoom SDK Secret'
+            }),
+            'is_active': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
+        }
+        help_texts = {
+            'sdk_key': 'Get this from Zoom App Marketplace > Build App > Meeting SDK',
+            'sdk_secret': 'Keep this secret - never expose in client-side code',
+        }
+
+
+class ZoomMeetingForm(forms.ModelForm):
+    """Form for creating/editing virtual meetings (Zoom, Google Meet, Teams, etc.)"""
+    
+    class Meta:
+        from .models import ZoomMeeting
+        model = ZoomMeeting
+        fields = [
+            'title', 'description', 'platform', 'meeting_number', 'meeting_password',
+            'meeting_url', 'event', 'scheduled_time', 'duration_minutes',
+            'members_only', 'financial_only'
+        ]
+        widgets = {
+            'title': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Chapter Meeting - March 2026'
+            }),
+            'description': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Describe the meeting agenda...'
+            }),
+            'platform': forms.Select(attrs={
+                'class': 'form-select',
+                'id': 'id_platform'
+            }),
+            'meeting_number': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': '123-456-7890'
+            }),
+            'meeting_password': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Optional password'
+            }),
+            'meeting_url': forms.URLInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'https://meet.google.com/xxx-xxxx-xxx or https://teams.microsoft.com/...'
+            }),
+            'event': forms.Select(attrs={
+                'class': 'form-select'
+            }),
+            'scheduled_time': forms.DateTimeInput(attrs={
+                'class': 'form-control',
+                'type': 'datetime-local'
+            }),
+            'duration_minutes': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': 15,
+                'max': 480
+            }),
+            'members_only': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
+            'financial_only': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
+        }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        from .models import Event
+        # Only show upcoming events in dropdown
+        self.fields['event'].queryset = Event.objects.filter(
+            start_date__gte=timezone.now()
+        ).order_by('start_date')
+        self.fields['event'].required = False
+        # Make meeting_number not required (depends on platform)
+        self.fields['meeting_number'].required = False
+        self.fields['meeting_url'].required = False
+    
+    def clean(self):
+        """Validate that appropriate fields are filled based on platform"""
+        cleaned_data = super().clean()
+        platform = cleaned_data.get('platform')
+        meeting_number = cleaned_data.get('meeting_number')
+        meeting_url = cleaned_data.get('meeting_url')
+        
+        if platform == 'zoom':
+            # Zoom requires either meeting_number (for embedded) or meeting_url
+            if not meeting_number and not meeting_url:
+                raise forms.ValidationError(
+                    "For Zoom, provide either a Meeting ID (for embedded joining) "
+                    "or a Meeting URL (for external link)."
+                )
+        else:
+            # Non-Zoom platforms require meeting_url
+            if not meeting_url:
+                raise forms.ValidationError(
+                    f"Please provide a meeting URL for {dict(self.fields['platform'].choices).get(platform, platform)}."
+                )
+        
+        return cleaned_data
+    
+    def clean_meeting_number(self):
+        """Clean meeting number - remove dashes and spaces"""
+        meeting_number = self.cleaned_data.get('meeting_number', '')
+        if meeting_number:
+            # Remove common formatting characters
+            return meeting_number.replace('-', '').replace(' ', '').strip()
+        return meeting_number
+
+
+# =============================================================================
+# POLLING / VOTING FORMS
+# =============================================================================
+
+class PollForm(forms.ModelForm):
+    """Form for creating/editing polls"""
+    
+    class Meta:
+        from .models import Poll
+        model = Poll
+        fields = [
+            'title', 'description', 'poll_type', 'meeting',
+            'is_anonymous', 'show_results_during',
+            'allow_multiple', 'max_selections', 'financial_only',
+            'starts_at', 'ends_at', 'is_active'
+        ]
+        widgets = {
+            'title': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'What are members voting on?'
+            }),
+            'description': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Provide context for the vote...'
+            }),
+            'poll_type': forms.Select(attrs={
+                'class': 'form-select'
+            }),
+            'meeting': forms.Select(attrs={
+                'class': 'form-select'
+            }),
+            'is_anonymous': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
+            'show_results_during': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
+            'allow_multiple': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
+            'max_selections': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': 1,
+                'max': 10
+            }),
+            'financial_only': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
+            'starts_at': forms.DateTimeInput(attrs={
+                'class': 'form-control',
+                'type': 'datetime-local'
+            }),
+            'ends_at': forms.DateTimeInput(attrs={
+                'class': 'form-control',
+                'type': 'datetime-local'
+            }),
+            'is_active': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
+        }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        from .models import ZoomMeeting
+        # Only show upcoming/active meetings
+        self.fields['meeting'].queryset = ZoomMeeting.objects.filter(
+            status__in=['scheduled', 'in_progress']
+        ).order_by('-scheduled_time')
+        self.fields['meeting'].required = False
+        self.fields['ends_at'].required = False
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        starts_at = cleaned_data.get('starts_at')
+        ends_at = cleaned_data.get('ends_at')
+        
+        if starts_at and ends_at and ends_at <= starts_at:
+            raise forms.ValidationError('End time must be after start time')
+        
+        return cleaned_data
+
+
+class PollOptionForm(forms.ModelForm):
+    """Form for a single poll option"""
+    
+    class Meta:
+        from .models import PollOption
+        model = PollOption
+        fields = ['text', 'order']
+        widgets = {
+            'text': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Option text'
+            }),
+            'order': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': 0
+            }),
+        }
+
+
+# Formset for managing multiple poll options
+from django.forms import inlineformset_factory
+from .models import Poll, PollOption
+
+PollOptionFormSet = inlineformset_factory(
+    Poll,
+    PollOption,
+    form=PollOptionForm,
+    fields=['text', 'order'],
+    extra=4,  # Start with 4 empty options
+    can_delete=True,
+    min_num=2,  # At least 2 options required
+    validate_min=True
+)
+
+
+class VoteForm(forms.Form):
+    """Form for submitting a vote"""
+    
+    option = forms.ModelChoiceField(
+        queryset=None,
+        widget=forms.RadioSelect(attrs={
+            'class': 'form-check-input'
+        }),
+        empty_label=None
+    )
+    
+    def __init__(self, poll, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.poll = poll
+        self.fields['option'].queryset = poll.options.all()
+        
+        # Switch to checkboxes if multiple selection allowed
+        if poll.allow_multiple:
+            self.fields['option'] = forms.ModelMultipleChoiceField(
+                queryset=poll.options.all(),
+                widget=forms.CheckboxSelectMultiple(attrs={
+                    'class': 'form-check-input'
+                })
+            )
+    
+    def clean_option(self):
+        option = self.cleaned_data['option']
+        
+        # For multiple choice, validate max selections
+        if self.poll.allow_multiple:
+            if len(option) > self.poll.max_selections:
+                raise forms.ValidationError(
+                    f'You can only select up to {self.poll.max_selections} options'
+                )
+        
+        return option

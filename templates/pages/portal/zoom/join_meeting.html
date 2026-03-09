@@ -1,0 +1,338 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ meeting.title }} - Meeting Room{% endblock %}
+
+{% block css %}
+<style>
+    .meeting-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+    
+    .zoom-container {
+        flex: 1;
+        min-width: 600px;
+        min-height: 500px;
+        background: #000;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    
+    .external-meeting-container {
+        flex: 1;
+        min-width: 600px;
+        min-height: 400px;
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        border-radius: 8px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 40px;
+        text-align: center;
+    }
+    
+    .external-meeting-container .platform-icon {
+        font-size: 80px;
+        margin-bottom: 20px;
+    }
+    
+    .external-meeting-container.google-meet { color: #00897b; }
+    .external-meeting-container.teams { color: #6264a7; }
+    .external-meeting-container.webex { color: #00bceb; }
+    .external-meeting-container.other { color: #6c757d; }
+    
+    #zmmtg-root {
+        display: none;
+    }
+    
+    .zoom-meeting-embedded {
+        width: 100%;
+        height: 100%;
+        min-height: 500px;
+    }
+    
+    .sidebar-panel {
+        width: 350px;
+        flex-shrink: 0;
+    }
+    
+    .poll-card {
+        margin-bottom: 15px;
+    }
+    
+    .poll-option {
+        display: flex;
+        align-items: center;
+        padding: 10px;
+        margin: 5px 0;
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .poll-option:hover {
+        background: #f8f9fa;
+        border-color: #007bff;
+    }
+    
+    .poll-option.selected {
+        background: #e7f1ff;
+        border-color: #007bff;
+    }
+    
+    .poll-progress {
+        height: 24px;
+        border-radius: 4px;
+    }
+    
+    .meeting-info-bar {
+        background: linear-gradient(135deg, #0047AB 0%, #003380 100%);
+        color: white;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+
+    .platform-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+    
+    @media (max-width: 992px) {
+        .zoom-container, .external-meeting-container {
+            min-width: 100%;
+        }
+        .sidebar-panel {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid my-4">
+    <!-- Meeting Info Bar -->
+    <div class="meeting-info-bar">
+        <div class="d-flex justify-content-between align-items-center flex-wrap">
+            <div>
+                <h4 class="mb-0">{{ meeting.title }}</h4>
+                <small>{{ meeting.scheduled_time|date:"F d, Y" }} at {{ meeting.scheduled_time|time:"g:i A" }}</small>
+            </div>
+            <div class="text-end">
+                {% if is_host %}
+                <span class="badge bg-warning text-dark me-2"><i class="fas fa-crown"></i> Host</span>
+                {% endif %}
+                <span class="badge bg-light text-dark platform-badge">
+                    <i class="fas {{ meeting.get_platform_icon }}"></i>
+                    {{ meeting.get_platform_display }}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <div class="meeting-container">
+        {% if is_embedded_zoom %}
+        <!-- Embedded Zoom Meeting Area -->
+        <div class="zoom-container">
+            <div id="meetingSDKElement" class="zoom-meeting-embedded"></div>
+            <div id="zoom-loading" class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="text-white mt-3">Loading Zoom Meeting...</p>
+                <p class="text-muted small">If the meeting doesn't load, ensure pop-ups are enabled.</p>
+            </div>
+        </div>
+        {% else %}
+        <!-- External Meeting Link (Google Meet, Teams, etc.) -->
+        <div class="external-meeting-container {{ meeting.platform|default:'other' }}">
+            <i class="fas {{ meeting.get_platform_icon }} platform-icon"></i>
+            <h3 class="text-white mb-3">{{ meeting.get_platform_display }}</h3>
+            <p class="text-light mb-4">{{ meeting.description|default:"Click below to join the meeting in a new tab." }}</p>
+            
+            {% if meeting.meeting_url %}
+            <a href="{{ meeting.meeting_url }}" target="_blank" 
+               class="btn btn-lg btn-light px-5 py-3" rel="noopener noreferrer">
+                <i class="fas fa-external-link-alt me-2"></i> 
+                Join {{ meeting.get_platform_display }} Meeting
+            </a>
+            {% else %}
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle"></i> 
+                Meeting URL not configured. Please contact the host.
+            </div>
+            {% endif %}
+            
+            <p class="text-muted small mt-4">
+                <i class="fas fa-info-circle"></i>
+                The meeting will open in a new tab. Keep this page open to vote in polls.
+            </p>
+        </div>
+        {% endif %}
+
+        <!-- Sidebar with Polls -->
+        <div class="sidebar-panel">
+            <!-- Active Polls -->
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-poll"></i> Meeting Polls</h5>
+                </div>
+                <div class="card-body" id="polls-container">
+                    {% if polls %}
+                        {% for poll in polls %}
+                        <div class="poll-card" data-poll-id="{{ poll.id }}">
+                            <h6>{{ poll.title }}</h6>
+                            {% if poll.description %}
+                            <p class="text-muted small">{{ poll.description }}</p>
+                            {% endif %}
+                            
+                            {% if poll.user_has_voted %}
+                            <div class="poll-results">
+                                {% for option in poll.get_results %}
+                                <div class="mb-2">
+                                    <div class="d-flex justify-content-between small">
+                                        <span>{{ option.text }}</span>
+                                        <span>{{ option.vote_count }} ({{ option.percentage }}%)</span>
+                                    </div>
+                                    <div class="progress poll-progress">
+                                        <div class="progress-bar" role="progressbar" 
+                                             style="width: {{ option.percentage }}%"></div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                                <small class="text-success"><i class="fas fa-check"></i> You've voted</small>
+                            </div>
+                            {% else %}
+                            <form action="{% url 'view_poll' poll.id %}" method="post" class="poll-form">
+                                {% csrf_token %}
+                                {% for option in poll.options.all %}
+                                <label class="poll-option">
+                                    <input type="radio" name="option" value="{{ option.id }}" 
+                                           class="form-check-input me-2" required>
+                                    {{ option.text }}
+                                </label>
+                                {% endfor %}
+                                <button type="submit" class="btn btn-sm btn-primary mt-2 w-100">
+                                    <i class="fas fa-vote-yea"></i> Submit Vote
+                                </button>
+                            </form>
+                            {% endif %}
+                        </div>
+                        <hr>
+                        {% endfor %}
+                    {% else %}
+                    <p class="text-muted mb-0">No active polls for this meeting.</p>
+                    {% endif %}
+                    
+                    {% if is_host %}
+                    <a href="{% url 'create_poll' %}?meeting={{ meeting.id }}" class="btn btn-outline-primary w-100 mt-2">
+                        <i class="fas fa-plus"></i> Create Poll
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Meeting Controls (Host Only) -->
+            {% if is_host %}
+            <div class="card shadow mt-3">
+                <div class="card-header bg-dark text-white">
+                    <h6 class="mb-0"><i class="fas fa-sliders-h"></i> Host Controls</h6>
+                </div>
+                <div class="card-body">
+                    {% if meeting.status == 'scheduled' %}
+                    <a href="{% url 'start_zoom_meeting' meeting.id %}" class="btn btn-success w-100 mb-2">
+                        <i class="fas fa-play"></i> Start Meeting
+                    </a>
+                    {% elif meeting.status == 'in_progress' %}
+                    <a href="{% url 'end_zoom_meeting' meeting.id %}" class="btn btn-danger w-100 mb-2">
+                        <i class="fas fa-stop"></i> End Meeting
+                    </a>
+                    {% endif %}
+                    <a href="{% url 'manage_polls' %}" class="btn btn-outline-secondary w-100">
+                        <i class="fas fa-poll-h"></i> Manage Polls
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% if is_embedded_zoom %}
+<!-- Zoom Meeting SDK - Only loaded for embedded Zoom meetings -->
+<script src="https://source.zoom.us/2.18.0/lib/vendor/react.min.js"></script>
+<script src="https://source.zoom.us/2.18.0/lib/vendor/react-dom.min.js"></script>
+<script src="https://source.zoom.us/2.18.0/lib/vendor/redux.min.js"></script>
+<script src="https://source.zoom.us/2.18.0/lib/vendor/redux-thunk.min.js"></script>
+<script src="https://source.zoom.us/2.18.0/lib/vendor/lodash.min.js"></script>
+<script src="https://source.zoom.us/2.18.0/zoom-meeting-embedded-2.18.0.min.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const client = ZoomMtgEmbedded.createClient();
+    
+    let meetingSDKElement = document.getElementById('meetingSDKElement');
+    
+    client.init({
+        zoomAppRoot: meetingSDKElement,
+        language: 'en-US',
+        customize: {
+            video: {
+                isResizable: true,
+                viewSizes: {
+                    default: {
+                        width: 1000,
+                        height: 600
+                    }
+                }
+            }
+        }
+    }).then(() => {
+        document.getElementById('zoom-loading').style.display = 'none';
+        
+        client.join({
+            sdkKey: '{{ sdk_key }}',
+            signature: '{{ signature }}',
+            meetingNumber: '{{ meeting_number }}',
+            password: '{{ password }}',
+            userName: '{{ user_name }}',
+            userEmail: '{{ user_email }}'
+        }).then(() => {
+            console.log('Joined meeting successfully');
+        }).catch((error) => {
+            console.error('Error joining meeting:', error);
+            document.getElementById('zoom-loading').innerHTML = `
+                <div class="alert alert-danger m-3">
+                    <h5><i class="fas fa-exclamation-triangle"></i> Unable to Join Meeting</h5>
+                    <p>${error.message || 'Please check the meeting details and try again.'}</p>
+                    <a href="{% url 'meeting_list' %}" class="btn btn-outline-light">Back to Meetings</a>
+                </div>
+            `;
+        });
+    }).catch((error) => {
+        console.error('Error initializing Zoom:', error);
+    });
+});
+</script>
+{% endif %}
+
+<!-- Poll auto-refresh for all platforms -->
+<script>
+{% if polls %}
+setInterval(function() {
+    {% for poll in polls %}
+    fetch('{% url "poll_results_json" poll.id %}')
+        .then(response => response.json())
+        .then(data => {
+            // Update poll results display if available
+            console.log('Poll update:', data);
+        });
+    {% endfor %}
+}, 10000);
+{% endif %}
+</script>
+{% endblock %}

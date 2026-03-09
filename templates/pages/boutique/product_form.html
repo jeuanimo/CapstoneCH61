@@ -29,6 +29,13 @@
         padding: 20px;
     }
 
+    .card-header-blue h4,
+    .card-header-blue h3,
+    .card-header-blue h2,
+    .card-header-blue h1 {
+        color: white;
+    }
+
     body.dark-mode .card-header-blue {
         background: linear-gradient(135deg, #2a5a9a 0%, #1a4a8a 100%);
     }
@@ -131,6 +138,44 @@
 
     .form-check-input:focus {
         box-shadow: 0 0 0 0.2rem rgba(0, 71, 171, 0.25);
+    }
+
+    /* Override Bootstrap's form-check completely */
+    .form-check {
+        position: relative !important;
+        display: flex !important;
+        align-items: center !important;
+        padding-left: 0 !important;
+        margin-bottom: 0 !important;
+        min-height: auto !important;
+    }
+
+    .form-check .form-check-input {
+        position: static !important;
+        float: none !important;
+        margin: 0 !important;
+        margin-right: 8px !important;
+        flex-shrink: 0;
+        width: 16px;
+        height: 16px;
+    }
+
+    .form-check .form-check-label {
+        font-size: 0.8rem;
+        margin-bottom: 0;
+        line-height: 1.3;
+        padding-left: 0 !important;
+        cursor: pointer;
+    }
+
+    /* Column spacing for the checkbox grid */
+    .row .col-4,
+    .row .col-md-3 {
+        padding: 8px 12px;
+    }
+
+    body.dark-mode .form-check-label {
+        color: #e8edf7;
     }
 </style>
 {% endblock %}

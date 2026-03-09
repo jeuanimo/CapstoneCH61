@@ -1,0 +1,172 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - Virtual Meetings{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-video"></i> {{ title }}</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {{ form.non_field_errors }}
+                        </div>
+                        {% endif %}
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Meeting Title *</label>
+                            {{ form.title }}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            {{ form.description }}
+                        </div>
+                        
+                        <!-- Platform Selection -->
+                        <div class="mb-3">
+                            <label class="form-label">Meeting Platform *</label>
+                            {{ form.platform }}
+                            <small class="form-text text-muted">
+                                Zoom meetings can be embedded in the website. Other platforms open in a new tab.
+                            </small>
+                        </div>
+                        
+                        <!-- Zoom-specific fields -->
+                        <div id="zoom-fields">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">
+                                        <span class="zoom-only">Zoom Meeting ID</span>
+                                    </label>
+                                    {{ form.meeting_number }}
+                                    <small class="form-text text-muted zoom-only">
+                                        Enter the Meeting ID for embedded joining, or leave blank and use URL below
+                                    </small>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Meeting Password</label>
+                                    {{ form.meeting_password }}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Meeting URL (for all platforms including Zoom fallback) -->
+                        <div class="mb-3" id="url-field">
+                            <label class="form-label">
+                                <span id="url-label">Meeting URL</span> <span id="url-required">*</span>
+                            </label>
+                            {{ form.meeting_url }}
+                            <small class="form-text text-muted" id="url-help">
+                                Paste the full meeting link here
+                            </small>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Scheduled Date/Time *</label>
+                                {{ form.scheduled_time }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Duration (minutes)</label>
+                                {{ form.duration_minutes }}
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Link to Event (Optional)</label>
+                            {{ form.event }}
+                        </div>
+                        
+                        <div class="card bg-light mb-3">
+                            <div class="card-body">
+                                <h6 class="card-title">Access Control</h6>
+                                <div class="form-check mb-2" style="position: static !important;">
+                                    {{ form.members_only }}
+                                    <label class="form-check-label" for="{{ form.members_only.id_for_label }}">
+                                        Members Only (require login)
+                                    </label>
+                                </div>
+                                <div class="form-check" style="position: static !important;">
+                                    {{ form.financial_only }}
+                                    <label class="form-check-label" for="{{ form.financial_only.id_for_label }}">
+                                        Financial Members Only
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'manage_zoom_meetings' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Save Meeting
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Platform Info Card -->
+            <div class="card mt-3">
+                <div class="card-body">
+                    <h6><i class="fas fa-info-circle"></i> Platform Differences</h6>
+                    <ul class="small mb-0">
+                        <li><strong>Zoom (Embedded):</strong> Members join directly within the website with polls sidebar</li>
+                        <li><strong>Google Meet / Teams / Others:</strong> Opens in a new tab; polls still accessible from meeting page</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const platformSelect = document.getElementById('id_platform');
+    const zoomFields = document.getElementById('zoom-fields');
+    const urlRequired = document.getElementById('url-required');
+    const urlLabel = document.getElementById('url-label');
+    const urlHelp = document.getElementById('url-help');
+    
+    function updateFieldVisibility() {
+        const platform = platformSelect.value;
+        const isZoom = platform === 'zoom';
+        
+        // Show/hide Zoom-specific fields
+        if (isZoom) {
+            zoomFields.style.display = 'block';
+            urlRequired.style.display = 'none';
+            urlHelp.textContent = 'Optional: Use if you prefer link joining over embedded';
+        } else {
+            zoomFields.style.display = 'none';
+            urlRequired.style.display = 'inline';
+            urlHelp.textContent = 'Paste the full meeting link here';
+        }
+        
+        // Update URL label based on platform
+        const labels = {
+            'zoom': 'Zoom Web Link (Optional)',
+            'google_meet': 'Google Meet URL',
+            'teams': 'Teams Meeting URL',
+            'webex': 'Webex Meeting URL',
+            'other': 'Meeting URL'
+        };
+        urlLabel.textContent = labels[platform] || 'Meeting URL';
+    }
+    
+    platformSelect.addEventListener('change', updateFieldVisibility);
+    
+    // Initial state
+    updateFieldVisibility();
+});
+</script>
+{% endblock %}

@@ -46,7 +46,7 @@
             </button>
         </div>
         <div class="cookie-banner-links">
-            <a href="#" onclick="showCookieDetails(); return false;">Learn more about cookies</a>
+            <button type="button" class="cookie-link-btn" onclick="showCookieDetails()">Learn more about cookies</button>
         </div>
     </div>
 </div>
@@ -201,13 +201,17 @@
         text-align: center;
     }
 
-    .cookie-banner-links a {
+    .cookie-link-btn {
         color: #7eb8da;
         font-size: 0.85rem;
         text-decoration: none;
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 0;
     }
 
-    .cookie-banner-links a:hover {
+    .cookie-link-btn:hover {
         text-decoration: underline;
     }
 

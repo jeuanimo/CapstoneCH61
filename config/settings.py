@@ -137,6 +137,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',                  # Common utilities (URL rewriting)
     'django.middleware.csrf.CsrfViewMiddleware',                 # CSRF token protection
     'django.contrib.auth.middleware.AuthenticationMiddleware',    # User authentication
+    'pages.middleware.LastSeenMiddleware',                       # Track member online status
     'django.contrib.messages.middleware.MessageMiddleware',       # Messages (alerts/notifications)
     'django.middleware.clickjacking.XFrameOptionsMiddleware',    # Clickjacking protection
     'axes.middleware.AxesMiddleware',                            # Brute-force attack prevention

@@ -1,7 +1,7 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% load static %}
 
-{% block title %}Contact Directory - Nu Gamma Sigma{% endblock %}
+{% block title %}Contact Directory - Nu Gamma Sigma{% endblock title %}
 
 {% block extra_css %}
 <style>
@@ -177,7 +177,7 @@
         }
     }
 </style>
-{% endblock %}
+{% endblock extra_css %}
 
 {% block content %}
 <div class="container contact-directory-container">
@@ -264,4 +264,4 @@
         <i class="fas fa-lock"></i> This information is confidential and for chapter use only.
     </div>
 </div>
-{% endblock %}
+{% endblock content %}

@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+
+{% block title %}Polls & Voting{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-poll"></i> Polls & Voting</h2>
+        <div>
+            {% if user.is_staff or user.member_profile.is_officer %}
+            <a href="{% url 'manage_polls' %}" class="btn btn-outline-primary me-2">
+                <i class="fas fa-cog"></i> Manage Polls
+            </a>
+            {% endif %}
+            <a href="{% url 'my_votes' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-history"></i> My Votes
+            </a>
+        </div>
+    </div>
+
+    <!-- Open Polls -->
+    <div class="card shadow mb-4">
+        <div class="card-header bg-success text-white">
+            <h5 class="mb-0"><i class="fas fa-vote-yea"></i> Open for Voting</h5>
+        </div>
+        <div class="card-body">
+            {% if open_polls %}
+            <div class="row">
+                {% for poll in open_polls %}
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100 border-success">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ poll.title }}</h5>
+                            <p class="card-text text-muted">{{ poll.description|truncatewords:15 }}</p>
+                            
+                            <div class="mb-2">
+                                <span class="badge bg-{{ poll.poll_type|default:'info' }}">
+                                    {{ poll.get_poll_type_display }}
+                                </span>
+                                {% if poll.is_anonymous %}
+                                <span class="badge bg-secondary"><i class="fas fa-user-secret"></i> Anonymous</span>
+                                {% endif %}
+                                {% if poll.financial_only %}
+                                <span class="badge bg-warning text-dark"><i class="fas fa-dollar-sign"></i> Financial Only</span>
+                                {% endif %}
+                            </div>
+                            
+                            {% if poll.ends_at %}
+                            <small class="text-muted">
+                                <i class="fas fa-clock"></i> Ends: {{ poll.ends_at|date:"M d, Y g:i A" }}
+                            </small>
+                            {% endif %}
+                            
+                            <div class="mt-2">
+                                <small class="text-muted">
+                                    <i class="fas fa-users"></i> {{ poll.total_voters }} voter{{ poll.total_voters|pluralize }}
+                                </small>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            {% if poll.user_has_voted %}
+                            <a href="{% url 'view_poll' poll.id %}" class="btn btn-outline-success w-100">
+                                <i class="fas fa-check"></i> View Results
+                            </a>
+                            {% else %}
+                            <a href="{% url 'view_poll' poll.id %}" class="btn btn-success w-100">
+                                <i class="fas fa-vote-yea"></i> Vote Now
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-4">
+                <i class="fas fa-ballot-check fa-3x text-muted mb-3"></i>
+                <p class="text-muted mb-0">No polls are currently open for voting.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Closed Polls -->
+    {% if closed_polls %}
+    <div class="card shadow">
+        <div class="card-header bg-secondary text-white">
+            <h5 class="mb-0"><i class="fas fa-history"></i> Recently Closed</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Poll</th>
+                            <th>Type</th>
+                            <th>Votes</th>
+                            <th>Ended</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for poll in closed_polls %}
+                        <tr>
+                            <td>{{ poll.title }}</td>
+                            <td><span class="badge bg-info">{{ poll.get_poll_type_display }}</span></td>
+                            <td>{{ poll.total_voters }}</td>
+                            <td>{{ poll.ends_at|date:"M d, Y"|default:"N/A" }}</td>
+                            <td>
+                                <a href="{% url 'view_poll' poll.id %}" class="btn btn-sm btn-outline-secondary">
+                                    <i class="fas fa-chart-bar"></i> Results
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

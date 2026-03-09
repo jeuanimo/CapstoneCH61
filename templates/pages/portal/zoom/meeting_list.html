@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+
+{% block title %}Upcoming Meetings{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-video"></i> Chapter Meetings</h2>
+        {% if user.is_staff or user.member_profile.is_officer %}
+        <a href="{% url 'manage_zoom_meetings' %}" class="btn btn-outline-primary">
+            <i class="fas fa-cog"></i> Manage Meetings
+        </a>
+        {% endif %}
+    </div>
+
+    {% if meetings %}
+    <div class="row">
+        {% for meeting in meetings %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100 shadow-sm {% if meeting.is_active %}border-success{% endif %}">
+                {% if meeting.is_active %}
+                <div class="card-header bg-success text-white">
+                    <span class="badge bg-danger me-2">LIVE</span> Meeting in Progress
+                </div>
+                {% endif %}
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h5 class="card-title mb-0">{{ meeting.title }}</h5>
+                        <span class="badge bg-secondary" title="{{ meeting.get_platform_display }}">
+                            <i class="fas {{ meeting.get_platform_icon }}"></i>
+                        </span>
+                    </div>
+                    <p class="card-text text-muted">{{ meeting.description|truncatewords:20 }}</p>
+                    
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-calendar me-2"></i> {{ meeting.scheduled_time|date:"F d, Y" }}</li>
+                        <li><i class="fas fa-clock me-2"></i> {{ meeting.scheduled_time|time:"g:i A" }}</li>
+                        <li><i class="fas fa-hourglass-half me-2"></i> {{ meeting.duration_minutes }} minutes</li>
+                        {% if meeting.host %}
+                        <li><i class="fas fa-user me-2"></i> Host: {{ meeting.host.get_full_name|default:meeting.host.username }}</li>
+                        {% endif %}
+                    </ul>
+                    
+                    <div class="mt-2">
+                        <span class="badge bg-light text-dark border">
+                            <i class="fas {{ meeting.get_platform_icon }} me-1"></i>
+                            {{ meeting.get_platform_display }}
+                        </span>
+                        {% if meeting.members_only %}
+                        <span class="badge bg-info"><i class="fas fa-lock"></i> Members Only</span>
+                        {% endif %}
+                        {% if meeting.financial_only %}
+                        <span class="badge bg-warning text-dark"><i class="fas fa-dollar-sign"></i> Financial Only</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-footer">
+                    {% if meeting.is_active %}
+                    <a href="{% url 'join_zoom_meeting' meeting.id %}" class="btn btn-success w-100">
+                        <i class="fas fa-sign-in-alt"></i> Join Now
+                    </a>
+                    {% elif meeting.is_upcoming %}
+                    <a href="{% url 'join_zoom_meeting' meeting.id %}" class="btn btn-primary w-100">
+                        <i class="fas fa-door-open"></i> Enter Meeting Room
+                    </a>
+                    {% else %}
+                    <button class="btn btn-secondary w-100" disabled>
+                        <i class="fas fa-clock"></i> Meeting Ended
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <i class="fas fa-calendar-times fa-4x text-muted mb-3"></i>
+        <h4 class="text-muted">No Upcoming Meetings</h4>
+        <p class="text-muted">Check back later for scheduled chapter meetings.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

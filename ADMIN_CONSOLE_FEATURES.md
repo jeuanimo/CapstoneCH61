@@ -250,6 +250,136 @@ Automatic backup system protects against accidental data loss during imports and
 
 ---
 
+## 6. Virtual Meetings & Polls (✅ Completed)
+
+### Overview
+Multi-platform virtual meeting system with integrated voting/polling functionality. Supports embedded meetings (Zoom) and external platforms (Google Meet, Microsoft Teams, Webex, etc.).
+
+### Access URLs
+```
+/portal/meetings/                   # Member: View scheduled meetings
+/portal/meetings/manage/            # Officer: Manage meetings
+/portal/meetings/create/            # Officer: Create new meeting
+/portal/zoom-config/                # Officer: Configure Zoom SDK
+/portal/polls/                      # Member: View active polls
+/portal/polls/manage/               # Officer: Manage polls
+```
+
+### Supported Platforms
+
+| Platform | Type | Feature |
+|----------|------|---------|
+| Zoom (Embedded) | Native | Meeting embedded directly on page with polls sidebar |
+| Google Meet | External Link | Opens in new tab, polls remain on site |
+| Microsoft Teams | External Link | Opens in new tab, polls remain on site |
+| Cisco Webex | External Link | Opens in new tab, polls remain on site |
+| Other | External Link | Any meeting URL supported |
+
+### Meeting Model Fields
+
+| Field | Description |
+|-------|-------------|
+| `title` | Meeting title/name |
+| `description` | Meeting agenda/description |
+| `platform` | Meeting platform (zoom, google_meet, teams, webex, other) |
+| `meeting_number` | Zoom Meeting ID (for embedded Zoom only) |
+| `meeting_password` | Meeting password (optional) |
+| `meeting_url` | External meeting link (Google Meet, Teams, etc.) |
+| `host` | Meeting host (user) |
+| `event` | Optional linked Event |
+| `scheduled_time` | Date and time of meeting |
+| `duration_minutes` | Expected duration |
+| `status` | scheduled, in_progress, completed, cancelled |
+| `members_only` | Restrict to logged-in members |
+| `financial_only` | Restrict to financial members |
+
+### Poll/Voting Model Fields
+
+| Field | Description |
+|-------|-------------|
+| `title` | Poll question/title |
+| `description` | Additional context |
+| `poll_type` | yes_no, multiple_choice, single_choice |
+| `meeting` | Optional linked meeting |
+| `is_anonymous` | Hide voter identities |
+| `show_results_during` | Show live results while voting |
+| `allow_multiple` | Allow selecting multiple options |
+| `max_selections` | Limit selections if multiple allowed |
+| `financial_only` | Restrict to financial members |
+| `starts_at`, `ends_at` | Voting window |
+| `is_active` | Poll visibility |
+
+### Access Control
+
+| Role | Permissions |
+|------|-------------|
+| **Staff** | Full access: create/edit/delete meetings/polls, configure Zoom |
+| **Officers** | Full access: create/edit/delete meetings/polls, configure Zoom |
+| **Financial Members** | Join meetings, vote in all polls |
+| **Non-Financial Members** | Join non-restricted meetings, vote in non-restricted polls |
+
+### Key Features
+
+#### Meeting Management
+- **Create meetings** with any supported platform
+- **Platform-aware forms**: Dynamic fields based on selected platform
+- **Access restrictions**: Members-only, financial-only options
+- **Meeting lifecycle**: scheduled → in_progress → completed
+- **Link to events**: Optional association with chapter events
+
+#### Zoom Integration
+- **Embedded SDK**: Zoom meetings display directly within the website
+- **Signature generation**: Automatic JWT signature for SDK authentication
+- **Host controls**: Start/end meeting buttons for hosts
+- **SDK Configuration**: Separate admin page for SDK credentials
+
+#### External Platform Support
+- **External link button**: Opens Google Meet/Teams/etc. in new tab
+- **Platform icons**: Visual identification of meeting platform
+- **Persistent polls**: Polls remain accessible while meeting opens externally
+
+#### Polling System
+- **Anonymous/recorded voting**: Configurable privacy per poll
+- **Live results**: Optional real-time result display
+- **Meeting-linked polls**: Associate polls with specific meetings
+- **Multiple choice support**: Single or multiple option selection
+- **Voting window**: Set start/end times for polls
+- **Voter tracking**: View who voted (for non-anonymous polls)
+
+### Templates
+
+| Template | Description |
+|----------|-------------|
+| `zoom/meeting_list.html` | Public meeting list with platform badges |
+| `zoom/manage_meetings.html` | Officer meeting management dashboard |
+| `zoom/meeting_form.html` | Create/edit meeting (platform-aware) |
+| `zoom/join_meeting.html` | Meeting room (embedded or external) |
+| `zoom/zoom_config.html` | Zoom SDK configuration |
+| `polls/poll_list.html` | Active polls listing |
+| `polls/manage_polls.html` | Officer poll management |
+| `polls/poll_form.html` | Create/edit poll with options |
+| `polls/view_poll.html` | Vote and view results |
+| `polls/poll_voters.html` | View poll participants |
+
+### Zoom SDK Setup
+
+1. **Create Zoom Marketplace App**:
+   - Visit [marketplace.zoom.us](https://marketplace.zoom.us)
+   - Create a "Meeting SDK" app (not OAuth)
+   - Get SDK Key and SDK Secret
+
+2. **Configure in Site**:
+   - Navigate to `/portal/zoom-config/`
+   - Enter SDK Key and SDK Secret
+   - Mark as Active
+
+3. **Create Embedded Meeting**:
+   - Create meeting with Platform = "Zoom (Embedded)"
+   - Enter the Zoom Meeting ID
+   - Optionally enter password
+
+---
+
 ## 7. Quick Start Guide
 
 ### Configure Site Settings
@@ -267,6 +397,16 @@ Automatic backup system protects against accidental data loss during imports and
 3. **Edit Content**: Click edit icon on any section
 4. **Delete Content**: Use individual delete, bulk delete, or clear all
 5. **Restore**: If needed, restore from automatic backups
+
+### Manage Virtual Meetings
+1. Navigate to Meetings MGMT in officer menu
+2. **Configure Zoom** (optional): Set up SDK credentials
+3. **Create Meeting**:
+   - Select platform (Zoom/Google Meet/Teams/etc.)
+   - For Zoom: Enter Meeting ID for embedded, or URL for link
+   - For others: Enter meeting URL
+4. **Start Meeting**: Click play button when ready
+5. **Create Polls**: Add polls linked to meetings for live voting
 
 ### Import Documents
 1. Go to "Import from Document" section
@@ -290,3 +430,7 @@ Automatic backup system protects against accidental data loss during imports and
 | Lost data after import | Use Backup & Restore section to revert |
 | Settings not saving | Check for validation errors on form |
 | Configuration not showing | Run migrations: `python manage.py migrate` |
+| Zoom meeting won't load | Verify SDK Key/Secret in Zoom Config |
+| "Zoom not configured" error | Go to /portal/zoom-config/ and add credentials |
+| Meeting URL validation fails | Ensure full URL including https:// |
+| Poll not showing | Check is_active=True and voting window dates |

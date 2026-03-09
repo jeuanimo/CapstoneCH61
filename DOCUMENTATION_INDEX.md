@@ -12,12 +12,12 @@
 - **System Architecture** → `BOUTIQUE_ARCHITECTURE_DIAGRAMS.txt`
 - **Implementation Checklist** → `BOUTIQUE_IMPLEMENTATION_CHECKLIST.md`
 
-### �️ Admin Console & Site Management
-- **Site Configuration & History** → `ADMIN_CONSOLE_FEATURES.md`
+### 🛠️ Admin Console & Site Management
+- **Site Configuration, History & Virtual Meetings** → `ADMIN_CONSOLE_FEATURES.md`
 - **Photo Management** → `PHOTO_MANAGEMENT_FEATURES.md`
 - **Chatbot Setup** → `CHATBOT_INTEGRATION_GUIDE.txt`
 
-### �📋 Document Descriptions
+### 📋 Document Descriptions
 
 #### 1. BOUTIQUE_FINAL_SUMMARY.txt
 **What**: High-level overview of all features
@@ -91,14 +91,16 @@
 - Feature completeness checklist
 
 #### 7. ADMIN_CONSOLE_FEATURES.md
-**What**: Admin console, site configuration, and chapter history features
-**When to Read**: Managing site settings or chapter history
+**What**: Admin console, site configuration, chapter history, and virtual meetings
+**When to Read**: Managing site settings, chapter history, or virtual meetings
 **Contains**:
 - SiteConfiguration model (36 configurable fields)
 - Tabbed configuration interface
 - Chapter history CRUD operations
 - CSV/TXT/DOCX document import
 - Backup & restore system
+- Virtual meetings (Zoom, Google Meet, Teams, Webex)
+- Polling/voting system
 - URL reference
 - Security features
 
@@ -162,6 +164,20 @@
 2. Go to: `/portal/admin/chapter-history/`
 3. Use "Import from Document" section
 4. Select DOCX file and import mode
+
+### Task: "How do I set up virtual meetings?"
+1. Read: `ADMIN_CONSOLE_FEATURES.md` → "Virtual Meetings & Polls"
+2. For Zoom embedded: Go to `/portal/zoom-config/` and add SDK credentials
+3. Create meeting: `/portal/meetings/create/`
+4. Select platform (Zoom, Google Meet, Teams, etc.)
+5. Enter meeting ID (Zoom) or URL (others)
+
+### Task: "How do I create a poll for a meeting?"
+1. Read: `ADMIN_CONSOLE_FEATURES.md` → "Virtual Meetings & Polls"
+2. Go to: `/portal/polls/create/`
+3. Enter poll question and options
+4. Link to meeting (optional)
+5. Configure privacy and voting window
 
 ---
 
@@ -270,7 +286,7 @@ CapstoneCH61/
 ├── db.sqlite3
 ├── requirements.txt (includes python-docx)
 │
-├── ADMIN_CONSOLE_FEATURES.md (NEW - site config & history)
+├── ADMIN_CONSOLE_FEATURES.md (site config, history & meetings)
 ├── BOUTIQUE_FINAL_SUMMARY.txt
 ├── BOUTIQUE_QUICK_REFERENCE.md
 ├── BOUTIQUE_ADMIN_IMPLEMENTATION.txt
@@ -294,7 +310,7 @@ CapstoneCH61/
 | BOUTIQUE_CRUD_ADMIN_GUIDE.md | Guide | Complete details | Long |
 | BOUTIQUE_ARCHITECTURE_DIAGRAMS.txt | Reference | System design | Long |
 | BOUTIQUE_IMPLEMENTATION_CHECKLIST.md | Checklist | Verification | Long |
-| ADMIN_CONSOLE_FEATURES.md | Guide | Site config & history | Long |
+| ADMIN_CONSOLE_FEATURES.md | Guide | Site config, history & meetings | Long |
 | PHOTO_MANAGEMENT_FEATURES.md | Guide | Photo/album management | Medium |
 | DOCUMENTATION_INDEX.md | Navigation | This file | Medium |
 
@@ -308,6 +324,19 @@ Admin Console URLs (require staff or officer):
   /portal/admin/chapter-history/
   /portal/admin/chapter-history/edit/<id>/
   /portal/admin/chatbot/
+
+Virtual Meetings URLs:
+  /portal/meetings/                   # View meetings (members)
+  /portal/meetings/manage/            # Manage meetings (officers)
+  /portal/meetings/create/            # Create meeting (officers)
+  /portal/meetings/<id>/join/         # Join meeting (members)
+  /portal/zoom-config/                # Zoom SDK config (officers)
+
+Polls/Voting URLs:
+  /portal/polls/                      # View polls (members)
+  /portal/polls/manage/               # Manage polls (officers)
+  /portal/polls/create/               # Create poll (officers)
+  /portal/polls/<id>/                 # View/vote on poll (members)
 
 Boutique Admin URLs (require staff or officer):
   /pages/boutique/admin/add-product/
@@ -331,6 +360,8 @@ Django Admin:
   /admin/pages/product/
   /admin/pages/siteconfiguration/
   /admin/pages/chapterhistorysection/
+  /admin/pages/zoommeeting/
+  /admin/pages/poll/
 ```
 
 ---
@@ -363,6 +394,10 @@ Django Admin:
 - ✅ 3 new URL routes for admin functions
 - ✅ Enhanced admin interface with filters
 - ✅ Bulk CSV import with officer access
+- ✅ Virtual Meetings (Zoom, Google Meet, Teams, Webex)
+- ✅ Polling/Voting system with anonymous option
+- ✅ 14 new URL routes for meetings and polls
+- ✅ 13 new templates for meetings and polls
 
 **What Was Enhanced:**
 - ✅ MemberProfileAdmin - now shows officer status
@@ -370,6 +405,7 @@ Django Admin:
 - ✅ Shop page - added admin control panel
 - ✅ Product detail - added admin buttons
 - ✅ import_products - now accessible to officers
+- ✅ base.html - added Meetings and Polls navigation
 
 **What Remains Unchanged:**
 - ✅ All shopping functionality
@@ -391,7 +427,7 @@ Django Admin:
 ---
 
 **Status**: All documentation complete ✅
-**Updated**: 2026-02-05
-**Version**: 1.0
+**Updated**: 2026-03-08
+**Version**: 1.1
 **System Status**: Production Ready ✅
 
