@@ -46,6 +46,9 @@ PyJWT>=2.8.0
 # HTTP Requests (for Zoom API)
 requests>=2.31.0
 
+# Rate limiting for API endpoints
+django-ratelimit>=4.1.0
+
 # Cloudinary for Media Storage (persistent across deploys)
 cloudinary>=1.36.0
 django-cloudinary-storage>=0.3.0
