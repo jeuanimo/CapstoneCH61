@@ -1010,6 +1010,7 @@ def manage_invitations(request):
 def create_invitation(request):
     """Create new invitation code (admin only)"""
     import secrets
+    from .email_utils import send_invitation_email
     
     if request.method == 'POST':
         email = request.POST.get('email', '').strip()
@@ -1031,7 +1032,7 @@ def create_invitation(request):
         # Generate unique code
         code = secrets.token_urlsafe(16)[:20].upper().replace('_', '').replace('-', '')
         
-        InvitationCode.objects.create(
+        invitation = InvitationCode.objects.create(
             code=code,
             email=email,
             first_name=first_name,
@@ -1042,7 +1043,14 @@ def create_invitation(request):
         )
         
         logger.info(f"Invitation created: {code} for {email} by {request.user.username}")
-        messages.success(request, f"Invitation code created: {code} for {email}")
+        
+        # Send invitation email
+        email_sent = send_invitation_email(invitation)
+        if email_sent:
+            messages.success(request, f"Invitation code created and emailed to {email}")
+        else:
+            messages.warning(request, f"Invitation code created: {code} for {email} (email failed to send)")
+        
         return redirect('manage_invitations')
     
     return render(request, 'pages/create_invitation.html')
@@ -1064,6 +1072,8 @@ def delete_invitation(request, pk):
 @user_passes_test(is_officer_or_staff)
 def generate_member_invitation(request, pk):
     """Generate a new invitation code for an existing member (officers and admin)"""
+    from .email_utils import send_invitation_email
+    
     member_profile = get_object_or_404(MemberProfile, pk=pk)
     user = member_profile.user
     
@@ -1079,11 +1089,20 @@ def generate_member_invitation(request, pk):
         # Generate new invitation using helper function
         invitation = generate_invitation_for_member(user, member_profile, request.user)
         
-        messages.success(
-            request, 
-            f"Invitation code generated: <strong>{invitation.code}</strong> "
-            f"(Valid until {invitation.expires_at.strftime('%Y-%m-%d')})"
-        )
+        # Send invitation email
+        email_sent = send_invitation_email(invitation)
+        if email_sent:
+            messages.success(
+                request, 
+                f"Invitation code generated and emailed to {user.email}: <strong>{invitation.code}</strong> "
+                f"(Valid until {invitation.expires_at.strftime('%Y-%m-%d')})"
+            )
+        else:
+            messages.warning(
+                request, 
+                f"Invitation code generated: <strong>{invitation.code}</strong> "
+                f"(Valid until {invitation.expires_at.strftime('%Y-%m-%d')}) - Email failed to send"
+            )
     
     return redirect('member_roster')
 

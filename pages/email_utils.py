@@ -274,3 +274,62 @@ def send_bulk_email_to_members(member_profiles, subject, message, bcc=True):
     except Exception as e:
         logger.error(f"Failed to send bulk email: {str(e)}")
         return 0
+
+
+def send_invitation_email(invitation):
+    """
+    Send invitation email to a new member with their signup code.
+    
+    Args:
+        invitation: InvitationCode instance
+        
+    Returns:
+        bool: True if email sent successfully, False otherwise
+    """
+    if not invitation.email:
+        logger.warning(f"No email for invitation {invitation.code}")
+        return False
+    
+    try:
+        subject = "Nu Gamma Sigma Chapter - Your Invitation to Join"
+        
+        signup_url = "https://ngs1914.org/signup"
+        
+        name = invitation.first_name or "Brother"
+        
+        message = f"""
+{name},
+
+You have been invited to join the Nu Gamma Sigma Chapter member portal.
+
+Your Invitation Code: {invitation.code}
+
+To create your account:
+1. Visit: {signup_url}
+2. Enter your invitation code: {invitation.code}
+3. Enter your email: {invitation.email}
+4. Create a username and password
+
+This code expires on {invitation.expires_at.strftime('%B %d, %Y')}.
+
+If you have any questions, please contact us at {getattr(settings, 'CONTACT_EMAIL', 'contact@ngs1914.org')}.
+
+Blue Phi,
+Nu Gamma Sigma Chapter
+Phi Beta Sigma Fraternity, Inc.
+"""
+        
+        send_mail(
+            subject=subject,
+            message=message,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[invitation.email],
+            fail_silently=False,
+        )
+        
+        logger.info(f"Invitation email sent to {invitation.email} (code: {invitation.code})")
+        return True
+        
+    except Exception as e:
+        logger.error(f"Failed to send invitation email to {invitation.email}: {str(e)}")
+        return False
