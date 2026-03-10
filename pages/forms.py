@@ -865,7 +865,10 @@ class SiteConfigurationForm(forms.ModelForm):
             # Theme  
             'primary_color', 'secondary_color', 'dark_mode_default',
             # Feature Toggles
-            'show_boutique', 'show_events', 'maintenance_mode', 'maintenance_message',
+            'show_boutique', 'boutique_type', 'external_store_url', 'external_store_name',
+            'show_events',
+            'show_event_tickets', 'event_tickets_type', 'external_tickets_url', 'external_tickets_name',
+            'maintenance_mode', 'maintenance_message',
             # Footer
             'footer_text'
         ]
@@ -1013,8 +1016,33 @@ class SiteConfigurationForm(forms.ModelForm):
             'show_boutique': forms.CheckboxInput(attrs={
                 'class': 'form-check-input'
             }),
+            'boutique_type': forms.RadioSelect(attrs={
+                'class': 'form-check-input'
+            }),
+            'external_store_url': forms.URLInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'https://www.etsy.com/shop/yourstore'
+            }),
+            'external_store_name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'e.g., Shop Now, Visit Our Store'
+            }),
             'show_events': forms.CheckboxInput(attrs={
                 'class': 'form-check-input'
+            }),
+            'show_event_tickets': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
+            'event_tickets_type': forms.RadioSelect(attrs={
+                'class': 'form-check-input'
+            }),
+            'external_tickets_url': forms.URLInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'https://www.eventbrite.com/e/your-event'
+            }),
+            'external_tickets_name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'e.g., Get Tickets, Buy Now'
             }),
             'maintenance_mode': forms.CheckboxInput(attrs={
                 'class': 'form-check-input'
@@ -1062,7 +1090,14 @@ class SiteConfigurationForm(forms.ModelForm):
             'secondary_color': 'Secondary Color',
             'dark_mode_default': 'Dark Mode Default',
             'show_boutique': 'Show Boutique',
+            'boutique_type': 'Boutique Type',
+            'external_store_url': 'External Store URL',
+            'external_store_name': 'Store Link Text',
             'show_events': 'Show Events',
+            'show_event_tickets': 'Show Event Tickets',
+            'event_tickets_type': 'Event Tickets Type',
+            'external_tickets_url': 'External Tickets URL',
+            'external_tickets_name': 'Tickets Link Text',
             'maintenance_mode': 'Maintenance Mode',
             'maintenance_message': 'Maintenance Message',
             'footer_text': 'Footer Text',

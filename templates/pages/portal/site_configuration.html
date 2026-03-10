@@ -708,12 +708,108 @@
                     </div>
                 </div>
 
+                <!-- Boutique Type Options (shown when boutique is enabled) -->
+                <div id="boutique-options" class="boutique-options-section" style="margin-left: 30px; padding: 15px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #0047AB; margin-bottom: 20px;">
+                    <h5 style="margin-top: 0; color: #0047AB;"><i class="fas fa-store"></i> Boutique Type</h5>
+                    <p class="help-text" style="margin-bottom: 15px;">Choose how you want to handle your merchandise store.</p>
+                    
+                    <div class="boutique-type-options">
+                        <div class="form-check" style="margin-bottom: 10px;">
+                            <input type="radio" class="form-check-input" name="boutique_type" id="boutique_type_internal" value="internal" {% if form.instance.boutique_type == 'internal' or not form.instance.boutique_type %}checked{% endif %}>
+                            <label class="form-check-label" for="boutique_type_internal">
+                                <strong>Use Internal Boutique</strong>
+                                <br><small class="text-muted">Host your own store with products managed directly on this site</small>
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input type="radio" class="form-check-input" name="boutique_type" id="boutique_type_external" value="external" {% if form.instance.boutique_type == 'external' %}checked{% endif %}>
+                            <label class="form-check-label" for="boutique_type_external">
+                                <strong>Link to External Store</strong>
+                                <br><small class="text-muted">Redirect visitors to your existing e-store (Etsy, Shopify, etc.)</small>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- External Store Fields (shown when external is selected) -->
+                    <div id="external-store-fields" class="external-store-fields" style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #dee2e6; display: none;">
+                        <div class="form-group">
+                            <label for="{{ form.external_store_url.id_for_label }}">
+                                <i class="fas fa-link"></i> External Store URL <span class="text-danger">*</span>
+                            </label>
+                            {{ form.external_store_url }}
+                            <p class="help-text">Full URL to your external store (e.g., https://www.etsy.com/shop/yourstore)</p>
+                        </div>
+                        <div class="form-group">
+                            <label for="{{ form.external_store_name.id_for_label }}">
+                                <i class="fas fa-tag"></i> Store Link Text
+                            </label>
+                            {{ form.external_store_name }}
+                            <p class="help-text">Text for the navigation link (default: "Shop")</p>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="form-group">
                     <div class="form-check">
                         {{ form.show_events }}
                         <label class="form-check-label" for="{{ form.show_events.id_for_label }}">
                             <strong><i class="fas fa-calendar-alt"></i> Show Events</strong> - Display the events calendar section
                         </label>
+                    </div>
+                </div>
+
+                <div class="section-divider"></div>
+
+                <!-- Event Ticketing Section -->
+                <h4 style="color: #9c27b0;"><i class="fas fa-ticket-alt"></i> Event Ticketing</h4>
+                
+                <div class="form-group">
+                    <div class="form-check">
+                        {{ form.show_event_tickets }}
+                        <label class="form-check-label" for="{{ form.show_event_tickets.id_for_label }}">
+                            <strong><i class="fas fa-ticket-alt"></i> Show Event Tickets</strong> - Display the event ticketing section
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Event Tickets Type Options (shown when ticketing is enabled) -->
+                <div id="tickets-options" class="tickets-options-section" style="margin-left: 30px; padding: 15px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #9c27b0; margin-bottom: 20px;">
+                    <h5 style="margin-top: 0; color: #9c27b0;"><i class="fas fa-ticket-alt"></i> Ticketing Type</h5>
+                    <p class="help-text" style="margin-bottom: 15px;">Choose how you want to handle event ticketing.</p>
+                    
+                    <div class="tickets-type-options">
+                        <div class="form-check" style="margin-bottom: 10px;">
+                            <input type="radio" class="form-check-input" name="event_tickets_type" id="tickets_type_internal" value="internal" {% if form.instance.event_tickets_type == 'internal' or not form.instance.event_tickets_type %}checked{% endif %}>
+                            <label class="form-check-label" for="tickets_type_internal">
+                                <strong>Use Internal Ticketing</strong>
+                                <br><small class="text-muted">Sell tickets directly on this site with payment processing</small>
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input type="radio" class="form-check-input" name="event_tickets_type" id="tickets_type_external" value="external" {% if form.instance.event_tickets_type == 'external' %}checked{% endif %}>
+                            <label class="form-check-label" for="tickets_type_external">
+                                <strong>Link to External Ticket Site</strong>
+                                <br><small class="text-muted">Redirect visitors to Eventbrite, Ticketmaster, etc.</small>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- External Tickets Fields (shown when external is selected) -->
+                    <div id="external-tickets-fields" class="external-tickets-fields" style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #dee2e6; display: none;">
+                        <div class="form-group">
+                            <label for="{{ form.external_tickets_url.id_for_label }}">
+                                <i class="fas fa-link"></i> External Tickets URL <span class="text-danger">*</span>
+                            </label>
+                            {{ form.external_tickets_url }}
+                            <p class="help-text">Full URL to your external ticket site (e.g., https://www.eventbrite.com/e/your-event)</p>
+                        </div>
+                        <div class="form-group">
+                            <label for="{{ form.external_tickets_name.id_for_label }}">
+                                <i class="fas fa-tag"></i> Tickets Link Text
+                            </label>
+                            {{ form.external_tickets_name }}
+                            <p class="help-text">Text for the navigation link (default: "Buy Tickets")</p>
+                        </div>
                     </div>
                 </div>
 
@@ -817,5 +913,73 @@ document.getElementById('{{ form.primary_color.id_for_label }}')?.addEventListen
 document.getElementById('{{ form.secondary_color.id_for_label }}')?.addEventListener('input', function() {
     document.getElementById('secondary-color-hex').textContent = this.value;
 });
+
+// ===========================================
+// Boutique Toggle Logic
+// ===========================================
+const showBoutiqueCheckbox = document.getElementById('{{ form.show_boutique.id_for_label }}');
+const boutiqueOptions = document.getElementById('boutique-options');
+const boutiqueTypeInternal = document.getElementById('boutique_type_internal');
+const boutiqueTypeExternal = document.getElementById('boutique_type_external');
+const externalStoreFields = document.getElementById('external-store-fields');
+
+function updateBoutiqueVisibility() {
+    if (showBoutiqueCheckbox && boutiqueOptions) {
+        boutiqueOptions.style.display = showBoutiqueCheckbox.checked ? 'block' : 'none';
+    }
+}
+
+function updateExternalStoreFields() {
+    if (boutiqueTypeExternal && externalStoreFields) {
+        externalStoreFields.style.display = boutiqueTypeExternal.checked ? 'block' : 'none';
+    }
+}
+
+if (showBoutiqueCheckbox) {
+    showBoutiqueCheckbox.addEventListener('change', updateBoutiqueVisibility);
+    updateBoutiqueVisibility(); // Set initial state
+}
+
+if (boutiqueTypeInternal) {
+    boutiqueTypeInternal.addEventListener('change', updateExternalStoreFields);
+}
+if (boutiqueTypeExternal) {
+    boutiqueTypeExternal.addEventListener('change', updateExternalStoreFields);
+}
+updateExternalStoreFields(); // Set initial state
+
+// ===========================================
+// Event Ticketing Toggle Logic
+// ===========================================
+const showTicketsCheckbox = document.getElementById('{{ form.show_event_tickets.id_for_label }}');
+const ticketsOptions = document.getElementById('tickets-options');
+const ticketsTypeInternal = document.getElementById('tickets_type_internal');
+const ticketsTypeExternal = document.getElementById('tickets_type_external');
+const externalTicketsFields = document.getElementById('external-tickets-fields');
+
+function updateTicketsVisibility() {
+    if (showTicketsCheckbox && ticketsOptions) {
+        ticketsOptions.style.display = showTicketsCheckbox.checked ? 'block' : 'none';
+    }
+}
+
+function updateExternalTicketsFields() {
+    if (ticketsTypeExternal && externalTicketsFields) {
+        externalTicketsFields.style.display = ticketsTypeExternal.checked ? 'block' : 'none';
+    }
+}
+
+if (showTicketsCheckbox) {
+    showTicketsCheckbox.addEventListener('change', updateTicketsVisibility);
+    updateTicketsVisibility(); // Set initial state
+}
+
+if (ticketsTypeInternal) {
+    ticketsTypeInternal.addEventListener('change', updateExternalTicketsFields);
+}
+if (ticketsTypeExternal) {
+    ticketsTypeExternal.addEventListener('change', updateExternalTicketsFields);
+}
+updateExternalTicketsFields(); // Set initial state
 </script>
 {% endblock %}

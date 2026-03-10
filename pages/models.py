@@ -1453,10 +1453,64 @@ class SiteConfiguration(models.Model):
         default=True,
         help_text='Show the merchandise boutique section'
     )
+    
+    # Boutique Type Options
+    BOUTIQUE_TYPE_CHOICES = [
+        ('internal', 'Use Internal Boutique'),
+        ('external', 'Link to External Store'),
+    ]
+    boutique_type = models.CharField(
+        max_length=20,
+        choices=BOUTIQUE_TYPE_CHOICES,
+        default='internal',
+        help_text='Choose between hosting your own boutique or linking to an external store'
+    )
+    external_store_url = models.URLField(
+        blank=True,
+        default='',
+        help_text='URL of your external e-store (e.g., shopify, etsy, etc.)'
+    )
+    external_store_name = models.CharField(
+        max_length=100,
+        blank=True,
+        default='Shop',
+        help_text='Text to display for the store link (e.g., "Shop Now", "Visit Our Store")'
+    )
+    
     show_events = models.BooleanField(
         default=True,
         help_text='Show the events calendar section'
     )
+    
+    # Event Ticketing Feature
+    show_event_tickets = models.BooleanField(
+        default=False,
+        help_text='Show the event ticketing section'
+    )
+    
+    # Event Ticketing Type Options
+    EVENT_TICKETS_TYPE_CHOICES = [
+        ('internal', 'Use Internal Ticketing'),
+        ('external', 'Link to External Ticket Site'),
+    ]
+    event_tickets_type = models.CharField(
+        max_length=20,
+        choices=EVENT_TICKETS_TYPE_CHOICES,
+        default='internal',
+        help_text='Choose between hosting your own ticketing or linking to an external site'
+    )
+    external_tickets_url = models.URLField(
+        blank=True,
+        default='',
+        help_text='URL of your external ticket site (e.g., Eventbrite, Ticketmaster, etc.)'
+    )
+    external_tickets_name = models.CharField(
+        max_length=100,
+        blank=True,
+        default='Buy Tickets',
+        help_text='Text to display for the tickets link (e.g., "Get Tickets", "Buy Now")'
+    )
+    
     maintenance_mode = models.BooleanField(
         default=False,
         help_text='Put the site in maintenance mode (only staff can access)'
