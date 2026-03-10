@@ -2,6 +2,70 @@
 
 {% block title %}Photo Gallery - Member Portal{% endblock %}
 
+{% block css %}
+<style>
+    /* Photo Gallery Dark Mode Support */
+    .gallery-card {
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.15);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .gallery-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+    
+    body.dark-mode .gallery-card {
+        background: #1a2a4a;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+    }
+    
+    body.dark-mode .gallery-card:hover {
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    }
+    
+    .gallery-image-wrapper {
+        height: 250px;
+        background-color: #f8f9fa;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    body.dark-mode .gallery-image-wrapper {
+        background-color: #0f1a2e;
+    }
+    
+    .gallery-image {
+        max-height: 100%;
+        max-width: 100%;
+        width: auto;
+        height: auto;
+        object-fit: contain;
+    }
+    
+    body.dark-mode .card-body,
+    body.dark-mode .card-footer {
+        background: #1a2a4a;
+        color: #e8edf7;
+    }
+    
+    body.dark-mode .card-text,
+    body.dark-mode .text-muted {
+        color: #a0aec0 !important;
+    }
+    
+    body.dark-mode .card-title {
+        color: #e8edf7;
+    }
+    
+    body.dark-mode h2 {
+        color: #e8edf7;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container my-5">
     <div class="row mb-4">
@@ -25,7 +89,7 @@
     </div>
 
     <!-- Album Filter -->
-    <div class="card mb-4" style="box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);">
+    <div class="card mb-4 gallery-card">
         <div class="card-body">
             <h5 class="card-title">Filter by Album</h5>
             <div class="d-flex flex-wrap gap-2">
@@ -46,9 +110,10 @@
     <div class="row g-3">
         {% for photo in photos %}
         <div class="col-md-4 col-lg-3">
-            <div class="card h-100" style="box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);">
-                <a href="{% url 'photo_detail' photo.id %}" class="d-flex align-items-center justify-content-center" style="height: 250px; background-color: #f8f9fa; overflow: hidden;">
-                    <img src="{{ photo.image.url }}" class="card-img-top" alt="{{ photo.caption }}" style="max-height: 100%; max-width: 100%; width: auto; height: auto; object-fit: contain;">
+            <div class="card h-100 gallery-card">
+                <a href="{% url 'photo_detail' photo.id %}" class="gallery-image-wrapper">
+                    <img src="{{ photo.image.url }}" class="gallery-image" alt="{{ photo.caption }}">
+                </a>
                 </a>
                 <div class="card-body">
                     <p class="card-text small">

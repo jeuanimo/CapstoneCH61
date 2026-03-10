@@ -317,6 +317,20 @@
         .content-wrapper {
             padding: 1.5rem;
         }
+        
+        .programs-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .programs-grid {
+            gap: 1rem;
+        }
+        
+        .program-card {
+            margin-bottom: 0;
+        }
     }
 </style>
 {% endblock %}
