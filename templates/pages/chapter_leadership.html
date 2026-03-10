@@ -45,19 +45,21 @@
     }
     
     .page-header {
-        text-align: center;
-        margin-bottom: 3rem;
-        border-bottom: 3px solid var(--primary-color);
+        margin-bottom: 2rem;
         padding-bottom: 1rem;
         display: flex;
-        justify-content: space-between;
-        align-items: center;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 1rem;
     }
     
     .page-header h1 {
         color: var(--primary-color);
         font-size: 2.5rem;
         margin: 0;
+        padding-bottom: 0.5rem;
+        border-bottom: 3px solid var(--primary-color);
+        flex-grow: 0;
     }
     
     body.dark-mode .page-header h1 {
@@ -282,6 +284,13 @@
                 </a>
                 <a href="{% url 'import_officers' %}" class="btn-add" style="margin-left: 10px; background-color: var(--success-color);">
                     <i class="fas fa-file-csv"></i> Import CSV
+                </a>
+            </div>
+            {% endif %}
+            {% if user.is_authenticated %}
+            <div class="member-upload-action" style="margin-top: 1rem;">
+                <a href="{% url 'upload_my_leadership_photo' %}" class="btn-upload-my-photo" style="display: inline-block; background: linear-gradient(135deg, #2a7dd4 0%, var(--primary-color) 100%); color: white; padding: 0.6rem 1.2rem; border-radius: 6px; text-decoration: none; font-weight: 600; transition: transform 0.2s, box-shadow 0.2s;">
+                    <i class="fas fa-camera"></i> Upload My Leadership Photo
                 </a>
             </div>
             {% endif %}

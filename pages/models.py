@@ -109,6 +109,14 @@ class ChapterLeadership(models.Model):
     is_active = models.BooleanField(default=True, help_text="Currently serving in this position")
     term_start = models.DateField(blank=True, null=True)
     term_end = models.DateField(blank=True, null=True)
+    member = models.ForeignKey(
+        'MemberProfile', 
+        on_delete=models.SET_NULL, 
+        blank=True, 
+        null=True, 
+        related_name='leadership_positions',
+        help_text="Link to member profile (allows member to manage their own photo)"
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     

@@ -1018,6 +1018,63 @@ def upload_leader_photo(request, pk):
     return render(request, 'pages/portal/upload_leader_photo.html', context)
 
 
+@login_required
+def upload_my_leadership_photo(request):
+    """Allow members to upload their own leadership photo"""
+    # Find leadership entries that belong to this user
+    # Match by: linked member profile OR email address
+    user = request.user
+    my_leadership = None
+    
+    # First try to find by linked member profile
+    if hasattr(user, 'member_profile'):
+        my_leadership = ChapterLeadership.objects.filter(
+            member=user.member_profile, 
+            is_active=True
+        ).first()
+    
+    # If not found, try matching by email
+    if not my_leadership and user.email:
+        my_leadership = ChapterLeadership.objects.filter(
+            email__iexact=user.email, 
+            is_active=True
+        ).first()
+    
+    if not my_leadership:
+        messages.warning(request, "You don't have an active leadership position. Contact an officer if this is incorrect.")
+        return redirect('chapter_leadership')
+    
+    if request.method == 'POST':
+        if 'profile_image' in request.FILES:
+            # Delete old image if exists
+            if my_leadership.profile_image:
+                try:
+                    if os.path.exists(my_leadership.profile_image.path):
+                        os.remove(my_leadership.profile_image.path)
+                except Exception:
+                    pass  # File might not exist
+            
+            # Save new image
+            my_leadership.profile_image = request.FILES['profile_image']
+            
+            # Link to member profile if not already linked
+            if hasattr(user, 'member_profile') and not my_leadership.member:
+                my_leadership.member = user.member_profile
+            
+            my_leadership.save()
+            logger.info(f"Member uploaded own leadership photo: {my_leadership.full_name} by {user.username}")
+            messages.success(request, "Your leadership photo has been updated!")
+            return redirect('chapter_leadership')
+        else:
+            messages.error(request, "Please select an image to upload.")
+    
+    context = {
+        'leader': my_leadership,
+        'is_self_upload': True,
+    }
+    return render(request, 'pages/upload_my_leadership_photo.html', context)
+
+
 # ==================== INVITATION CODE MANAGEMENT ====================
 
 @login_required

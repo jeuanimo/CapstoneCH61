@@ -126,6 +126,7 @@ urlpatterns = [
     path('leadership/delete/<int:pk>/', views.delete_leadership, name='delete_leadership'),
     path('leadership/bulk-delete/', views.bulk_delete_leadership, name='bulk_delete_leadership'),
     path('leadership/upload-photo/<int:pk>/', views.upload_leader_photo, name='upload_leader_photo'),
+    path('leadership/my-photo/', views.upload_my_leadership_photo, name='upload_my_leadership_photo'),
     
     # INVITATION CODE MANAGEMENT (Officer only)
     path('invitations/', views.manage_invitations, name='manage_invitations'),

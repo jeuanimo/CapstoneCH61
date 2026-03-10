@@ -1,0 +1,255 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Upload My Leadership Photo - {{ site_config.chapter_name|default:"Nu Gamma Sigma" }}{% endblock %}
+
+{% block css %}
+<style>
+    .upload-container {
+        max-width: 600px;
+        margin: 2rem auto;
+        padding: 2rem;
+    }
+    
+    .upload-card {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    body.dark-mode .upload-card {
+        background: #1a2a4a;
+    }
+    
+    .upload-header {
+        text-align: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid var(--primary-color);
+    }
+    
+    .upload-header h1 {
+        color: var(--primary-color);
+        font-size: 1.8rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    body.dark-mode .upload-header h1 {
+        color: #87ceeb;
+    }
+    
+    .upload-header p {
+        color: #666;
+        margin: 0;
+    }
+    
+    body.dark-mode .upload-header p {
+        color: #b0b8c8;
+    }
+    
+    .current-photo {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    
+    .current-photo img {
+        width: 200px;
+        height: 200px;
+        object-fit: cover;
+        border-radius: 50%;
+        border: 4px solid var(--primary-color);
+    }
+    
+    .current-photo .no-photo {
+        width: 200px;
+        height: 200px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+        color: white;
+        font-size: 4rem;
+    }
+    
+    .position-info {
+        text-align: center;
+        margin-bottom: 1.5rem;
+    }
+    
+    .position-info h3 {
+        color: var(--primary-color);
+        margin-bottom: 0.25rem;
+    }
+    
+    body.dark-mode .position-info h3 {
+        color: #87ceeb;
+    }
+    
+    .position-info .position-title {
+        color: #666;
+        font-weight: 600;
+    }
+    
+    body.dark-mode .position-info .position-title {
+        color: #b0b8c8;
+    }
+    
+    .upload-form {
+        margin-top: 1.5rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: var(--primary-color);
+    }
+    
+    body.dark-mode .form-group label {
+        color: #87ceeb;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid var(--secondary-color);
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: border-color 0.3s ease;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: var(--primary-color);
+    }
+    
+    body.dark-mode .form-control {
+        background: #0d1929;
+        border-color: #333;
+        color: #e8edf7;
+    }
+    
+    .help-text {
+        font-size: 0.85rem;
+        color: #666;
+        margin-top: 0.5rem;
+    }
+    
+    body.dark-mode .help-text {
+        color: #888;
+    }
+    
+    .btn-upload {
+        display: inline-block;
+        background: linear-gradient(135deg, var(--primary-color) 0%, #0d3a6b 100%);
+        color: white;
+        padding: 0.75rem 2rem;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+        width: 100%;
+    }
+    
+    .btn-upload:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(22, 79, 144, 0.4);
+    }
+    
+    .btn-back {
+        display: inline-block;
+        background: var(--secondary-color);
+        color: var(--primary-color);
+        padding: 0.75rem 2rem;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        text-decoration: none;
+        text-align: center;
+        margin-top: 1rem;
+        width: 100%;
+    }
+    
+    .btn-back:hover {
+        background: #b8b9b7;
+    }
+    
+    body.dark-mode .btn-back {
+        background: #2a3a5a;
+        color: #87ceeb;
+    }
+    
+    @media (max-width: 768px) {
+        .upload-container {
+            padding: 1rem;
+        }
+        
+        .upload-card {
+            padding: 1.5rem;
+        }
+        
+        .current-photo img,
+        .current-photo .no-photo {
+            width: 150px;
+            height: 150px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="upload-container">
+    <div class="upload-card">
+        <div class="upload-header">
+            <h1><i class="fas fa-camera"></i> Upload My Leadership Photo</h1>
+            <p>Update your photo for the leadership page</p>
+        </div>
+        
+        <div class="current-photo">
+            {% if leader.profile_image %}
+                <img src="{{ leader.profile_image.url }}" alt="{{ leader.full_name }}">
+            {% else %}
+                <div class="no-photo">
+                    <i class="fas fa-user"></i>
+                </div>
+            {% endif %}
+        </div>
+        
+        <div class="position-info">
+            <h3>{{ leader.full_name }}</h3>
+            <span class="position-title">{{ leader.get_position_title }}</span>
+        </div>
+        
+        <form method="post" enctype="multipart/form-data" class="upload-form">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="profile_image">
+                    <i class="fas fa-image"></i> Select New Photo
+                </label>
+                <input type="file" name="profile_image" id="profile_image" class="form-control" accept="image/*" required>
+                <p class="help-text">
+                    Recommended: Square image, at least 300x300 pixels. Supported formats: JPG, PNG, GIF.
+                </p>
+            </div>
+            
+            <button type="submit" class="btn-upload">
+                <i class="fas fa-upload"></i> Upload Photo
+            </button>
+        </form>
+        
+        <a href="{% url 'chapter_leadership' %}" class="btn-back">
+            <i class="fas fa-arrow-left"></i> Back to Leadership
+        </a>
+    </div>
+</div>
+{% endblock %}
