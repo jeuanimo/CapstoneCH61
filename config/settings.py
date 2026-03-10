@@ -288,82 +288,111 @@ else:
 
 # ====================== LOGGING CONFIGURATION ======================
 
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'formatters': {
-        'verbose': {
-            # Detailed log format with timestamp, module, process, thread
-            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
-            'style': '{',
+# Production uses console-only logging (Render captures stdout)
+# Development uses file-based logging
+
+if DEBUG:
+    # Development: Log to both console and files
+    LOGGING = {
+        'version': 1,
+        'disable_existing_loggers': False,
+        'formatters': {
+            'verbose': {
+                'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+                'style': '{',
+            },
+            'simple': {
+                'format': '{levelname} {asctime} {message}',
+                'style': '{',
+            },
         },
-        'simple': {
-            # Simple format: Level, time, message
-            'format': '{levelname} {asctime} {message}',
-            'style': '{',
+        'handlers': {
+            'console': {
+                'level': 'INFO',
+                'class': 'logging.StreamHandler',
+                'formatter': 'simple',
+            },
+            'file': {
+                'level': 'WARNING',
+                'class': 'logging.handlers.RotatingFileHandler',
+                'filename': BASE_DIR / 'logs' / 'django.log',
+                'maxBytes': 1024 * 1024 * 5,
+                'backupCount': 5,
+                'formatter': 'verbose',
+            },
+            'security_file': {
+                'level': 'WARNING',
+                'class': 'logging.handlers.RotatingFileHandler',
+                'filename': BASE_DIR / 'logs' / 'security.log',
+                'maxBytes': 1024 * 1024 * 5,
+                'backupCount': 10,
+                'formatter': 'verbose',
+            },
         },
-    },
-    'filters': {
-        'require_debug_false': {
-            '()': 'django.utils.log.RequireDebugFalse',   # Only log when DEBUG = False
+        'loggers': {
+            'django': {
+                'handlers': ['console', 'file'],
+                'level': 'INFO',
+                'propagate': False,
+            },
+            'django.security': {
+                'handlers': ['security_file'],
+                'level': 'WARNING',
+                'propagate': False,
+            },
+            'pages': {
+                'handlers': ['console', 'file'],
+                'level': 'INFO',
+                'propagate': False,
+            },
+            'axes': {
+                'handlers': ['console', 'security_file'],
+                'level': 'WARNING',
+                'propagate': False,
+            },
         },
-        'require_debug_true': {
-            '()': 'django.utils.log.RequireDebugTrue',    # Only log when DEBUG = True
+    }
+else:
+    # Production: Console-only logging (Render captures stdout)
+    LOGGING = {
+        'version': 1,
+        'disable_existing_loggers': False,
+        'formatters': {
+            'verbose': {
+                'format': '{levelname} {asctime} {module} {message}',
+                'style': '{',
+            },
         },
-    },
-    'handlers': {
-        'console': {
-            # Log to console/terminal
-            'level': 'INFO',
-            'class': 'logging.StreamHandler',
-            'formatter': 'simple',
+        'handlers': {
+            'console': {
+                'level': 'INFO',
+                'class': 'logging.StreamHandler',
+                'formatter': 'verbose',
+            },
         },
-        'file': {
-            # Log warnings and errors to django.log file (rotating)
-            'level': 'WARNING',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': BASE_DIR / 'logs' / 'django.log',
-            'maxBytes': 1024 * 1024 * 5,                  # 5 MB per file
-            'backupCount': 5,                             # Keep 5 backup files
-            'formatter': 'verbose',
+        'loggers': {
+            'django': {
+                'handlers': ['console'],
+                'level': 'INFO',
+                'propagate': False,
+            },
+            'django.security': {
+                'handlers': ['console'],
+                'level': 'WARNING',
+                'propagate': False,
+            },
+            'pages': {
+                'handlers': ['console'],
+                'level': 'INFO',
+                'propagate': False,
+            },
+            'axes': {
+                'handlers': ['console'],
+                'level': 'WARNING',
+                'propagate': False,
+            },
         },
-        'security_file': {
-            # Log security events (login attempts, attacks) to security.log
-            'level': 'WARNING',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': BASE_DIR / 'logs' / 'security.log',
-            'maxBytes': 1024 * 1024 * 5,                  # 5 MB per file
-            'backupCount': 10,                            # Keep 10 backup files
-            'formatter': 'verbose',
-        },
-    },
-    'loggers': {
-        'django': {
-            # General Django logging
-            'handlers': ['console', 'file'],
-            'level': 'INFO',
-            'propagate': False,
-        },
-        'django.security': {
-            # Django security-related logging
-            'handlers': ['security_file'],
-            'level': 'WARNING',
-            'propagate': False,
-        },
-        'pages': {
-            # Application-specific logging
-            'handlers': ['console', 'file'],
-            'level': 'INFO',
-            'propagate': False,
-        },
-        'axes': {
-            # Axes brute-force attempt logging
-            'handlers': ['console', 'security_file'],
-            'level': 'WARNING',
-            'propagate': False,
-        },
-    },
-}
+    }
 
 # ====================== LOGIN/LOGOUT CONFIGURATION ======================
 
