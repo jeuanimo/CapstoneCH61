@@ -1,0 +1,310 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block css %}
+<style>
+    :root {
+        --pbs-blue: var(--primary-color, #164f90);
+        --pbs-blue-dark: #0d3a6b;
+        --pbs-blue-light: #2a7dd4;
+    }
+
+    .manage-container {
+        background-image: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)), url('{% static 'img/ngs.jpg' %}');
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        min-height: 100vh;
+        padding: 40px 0;
+    }
+
+    body.dark-mode .manage-container {
+        background-image: linear-gradient(rgba(11, 16, 32, 0.95), rgba(11, 16, 32, 0.95)), url('{% static 'img/ngs.jpg' %}');
+    }
+
+    .manage-card {
+        background: white;
+        border-radius: 12px;
+        padding: 30px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    body.dark-mode .manage-card {
+        background-color: #1a2a4a;
+        color: #e8edf7;
+    }
+
+    .page-header {
+        color: var(--pbs-blue);
+        margin-bottom: 30px;
+    }
+
+    body.dark-mode .page-header {
+        color: #4a90e2;
+    }
+
+    .action-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-bottom: 30px;
+    }
+
+    .table-responsive {
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .table {
+        margin-bottom: 0;
+    }
+
+    body.dark-mode .table {
+        color: #e8edf7;
+    }
+
+    body.dark-mode .table th {
+        background-color: #0d1a30;
+        color: #e8edf7;
+    }
+
+    body.dark-mode .table td {
+        border-color: #2a4a7a;
+    }
+
+    body.dark-mode .table-striped tbody tr:nth-of-type(odd) {
+        background-color: rgba(42, 74, 122, 0.3);
+    }
+
+    .ticket-image-thumb {
+        width: 60px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: 8px;
+    }
+
+    .status-badge {
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.85em;
+        font-weight: 500;
+    }
+
+    .status-active {
+        background-color: #28a745;
+        color: white;
+    }
+
+    .status-inactive {
+        background-color: #6c757d;
+        color: white;
+    }
+
+    .featured-badge {
+        background-color: #ffc107;
+        color: #000;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.75em;
+        font-weight: 600;
+    }
+
+    .btn-action {
+        padding: 5px 10px;
+        font-size: 0.85em;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+    }
+
+    .empty-state i {
+        font-size: 4em;
+        color: #6c757d;
+        margin-bottom: 20px;
+    }
+
+    .stats-card {
+        background: linear-gradient(135deg, var(--pbs-blue) 0%, var(--pbs-blue-dark) 100%);
+        border-radius: 8px;
+        padding: 20px;
+        color: white;
+        text-align: center;
+    }
+
+    body.dark-mode .stats-card {
+        background: linear-gradient(135deg, #2a5a9a 0%, #1a4a8a 100%);
+    }
+
+    .stats-card h3 {
+        font-size: 2em;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+
+    .stats-card p {
+        margin: 0;
+        opacity: 0.9;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="manage-container">
+    <div class="container">
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'portal' %}">Portal</a></li>
+                <li class="breadcrumb-item active">Manage Event Tickets</li>
+            </ol>
+        </nav>
+
+        <div class="manage-card">
+            <div class="action-bar">
+                <h1 class="page-header mb-0">
+                    <i class="fas fa-ticket-alt"></i> Manage Event Tickets
+                </h1>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <a href="{% url 'create_event_ticket' %}" class="btn btn-success">
+                        <i class="fas fa-plus"></i> Create Event Ticket
+                    </a>
+                    <a href="{% url 'manage_ticket_purchases' %}" class="btn btn-info">
+                        <i class="fas fa-shopping-cart"></i> View Purchases
+                    </a>
+                    <a href="{% url 'event_tickets' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-eye"></i> View Public Page
+                    </a>
+                </div>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="row mb-4">
+                <div class="col-md-3 mb-3">
+                    <div class="stats-card">
+                        <h3>{{ tickets.count }}</h3>
+                        <p>Total Events</p>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="stats-card" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">
+                        <h3>{{ tickets|length }}</h3>
+                        <p>Active Events</p>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="stats-card" style="background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);">
+                        <h3>{% for t in tickets %}{{ t.quantity_sold }}{% if not forloop.last %}+{% endif %}{% empty %}0{% endfor %}</h3>
+                        <p>Tickets Sold</p>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="stats-card" style="background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);">
+                        <h3>{% for t in tickets %}{{ t.tickets_remaining }}{% if not forloop.last %}+{% endif %}{% empty %}0{% endfor %}</h3>
+                        <p>Tickets Available</p>
+                    </div>
+                </div>
+            </div>
+
+            {% if tickets %}
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Image</th>
+                            <th>Event Name</th>
+                            <th>Date</th>
+                            <th>Type</th>
+                            <th>Price</th>
+                            <th>Sold / Available</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ticket in tickets %}
+                        <tr>
+                            <td>
+                                {% if ticket.image %}
+                                <img src="{{ ticket.image.url }}" alt="{{ ticket.event_name }}" class="ticket-image-thumb">
+                                {% else %}
+                                <div class="ticket-image-thumb d-flex align-items-center justify-content-center" style="background-color: #e9ecef;">
+                                    <i class="fas fa-calendar-alt text-muted"></i>
+                                </div>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <strong>{{ ticket.event_name }}</strong>
+                                {% if ticket.is_featured %}
+                                <span class="featured-badge ms-2"><i class="fas fa-star"></i></span>
+                                {% endif %}
+                                {% if ticket.requires_member %}
+                                <span class="badge bg-secondary ms-1"><i class="fas fa-lock"></i></span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {{ ticket.event_date|date:"M j, Y" }}
+                                {% if ticket.event_time %}
+                                <br><small class="text-muted">{{ ticket.event_time|time:"g:i A" }}</small>
+                                {% endif %}
+                            </td>
+                            <td>{{ ticket.get_ticket_type_display }}</td>
+                            <td>
+                                {% if ticket.price == 0 %}
+                                <span class="text-success">FREE</span>
+                                {% else %}
+                                ${{ ticket.price }}
+                                {% endif %}
+                            </td>
+                            <td>
+                                {{ ticket.quantity_sold }} / {{ ticket.quantity_available }}
+                                {% if ticket.tickets_remaining == 0 %}
+                                <br><span class="badge bg-danger">Sold Out</span>
+                                {% elif ticket.tickets_remaining <= 10 %}
+                                <br><span class="badge bg-warning text-dark">Low Stock</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if ticket.is_active %}
+                                <span class="status-badge status-active">Active</span>
+                                {% else %}
+                                <span class="status-badge status-inactive">Inactive</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div style="display: flex; gap: 5px; flex-wrap: wrap;">
+                                    <a href="{% url 'event_ticket_detail' ticket.id %}" class="btn btn-outline-info btn-action" title="View">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{% url 'edit_event_ticket' ticket.id %}" class="btn btn-outline-primary btn-action" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="{% url 'manage_ticket_purchases' %}?ticket={{ ticket.id }}" class="btn btn-outline-success btn-action" title="View Purchases">
+                                        <i class="fas fa-shopping-cart"></i>
+                                    </a>
+                                    <a href="{% url 'delete_event_ticket' ticket.id %}" class="btn btn-outline-danger btn-action" title="Delete">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-calendar-times"></i>
+                <h4>No Event Tickets Created</h4>
+                <p class="text-muted">Get started by creating your first event ticket.</p>
+                <a href="{% url 'create_event_ticket' %}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Create Event Ticket
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

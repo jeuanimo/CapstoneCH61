@@ -297,4 +297,18 @@ urlpatterns = [
     path('portal/polls/<int:poll_id>/voters/', views.poll_voters, name='poll_voters'),
     path('portal/polls/<int:poll_id>/results.json', views.poll_results_json, name='poll_results_json'),
     path('portal/my-votes/', views.my_votes, name='my_votes'),
+    
+    # EVENT TICKETS - PUBLIC PAGES
+    path('tickets/', views.event_tickets, name='event_tickets'),
+    path('tickets/<int:pk>/', views.event_ticket_detail, name='event_ticket_detail'),
+    path('tickets/<int:pk>/purchase/', views.purchase_ticket, name='purchase_ticket'),
+    path('tickets/confirmation/<int:purchase_id>/', views.ticket_purchase_success, name='ticket_purchase_success'),
+    
+    # EVENT TICKETS - ADMIN PAGES (Officer/Staff only)
+    path('portal/tickets/manage/', views.manage_event_tickets, name='manage_event_tickets'),
+    path('portal/tickets/create/', views.create_event_ticket, name='create_event_ticket'),
+    path('portal/tickets/<int:pk>/edit/', views.edit_event_ticket, name='edit_event_ticket'),
+    path('portal/tickets/<int:pk>/delete/', views.delete_event_ticket, name='delete_event_ticket'),
+    path('portal/tickets/purchases/', views.manage_ticket_purchases, name='manage_ticket_purchases'),
+    path('portal/tickets/purchases/<int:pk>/status/', views.update_ticket_purchase_status, name='update_ticket_purchase_status'),
 ]

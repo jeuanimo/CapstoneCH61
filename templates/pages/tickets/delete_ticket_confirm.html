@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block css %}
+<style>
+    :root {
+        --pbs-blue: var(--primary-color, #164f90);
+    }
+
+    .delete-container {
+        background-image: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)), url('{% static 'img/ngs.jpg' %}');
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        min-height: 100vh;
+        padding: 40px 0;
+    }
+
+    body.dark-mode .delete-container {
+        background-image: linear-gradient(rgba(11, 16, 32, 0.95), rgba(11, 16, 32, 0.95)), url('{% static 'img/ngs.jpg' %}');
+    }
+
+    .delete-card {
+        background: white;
+        border-radius: 12px;
+        padding: 40px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        max-width: 600px;
+        margin: 0 auto;
+        text-align: center;
+    }
+
+    body.dark-mode .delete-card {
+        background-color: #1a2a4a;
+        color: #e8edf7;
+    }
+
+    .warning-icon {
+        width: 80px;
+        height: 80px;
+        background-color: #dc3545;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+    }
+
+    .warning-icon i {
+        font-size: 40px;
+        color: white;
+    }
+
+    .ticket-preview {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 20px;
+        margin: 20px 0;
+        text-align: left;
+    }
+
+    body.dark-mode .ticket-preview {
+        background-color: #0d1a30;
+    }
+
+    .ticket-preview-image {
+        width: 100px;
+        height: 100px;
+        object-fit: cover;
+        border-radius: 8px;
+    }
+
+    .btn-delete {
+        background-color: #dc3545;
+        border: none;
+        color: white;
+        padding: 12px 30px;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-delete:hover {
+        background-color: #c82333;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="delete-container">
+    <div class="container">
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'portal' %}">Portal</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'manage_event_tickets' %}">Manage Tickets</a></li>
+                <li class="breadcrumb-item active">Delete</li>
+            </ol>
+        </nav>
+
+        <div class="delete-card">
+            <div class="warning-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            
+            <h2>Delete Event Ticket?</h2>
+            <p class="text-muted">This action cannot be undone. All purchase records will also be deleted.</p>
+            
+            <div class="ticket-preview">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        {% if ticket.image %}
+                        <img src="{{ ticket.image.url }}" alt="{{ ticket.event_name }}" class="ticket-preview-image">
+                        {% else %}
+                        <div class="ticket-preview-image d-flex align-items-center justify-content-center" style="background-color: #e9ecef;">
+                            <i class="fas fa-calendar-alt fa-2x text-muted"></i>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="col">
+                        <h5 class="mb-1">{{ ticket.event_name }}</h5>
+                        <p class="mb-1 text-muted">
+                            <i class="fas fa-calendar"></i> {{ ticket.event_date|date:"F j, Y" }}
+                        </p>
+                        <p class="mb-0">
+                            <span class="badge bg-info">{{ ticket.quantity_sold }} tickets sold</span>
+                            {% if ticket.price == 0 %}
+                            <span class="badge bg-success">FREE</span>
+                            {% else %}
+                            <span class="badge bg-primary">${{ ticket.price }}</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <form method="POST">
+                {% csrf_token %}
+                <div style="display: flex; gap: 15px; justify-content: center;">
+                    <button type="submit" class="btn btn-delete">
+                        <i class="fas fa-trash"></i> Yes, Delete
+                    </button>
+                    <a href="{% url 'manage_event_tickets' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-times"></i> Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

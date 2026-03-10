@@ -1,0 +1,275 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block css %}
+<style>
+    :root {
+        --pbs-blue: var(--primary-color, #164f90);
+        --pbs-blue-dark: #0d3a6b;
+        --pbs-blue-light: #2a7dd4;
+    }
+
+    .success-container {
+        background-image: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)), url('{% static 'img/ngs.jpg' %}');
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        min-height: 100vh;
+        padding: 40px 0;
+    }
+
+    body.dark-mode .success-container {
+        background-image: linear-gradient(rgba(11, 16, 32, 0.95), rgba(11, 16, 32, 0.95)), url('{% static 'img/ngs.jpg' %}');
+    }
+
+    .success-card {
+        background: white;
+        border-radius: 12px;
+        padding: 40px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        max-width: 700px;
+        margin: 0 auto;
+        text-align: center;
+    }
+
+    body.dark-mode .success-card {
+        background-color: #1a2a4a;
+        color: #e8edf7;
+    }
+
+    .success-icon {
+        width: 100px;
+        height: 100px;
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 30px;
+        animation: pulse 2s infinite;
+    }
+
+    .success-icon i {
+        font-size: 50px;
+        color: white;
+    }
+
+    @keyframes pulse {
+        0% {
+            box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.4);
+        }
+        70% {
+            box-shadow: 0 0 0 20px rgba(40, 167, 69, 0);
+        }
+        100% {
+            box-shadow: 0 0 0 0 rgba(40, 167, 69, 0);
+        }
+    }
+
+    .success-title {
+        color: #28a745;
+        font-weight: bold;
+        margin-bottom: 20px;
+    }
+
+    .confirmation-code {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 20px;
+        margin: 30px 0;
+        font-family: monospace;
+    }
+
+    body.dark-mode .confirmation-code {
+        background-color: #0d1a30;
+    }
+
+    .confirmation-code .label {
+        font-size: 0.9em;
+        color: #666;
+        margin-bottom: 5px;
+    }
+
+    body.dark-mode .confirmation-code .label {
+        color: #aaa;
+    }
+
+    .confirmation-code .code {
+        font-size: 2em;
+        font-weight: bold;
+        color: var(--pbs-blue);
+        letter-spacing: 3px;
+    }
+
+    body.dark-mode .confirmation-code .code {
+        color: #4a90e2;
+    }
+
+    .order-details {
+        text-align: left;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 20px;
+        margin: 30px 0;
+    }
+
+    body.dark-mode .order-details {
+        background-color: #0d1a30;
+    }
+
+    .order-details h5 {
+        margin-bottom: 15px;
+        color: var(--pbs-blue);
+    }
+
+    body.dark-mode .order-details h5 {
+        color: #4a90e2;
+    }
+
+    .order-details .detail-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    body.dark-mode .order-details .detail-row {
+        border-bottom-color: #2a4a7a;
+    }
+
+    .order-details .detail-row:last-child {
+        border-bottom: none;
+    }
+
+    .order-details .detail-row .label {
+        color: #666;
+    }
+
+    body.dark-mode .order-details .detail-row .label {
+        color: #aaa;
+    }
+
+    .order-details .total-row {
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 2px solid var(--pbs-blue);
+        font-weight: bold;
+        font-size: 1.1em;
+    }
+
+    body.dark-mode .order-details .total-row {
+        border-top-color: #4a90e2;
+    }
+
+    .btn-primary-custom {
+        background: linear-gradient(135deg, var(--pbs-blue) 0%, var(--pbs-blue-dark) 100%);
+        border: none;
+        color: white;
+        padding: 12px 30px;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary-custom:hover {
+        background: linear-gradient(135deg, var(--pbs-blue-light) 0%, var(--pbs-blue) 100%);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 71, 171, 0.4);
+    }
+
+    .email-note {
+        background-color: #e8f4fd;
+        border-radius: 8px;
+        padding: 15px;
+        margin: 20px 0;
+        color: #0d6efd;
+    }
+
+    body.dark-mode .email-note {
+        background-color: rgba(13, 110, 253, 0.2);
+        color: #6ea8fe;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="success-container">
+    <div class="container">
+        <div class="success-card">
+            <div class="success-icon">
+                <i class="fas fa-check"></i>
+            </div>
+            
+            <h1 class="success-title">Purchase Successful!</h1>
+            <p class="lead">Your tickets have been confirmed.</p>
+            
+            <div class="confirmation-code">
+                <div class="label">Confirmation Code</div>
+                <div class="code">{{ purchase.confirmation_code }}</div>
+            </div>
+            
+            <div class="email-note">
+                <i class="fas fa-envelope"></i>
+                A confirmation email has been sent to <strong>{{ purchase.email }}</strong>
+            </div>
+            
+            <div class="order-details">
+                <h5><i class="fas fa-ticket-alt"></i> Order Details</h5>
+                
+                <div class="detail-row">
+                    <span class="label">Event:</span>
+                    <span>{{ purchase.ticket.event_name }}</span>
+                </div>
+                
+                <div class="detail-row">
+                    <span class="label">Date:</span>
+                    <span>{{ purchase.ticket.event_date|date:"l, F j, Y" }}</span>
+                </div>
+                
+                {% if purchase.ticket.event_time %}
+                <div class="detail-row">
+                    <span class="label">Time:</span>
+                    <span>{{ purchase.ticket.event_time|time:"g:i A" }}</span>
+                </div>
+                {% endif %}
+                
+                {% if purchase.ticket.venue_name %}
+                <div class="detail-row">
+                    <span class="label">Venue:</span>
+                    <span>{{ purchase.ticket.venue_name }}</span>
+                </div>
+                {% endif %}
+                
+                <div class="detail-row">
+                    <span class="label">Quantity:</span>
+                    <span>{{ purchase.quantity }} ticket{% if purchase.quantity != 1 %}s{% endif %}</span>
+                </div>
+                
+                <div class="detail-row">
+                    <span class="label">Name:</span>
+                    <span>{{ purchase.full_name }}</span>
+                </div>
+                
+                <div class="detail-row total-row">
+                    <span>Total Paid:</span>
+                    <span>{% if purchase.total_price == 0 %}FREE{% else %}${{ purchase.total_price }}{% endif %}</span>
+                </div>
+            </div>
+            
+            <div class="mt-4" style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+                <a href="{% url 'event_tickets' %}" class="btn btn-primary-custom">
+                    <i class="fas fa-calendar-alt"></i> Browse More Events
+                </a>
+                <a href="{% url 'home' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-home"></i> Return Home
+                </a>
+            </div>
+            
+            <p class="text-muted mt-4 small">
+                Please save your confirmation code. You may need to present it at the event.
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

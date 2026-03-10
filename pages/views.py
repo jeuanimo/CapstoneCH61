@@ -6642,3 +6642,295 @@ def my_votes(request):
         'votes': votes,
     }
     return render(request, 'pages/portal/polls/my_votes.html', context)
+
+
+# ============================================================================
+# EVENT TICKETS VIEWS
+# ============================================================================
+
+def event_tickets(request):
+    """Display all available event tickets with optional filtering"""
+    from .models import EventTicket, SiteConfiguration
+    
+    site_config = SiteConfiguration.get_config()
+    
+    # Check if tickets are enabled
+    if not site_config.show_event_tickets:
+        messages.info(request, 'Event tickets are currently unavailable.')
+        return redirect('home')
+    
+    # Check if using external ticketing
+    if site_config.event_tickets_type == 'external' and site_config.external_tickets_url:
+        return redirect(site_config.external_tickets_url)
+    
+    # Get active tickets
+    tickets = EventTicket.objects.filter(is_active=True).order_by('event_date', 'event_time')
+    
+    # Filter by ticket type if specified
+    ticket_type = request.GET.get('type')
+    if ticket_type:
+        tickets = tickets.filter(ticket_type=ticket_type)
+    
+    # Get unique ticket types for filter
+    ticket_types = EventTicket.TICKET_TYPE_CHOICES
+    
+    context = {
+        'tickets': tickets,
+        'ticket_types': ticket_types,
+        'selected_type': ticket_type,
+    }
+    return render(request, 'pages/tickets/event_tickets.html', context)
+
+
+def event_ticket_detail(request, pk):
+    """Display event ticket details"""
+    from .models import EventTicket, SiteConfiguration
+    
+    site_config = SiteConfiguration.get_config()
+    
+    if not site_config.show_event_tickets:
+        messages.info(request, 'Event tickets are currently unavailable.')
+        return redirect('home')
+    
+    ticket = get_object_or_404(EventTicket, pk=pk, is_active=True)
+    
+    # Check if member-only
+    if ticket.requires_member and not request.user.is_authenticated:
+        messages.info(request, 'This event requires member login to purchase tickets.')
+        return redirect('login')
+    
+    context = {
+        'ticket': ticket,
+        'tickets_available': ticket.tickets_remaining > 0,
+    }
+    return render(request, 'pages/tickets/event_ticket_detail.html', context)
+
+
+def purchase_ticket(request, pk):
+    """Handle ticket purchase"""
+    from .models import EventTicket, TicketPurchase, SiteConfiguration
+    from .forms import TicketPurchaseForm
+    import uuid
+    
+    site_config = SiteConfiguration.get_config()
+    
+    if not site_config.show_event_tickets:
+        messages.info(request, 'Event tickets are currently unavailable.')
+        return redirect('home')
+    
+    ticket = get_object_or_404(EventTicket, pk=pk, is_active=True)
+    
+    # Check if member-only
+    if ticket.requires_member and not request.user.is_authenticated:
+        messages.info(request, 'This event requires member login to purchase tickets.')
+        return redirect('login')
+    
+    # Check availability
+    if ticket.tickets_remaining <= 0:
+        messages.error(request, 'Sorry, this event is sold out.')
+        return redirect('event_ticket_detail', pk=pk)
+    
+    if request.method == 'POST':
+        form = TicketPurchaseForm(request.POST, ticket=ticket)
+        if form.is_valid():
+            quantity = form.cleaned_data['quantity']
+            
+            # Verify tickets still available
+            if quantity > ticket.tickets_remaining:
+                messages.error(request, f'Only {ticket.tickets_remaining} tickets remaining.')
+                return redirect('event_ticket_detail', pk=pk)
+            
+            # Generate confirmation code
+            confirmation_code = str(uuid.uuid4())[:8].upper()
+            
+            # Create purchase
+            purchase = TicketPurchase.objects.create(
+                ticket=ticket,
+                quantity=quantity,
+                price_per_ticket=ticket.price,
+                total_price=ticket.price * quantity,
+                user=request.user if request.user.is_authenticated else None,
+                email=form.cleaned_data['email'],
+                full_name=form.cleaned_data['full_name'],
+                phone=form.cleaned_data.get('phone', ''),
+                status='pending',
+                confirmation_code=confirmation_code,
+            )
+            
+            # Update quantity sold
+            ticket.quantity_sold += quantity
+            ticket.save()
+            
+            # For now, mark as completed (no payment integration)
+            purchase.status = 'completed'
+            purchase.save()
+            
+            messages.success(request, f'Tickets purchased successfully! Confirmation: {confirmation_code}')
+            return redirect('ticket_purchase_success', purchase_id=purchase.id)
+    else:
+        initial = {}
+        if request.user.is_authenticated:
+            initial['email'] = request.user.email
+            if hasattr(request.user, 'first_name') and hasattr(request.user, 'last_name'):
+                initial['full_name'] = f"{request.user.first_name} {request.user.last_name}".strip()
+        form = TicketPurchaseForm(ticket=ticket, initial=initial)
+    
+    context = {
+        'ticket': ticket,
+        'form': form,
+    }
+    return render(request, 'pages/tickets/purchase_ticket.html', context)
+
+
+def ticket_purchase_success(request, purchase_id):
+    """Display ticket purchase confirmation"""
+    from .models import TicketPurchase
+    
+    purchase = get_object_or_404(TicketPurchase, pk=purchase_id)
+    
+    # Verify user has access to this purchase
+    if request.user.is_authenticated:
+        if purchase.user and purchase.user != request.user:
+            messages.error(request, 'You do not have access to this purchase.')
+            return redirect('event_tickets')
+    
+    context = {
+        'purchase': purchase,
+    }
+    return render(request, 'pages/tickets/purchase_success.html', context)
+
+
+# Event Ticket Admin Views
+@login_required
+@user_passes_test(is_officer_or_staff)
+def manage_event_tickets(request):
+    """Admin view to manage event tickets"""
+    from .models import EventTicket
+    
+    tickets = EventTicket.objects.all().order_by('-created_at')
+    
+    context = {
+        'tickets': tickets,
+    }
+    return render(request, 'pages/tickets/manage_tickets.html', context)
+
+
+@login_required
+@user_passes_test(is_officer_or_staff)
+def create_event_ticket(request):
+    """Admin view to create a new event ticket"""
+    from .forms import EventTicketForm
+    
+    if request.method == 'POST':
+        form = EventTicketForm(request.POST, request.FILES)
+        if form.is_valid():
+            ticket = form.save(commit=False)
+            ticket.created_by = request.user
+            ticket.save()
+            messages.success(request, f'Event ticket "{ticket.event_name}" created successfully!')
+            return redirect('manage_event_tickets')
+    else:
+        form = EventTicketForm()
+    
+    context = {
+        'form': form,
+        'title': 'Create Event Ticket',
+    }
+    return render(request, 'pages/tickets/event_ticket_form.html', context)
+
+
+@login_required
+@user_passes_test(is_officer_or_staff)
+def edit_event_ticket(request, pk):
+    """Admin view to edit an event ticket"""
+    from .models import EventTicket
+    from .forms import EventTicketForm
+    
+    ticket = get_object_or_404(EventTicket, pk=pk)
+    
+    if request.method == 'POST':
+        form = EventTicketForm(request.POST, request.FILES, instance=ticket)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'Event ticket "{ticket.event_name}" updated successfully!')
+            return redirect('manage_event_tickets')
+    else:
+        form = EventTicketForm(instance=ticket)
+    
+    context = {
+        'form': form,
+        'ticket': ticket,
+        'title': f'Edit {ticket.event_name}',
+    }
+    return render(request, 'pages/tickets/event_ticket_form.html', context)
+
+
+@login_required
+@user_passes_test(is_officer_or_staff)
+def delete_event_ticket(request, pk):
+    """Admin view to delete an event ticket"""
+    from .models import EventTicket
+    
+    ticket = get_object_or_404(EventTicket, pk=pk)
+    
+    if request.method == 'POST':
+        ticket_name = ticket.event_name
+        ticket.delete()
+        messages.success(request, f'Event ticket "{ticket_name}" deleted successfully!')
+        return redirect('manage_event_tickets')
+    
+    context = {
+        'ticket': ticket,
+    }
+    return render(request, 'pages/tickets/delete_ticket_confirm.html', context)
+
+
+@login_required
+@user_passes_test(is_officer_or_staff)
+def manage_ticket_purchases(request):
+    """Admin view to manage ticket purchases"""
+    from .models import TicketPurchase
+    
+    purchases = TicketPurchase.objects.all().select_related('ticket', 'user').order_by('-created_at')
+    
+    # Filter by status
+    status_filter = request.GET.get('status')
+    if status_filter:
+        purchases = purchases.filter(status=status_filter)
+    
+    # Filter by ticket
+    ticket_filter = request.GET.get('ticket')
+    if ticket_filter:
+        purchases = purchases.filter(ticket_id=ticket_filter)
+    
+    context = {
+        'purchases': purchases,
+        'status_filter': status_filter,
+        'ticket_filter': ticket_filter,
+    }
+    return render(request, 'pages/tickets/manage_purchases.html', context)
+
+
+@login_required
+@user_passes_test(is_officer_or_staff)
+def update_ticket_purchase_status(request, pk):
+    """Admin view to update ticket purchase status"""
+    from .models import TicketPurchase
+    
+    purchase = get_object_or_404(TicketPurchase, pk=pk)
+    
+    if request.method == 'POST':
+        new_status = request.POST.get('status')
+        if new_status in dict(TicketPurchase.STATUS_CHOICES):
+            old_status = purchase.status
+            purchase.status = new_status
+            purchase.save()
+            
+            # If cancelling, restore ticket quantity
+            if new_status == 'cancelled' and old_status != 'cancelled':
+                purchase.ticket.quantity_sold -= purchase.quantity
+                purchase.ticket.save()
+            
+            messages.success(request, f'Purchase status updated to {new_status}.')
+    
+    return redirect('manage_ticket_purchases')

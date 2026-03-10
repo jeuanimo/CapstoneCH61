@@ -1133,6 +1133,161 @@ class OrderItem(models.Model):
         return self.price * self.quantity
 
 
+# ============================================================================
+# EVENT TICKETING SYSTEM
+# ============================================================================
+
+class EventTicket(models.Model):
+    """
+    Event ticket listing for sale.
+    Similar to Product model but for event tickets.
+    """
+    TICKET_TYPE_CHOICES = [
+        ('general', 'General Admission'),
+        ('vip', 'VIP'),
+        ('early_bird', 'Early Bird'),
+        ('member', 'Member Only'),
+        ('group', 'Group Package'),
+    ]
+    
+    # Event Information
+    event_name = models.CharField(max_length=200, help_text='Name of the event')
+    description = models.TextField(blank=True, default='', help_text='Event description and details')
+    event_date = models.DateField(help_text='Date of the event')
+    event_time = models.TimeField(help_text='Start time of the event')
+    end_time = models.TimeField(blank=True, null=True, help_text='End time (optional)')
+    
+    # Location
+    venue_name = models.CharField(max_length=200, help_text='Name of the venue')
+    location = models.CharField(max_length=300, help_text='Full address of the venue')
+    city = models.CharField(max_length=100, blank=True, default='')
+    state = models.CharField(max_length=50, blank=True, default='')
+    
+    # Ticket Details
+    ticket_type = models.CharField(max_length=50, choices=TICKET_TYPE_CHOICES, default='general')
+    price = models.DecimalField(max_digits=10, decimal_places=2, help_text='Price per ticket')
+    quantity_available = models.PositiveIntegerField(default=0, help_text='Total tickets available for sale')
+    quantity_sold = models.PositiveIntegerField(default=0, help_text='Number of tickets sold')
+    max_per_order = models.PositiveIntegerField(default=10, help_text='Maximum tickets per order')
+    
+    # Display
+    image = models.ImageField(upload_to='event_tickets/', blank=True, null=True, help_text='Event promotional image')
+    is_active = models.BooleanField(default=True, help_text='Active tickets are visible for purchase')
+    is_featured = models.BooleanField(default=False, help_text='Featured events appear first')
+    requires_member = models.BooleanField(default=False, help_text='Only members can purchase')
+    
+    # Metadata
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey(
+        User, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True,
+        related_name='event_tickets_created'
+    )
+    
+    class Meta:
+        ordering = ['event_date', 'event_time']
+        indexes = [
+            models.Index(fields=['event_date', 'is_active']),
+            models.Index(fields=['is_active', '-created_at']),
+            models.Index(fields=['is_featured', 'event_date']),
+        ]
+        verbose_name = 'Event Ticket'
+        verbose_name_plural = 'Event Tickets'
+    
+    def __str__(self):
+        return f"{self.event_name} - {self.event_date}"
+    
+    @property
+    def tickets_remaining(self):
+        """Calculate remaining tickets available"""
+        return max(0, self.quantity_available - self.quantity_sold)
+    
+    @property
+    def is_sold_out(self):
+        """Check if event is sold out"""
+        return self.tickets_remaining <= 0
+    
+    @property
+    def is_past_event(self):
+        """Check if event date has passed"""
+        from datetime import date
+        return self.event_date < date.today()
+    
+    def can_purchase(self, quantity=1):
+        """Check if the requested quantity can be purchased"""
+        return (
+            self.is_active and 
+            not self.is_sold_out and 
+            not self.is_past_event and
+            quantity <= self.tickets_remaining and
+            quantity <= self.max_per_order
+        )
+
+
+class TicketPurchase(models.Model):
+    """
+    Record of ticket purchase.
+    Similar to Order model but specifically for event tickets.
+    """
+    STATUS_CHOICES = [
+        ('pending', 'Pending Payment'),
+        ('completed', 'Payment Completed'),
+        ('cancelled', 'Cancelled'),
+        ('refunded', 'Refunded'),
+    ]
+    
+    # Ticket Reference
+    ticket = models.ForeignKey(EventTicket, on_delete=models.CASCADE, related_name='purchases')
+    quantity = models.PositiveIntegerField(default=1)
+    price_per_ticket = models.DecimalField(max_digits=10, decimal_places=2, help_text='Price at time of purchase')
+    total_price = models.DecimalField(max_digits=10, decimal_places=2)
+    
+    # Buyer Information
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='ticket_purchases')
+    email = models.EmailField(help_text='Email for ticket confirmation')
+    full_name = models.CharField(max_length=200, help_text='Name on the ticket')
+    phone = models.CharField(max_length=20, blank=True, default='')
+    
+    # Payment
+    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='pending')
+    stripe_payment_intent = models.CharField(max_length=250, blank=True, default='')
+    
+    # Confirmation
+    confirmation_code = models.CharField(max_length=20, unique=True, help_text='Unique confirmation code')
+    
+    # Metadata
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['user', '-created_at']),
+            models.Index(fields=['email', '-created_at']),
+            models.Index(fields=['confirmation_code']),
+            models.Index(fields=['status', '-created_at']),
+        ]
+        verbose_name = 'Ticket Purchase'
+        verbose_name_plural = 'Ticket Purchases'
+    
+    def __str__(self):
+        return f"Ticket #{self.confirmation_code} - {self.ticket.event_name}"
+    
+    def save(self, *args, **kwargs):
+        # Generate confirmation code if not set
+        if not self.confirmation_code:
+            import random
+            import string
+            self.confirmation_code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
+        # Calculate total if not set
+        if not self.total_price:
+            self.total_price = self.price_per_ticket * self.quantity
+        super().save(*args, **kwargs)
+
+
 class ChapterHistoryBackup(models.Model):
     """
     Stores backups of chapter history sections for undo/restore functionality.

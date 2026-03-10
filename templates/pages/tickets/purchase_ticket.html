@@ -1,0 +1,371 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block css %}
+<style>
+    :root {
+        --pbs-blue: var(--primary-color, #164f90);
+        --pbs-blue-dark: #0d3a6b;
+        --pbs-blue-light: #2a7dd4;
+    }
+
+    .purchase-container {
+        background-image: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)), url('{% static 'img/ngs.jpg' %}');
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        min-height: 100vh;
+        padding: 40px 0;
+    }
+
+    body.dark-mode .purchase-container {
+        background-image: linear-gradient(rgba(11, 16, 32, 0.95), rgba(11, 16, 32, 0.95)), url('{% static 'img/ngs.jpg' %}');
+    }
+
+    .purchase-card {
+        background: white;
+        border-radius: 12px;
+        padding: 30px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    body.dark-mode .purchase-card {
+        background-color: #1a2a4a;
+        color: #e8edf7;
+    }
+
+    .event-summary {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 30px;
+    }
+
+    body.dark-mode .event-summary {
+        background-color: #0d1a30;
+    }
+
+    .event-summary-image {
+        width: 100%;
+        height: 150px;
+        object-fit: cover;
+        border-radius: 8px;
+    }
+
+    .event-summary-title {
+        color: var(--pbs-blue);
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    body.dark-mode .event-summary-title {
+        color: #4a90e2;
+    }
+
+    .event-summary-info {
+        font-size: 0.9em;
+        color: #666;
+    }
+
+    body.dark-mode .event-summary-info {
+        color: #aaa;
+    }
+
+    .event-summary-info i {
+        width: 20px;
+        color: var(--pbs-blue);
+    }
+
+    body.dark-mode .event-summary-info i {
+        color: #4a90e2;
+    }
+
+    .form-section-title {
+        color: var(--pbs-blue);
+        font-weight: 600;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid var(--pbs-blue);
+    }
+
+    body.dark-mode .form-section-title {
+        color: #4a90e2;
+        border-bottom-color: #4a90e2;
+    }
+
+    .form-control, .form-select {
+        border-radius: 8px;
+        padding: 12px 15px;
+    }
+
+    body.dark-mode .form-control, body.dark-mode .form-select {
+        background-color: #0d1a30;
+        border-color: #2a4a7a;
+        color: #e8edf7;
+    }
+
+    .order-summary {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 20px;
+        position: sticky;
+        top: 20px;
+    }
+
+    body.dark-mode .order-summary {
+        background-color: #0d1a30;
+    }
+
+    .order-summary-title {
+        font-weight: bold;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    body.dark-mode .order-summary-title {
+        border-bottom-color: #2a4a7a;
+    }
+
+    .order-line {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+    }
+
+    .order-total {
+        font-size: 1.5em;
+        font-weight: bold;
+        color: var(--pbs-blue);
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 2px solid var(--pbs-blue);
+    }
+
+    body.dark-mode .order-total {
+        color: #4a90e2;
+        border-top-color: #4a90e2;
+    }
+
+    .btn-purchase {
+        background: linear-gradient(135deg, var(--pbs-blue) 0%, var(--pbs-blue-dark) 100%);
+        border: none;
+        color: white;
+        padding: 15px 40px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 1.1em;
+        transition: all 0.3s ease;
+        width: 100%;
+    }
+
+    .btn-purchase:hover {
+        background: linear-gradient(135deg, var(--pbs-blue-light) 0%, var(--pbs-blue) 100%);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 71, 171, 0.4);
+    }
+
+    body.dark-mode .btn-purchase {
+        background: linear-gradient(135deg, #2a5a9a 0%, #1a4a8a 100%);
+    }
+
+    .quantity-input {
+        max-width: 100px;
+    }
+
+    .price-per-ticket {
+        font-size: 1.2em;
+        font-weight: bold;
+        color: var(--pbs-blue);
+    }
+
+    body.dark-mode .price-per-ticket {
+        color: #4a90e2;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="purchase-container">
+    <div class="container">
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'event_tickets' %}">Event Tickets</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'event_ticket_detail' ticket.id %}">{{ ticket.event_name }}</a></li>
+                <li class="breadcrumb-item active">Purchase</li>
+            </ol>
+        </nav>
+
+        <h1 class="text-center mb-4" style="color: var(--pbs-blue);">
+            <i class="fas fa-ticket-alt"></i> Purchase Tickets
+        </h1>
+
+        <form method="POST" id="purchaseForm">
+            {% csrf_token %}
+            <div class="row">
+                <!-- Purchase Form -->
+                <div class="col-lg-8 mb-4">
+                    <div class="purchase-card">
+                        <!-- Event Summary -->
+                        <div class="event-summary">
+                            <div class="row align-items-center">
+                                <div class="col-md-3">
+                                    {% if ticket.image %}
+                                    <img src="{{ ticket.image.url }}" alt="{{ ticket.event_name }}" class="event-summary-image">
+                                    {% else %}
+                                    <div class="event-summary-image d-flex align-items-center justify-content-center" style="background-color: #e9ecef;">
+                                        <i class="fas fa-calendar-alt fa-3x" style="color: #6c757d;"></i>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-9">
+                                    <h4 class="event-summary-title">{{ ticket.event_name }}</h4>
+                                    <div class="event-summary-info">
+                                        <p class="mb-1"><i class="fas fa-calendar"></i> {{ ticket.event_date|date:"l, F j, Y" }}</p>
+                                        {% if ticket.event_time %}
+                                        <p class="mb-1"><i class="fas fa-clock"></i> {{ ticket.event_time|time:"g:i A" }}</p>
+                                        {% endif %}
+                                        {% if ticket.venue_name %}
+                                        <p class="mb-0"><i class="fas fa-map-marker-alt"></i> {{ ticket.venue_name }}</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Ticket Selection -->
+                        <h5 class="form-section-title"><i class="fas fa-ticket-alt"></i> Ticket Selection</h5>
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label">Number of Tickets</label>
+                                {{ form.quantity }}
+                                {% if form.quantity.errors %}
+                                <div class="text-danger small">{{ form.quantity.errors.0 }}</div>
+                                {% endif %}
+                                <small class="text-muted">
+                                    {{ ticket.tickets_remaining }} tickets available
+                                    {% if ticket.max_per_order %}
+                                    (max {{ ticket.max_per_order }} per order)
+                                    {% endif %}
+                                </small>
+                            </div>
+                            <div class="col-md-6 d-flex align-items-center">
+                                <div>
+                                    <span class="text-muted">Price per ticket:</span>
+                                    <span class="price-per-ticket d-block">
+                                        {% if ticket.price == 0 %}FREE{% else %}${{ ticket.price }}{% endif %}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Contact Information -->
+                        <h5 class="form-section-title"><i class="fas fa-user"></i> Contact Information</h5>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Full Name *</label>
+                                {{ form.full_name }}
+                                {% if form.full_name.errors %}
+                                <div class="text-danger small">{{ form.full_name.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Email Address *</label>
+                                {{ form.email }}
+                                {% if form.email.errors %}
+                                <div class="text-danger small">{{ form.email.errors.0 }}</div>
+                                {% endif %}
+                                <small class="text-muted">Confirmation will be sent to this email</small>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Phone Number</label>
+                                {{ form.phone }}
+                                {% if form.phone.errors %}
+                                <div class="text-danger small">{{ form.phone.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Order Summary -->
+                <div class="col-lg-4">
+                    <div class="order-summary">
+                        <h5 class="order-summary-title"><i class="fas fa-shopping-cart"></i> Order Summary</h5>
+                        
+                        <div class="order-line">
+                            <span>Event:</span>
+                            <span>{{ ticket.event_name|truncatechars:20 }}</span>
+                        </div>
+                        
+                        <div class="order-line">
+                            <span>Price per ticket:</span>
+                            <span>{% if ticket.price == 0 %}FREE{% else %}${{ ticket.price }}{% endif %}</span>
+                        </div>
+                        
+                        <div class="order-line">
+                            <span>Quantity:</span>
+                            <span id="summaryQuantity">1</span>
+                        </div>
+                        
+                        <div class="order-total">
+                            <div class="order-line" style="margin-bottom: 0;">
+                                <span>Total:</span>
+                                <span id="summaryTotal">{% if ticket.price == 0 %}FREE{% else %}${{ ticket.price }}{% endif %}</span>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-purchase mt-4">
+                            <i class="fas fa-check-circle"></i> Complete Purchase
+                        </button>
+                        
+                        <p class="text-center text-muted small mt-3">
+                            <i class="fas fa-lock"></i> Your information is secure
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </form>
+        
+        <div class="text-center mt-4">
+            <a href="{% url 'event_ticket_detail' ticket.id %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Event Details
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const quantityInput = document.getElementById('id_quantity');
+    const summaryQuantity = document.getElementById('summaryQuantity');
+    const summaryTotal = document.getElementById('summaryTotal');
+    const pricePerTicket = {{ ticket.price|default:0 }};
+    
+    function updateSummary() {
+        const quantity = parseInt(quantityInput.value) || 1;
+        summaryQuantity.textContent = quantity;
+        
+        if (pricePerTicket === 0) {
+            summaryTotal.textContent = 'FREE';
+        } else {
+            const total = (pricePerTicket * quantity).toFixed(2);
+            summaryTotal.textContent = '$' + total;
+        }
+    }
+    
+    if (quantityInput) {
+        quantityInput.addEventListener('change', updateSummary);
+        quantityInput.addEventListener('input', updateSummary);
+        updateSummary(); // Initialize
+    }
+});
+</script>
+{% endblock %}

@@ -1631,3 +1631,174 @@ class VoteForm(forms.Form):
                 )
         
         return option
+
+
+# =============================================================================
+# EVENT TICKETING FORMS
+# =============================================================================
+
+class EventTicketForm(forms.ModelForm):
+    """Form for creating/editing event tickets"""
+    
+    class Meta:
+        from .models import EventTicket
+        model = EventTicket
+        fields = [
+            'event_name', 'description', 'event_date', 'event_time', 'end_time',
+            'venue_name', 'location', 'city', 'state',
+            'ticket_type', 'price', 'quantity_available', 'quantity_sold', 'max_per_order',
+            'image', 'is_active', 'is_featured', 'requires_member'
+        ]
+        widgets = {
+            'event_name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'e.g., Annual Gala 2026'
+            }),
+            'description': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 4,
+                'placeholder': 'Event description, dress code, what to expect...'
+            }),
+            'event_date': forms.DateInput(attrs={
+                'class': 'form-control',
+                'type': 'date'
+            }),
+            'event_time': forms.TimeInput(attrs={
+                'class': 'form-control',
+                'type': 'time'
+            }),
+            'end_time': forms.TimeInput(attrs={
+                'class': 'form-control',
+                'type': 'time'
+            }),
+            'venue_name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'e.g., Grand Ballroom Hotel'
+            }),
+            'location': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Full address'
+            }),
+            'city': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'City'
+            }),
+            'state': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'State'
+            }),
+            'ticket_type': forms.Select(attrs={
+                'class': 'form-control'
+            }),
+            'price': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': '0',
+                'step': '0.01',
+                'placeholder': '0.00'
+            }),
+            'quantity_available': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': '1',
+                'placeholder': 'Total tickets for sale'
+            }),
+            'quantity_sold': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': '0',
+                'placeholder': '0'
+            }),
+            'max_per_order': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': '1',
+                'max': '20',
+                'placeholder': '10'
+            }),
+            'image': forms.FileInput(attrs={
+                'class': 'form-control',
+                'accept': 'image/*'
+            }),
+            'is_active': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
+            'is_featured': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
+            'requires_member': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
+        }
+        labels = {
+            'event_name': 'Event Name',
+            'description': 'Event Description',
+            'event_date': 'Event Date',
+            'event_time': 'Start Time',
+            'end_time': 'End Time (Optional)',
+            'venue_name': 'Venue Name',
+            'location': 'Address',
+            'city': 'City',
+            'state': 'State',
+            'ticket_type': 'Ticket Type',
+            'price': 'Price ($)',
+            'quantity_available': 'Tickets Available',
+            'quantity_sold': 'Tickets Sold',
+            'max_per_order': 'Max Per Order',
+            'image': 'Event Image',
+            'is_active': 'Active (visible for sale)',
+            'is_featured': 'Featured Event',
+            'requires_member': 'Members Only',
+        }
+
+
+class TicketPurchaseForm(forms.Form):
+    """Form for purchasing event tickets"""
+    
+    quantity = forms.IntegerField(
+        min_value=1,
+        max_value=10,
+        initial=1,
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control',
+            'min': '1',
+            'max': '10'
+        })
+    )
+    full_name = forms.CharField(
+        max_length=200,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Full name (as it should appear on ticket)'
+        })
+    )
+    email = forms.EmailField(
+        widget=forms.EmailInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Email for confirmation'
+        })
+    )
+    phone = forms.CharField(
+        max_length=20,
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Phone number (optional)'
+        })
+    )
+    
+    def __init__(self, ticket, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.ticket = ticket
+        # Set max based on ticket availability and max per order
+        max_available = min(ticket.tickets_remaining, ticket.max_per_order)
+        self.fields['quantity'].max_value = max_available
+        self.fields['quantity'].widget.attrs['max'] = str(max_available)
+    
+    def clean_quantity(self):
+        quantity = self.cleaned_data['quantity']
+        if quantity > self.ticket.tickets_remaining:
+            raise forms.ValidationError(
+                f'Only {self.ticket.tickets_remaining} tickets remaining'
+            )
+        if quantity > self.ticket.max_per_order:
+            raise forms.ValidationError(
+                f'Maximum {self.ticket.max_per_order} tickets per order'
+            )
+        return quantity

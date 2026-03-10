@@ -1,0 +1,372 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block css %}
+<style>
+    :root {
+        --pbs-blue: var(--primary-color, #164f90);
+        --pbs-blue-dark: #0d3a6b;
+        --pbs-blue-light: #2a7dd4;
+    }
+
+    .form-container {
+        background-image: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)), url('{% static 'img/ngs.jpg' %}');
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        min-height: 100vh;
+        padding: 40px 0;
+    }
+
+    body.dark-mode .form-container {
+        background-image: linear-gradient(rgba(11, 16, 32, 0.95), rgba(11, 16, 32, 0.95)), url('{% static 'img/ngs.jpg' %}');
+    }
+
+    .form-card {
+        background: white;
+        border-radius: 12px;
+        padding: 30px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    body.dark-mode .form-card {
+        background-color: #1a2a4a;
+        color: #e8edf7;
+    }
+
+    .page-title {
+        color: var(--pbs-blue);
+        margin-bottom: 30px;
+        text-align: center;
+    }
+
+    body.dark-mode .page-title {
+        color: #4a90e2;
+    }
+
+    .form-section {
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    body.dark-mode .form-section {
+        border-bottom-color: #2a4a7a;
+    }
+
+    .form-section:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    .section-title {
+        color: var(--pbs-blue);
+        font-weight: 600;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    body.dark-mode .section-title {
+        color: #4a90e2;
+    }
+
+    .form-control, .form-select {
+        border-radius: 8px;
+        padding: 10px 15px;
+    }
+
+    body.dark-mode .form-control, body.dark-mode .form-select {
+        background-color: #0d1a30;
+        border-color: #2a4a7a;
+        color: #e8edf7;
+    }
+
+    .form-check-input:checked {
+        background-color: var(--pbs-blue);
+        border-color: var(--pbs-blue);
+    }
+
+    .btn-submit {
+        background: linear-gradient(135deg, var(--pbs-blue) 0%, var(--pbs-blue-dark) 100%);
+        border: none;
+        color: white;
+        padding: 12px 40px;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-submit:hover {
+        background: linear-gradient(135deg, var(--pbs-blue-light) 0%, var(--pbs-blue) 100%);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 71, 171, 0.4);
+    }
+
+    .current-image {
+        max-width: 200px;
+        border-radius: 8px;
+        margin-bottom: 10px;
+    }
+
+    .help-text {
+        font-size: 0.85em;
+        color: #6c757d;
+    }
+
+    body.dark-mode .help-text {
+        color: #aaa;
+    }
+
+    .required-indicator {
+        color: #dc3545;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <div class="container">
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'portal' %}">Portal</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'manage_event_tickets' %}">Manage Tickets</a></li>
+                <li class="breadcrumb-item active">{{ title }}</li>
+            </ol>
+        </nav>
+
+        <div class="form-card">
+            <h1 class="page-title">
+                <i class="fas fa-ticket-alt"></i> {{ title }}
+            </h1>
+
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <!-- Event Details Section -->
+                <div class="form-section">
+                    <h5 class="section-title">
+                        <i class="fas fa-info-circle"></i> Event Details
+                    </h5>
+                    
+                    <div class="row">
+                        <div class="col-md-8 mb-3">
+                            <label class="form-label">Event Name <span class="required-indicator">*</span></label>
+                            {{ form.event_name }}
+                            {% if form.event_name.errors %}
+                            <div class="text-danger small">{{ form.event_name.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Ticket Type <span class="required-indicator">*</span></label>
+                            {{ form.ticket_type }}
+                            {% if form.ticket_type.errors %}
+                            <div class="text-danger small">{{ form.ticket_type.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        {{ form.description }}
+                        {% if form.description.errors %}
+                        <div class="text-danger small">{{ form.description.errors.0 }}</div>
+                        {% endif %}
+                        <div class="help-text">Provide details about the event, what to expect, dress code, etc.</div>
+                    </div>
+                </div>
+
+                <!-- Date & Time Section -->
+                <div class="form-section">
+                    <h5 class="section-title">
+                        <i class="fas fa-calendar-alt"></i> Date & Time
+                    </h5>
+                    
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Event Date <span class="required-indicator">*</span></label>
+                            {{ form.event_date }}
+                            {% if form.event_date.errors %}
+                            <div class="text-danger small">{{ form.event_date.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Start Time</label>
+                            {{ form.event_time }}
+                            {% if form.event_time.errors %}
+                            <div class="text-danger small">{{ form.event_time.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">End Time</label>
+                            {{ form.end_time }}
+                            {% if form.end_time.errors %}
+                            <div class="text-danger small">{{ form.end_time.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Location Section -->
+                <div class="form-section">
+                    <h5 class="section-title">
+                        <i class="fas fa-map-marker-alt"></i> Location
+                    </h5>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Venue Name</label>
+                            {{ form.venue_name }}
+                            {% if form.venue_name.errors %}
+                            <div class="text-danger small">{{ form.venue_name.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Address</label>
+                            {{ form.location }}
+                            {% if form.location.errors %}
+                            <div class="text-danger small">{{ form.location.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">City</label>
+                            {{ form.city }}
+                            {% if form.city.errors %}
+                            <div class="text-danger small">{{ form.city.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">State</label>
+                            {{ form.state }}
+                            {% if form.state.errors %}
+                            <div class="text-danger small">{{ form.state.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pricing & Availability Section -->
+                <div class="form-section">
+                    <h5 class="section-title">
+                        <i class="fas fa-dollar-sign"></i> Pricing & Availability
+                    </h5>
+                    
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Price <span class="required-indicator">*</span></label>
+                            {{ form.price }}
+                            {% if form.price.errors %}
+                            <div class="text-danger small">{{ form.price.errors.0 }}</div>
+                            {% endif %}
+                            <div class="help-text">Enter 0 for free events</div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Quantity Available <span class="required-indicator">*</span></label>
+                            {{ form.quantity_available }}
+                            {% if form.quantity_available.errors %}
+                            <div class="text-danger small">{{ form.quantity_available.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Max Per Order</label>
+                            {{ form.max_per_order }}
+                            {% if form.max_per_order.errors %}
+                            <div class="text-danger small">{{ form.max_per_order.errors.0 }}</div>
+                            {% endif %}
+                            <div class="help-text">Leave blank for no limit</div>
+                        </div>
+                        {% if ticket %}
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Quantity Sold</label>
+                            {{ form.quantity_sold }}
+                            {% if form.quantity_sold.errors %}
+                            <div class="text-danger small">{{ form.quantity_sold.errors.0 }}</div>
+                            {% endif %}
+                            <div class="help-text">Adjust if needed</div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Image Section -->
+                <div class="form-section">
+                    <h5 class="section-title">
+                        <i class="fas fa-image"></i> Event Image
+                    </h5>
+                    
+                    {% if ticket and ticket.image %}
+                    <div class="mb-3">
+                        <label class="form-label">Current Image:</label><br>
+                        <img src="{{ ticket.image.url }}" alt="Current image" class="current-image">
+                    </div>
+                    {% endif %}
+                    
+                    <div class="mb-3">
+                        <label class="form-label">{% if ticket and ticket.image %}Replace{% else %}Upload{% endif %} Image</label>
+                        {{ form.image }}
+                        {% if form.image.errors %}
+                        <div class="text-danger small">{{ form.image.errors.0 }}</div>
+                        {% endif %}
+                        <div class="help-text">Recommended size: 800x400 pixels. JPG, PNG, or GIF.</div>
+                    </div>
+                </div>
+
+                <!-- Options Section -->
+                <div class="form-section">
+                    <h5 class="section-title">
+                        <i class="fas fa-cog"></i> Options
+                    </h5>
+                    
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <div class="form-check">
+                                {{ form.is_active }}
+                                <label class="form-check-label" for="id_is_active">
+                                    <strong>Active</strong>
+                                    <small class="d-block text-muted">Show on public tickets page</small>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="form-check">
+                                {{ form.is_featured }}
+                                <label class="form-check-label" for="id_is_featured">
+                                    <strong>Featured</strong>
+                                    <small class="d-block text-muted">Highlight with badge</small>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="form-check">
+                                {{ form.requires_member }}
+                                <label class="form-check-label" for="id_requires_member">
+                                    <strong>Members Only</strong>
+                                    <small class="d-block text-muted">Require login to purchase</small>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="text-center mt-4">
+                    <button type="submit" class="btn btn-submit">
+                        <i class="fas fa-save"></i> {% if ticket %}Update{% else %}Create{% endif %} Event Ticket
+                    </button>
+                    <a href="{% url 'manage_event_tickets' %}" class="btn btn-outline-secondary ms-2">
+                        <i class="fas fa-times"></i> Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
