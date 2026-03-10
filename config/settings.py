@@ -146,7 +146,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',    # Clickjacking protection
     'axes.middleware.AxesMiddleware',                            # Brute-force attack prevention
     'pages.middleware.CookieConsentMiddleware',                  # GDPR cookie consent tracking
-    'pages.middleware.AnalyticsMiddleware',                      # DIY analytics tracking
+    # 'pages.middleware.AnalyticsMiddleware',                    # DISABLED: Use Google Analytics instead for better performance
 ]
 
 # Authentication backends (order matters - tried in sequence)
