@@ -761,8 +761,11 @@ def _validate_invitation_code(invitation_code):
     if not invitation_code:
         return None, "Invitation code is required to sign up."
     
+    # Strip whitespace and make case-insensitive
+    invitation_code = invitation_code.strip()
+    
     try:
-        invitation = InvitationCode.objects.get(code=invitation_code)
+        invitation = InvitationCode.objects.get(code__iexact=invitation_code)
         if not invitation.is_valid():
             if invitation.is_used:
                 return None, "This invitation code has already been used."
