@@ -141,11 +141,11 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',                  # Common utilities (URL rewriting)
     'django.middleware.csrf.CsrfViewMiddleware',                 # CSRF token protection
     'django.contrib.auth.middleware.AuthenticationMiddleware',    # User authentication
-    'pages.middleware.LastSeenMiddleware',                       # Track member online status
+    # 'pages.middleware.LastSeenMiddleware',                       # DISABLED: Track member online status
     'django.contrib.messages.middleware.MessageMiddleware',       # Messages (alerts/notifications)
     'django.middleware.clickjacking.XFrameOptionsMiddleware',    # Clickjacking protection
     'axes.middleware.AxesMiddleware',                            # Brute-force attack prevention
-    'pages.middleware.CookieConsentMiddleware',                  # GDPR cookie consent tracking
+    # 'pages.middleware.CookieConsentMiddleware',                  # DISABLED: GDPR cookie consent tracking
     # 'pages.middleware.AnalyticsMiddleware',                    # DISABLED: Use Google Analytics instead for better performance
 ]
 
