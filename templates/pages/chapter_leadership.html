@@ -31,7 +31,7 @@
     }
     
     .content-wrapper {
-        max-width: 1200px;
+        max-width: 1400px;
         margin: 0 auto;
         background: rgba(255, 255, 255, 0.95);
         border-radius: 8px;
@@ -93,9 +93,27 @@
     
     .leadership-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 2rem;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1.5rem;
         margin-top: 2rem;
+    }
+    
+    @media (max-width: 1400px) {
+        .leadership-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+    
+    @media (max-width: 1000px) {
+        .leadership-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+    
+    @media (max-width: 600px) {
+        .leadership-grid {
+            grid-template-columns: 1fr;
+        }
     }
     
     .leader-card {
