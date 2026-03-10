@@ -266,9 +266,10 @@ MEDIA_ROOT = BASE_DIR / 'media'                         # Location for uploaded 
 # Use Cloudinary for media storage in production (persistent across deploys)
 # Set CLOUDINARY_URL in environment to enable: cloudinary://API_KEY:API_SECRET@CLOUD_NAME
 
-CLOUDINARY_URL = config('CLOUDINARY_URL', default=None)
+CLOUDINARY_URL = config('CLOUDINARY_URL', default='')
 
-if CLOUDINARY_URL:
+# Only use Cloudinary if URL is properly set (starts with cloudinary://)
+if CLOUDINARY_URL and CLOUDINARY_URL.startswith('cloudinary://'):
     # Production: Use Cloudinary for media storage
     DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
     
@@ -282,7 +283,8 @@ if CLOUDINARY_URL:
             'API_SECRET': cloudinary_match.group(2),
         }
 else:
-    # Development: Use local file storage
+    # Development/No Cloudinary: Use local file storage
+    CLOUDINARY_URL = None  # Clear invalid value
     DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
 
 
