@@ -31,7 +31,7 @@
     }
     
     .content-wrapper {
-        max-width: 1400px;
+        max-width: 1800px;
         margin: 0 auto;
         background: rgba(255, 255, 255, 0.95);
         border-radius: 8px;
@@ -93,24 +93,36 @@
     
     .leadership-grid {
         display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 1.5rem;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 1rem;
         margin-top: 2rem;
     }
     
-    @media (max-width: 1400px) {
+    @media (max-width: 1600px) {
         .leadership-grid {
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(5, 1fr);
+        }
+    }
+    
+    @media (max-width: 1300px) {
+        .leadership-grid {
+            grid-template-columns: repeat(4, 1fr);
         }
     }
     
     @media (max-width: 1000px) {
         .leadership-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .leadership-grid {
             grid-template-columns: repeat(2, 1fr);
         }
     }
     
-    @media (max-width: 600px) {
+    @media (max-width: 480px) {
         .leadership-grid {
             grid-template-columns: 1fr;
         }
@@ -136,7 +148,7 @@
     
     .leader-image {
         width: 100%;
-        height: 300px;
+        height: 180px;
         background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
         display: flex;
         align-items: center;
@@ -151,21 +163,21 @@
     }
     
     .leader-image i {
-        font-size: 5rem;
+        font-size: 3.5rem;
         color: rgba(255, 255, 255, 0.5);
     }
     
     .leader-info {
-        padding: 1.5rem;
+        padding: 0.75rem;
     }
     
     .leader-position {
         color: var(--primary-color);
-        font-size: 0.9rem;
+        font-size: 0.7rem;
         font-weight: 600;
         text-transform: uppercase;
-        letter-spacing: 1px;
-        margin-bottom: 0.5rem;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.25rem;
     }
     
     body.dark-mode .leader-position {
@@ -174,9 +186,10 @@
     
     .leader-name {
         color: var(--primary-color);
-        font-size: 1.5rem;
+        font-size: 1rem;
         font-weight: 700;
-        margin: 0 0 1rem 0;
+        margin: 0 0 0.5rem 0;
+        line-height: 1.2;
     }
     
     body.dark-mode .leader-name {
@@ -185,8 +198,13 @@
     
     .leader-bio {
         color: #333;
-        line-height: 1.6;
-        margin-bottom: 1rem;
+        line-height: 1.4;
+        margin-bottom: 0.5rem;
+        font-size: 0.8rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
     }
     
     body.dark-mode .leader-bio {
@@ -196,9 +214,10 @@
     .leader-contact {
         display: flex;
         flex-direction: column;
-        gap: 0.5rem;
-        margin-top: 1rem;
-        padding-top: 1rem;
+        gap: 0.25rem;
+        margin-top: 0.5rem;
+        font-size: 0.75rem;
+        padding-top: 0.5rem;
         border-top: 1px solid #e0e0e0;
     }
     
@@ -209,10 +228,10 @@
     .leader-contact a {
         color: var(--primary-color);
         text-decoration: none;
-        font-size: 0.9rem;
+        font-size: 0.75rem;
         display: flex;
         align-items: center;
-        gap: 0.5rem;
+        gap: 0.3rem;
     }
     
     .leader-contact a:hover {
@@ -225,9 +244,9 @@
     
     .leader-actions {
         display: flex;
-        gap: 0.5rem;
-        margin-top: 1rem;
-        padding-top: 1rem;
+        gap: 0.3rem;
+        margin-top: 0.5rem;
+        padding-top: 0.5rem;
         border-top: 1px solid #e0e0e0;
     }
     
@@ -237,13 +256,13 @@
     
     .btn-edit, .btn-delete {
         flex: 1;
-        padding: 0.5rem;
+        padding: 0.3rem 0.4rem;
         border-radius: 4px;
         text-decoration: none;
         font-weight: 600;
         text-align: center;
         transition: all 0.3s ease;
-        font-size: 0.85rem;
+        font-size: 0.7rem;
     }
     
     .btn-edit {
