@@ -961,6 +961,37 @@ def delete_leadership(request, pk):
 
 @login_required
 @user_passes_test(is_officer_or_staff)
+def bulk_delete_leadership(request):
+    """Bulk delete multiple leadership members (officers/staff only)"""
+    if request.method == 'POST':
+        leader_ids = request.POST.getlist('leader_ids')
+        
+        if not leader_ids:
+            messages.warning(request, "No leaders selected for deletion.")
+            return redirect('chapter_leadership')
+        
+        try:
+            leaders_to_delete = ChapterLeadership.objects.filter(pk__in=leader_ids)
+            count = leaders_to_delete.count()
+            
+            details = [leader.full_name for leader in leaders_to_delete]
+            
+            leaders_to_delete.delete()
+            
+            logger.info(f"Bulk deleted {count} leaders by {request.user.username}. Names: {'; '.join(details)}")
+            messages.success(request, f"Successfully deleted {count} leader{'s' if count != 1 else ''}.")
+        
+        except Exception as e:
+            logger.error(f"Error bulk deleting leaders: {str(e)}")
+            messages.error(request, f"Error deleting leaders: {str(e)}")
+        
+        return redirect('chapter_leadership')
+    
+    return redirect('chapter_leadership')
+
+
+@login_required
+@user_passes_test(is_officer_or_staff)
 def upload_leader_photo(request, pk):
     """Upload or update leader's profile photo (admin/officers only)"""
     leader = get_object_or_404(ChapterLeadership, pk=pk)
