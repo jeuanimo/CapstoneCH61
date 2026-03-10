@@ -4,15 +4,16 @@
 
 {% block content %}
 <style>
+    /* Theme Colors - Use project standard colors */
     :root {
-        --pbs-blue: #0047AB;
-        --pbs-blue-dark: #003380;
-        --pbs-blue-light: #1e5bc6;
+        --pbs-blue: var(--primary-color, #164f90);
+        --pbs-blue-dark: #0d3a6b;
+        --pbs-blue-light: #2a7dd4;
     }
     
     .success-alert {
         background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
-        border: 2px solid #28a745;
+        border: 2px solid var(--success-color, #4caf50);
         padding: 30px;
         border-radius: 15px;
         text-align: center;
@@ -154,7 +155,7 @@
     }
     
     .grand-total-value {
-        color: #28a745;
+        color: var(--success-color, #4caf50);
         font-weight: bold;
         font-size: 1.3em;
     }

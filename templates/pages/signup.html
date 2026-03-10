@@ -47,7 +47,7 @@
     .signup-header {
         text-align: center;
         margin-bottom: 2rem;
-        border-bottom: 3px solid #164f90;
+        border-bottom: 3px solid var(--primary-color);
         padding-bottom: 1rem;
     }
     
@@ -56,7 +56,7 @@
     }
     
     .signup-header h1 {
-        color: #164f90;
+        color: var(--primary-color);
         font-size: 2rem;
         margin: 0 0 0.5rem 0;
     }
@@ -100,7 +100,7 @@
     
     .form-group label {
         display: block;
-        color: #164f90;
+        color: var(--primary-color);
         font-weight: 600;
         margin-bottom: 0.5rem;
         font-size: 0.95rem;
@@ -113,7 +113,7 @@
     .form-control {
         width: 100%;
         padding: 0.75rem;
-        border: 2px solid #c8c9c7;
+        border: 2px solid var(--secondary-color);
         border-radius: 4px;
         font-size: 1rem;
         transition: border-color 0.3s ease;
@@ -122,7 +122,7 @@
     
     .form-control:focus {
         outline: none;
-        border-color: #164f90;
+        border-color: var(--primary-color);
         box-shadow: 0 0 0 0.2rem rgba(22, 79, 144, 0.25);
     }
     
@@ -161,7 +161,7 @@
         list-style: none;
         padding: 0;
         margin: 0.5rem 0 0 0;
-        color: #d32f2f;
+        color: var(--error-color);
         font-size: 0.9rem;
     }
     
@@ -190,7 +190,7 @@
     }
     
     .btn-submit {
-        background-color: #164f90;
+        background-color: var(--primary-color);
         color: #ffffff;
     }
     
@@ -201,8 +201,8 @@
     }
     
     .btn-cancel {
-        background-color: #c8c9c7;
-        color: #164f90;
+        background-color: var(--secondary-color);
+        color: var(--primary-color);
     }
     
     .btn-cancel:hover {
@@ -220,7 +220,7 @@
         text-align: center;
         margin-top: 1.5rem;
         padding-top: 1.5rem;
-        border-top: 1px solid #c8c9c7;
+        border-top: 1px solid var(--secondary-color);
         color: #666;
     }
     
@@ -230,7 +230,7 @@
     }
     
     .login-link a {
-        color: #164f90;
+        color: var(--primary-color);
         font-weight: 600;
         text-decoration: none;
     }
@@ -277,7 +277,7 @@
             
             <div class="form-group">
                 <label for="invitation_code">
-                    Invitation Code <span style="color: #d32f2f;">*</span>
+                    Invitation Code <span style="color: var(--error-color);">*</span>
                 </label>
                 <input type="text" 
                        id="invitation_code" 
@@ -292,7 +292,7 @@
             
             <div class="form-group">
                 <label for="email">
-                    Email <span style="color: #d32f2f;">*</span>
+                    Email <span style="color: var(--error-color);">*</span>
                 </label>
                 <input type="email" 
                        id="email" 
@@ -307,7 +307,7 @@
             
             <div class="form-group">
                 <label for="id_username">
-                    Username <span style="color: #d32f2f;">*</span>
+                    Username <span style="color: var(--error-color);">*</span>
                 </label>
                 {{ form.username }}
                 <div class="help-text">

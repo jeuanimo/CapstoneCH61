@@ -4,11 +4,11 @@
 
 {% block css %}
 <style>
-    /* Theme Colors - Phi Beta Sigma Royal Blue */
+    /* Theme Colors - Use project standard colors */
     :root {
-        --pbs-blue: #0047AB;
-        --pbs-blue-dark: #003380;
-        --pbs-blue-light: #1e5bc6;
+        --pbs-blue: var(--primary-color, #164f90);
+        --pbs-blue-dark: #0d3a6b;
+        --pbs-blue-light: #2a7dd4;
     }
 
     .cart-title {
@@ -107,8 +107,8 @@
 
     .btn-remove {
         background: transparent;
-        border: 2px solid #dc3545;
-        color: #dc3545;
+        border: 2px solid var(--error-color, #d32f2f);
+        color: var(--error-color, #d32f2f);
         padding: 6px 12px;
         border-radius: 6px;
         font-weight: 500;
@@ -117,7 +117,7 @@
     }
 
     .btn-remove:hover {
-        background: #dc3545;
+        background: var(--error-color, #d32f2f);
         color: white;
     }
 

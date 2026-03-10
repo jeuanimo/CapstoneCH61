@@ -312,7 +312,7 @@
             </div>
             <div class="modal-body">
                 {% for message in messages %}
-                <p {% if message.tags == 'error' %}style="color: #dc3545;"{% elif message.tags == 'success' %}style="color: #28a745;"{% elif message.tags == 'warning' %}style="color: #ffc107;"{% endif %}>{{ message|safe }}</p>
+                <p {% if message.tags == 'error' %}style="color: var(--error-color);"{% elif message.tags == 'success' %}style="color: var(--success-color);"{% elif message.tags == 'warning' %}style="color: var(--warning-color);"{% endif %}>{{ message|safe }}</p>
                 {% endfor %}
             </div>
             <div class="modal-footer">
@@ -698,11 +698,11 @@
         }
 
         .modal-icon-success {
-            color: #4caf50;
+            color: var(--success-color);
         }
 
         .modal-icon-warning {
-            color: #ff9800;
+            color: var(--warning-color);
         }
 
         .modal-icon-error {
@@ -716,7 +716,7 @@
         .modal-header h2 {
             margin: 0;
             font-size: 1.75rem;
-            color: #164f90;
+            color: var(--primary-color);
         }
 
         body.dark-mode .modal-header h2 {
@@ -750,7 +750,7 @@
         }
 
         .modal-btn {
-            background-color: #164f90;
+            background-color: var(--primary-color);
             color: white;
             border: none;
             padding: 0.75rem 2.5rem;

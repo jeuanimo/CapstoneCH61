@@ -48,7 +48,7 @@
     }
     
     .events-header h1 {
-        color: #164f90;
+        color: var(--primary-color);
         font-size: 2.5rem;
         margin-bottom: 0.5rem;
     }
@@ -66,7 +66,7 @@
     
     .search-box input {
         padding: 0.75rem 1rem;
-        border: 2px solid #164f90;
+        border: 2px solid var(--primary-color);
         border-radius: 4px;
         font-size: 1rem;
         width: 300px;
@@ -75,11 +75,11 @@
     body.dark-mode .search-box input {
         background: #1a2a4a;
         color: #e8edf7;
-        border-color: #c8c9c7;
+        border-color: var(--secondary-color);
     }
     
     .search-box button {
-        background-color: #164f90;
+        background-color: var(--primary-color);
         color: #ffffff;
         border: none;
         padding: 0.75rem 1.5rem;
@@ -90,8 +90,8 @@
     }
     
     .search-box button:hover {
-        background-color: #c8c9c7;
-        color: #164f90;
+        background-color: var(--secondary-color);
+        color: var(--primary-color);
     }
     
     .calendar-container {
@@ -105,7 +105,7 @@
         background: #f5f5f5;
         padding: 1.5rem;
         border-radius: 8px;
-        border: 2px solid #c8c9c7;
+        border: 2px solid var(--secondary-color);
     }
     
     body.dark-mode .calendar-box {
@@ -121,7 +121,7 @@
     }
     
     .calendar-header h2 {
-        color: #164f90;
+        color: var(--primary-color);
         margin: 0;
         font-size: 1.5rem;
     }
@@ -136,7 +136,7 @@
     }
     
     .calendar-nav a {
-        background-color: #164f90;
+        background-color: var(--primary-color);
         color: #ffffff;
         padding: 0.5rem 0.75rem;
         border-radius: 4px;
@@ -147,8 +147,8 @@
     }
     
     .calendar-nav a:hover {
-        background-color: #c8c9c7;
-        color: #164f90;
+        background-color: var(--secondary-color);
+        color: var(--primary-color);
     }
     
     .calendar-table {
@@ -161,8 +161,8 @@
     .calendar-table td {
         padding: 0.5rem;
         text-align: center;
-        border: 1px solid #c8c9c7;
-        color: #164f90;
+        border: 1px solid var(--secondary-color);
+        color: var(--primary-color);
     }
     
     body.dark-mode .calendar-table th,
@@ -172,7 +172,7 @@
     }
     
     .calendar-table th {
-        background-color: #164f90;
+        background-color: var(--primary-color);
         color: #ffffff;
         font-weight: 700;
     }
@@ -211,7 +211,7 @@
         background: #f5f5f5;
         padding: 1.5rem;
         border-radius: 8px;
-        border: 2px solid #c8c9c7;
+        border: 2px solid var(--secondary-color);
     }
     
     body.dark-mode .upcoming-events {
@@ -220,7 +220,7 @@
     }
     
     .upcoming-events h3 {
-        color: #164f90;
+        color: var(--primary-color);
         margin-top: 0;
     }
     
@@ -232,18 +232,18 @@
         background: white;
         padding: 1rem;
         margin-bottom: 1rem;
-        border-left: 4px solid #164f90;
+        border-left: 4px solid var(--primary-color);
         border-radius: 4px;
     }
     
     body.dark-mode .event-item {
         background: #1a2a4a;
-        border-left-color: #c8c9c7;
+        border-left-color: var(--secondary-color);
     }
     
     .event-item h4 {
         margin: 0 0 0.5rem 0;
-        color: #164f90;
+        color: var(--primary-color);
     }
     
     body.dark-mode .event-item h4 {
@@ -262,7 +262,7 @@
     
     .event-date {
         font-weight: 600;
-        color: #164f90;
+        color: var(--primary-color);
     }
     
     body.dark-mode .event-date {
@@ -415,7 +415,7 @@
         
         {% if events %}
             <div class="events-list">
-                <h2 style="color: #164f90; text-align: center; margin-bottom: 1.5rem;">Search Results</h2>
+                <h2 style="color: var(--primary-color); text-align: center; margin-bottom: 1.5rem;">Search Results</h2>
                 <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem;">
                     {% for event in events %}
                         <div class="event-item">

@@ -27,26 +27,26 @@
         <!-- Stats Summary -->
         {% if total_members %}
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
-            <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #164f90;">
+            <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; border-left: 4px solid var(--primary-color);">
                 <p style="color: #6c757d; margin: 0 0 0.5rem 0; font-size: 0.9rem;">Total Members in System</p>
                 <p style="color: #1a1a2e; margin: 0; font-size: 2rem; font-weight: bold;">{{ total_members }}</p>
             </div>
             {% if hq_member_count %}
-            <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #ffc107;">
+            <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; border-left: 4px solid var(--warning-color);">
                 <p style="color: #6c757d; margin: 0 0 0.5rem 0; font-size: 0.9rem;">Members in HQ List</p>
                 <p style="color: #1a1a2e; margin: 0; font-size: 2rem; font-weight: bold;">{{ hq_member_count }}</p>
             </div>
             {% endif %}
             {% if marked_count %}
-            <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #ffc107;">
+            <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; border-left: 4px solid var(--warning-color);">
                 <p style="color: #6c757d; margin: 0 0 0.5rem 0; font-size: 0.9rem;">Members Marked as Non-Financial</p>
                 <p style="color: #1a1a2e; margin: 0; font-size: 2rem; font-weight: bold;">{{ marked_count }}</p>
             </div>
             {% endif %}
             {% if in_hq_count %}
-            <div style="background: #d4edda; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #28a745;">
+            <div style="background: #d4edda; padding: 1.5rem; border-radius: 8px; border-left: 4px solid var(--success-color);">
                 <p style="color: #155724; margin: 0 0 0.5rem 0; font-size: 0.9rem;">On HQ List (Unchanged)</p>
-                <p style="color: #28a745; margin: 0; font-size: 2rem; font-weight: bold;">{{ in_hq_count }}</p>
+                <p style="color: var(--success-color); margin: 0; font-size: 2rem; font-weight: bold;">{{ in_hq_count }}</p>
             </div>
             {% endif %}
         </div>
@@ -73,7 +73,7 @@
                             Required columns: Member# or Member Number
                         </small>
                         {% if form.csv_file.errors %}
-                            <div style="color: #dc3545; margin-top: 0.5rem;">
+                            <div style="color: var(--error-color); margin-top: 0.5rem;">
                                 {% for error in form.csv_file.errors %}
                                     {{ error }}
                                 {% endfor %}
@@ -82,7 +82,7 @@
                     </div>
 
                     <!-- Confirmation Checkbox -->
-                    <div style="margin-bottom: 1.5rem; padding: 1rem; background: #fff3cd; border-radius: 6px; border-left: 4px solid #ffc107;">
+                    <div style="margin-bottom: 1.5rem; padding: 1rem; background: #fff3cd; border-radius: 6px; border-left: 4px solid var(--warning-color);">
                         <div style="display: flex; align-items: start; gap: 0.75rem;">
                             <input type="checkbox" class="form-check-input" id="{{ form.confirm.id_for_label }}" 
                                    name="confirm" required style="margin-top: 0.25rem;">
@@ -91,7 +91,7 @@
                             </label>
                         </div>
                         {% if form.confirm.errors %}
-                            <div style="color: #dc3545; margin-top: 0.5rem;">
+                            <div style="color: var(--error-color); margin-top: 0.5rem;">
                                 {% for error in form.confirm.errors %}{{ error }}{% endfor %}
                             </div>
                         {% endif %}
@@ -100,7 +100,7 @@
                     <!-- Buttons -->
                     <div style="display: flex; gap: 0.75rem;">
                         <button type="submit" name="preview" value="on" class="btn btn-outline-primary" 
-                                style="flex: 1; border-color: #164f90; color: #164f90;">
+                                style="flex: 1; border-color: var(--primary-color); color: var(--primary-color);">
                             <i class="fas fa-eye"></i> Preview Changes
                         </button>
                         <button type="submit" class="btn btn-warning" style="flex: 1;" 
@@ -113,11 +113,11 @@
 
             <!-- RIGHT COLUMN: Information -->
             <div>
-                <div style="background: #e7f3ff; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #164f90; margin-bottom: 1.5rem;">
-                    <h4 style="color: #164f90; margin-bottom: 1rem;">
+                <div style="background: #e7f3ff; padding: 1.5rem; border-radius: 8px; border-left: 4px solid var(--primary-color); margin-bottom: 1.5rem;">
+                    <h4 style="color: var(--primary-color); margin-bottom: 1rem;">
                         <i class="fas fa-info-circle"></i> How It Works
                     </h4>
-                    <ol style="color: #164f90; margin: 0; padding-left: 1.5rem;">
+                    <ol style="color: var(--primary-color); margin: 0; padding-left: 1.5rem;">
                         <li style="margin-bottom: 0.75rem;">
                             Export your current member list from International HQ
                         </li>
@@ -152,7 +152,7 @@
                     </div>
 
                     <div>
-                        <strong style="color: #28a745;">Members on HQ List</strong>
+                        <strong style="color: var(--success-color);">Members on HQ List</strong>
                         <p style="color: #6c757d; margin: 0.5rem 0 0 0; font-size: 0.9rem;">
                             ✅ No changes made<br>
                             ✅ Keep current status<br>
@@ -176,7 +176,7 @@
             </h3>
 
             {% if csv_errors %}
-            <div style="background: #fff3cd; padding: 1rem; border-radius: 6px; margin-bottom: 1.5rem; border-left: 4px solid #ffc107;">
+            <div style="background: #fff3cd; padding: 1rem; border-radius: 6px; margin-bottom: 1.5rem; border-left: 4px solid var(--warning-color);">
                 <strong style="color: #856404;">CSV Processing Notes:</strong>
                 <ul style="color: #856404; margin: 0.5rem 0 0 0;">
                     {% for error in csv_errors %}
@@ -187,7 +187,7 @@
             {% endif %}
 
             {% if members_to_mark or is_preview %}
-            <h4 style="color: #ffc107; margin-bottom: 1rem;">
+            <h4 style="color: var(--warning-color); margin-bottom: 1rem;">
                 <i class="fas fa-exclamation-circle"></i> Members NOT on HQ List (To Be Marked)
             </h4>
             <div style="overflow-x: auto; margin-bottom: 2rem;">
@@ -232,7 +232,7 @@
             {% endif %}
 
             {% if members_in_hq %}
-            <h4 style="color: #28a745; margin-bottom: 1rem;" style="margin-bottom: 1rem;">
+            <h4 style="color: var(--success-color); margin-bottom: 1rem;" style="margin-bottom: 1rem;">
                 <i class="fas fa-check-circle"></i> Members on HQ List (No Changes)
             </h4>
             <p style="color: #6c757d; margin-bottom: 1rem;">
@@ -243,9 +243,9 @@
                     <caption class="sr-only">Members already non-financial</caption>
                     <thead>
                         <tr style="border-bottom: 2px solid #dee2e6;">
-                            <th style="padding: 0.75rem; text-align: left; color: #28a745;">Name</th>
-                            <th style="padding: 0.75rem; text-align: left; color: #28a745;">Member #</th>
-                            <th style="padding: 0.75rem; text-align: left; color: #28a745;">Status</th>
+                            <th style="padding: 0.75rem; text-align: left; color: var(--success-color);">Name</th>
+                            <th style="padding: 0.75rem; text-align: left; color: var(--success-color);">Member #</th>
+                            <th style="padding: 0.75rem; text-align: left; color: var(--success-color);">Status</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -348,26 +348,26 @@
         <!-- Stats Summary -->
         {% if total_members %}
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
-            <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #164f90;">
+            <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; border-left: 4px solid var(--primary-color);">
                 <p style="color: #6c757d; margin: 0 0 0.5rem 0; font-size: 0.9rem;">Total Members in System</p>
                 <p style="color: #1a1a2e; margin: 0; font-size: 2rem; font-weight: bold;">{{ total_members }}</p>
             </div>
             {% if hq_member_count %}
-            <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #28a745;">
+            <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; border-left: 4px solid var(--success-color);">
                 <p style="color: #6c757d; margin: 0 0 0.5rem 0; font-size: 0.9rem;">Members in HQ List</p>
                 <p style="color: #1a1a2e; margin: 0; font-size: 2rem; font-weight: bold;">{{ hq_member_count }}</p>
             </div>
             {% endif %}
             {% if members_to_remove %}
-            <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #dc3545;">
+            <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; border-left: 4px solid var(--error-color);">
                 <p style="color: #6c757d; margin: 0 0 0.5rem 0; font-size: 0.9rem;">Members NOT in HQ</p>
                 <p style="color: #1a1a2e; margin: 0; font-size: 2rem; font-weight: bold;">{{ members_to_remove|length }}</p>
             </div>
             {% endif %}
             {% if removed_count %}
-            <div style="background: #d4edda; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #28a745;">
+            <div style="background: #d4edda; padding: 1.5rem; border-radius: 8px; border-left: 4px solid var(--success-color);">
                 <p style="color: #155724; margin: 0 0 0.5rem 0; font-size: 0.9rem;">Members {{ action }}</p>
-                <p style="color: #28a745; margin: 0; font-size: 2rem; font-weight: bold;">{{ removed_count }}</p>
+                <p style="color: var(--success-color); margin: 0; font-size: 2rem; font-weight: bold;">{{ removed_count }}</p>
             </div>
             {% endif %}
         </div>
@@ -394,7 +394,7 @@
                             Required columns: Member# or Member Number
                         </small>
                         {% if form.csv_file.errors %}
-                            <div style="color: #dc3545; margin-top: 0.5rem;">
+                            <div style="color: var(--error-color); margin-top: 0.5rem;">
                                 {% for error in form.csv_file.errors %}
                                     {{ error }}
                                 {% endfor %}
@@ -405,7 +405,7 @@
                     <!-- Buttons -->
                     <div style="display: flex; gap: 0.75rem;">
                         <button type="submit" name="preview" value="on" class="btn btn-outline-primary" 
-                                style="flex: 1; border-color: #164f90; color: #164f90;">
+                                style="flex: 1; border-color: var(--primary-color); color: var(--primary-color);">
                             <i class="fas fa-eye"></i> Preview Changes
                         </button>
                         <button type="submit" class="btn btn-warning" style="flex: 1;" 
@@ -418,11 +418,11 @@
 
             <!-- RIGHT COLUMN: Information -->
             <div>
-                <div style="background: #e7f3ff; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #164f90; margin-bottom: 1.5rem;">
-                    <h4 style="color: #164f90; margin-bottom: 1rem;">
+                <div style="background: #e7f3ff; padding: 1.5rem; border-radius: 8px; border-left: 4px solid var(--primary-color); margin-bottom: 1.5rem;">
+                    <h4 style="color: var(--primary-color); margin-bottom: 1rem;">
                         <i class="fas fa-info-circle"></i> How It Works
                     </h4>
-                    <ol style="color: #164f90; margin: 0; padding-left: 1.5rem;">
+                    <ol style="color: var(--primary-color); margin: 0; padding-left: 1.5rem;">
                         <li style="margin-bottom: 0.75rem;">
                             Export your current member list from International HQ
                         </li>
@@ -457,7 +457,7 @@
                     </div>
 
                     <div>
-                        <strong style="color: #28a745;">Members on HQ List</strong>
+                        <strong style="color: var(--success-color);">Members on HQ List</strong>
                         <p style="color: #6c757d; margin: 0.5rem 0 0 0; font-size: 0.9rem;">
                             ✅ No changes made<br>
                             ✅ Keep current status<br>
@@ -481,7 +481,7 @@
             </h3>
 
             {% if csv_errors %}
-            <div style="background: #fff3cd; padding: 1rem; border-radius: 6px; margin-bottom: 1.5rem; border-left: 4px solid #ffc107;">
+            <div style="background: #fff3cd; padding: 1rem; border-radius: 6px; margin-bottom: 1.5rem; border-left: 4px solid var(--warning-color);">
                 <strong style="color: #856404;">CSV Processing Notes:</strong>
                 <ul style="color: #856404; margin: 0.5rem 0 0 0;">
                     {% for error in csv_errors %}
@@ -492,7 +492,7 @@
             {% endif %}
 
             {% if members_to_mark or is_preview %}
-            <h4 style="color: #ffc107; margin-bottom: 1rem;">
+            <h4 style="color: var(--warning-color); margin-bottom: 1rem;">
                 <i class="fas fa-exclamation-circle"></i> Members NOT on HQ List (To Be Marked)
             </h4>
             <div style="overflow-x: auto; margin-bottom: 2rem;">
@@ -537,7 +537,7 @@
             {% endif %}
 
             {% if members_in_hq %}
-            <h4 style="color: #28a745; margin-bottom: 1rem;">
+            <h4 style="color: var(--success-color); margin-bottom: 1rem;">
                 <i class="fas fa-check-circle"></i> Members on HQ List (No Changes)
             </h4>
             <p style="color: #6c757d; margin-bottom: 1rem;">
@@ -548,9 +548,9 @@
                     <caption class="sr-only">Members on HQ list</caption>
                     <thead>
                         <tr style="border-bottom: 2px solid #dee2e6;">
-                            <th style="padding: 0.75rem; text-align: left; color: #28a745;">Name</th>
-                            <th style="padding: 0.75rem; text-align: left; color: #28a745;">Member #</th>
-                            <th style="padding: 0.75rem; text-align: left; color: #28a745;">Status</th>
+                            <th style="padding: 0.75rem; text-align: left; color: var(--success-color);">Name</th>
+                            <th style="padding: 0.75rem; text-align: left; color: var(--success-color);">Member #</th>
+                            <th style="padding: 0.75rem; text-align: left; color: var(--success-color);">Status</th>
                         </tr>
                     </thead>
                     <tbody>

@@ -130,11 +130,11 @@
         font-weight: 500;
     }
     .badge-overdue {
-        background-color: #dc3545;
+        background-color: var(--error-color);
         color: #fff;
     }
     .badge-current {
-        background-color: #28a745;
+        background-color: var(--success-color);
         color: #fff;
     }
 </style>
@@ -208,11 +208,11 @@
                                 </div>
                                 <div class="stat-item">
                                     <div class="stat-label">Paid</div>
-                                    <div class="stat-value" style="color: #28a745;">${{ item.total_paid|floatformat:2 }}</div>
+                                    <div class="stat-value" style="color: var(--success-color);">${{ item.total_paid|floatformat:2 }}</div>
                                 </div>
                                 <div class="stat-item">
                                     <div class="stat-label">Balance</div>
-                                    <div class="stat-value" {% if item.balance > 0 %}style="color: #dc3545;"{% else %}style="color: #28a745;"{% endif %}>
+                                    <div class="stat-value" {% if item.balance > 0 %}style="color: var(--error-color);"{% else %}style="color: var(--success-color);"{% endif %}>
                                         {% if item.balance > 0 %}
                                             -${{ item.balance|floatformat:2 }}
                                         {% else %}

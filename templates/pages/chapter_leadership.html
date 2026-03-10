@@ -14,8 +14,8 @@
     }
     
     .leadership-container {
-        width: 100vw;
-        margin-left: calc(-50vw + 50%);
+        width: 100%;
+        margin-left: 0;
         padding: 2rem 1rem;
         min-height: calc(100vh - 210px);
         background-image: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)), url('{% static 'img/ngs.jpg' %}');
@@ -47,7 +47,7 @@
     .page-header {
         text-align: center;
         margin-bottom: 3rem;
-        border-bottom: 3px solid #164f90;
+        border-bottom: 3px solid var(--primary-color);
         padding-bottom: 1rem;
         display: flex;
         justify-content: space-between;
@@ -55,7 +55,7 @@
     }
     
     .page-header h1 {
-        color: #164f90;
+        color: var(--primary-color);
         font-size: 2.5rem;
         margin: 0;
     }
@@ -71,7 +71,7 @@
     }
     
     .btn-add {
-        background-color: #164f90;
+        background-color: var(--primary-color);
         color: #ffffff;
         padding: 0.75rem 1.5rem;
         border-radius: 4px;
@@ -117,7 +117,7 @@
     .leader-image {
         width: 100%;
         height: 300px;
-        background: linear-gradient(135deg, #164f90 0%, #c8c9c7 100%);
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -140,7 +140,7 @@
     }
     
     .leader-position {
-        color: #164f90;
+        color: var(--primary-color);
         font-size: 0.9rem;
         font-weight: 600;
         text-transform: uppercase;
@@ -153,7 +153,7 @@
     }
     
     .leader-name {
-        color: #164f90;
+        color: var(--primary-color);
         font-size: 1.5rem;
         font-weight: 700;
         margin: 0 0 1rem 0;
@@ -187,7 +187,7 @@
     }
     
     .leader-contact a {
-        color: #164f90;
+        color: var(--primary-color);
         text-decoration: none;
         font-size: 0.9rem;
         display: flex;
@@ -227,7 +227,7 @@
     }
     
     .btn-edit {
-        background-color: #164f90;
+        background-color: var(--primary-color);
         color: #ffffff;
     }
     
@@ -238,7 +238,7 @@
     }
     
     .btn-delete {
-        background-color: #d32f2f;
+        background-color: var(--error-color);
         color: #ffffff;
     }
     
@@ -280,7 +280,7 @@
                 <a href="{% url 'add_leadership' %}" class="btn-add">
                     <i class="fas fa-plus"></i> Add Leader
                 </a>
-                <a href="{% url 'import_officers' %}" class="btn-add" style="margin-left: 10px; background-color: #28a745;">
+                <a href="{% url 'import_officers' %}" class="btn-add" style="margin-left: 10px; background-color: var(--success-color);">
                     <i class="fas fa-file-csv"></i> Import CSV
                 </a>
             </div>
@@ -298,7 +298,7 @@
                     </label>
                     <span id="selected-count" style="color: #666;">0 selected</span>
                 </div>
-                <button type="submit" form="bulk-delete-form" class="btn-delete" style="background: #dc3545; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; display: none;" id="bulk-delete-btn">
+                <button type="submit" form="bulk-delete-form" class="btn-delete" style="background: var(--error-color); color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; display: none;" id="bulk-delete-btn">
                     <i class="fas fa-trash"></i> Delete Selected
                 </button>
             </div>
@@ -341,7 +341,7 @@
                                     {% endif %}
                             {% if user.is_authenticated and user.is_staff or user.is_authenticated and user.memberprofile and user.memberprofile.is_officer %}
                                 <div class="leader-actions">
-                                    <a href="{% url 'upload_leader_photo' leader_data.person.pk %}" class="btn-edit" style="background-color: #28a745;">
+                                    <a href="{% url 'upload_leader_photo' leader_data.person.pk %}" class="btn-edit" style="background-color: var(--success-color);">
                                         <i class="fas fa-camera"></i> Photo
                                     </a>
                                     <a href="{% url 'edit_leadership' leader_data.positions.0.pk %}" class="btn-edit">
@@ -373,7 +373,7 @@
             </div>
         {% endif %}
         
-        <div style="text-align: center; margin-top: 2rem; padding-top: 2rem; border-top: 2px solid #164f90;">
+        <div style="text-align: center; margin-top: 2rem; padding-top: 2rem; border-top: 2px solid var(--primary-color);">
             <a href="{% url 'home' %}" class="btn-add" style="display: inline-block; text-decoration: none;">
                 <i class="fas fa-arrow-left"></i> Back to Home
             </a>

@@ -3,59 +3,7 @@
 
 {% block title %}Fraternity Information Chatbot - {{ site_config.chapter_name|default:"Nu Gamma Sigma" }}{% endblock %}
 
-{% block content %}
-<div class="chatbot-container">
-    <div class="chatbot-wrapper">
-        <!-- Header -->
-        <div class="chatbot-header">
-            <h2><i class="fas fa-comments"></i> Fraternity Information Assistant</h2>
-            <p>Ask us anything about {{ site_config.organization_name|default:"Phi Beta Sigma Fraternity, Inc" }}. - {{ site_config.chapter_name|default:"Nu Gamma Sigma Chapter" }}</p>
-        </div>
-
-        <!-- Chat Display -->
-        <div class="chatbot-messages" id="chatMessages">
-            <div class="message bot-message">
-                <div class="message-content">
-                    <p><strong>Hello! 👋</strong></p>
-                    <p>{% if site_config and site_config.chatbot_welcome_message %}{{ site_config.chatbot_welcome_message }}{% else %}I'm here to help answer questions about our fraternity. You can ask me about our history, membership, events, values, and more.{% endif %}</p>
-                    <p><small style="color: #888;">Powered by Public Knowledge Base</small></p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Input Form -->
-        <form id="chatForm" class="chatbot-input-form" onsubmit="handleSubmit(event)">
-            {% csrf_token %}
-            <div class="input-group">
-                <input 
-                    type="text" 
-                    id="queryInput" 
-                    placeholder="Ask a question... (max 400 characters)"
-                    maxlength="400"
-                    autocomplete="off"
-                    required
-                >
-                <button type="submit" id="submitBtn" class="btn-send">
-                    <i class="fas fa-paper-plane"></i> Send
-                </button>
-            </div>
-            <small class="character-count">
-                <span id="charCount">0</span>/400
-            </small>
-        </form>
-
-        <!-- Categories Info -->
-        <div class="chatbot-info">
-            <p><strong>Common Topics:</strong></p>
-            <ul>
-                {% for code, name in faq_categories %}
-                    <li>{{ name }}</li>
-                {% endfor %}
-            </ul>
-        </div>
-    </div>
-</div>
-
+{% block css %}
 <style>
     .chatbot-container {
         max-width: 800px;
@@ -81,7 +29,7 @@
     }
 
     .chatbot-header {
-        background: linear-gradient(135deg, #164f90 0%, #0d3a6b 100%);
+        background: linear-gradient(135deg, var(--primary-color) 0%, #0d3a6b 100%);
         color: white;
         padding: 1.5rem;
         border-radius: 12px 12px 0 0;
@@ -141,8 +89,8 @@
 
     .bot-message .message-content {
         background: #e3f2fd;
-        color: #164f90;
-        border-left: 3px solid #164f90;
+        color: var(--primary-color);
+        border-left: 3px solid var(--primary-color);
     }
 
     body.dark-mode .bot-message .message-content {
@@ -151,7 +99,7 @@
     }
 
     .user-message .message-content {
-        background: #164f90;
+        background: var(--primary-color);
         color: white;
         border-radius: 8px 0 8px 8px;
     }
@@ -187,7 +135,7 @@
         margin: 0.5rem 0;
         padding: 0.5rem;
         background: rgba(22, 79, 144, 0.1);
-        border-left: 2px solid #164f90;
+        border-left: 2px solid var(--primary-color);
         padding-left: 1rem;
         cursor: pointer;
         border-radius: 4px;
@@ -237,12 +185,12 @@
 
     .input-group input:focus {
         outline: none;
-        border-color: #164f90;
+        border-color: var(--primary-color);
         box-shadow: 0 0 4px rgba(22, 79, 144, 0.2);
     }
 
     .btn-send {
-        background: #164f90;
+        background: var(--primary-color);
         color: white;
         border: none;
         padding: 0.75rem 1.5rem;
@@ -309,7 +257,7 @@
     .loading-dots span {
         width: 6px;
         height: 6px;
-        background: #164f90;
+        background: var(--primary-color);
         border-radius: 50%;
         animation: bounce 1.4s infinite;
     }
@@ -338,11 +286,11 @@
     }
 
     .error-message {
-        color: #d32f2f;
+        color: var(--error-color);
         background: #ffebee;
         padding: 0.75rem;
         border-radius: 4px;
-        border-left: 3px solid #d32f2f;
+        border-left: 3px solid var(--error-color);
     }
 
     body.dark-mode .error-message {
@@ -367,6 +315,60 @@
         }
     }
 </style>
+{% endblock %}
+
+{% block content %}
+<div class="chatbot-container">
+    <div class="chatbot-wrapper">
+        <!-- Header -->
+        <div class="chatbot-header">
+            <h2><i class="fas fa-comments"></i> Fraternity Information Assistant</h2>
+            <p>Ask us anything about {{ site_config.organization_name|default:"Phi Beta Sigma Fraternity, Inc" }}. - {{ site_config.chapter_name|default:"Nu Gamma Sigma Chapter" }}</p>
+        </div>
+
+        <!-- Chat Display -->
+        <div class="chatbot-messages" id="chatMessages">
+            <div class="message bot-message">
+                <div class="message-content">
+                    <p><strong>Hello! 👋</strong></p>
+                    <p>{% if site_config and site_config.chatbot_welcome_message %}{{ site_config.chatbot_welcome_message }}{% else %}I'm here to help answer questions about our fraternity. You can ask me about our history, membership, events, values, and more.{% endif %}</p>
+                    <p><small style="color: #888;">Powered by Public Knowledge Base</small></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Input Form -->
+        <form id="chatForm" class="chatbot-input-form" onsubmit="handleSubmit(event)">
+            {% csrf_token %}
+            <div class="input-group">
+                <input 
+                    type="text" 
+                    id="queryInput" 
+                    placeholder="Ask a question... (max 400 characters)"
+                    maxlength="400"
+                    autocomplete="off"
+                    required
+                >
+                <button type="submit" id="submitBtn" class="btn-send">
+                    <i class="fas fa-paper-plane"></i> Send
+                </button>
+            </div>
+            <small class="character-count">
+                <span id="charCount">0</span>/400
+            </small>
+        </form>
+
+        <!-- Categories Info -->
+        <div class="chatbot-info">
+            <p><strong>Common Topics:</strong></p>
+            <ul>
+                {% for code, name in faq_categories %}
+                    <li>{{ name }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {

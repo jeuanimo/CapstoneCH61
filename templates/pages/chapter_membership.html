@@ -14,8 +14,8 @@
     }
     
     .page-container {
-        width: 100vw;
-        margin-left: calc(-50vw + 50%);
+        width: 100%;
+        margin-left: 0;
         padding: 2rem 1rem;
         min-height: calc(100vh - 210px);
         background-image: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)), url('{% static 'img/ngs.jpg' %}');
@@ -47,12 +47,12 @@
     .page-header {
         text-align: center;
         margin-bottom: 2rem;
-        border-bottom: 3px solid #164f90;
+        border-bottom: 3px solid var(--primary-color);
         padding-bottom: 1rem;
     }
     
     .page-header h1 {
-        color: #164f90;
+        color: var(--primary-color);
         font-size: 2.5rem;
         margin: 0 0 0.5rem 0;
     }
@@ -82,7 +82,7 @@
     }
     
     .page-content h2 {
-        color: #164f90;
+        color: var(--primary-color);
         margin-top: 2rem;
         margin-bottom: 1rem;
     }
@@ -99,7 +99,7 @@
         background: #f9f9f9;
         padding: 1.5rem;
         border-radius: 6px;
-        border-left: 4px solid #164f90;
+        border-left: 4px solid var(--primary-color);
         margin: 2rem 0;
     }
     
@@ -109,7 +109,7 @@
     }
     
     .eligibility-section h3 {
-        color: #164f90;
+        color: var(--primary-color);
         margin-top: 1.5rem;
         margin-bottom: 0.75rem;
         font-size: 1.2rem;
@@ -167,7 +167,7 @@
     }
     
     .return-modal-content h2 {
-        color: #164f90;
+        color: var(--primary-color);
         margin-top: 0;
         margin-bottom: 1.5rem;
         font-size: 1.8rem;
@@ -206,23 +206,23 @@
     }
     
     .return-btn-home {
-        background-color: #164f90;
+        background-color: var(--primary-color);
         color: #ffffff;
     }
     
     .return-btn-home:hover {
-        background-color: #c8c9c7;
-        color: #164f90;
+        background-color: var(--secondary-color);
+        color: var(--primary-color);
         transform: scale(1.05);
     }
     
     .return-btn-stay {
-        background-color: #c8c9c7;
-        color: #164f90;
+        background-color: var(--secondary-color);
+        color: var(--primary-color);
     }
     
     .return-btn-stay:hover {
-        background-color: #164f90;
+        background-color: var(--primary-color);
         color: #ffffff;
         transform: scale(1.05);
     }
@@ -232,7 +232,7 @@
         bottom: 2rem;
         right: 2rem;
         padding: 1rem 1.5rem;
-        background-color: #164f90;
+        background-color: var(--primary-color);
         color: #ffffff;
         border: none;
         border-radius: 50px;
@@ -246,7 +246,7 @@
     
     body.dark-mode .return-home-btn-floating {
         background-color: #87ceeb;
-        color: #164f90;
+        color: var(--primary-color);
     }
     
     .return-home-btn-floating:hover {

@@ -4,10 +4,11 @@
 
 {% block content %}
 <style>
+    /* Theme Colors - Use project standard colors */
     :root {
-        --pbs-blue: #0047AB;
-        --pbs-blue-dark: #003380;
-        --pbs-blue-light: #1e5bc6;
+        --pbs-blue: var(--primary-color, #164f90);
+        --pbs-blue-dark: #0d3a6b;
+        --pbs-blue-light: #2a7dd4;
     }
     
     .delete-card {
@@ -18,7 +19,7 @@
     }
     
     .delete-card-header {
-        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        background: linear-gradient(135deg, var(--error-color, #d32f2f) 0%, #c82333 100%);
         color: white;
         padding: 1.25rem;
     }
@@ -53,7 +54,7 @@
     }
     
     .btn-delete {
-        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        background: linear-gradient(135deg, var(--error-color, #d32f2f) 0%, #c82333 100%);
         border: none;
         color: white;
         padding: 10px 24px;
@@ -63,7 +64,7 @@
     }
     
     .btn-delete:hover {
-        background: linear-gradient(135deg, #e55565 0%, #dc3545 100%);
+        background: linear-gradient(135deg, #e55565 0%, var(--error-color, #d32f2f) 100%);
         color: white;
         transform: translateY(-2px);
         box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
@@ -90,7 +91,7 @@
     
     body.dark-mode .alert-danger {
         background-color: rgba(220, 53, 69, 0.2);
-        border-color: #dc3545;
+        border-color: var(--error-color, #d32f2f);
     }
 </style>
 

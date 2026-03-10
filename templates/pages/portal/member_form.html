@@ -115,15 +115,15 @@
             <!-- Admin Actions Section -->
             <div class="form-section admin-actions-section">
                 <h2><i class="fas fa-shield-alt"></i> Officer Actions</h2>
-                <div style="background: #fff3cd; padding: 1rem; border-radius: 6px; border-left: 4px solid #ffc107; margin-bottom: 1rem;">
+                <div style="background: #fff3cd; padding: 1rem; border-radius: 6px; border-left: 4px solid var(--warning-color); margin-bottom: 1rem;">
                     <p style="color: #856404; font-size: 0.9rem; margin: 0;">
                         <strong>Manual Marking:</strong> Check the box below to immediately mark this member as non-financial. 
                         They will lose document access and see a 90-day countdown on their dashboard.
                     </p>
                 </div>
-                <div class="form-group checkbox-group" style="background: #f0f0f0; padding: 1rem; border-radius: 6px; border: 2px solid #dc3545;">
+                <div class="form-group checkbox-group" style="background: #f0f0f0; padding: 1rem; border-radius: 6px; border: 2px solid var(--error-color);">
                     {{ form.mark_non_financial }}
-                    <label for="id_mark_non_financial" style="color: #dc3545; font-weight: bold;">{{ form.mark_non_financial.label_tag }}</label>
+                    <label for="id_mark_non_financial" style="color: var(--error-color); font-weight: bold;">{{ form.mark_non_financial.label_tag }}</label>
                 </div>
                 <p style="color: #666; font-size: 0.85rem; margin-top: 0.75rem;">
                     <i class="fas fa-info-circle"></i> This action will:
@@ -159,7 +159,7 @@
     }
 
     .portal-header h1 {
-        color: #164f90;
+        color: var(--primary-color);
         font-size: 2.5rem;
         margin-bottom: 0.5rem;
     }
@@ -197,11 +197,11 @@
         background: #f8f9fa;
         padding: 2rem !important;
         border-radius: 8px;
-        border-left: 4px solid #dc3545;
+        border-left: 4px solid var(--error-color);
     }
 
     .form-section h2 {
-        color: #164f90;
+        color: var(--primary-color);
         font-size: 1.5rem;
         margin-bottom: 1.5rem;
         display: flex;
@@ -233,7 +233,7 @@
     }
 
     .form-group label {
-        color: #164f90;
+        color: var(--primary-color);
         font-weight: 600;
         font-size: 1rem;
     }

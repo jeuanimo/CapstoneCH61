@@ -3,12 +3,11 @@
 
 {% block css %}
 <style>
-    /* Theme Colors - Phi Beta Sigma Royal Blue */
+    /* Theme Colors - Use project standard colors */
     :root {
-        --pbs-blue: #0047AB;
-        --pbs-blue-dark: #003380;
-        --pbs-blue-light: #1e5bc6;
-        --pbs-gold: #CFB53B;
+        --pbs-blue: var(--primary-color, #164f90);
+        --pbs-blue-dark: #0d3a6b;
+        --pbs-blue-light: #2a7dd4;
     }
 
     .boutique-page-container {
@@ -311,7 +310,7 @@
     }
 
     .filter-link.active {
-        background: linear-gradient(180deg, #ffc107 0%, #e0a800 50%, #c69500 100%);
+        background: linear-gradient(180deg, var(--warning-color, #ff9800) 0%, #e0a800 50%, #c69500 100%);
         border-color: #a67c00;
         color: var(--pbs-blue-dark) !important;
         text-shadow: 0 1px 0 rgba(255, 255, 255, 0.3);
@@ -321,7 +320,7 @@
     }
 
     .filter-link.active:hover {
-        background: linear-gradient(180deg, #ffcd39 0%, #ffc107 50%, #d4a106 100%);
+        background: linear-gradient(180deg, #ffcd39 0%, var(--warning-color, #ff9800) 50%, #d4a106 100%);
     }
 
     body.dark-mode .filter-link {
@@ -336,7 +335,7 @@
     }
 
     body.dark-mode .filter-link.active {
-        background: linear-gradient(180deg, #ffc107 0%, #e0a800 50%, #c69500 100%);
+        background: linear-gradient(180deg, var(--warning-color, #ff9800) 0%, #e0a800 50%, #c69500 100%);
         color: var(--pbs-blue-dark) !important;
     }
 

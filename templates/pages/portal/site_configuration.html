@@ -129,7 +129,7 @@
 
     .current-image-preview .image-info strong {
         display: block;
-        color: #28a745;
+        color: var(--success-color);
         margin-bottom: 5px;
     }
 
@@ -264,7 +264,7 @@
 
     .warning-toggle {
         background: #fff3cd;
-        border-left: 4px solid #ffc107;
+        border-left: 4px solid var(--warning-color);
         padding: 15px;
         border-radius: 0 8px 8px 0;
         margin-bottom: 15px;
@@ -277,7 +277,7 @@
 
     .danger-toggle {
         background: #f8d7da;
-        border-left: 4px solid #dc3545;
+        border-left: 4px solid var(--error-color);
         padding: 15px;
         border-radius: 0 8px 8px 0;
         margin-bottom: 15px;
@@ -648,10 +648,10 @@
             </div>
 
             <!-- Quick Link to Q&A Management -->
-            <div class="config-section" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-left: 4px solid #28a745;">
-                <h4 style="margin: 0 0 10px 0; color: #28a745;"><i class="fas fa-question-circle"></i> Chatbot Knowledge Base</h4>
+            <div class="config-section" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-left: 4px solid var(--success-color);">
+                <h4 style="margin: 0 0 10px 0; color: var(--success-color);"><i class="fas fa-question-circle"></i> Chatbot Knowledge Base</h4>
                 <p style="margin: 0 0 15px 0; color: #666;">Configure the questions and answers your chatbot can respond to.</p>
-                <a href="{% url 'manage_chatbot_qa' %}" class="btn-save" style="background: #28a745;">
+                <a href="{% url 'manage_chatbot_qa' %}" class="btn-save" style="background: var(--success-color);">
                     <i class="fas fa-cog"></i> Manage Q&A
                 </a>
             </div>
@@ -719,7 +719,7 @@
 
                 <div class="section-divider"></div>
 
-                <h4 style="color: #dc3545;"><i class="fas fa-exclamation-triangle"></i> Maintenance Mode</h4>
+                <h4 style="color: var(--error-color);"><i class="fas fa-exclamation-triangle"></i> Maintenance Mode</h4>
                 
                 <div class="danger-toggle">
                     <div class="form-check" style="background: transparent; padding: 0;">
@@ -765,10 +765,10 @@
             </div>
             
             <!-- Chatbot Q&A Management -->
-            <div style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 25px; border-radius: 12px; border-left: 4px solid #28a745;">
-                <h4 style="margin: 0 0 10px 0; color: #28a745;"><i class="fas fa-robot"></i> Chatbot Q&A</h4>
+            <div style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 25px; border-radius: 12px; border-left: 4px solid var(--success-color);">
+                <h4 style="margin: 0 0 10px 0; color: var(--success-color);"><i class="fas fa-robot"></i> Chatbot Q&A</h4>
                 <p style="margin: 0 0 15px 0; color: #666; font-size: 0.9em;">Configure the chatbot's knowledge base. Add questions and answers visitors can ask about.</p>
-                <a href="{% url 'manage_chatbot_qa' %}" style="display: inline-flex; align-items: center; gap: 8px; background: #28a745; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600;">
+                <a href="{% url 'manage_chatbot_qa' %}" style="display: inline-flex; align-items: center; gap: 8px; background: var(--success-color); color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600;">
                     <i class="fas fa-cog"></i> Manage Chatbot
                 </a>
             </div>

@@ -259,7 +259,7 @@
                     {% csrf_token %}
                     <input type="hidden" name="action" value="delete_section">
                     <input type="hidden" name="section_id" value="{{ section.id }}">
-                    <button type="submit" class="btn" style="background: #dc3545; color: white;">
+                    <button type="submit" class="btn" style="background: var(--error-color); color: white;">
                         <i class="fas fa-trash"></i> Delete Section
                     </button>
                 </form>

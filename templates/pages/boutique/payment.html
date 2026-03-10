@@ -3,11 +3,11 @@
 
 {% block css %}
 <style>
-    /* Theme Colors - Phi Beta Sigma Royal Blue */
+    /* Theme Colors - Use project standard colors */
     :root {
-        --pbs-blue: #0047AB;
-        --pbs-blue-dark: #003380;
-        --pbs-blue-light: #1e5bc6;
+        --pbs-blue: var(--primary-color, #164f90);
+        --pbs-blue-dark: #0d3a6b;
+        --pbs-blue-light: #2a7dd4;
     }
 
     .payment-title {
@@ -83,7 +83,7 @@
     }
 
     .total-due {
-        color: #28a745;
+        color: var(--success-color, #4caf50);
         font-weight: bold;
     }
 
@@ -141,7 +141,7 @@
                         <div id="card-element"></div>
 
                         <!-- Card Errors -->
-                        <div id="card-errors" role="alert" style="color: #dc3545; margin-bottom: 20px;"></div>
+                        <div id="card-errors" role="alert" style="color: var(--error-color, #d32f2f); margin-bottom: 20px;"></div>
 
                         <!-- Submit Button -->
                         <button type="submit" id="submit-button" class="btn-pay">

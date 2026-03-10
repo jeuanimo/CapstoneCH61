@@ -3,11 +3,11 @@
 
 {% block css %}
 <style>
-    /* Theme Colors - Phi Beta Sigma Royal Blue */
+    /* Theme Colors - Use project standard colors */
     :root {
-        --pbs-blue: #0047AB;
-        --pbs-blue-dark: #003380;
-        --pbs-blue-light: #1e5bc6;
+        --pbs-blue: var(--primary-color, #164f90);
+        --pbs-blue-dark: #0d3a6b;
+        --pbs-blue-light: #2a7dd4;
     }
 
     .page-title {
@@ -151,7 +151,7 @@
                     <!-- Order Header -->
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                         <h5 class="order-title">Order #{{ order.id }}</h5>
-                        <span class="badge" style="background-color: {% if order.status == 'completed' %}#28a745{% elif order.status == 'shipped' %}#0066cc{% elif order.status == 'pending' %}#ffc107{% else %}#6c757d{% endif %}; color: white;">
+                        <span class="badge" style="background-color: {% if order.status == 'completed' %}var(--success-color, #4caf50){% elif order.status == 'shipped' %}#0066cc{% elif order.status == 'pending' %}var(--warning-color, #ff9800){% else %}#6c757d{% endif %}; color: white;">
                             {{ order.get_status_display }}
                         </span>
                     </div>

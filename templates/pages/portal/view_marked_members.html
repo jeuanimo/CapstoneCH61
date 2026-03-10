@@ -17,17 +17,17 @@
 
         <!-- Summary Stats -->
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
-            <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #ffc107;">
+            <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; border-left: 4px solid var(--warning-color);">
                 <p style="color: #6c757d; margin: 0 0 0.5rem 0; font-size: 0.9rem;">Total Marked for Removal</p>
                 <p style="color: #1a1a2e; margin: 0; font-size: 2rem; font-weight: bold;">{{ total_marked }}</p>
             </div>
-            <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #ffc107;">
+            <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; border-left: 4px solid var(--warning-color);">
                 <p style="color: #6c757d; margin: 0 0 0.5rem 0; font-size: 0.9rem;">In Grace Period (30+ days)</p>
                 <p style="color: #1a1a2e; margin: 0; font-size: 2rem; font-weight: bold;">{{ at_risk|length }}</p>
             </div>
-            <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #dc3545;">
+            <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; border-left: 4px solid var(--error-color);">
                 <p style="color: #6c757d; margin: 0 0 0.5rem 0; font-size: 0.9rem;">Expiring Soon (&lt;30 days)</p>
-                <p style="color: #dc3545; margin: 0; font-size: 2rem; font-weight: bold;">{{ expiring_soon|length }}</p>
+                <p style="color: var(--error-color); margin: 0; font-size: 2rem; font-weight: bold;">{{ expiring_soon|length }}</p>
             </div>
         </div>
 
@@ -105,7 +105,7 @@
                             <td style="padding: 0.75rem; color: #555;">
                                 {{ item.member.member_number }}
                             </td>
-                            <td style="padding: 0.75rem; color: #164f90; font-weight: bold;">
+                            <td style="padding: 0.75rem; color: var(--primary-color); font-weight: bold;">
                                 {{ item.days_remaining }} days
                             </td>
                             <td style="padding: 0.75rem; color: #555; font-size: 0.85rem;">
@@ -123,7 +123,7 @@
         {% endif %}
 
         {% if not marked_members %}
-        <div style="background: #d4edda; padding: 2rem; border-radius: 8px; border-left: 4px solid #28a745;">
+        <div style="background: #d4edda; padding: 2rem; border-radius: 8px; border-left: 4px solid var(--success-color);">
             <h3 style="color: #155724; margin-bottom: 0.5rem;">
                 <i class="fas fa-check-circle"></i> No Members in Grace Period
             </h3>
@@ -134,11 +134,11 @@
         {% endif %}
 
         <!-- Admin Info -->
-        <div style="background: #e7f3ff; padding: 2rem; border-radius: 8px; border-left: 4px solid #164f90; margin-top: 2rem;">
-            <h4 style="color: #164f90; margin-bottom: 1rem;">
+        <div style="background: #e7f3ff; padding: 2rem; border-radius: 8px; border-left: 4px solid var(--primary-color); margin-top: 2rem;">
+            <h4 style="color: var(--primary-color); margin-bottom: 1rem;">
                 <i class="fas fa-info-circle"></i> How to Resolve Member Status
             </h4>
-            <ul style="color: #164f90; margin: 0; padding-left: 1.5rem;">
+            <ul style="color: var(--primary-color); margin: 0; padding-left: 1.5rem;">
                 <li style="margin-bottom: 0.75rem;">
                     <strong>Update HQ List:</strong> If member should be in the system, request their addition from International HQ
                 </li>

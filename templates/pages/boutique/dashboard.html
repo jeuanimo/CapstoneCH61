@@ -5,11 +5,11 @@
 
 {% block css %}
 <style>
-    /* Theme Colors - Phi Beta Sigma Royal Blue */
+    /* Theme Colors - Use project standard colors */
     :root {
-        --pbs-blue: #0047AB;
-        --pbs-blue-dark: #003380;
-        --pbs-blue-light: #1e5bc6;
+        --pbs-blue: var(--primary-color, #164f90);
+        --pbs-blue-dark: #0d3a6b;
+        --pbs-blue-light: #2a7dd4;
     }
 
     .dashboard-container {
@@ -85,15 +85,15 @@
     }
 
     .stat-card.revenue .stat-value {
-        color: #28a745;
+        color: var(--success-color, #4caf50);
     }
 
     .stat-card.warning .stat-value {
-        color: #ffc107;
+        color: var(--warning-color, #ff9800);
     }
 
     .stat-card.danger .stat-value {
-        color: #dc3545;
+        color: var(--error-color, #d32f2f);
     }
 
     .section-card {
@@ -193,12 +193,12 @@
     }
 
     .low-stock {
-        color: #dc3545;
+        color: var(--error-color, #d32f2f);
         font-weight: bold;
     }
 
     .in-stock {
-        color: #28a745;
+        color: var(--success-color, #4caf50);
     }
 
     .status-badge {
@@ -318,7 +318,7 @@
                     {% if pending_orders > 0 %}
                     <form method="post" action="{% url 'clear_abandoned_orders' %}" style="margin-top: 10px;" onsubmit="return confirm('Clear all {{ pending_orders }} abandoned/unpaid orders?\n\nThis will permanently delete orders that were never paid for.');">
                         {% csrf_token %}
-                        <button type="submit" class="btn btn-sm" style="background: #dc3545; color: white; font-size: 0.75rem; padding: 4px 10px;">
+                        <button type="submit" class="btn btn-sm" style="background: var(--error-color, #d32f2f); color: white; font-size: 0.75rem; padding: 4px 10px;">
                             <i class="fas fa-broom"></i> Clear Abandoned
                         </button>
                     </form>
@@ -385,7 +385,7 @@
                                     </td>
                                     <td>{{ stat.product__category|title }}</td>
                                     <td><strong>{{ stat.units_sold }}</strong></td>
-                                    <td style="color: #28a745; font-weight: bold;">${{ stat.revenue|floatformat:2 }}</td>
+                                    <td style="color: var(--success-color, #4caf50); font-weight: bold;">${{ stat.revenue|floatformat:2 }}</td>
                                     <td class="{% if stat.product__inventory <= low_stock_threshold %}low-stock{% else %}in-stock{% endif %}">
                                         {{ stat.product__inventory }}
                                     </td>
@@ -450,7 +450,7 @@
                         {% endfor %}
                     </ul>
                     {% else %}
-                    <p style="text-align: center; color: #28a745; padding: 20px;">
+                    <p style="text-align: center; color: var(--success-color, #4caf50); padding: 20px;">
                         <i class="fas fa-check-circle"></i> All products are well stocked!
                     </p>
                     {% endif %}
