@@ -1358,16 +1358,20 @@ class MemberCreateView(OfficerRequiredMixin, CreateView):
         # Save member profile with user reference
         member_profile = form.save(commit=False)
         member_profile.user = user
+        # Set is_officer if leadership position specified
+        if leadership_position:
+            member_profile.is_officer = True
         member_profile.save()
         
-        # Create leadership position if specified
+        # Create leadership position if specified (with member link)
         if leadership_position:
             ChapterLeadership.objects.create(
                 position=leadership_position,
                 full_name=user.get_full_name() or user.username,
                 email=user.email,
                 phone=member_profile.phone,
-                is_active=True
+                is_active=True,
+                member=member_profile  # Link to member profile
             )
         
         # Generate invitation code
@@ -1424,7 +1428,11 @@ class MemberUpdateView(OfficerRequiredMixin, UpdateView):
         initial = super().get_initial()
         
         member = self.get_object()
+        # Check by member FK first, then by email
         existing_leadership = ChapterLeadership.objects.filter(
+            member=member,
+            is_active=True
+        ).first() or ChapterLeadership.objects.filter(
             email__iexact=member.user.email,
             is_active=True
         ).first()
@@ -1446,6 +1454,9 @@ class MemberUpdateView(OfficerRequiredMixin, UpdateView):
         
         # Handle leadership position
         leadership_position = form.cleaned_data.get('leadership_position')
+        
+        # Delete existing leadership entries (by member FK or email)
+        ChapterLeadership.objects.filter(member=self.object).delete()
         ChapterLeadership.objects.filter(email__iexact=user.email).delete()
         
         if leadership_position:
@@ -1454,8 +1465,18 @@ class MemberUpdateView(OfficerRequiredMixin, UpdateView):
                 full_name=user.get_full_name() or user.username,
                 email=user.email,
                 phone=self.object.phone,
-                is_active=True
+                is_active=True,
+                member=self.object  # Link to member profile
             )
+            # Set is_officer flag
+            if not self.object.is_officer:
+                self.object.is_officer = True
+                self.object.save(update_fields=['is_officer'])
+        else:
+            # Clear is_officer flag if no position
+            if self.object.is_officer:
+                self.object.is_officer = False
+                self.object.save(update_fields=['is_officer'])
         
         logger.info(f"Member updated: {self.object.member_number} by {self.request.user.username}")
         messages.success(self.request, f"Successfully updated {user.get_full_name()}'s profile!")
@@ -1528,11 +1549,11 @@ def _update_member_leadership_position(member, leadership_position):
     """
     Update a member's leadership position.
     Deletes existing positions and creates new one if specified.
+    Also updates is_officer flag on MemberProfile.
     """
-    # Delete existing leadership entries for this member
-    ChapterLeadership.objects.filter(
-        email__iexact=member.user.email
-    ).delete()
+    # Delete existing leadership entries for this member (by FK or email)
+    ChapterLeadership.objects.filter(member=member).delete()
+    ChapterLeadership.objects.filter(email__iexact=member.user.email).delete()
     
     # Create new one if specified
     if leadership_position:
@@ -1541,8 +1562,18 @@ def _update_member_leadership_position(member, leadership_position):
             full_name=member.user.get_full_name() or member.user.username,
             email=member.user.email,
             phone=member.phone,
-            is_active=True
+            is_active=True,
+            member=member  # Link to member profile
         )
+        # Also set is_officer flag
+        if not member.is_officer:
+            member.is_officer = True
+            member.save(update_fields=['is_officer'])
+    else:
+        # Remove is_officer flag if no position
+        if member.is_officer:
+            member.is_officer = False
+            member.save(update_fields=['is_officer'])
 
 
 def _delete_member_and_account(member):
