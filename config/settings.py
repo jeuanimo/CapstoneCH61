@@ -288,111 +288,50 @@ else:
 
 # ====================== LOGGING CONFIGURATION ======================
 
-# Production uses console-only logging (Render captures stdout)
-# Development uses file-based logging
-
-if DEBUG:
-    # Development: Log to both console and files
-    LOGGING = {
-        'version': 1,
-        'disable_existing_loggers': False,
-        'formatters': {
-            'verbose': {
-                'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
-                'style': '{',
-            },
-            'simple': {
-                'format': '{levelname} {asctime} {message}',
-                'style': '{',
-            },
+# Console-only logging (works everywhere, Render captures stdout)
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',
         },
-        'handlers': {
-            'console': {
-                'level': 'INFO',
-                'class': 'logging.StreamHandler',
-                'formatter': 'simple',
-            },
-            'file': {
-                'level': 'WARNING',
-                'class': 'logging.handlers.RotatingFileHandler',
-                'filename': BASE_DIR / 'logs' / 'django.log',
-                'maxBytes': 1024 * 1024 * 5,
-                'backupCount': 5,
-                'formatter': 'verbose',
-            },
-            'security_file': {
-                'level': 'WARNING',
-                'class': 'logging.handlers.RotatingFileHandler',
-                'filename': BASE_DIR / 'logs' / 'security.log',
-                'maxBytes': 1024 * 1024 * 5,
-                'backupCount': 10,
-                'formatter': 'verbose',
-            },
+        'simple': {
+            'format': '{levelname} {asctime} {message}',
+            'style': '{',
         },
-        'loggers': {
-            'django': {
-                'handlers': ['console', 'file'],
-                'level': 'INFO',
-                'propagate': False,
-            },
-            'django.security': {
-                'handlers': ['security_file'],
-                'level': 'WARNING',
-                'propagate': False,
-            },
-            'pages': {
-                'handlers': ['console', 'file'],
-                'level': 'INFO',
-                'propagate': False,
-            },
-            'axes': {
-                'handlers': ['console', 'security_file'],
-                'level': 'WARNING',
-                'propagate': False,
-            },
+    },
+    'handlers': {
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
         },
-    }
-else:
-    # Production: Console-only logging (Render captures stdout)
-    LOGGING = {
-        'version': 1,
-        'disable_existing_loggers': False,
-        'formatters': {
-            'verbose': {
-                'format': '{levelname} {asctime} {module} {message}',
-                'style': '{',
-            },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
         },
-        'handlers': {
-            'console': {
-                'level': 'INFO',
-                'class': 'logging.StreamHandler',
-                'formatter': 'verbose',
-            },
+        'django.security': {
+            'handlers': ['console'],
+            'level': 'WARNING',
+            'propagate': False,
         },
-        'loggers': {
-            'django': {
-                'handlers': ['console'],
-                'level': 'INFO',
-                'propagate': False,
-            },
-            'django.security': {
-                'handlers': ['console'],
-                'level': 'WARNING',
-                'propagate': False,
-            },
-            'pages': {
-                'handlers': ['console'],
-                'level': 'INFO',
-                'propagate': False,
-            },
-            'axes': {
-                'handlers': ['console'],
-                'level': 'WARNING',
-                'propagate': False,
-            },
+        'pages': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
         },
-    }
+        'axes': {
+            'handlers': ['console'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+    },
+}
 
 # ====================== LOGIN/LOGOUT CONFIGURATION ======================
 
