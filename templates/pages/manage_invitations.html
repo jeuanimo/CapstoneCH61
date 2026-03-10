@@ -47,6 +47,11 @@
                             <td>{{ invitation.created_at|date:"M d, Y" }}</td>
                             <td>{{ invitation.created_by.username|default:"—" }}</td>
                             <td>
+                                <a href="{% url 'resend_invitation' invitation.pk %}" 
+                                   class="btn btn-sm btn-primary me-1"
+                                   title="Resend invitation email">
+                                    <i class="fas fa-envelope"></i>
+                                </a>
                                 <a href="{% url 'delete_invitation' invitation.pk %}" 
                                    class="btn btn-sm btn-danger"
                                    data-confirm="Delete this invitation code?">

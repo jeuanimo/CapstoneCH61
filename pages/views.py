@@ -1070,6 +1070,31 @@ def delete_invitation(request, pk):
 
 @login_required
 @user_passes_test(is_officer_or_staff)
+def resend_invitation(request, pk):
+    """Resend invitation email for an existing invitation code"""
+    from .email_utils import send_invitation_email
+    
+    invitation = get_object_or_404(InvitationCode, pk=pk)
+    
+    if invitation.is_used:
+        messages.error(request, "This invitation has already been used.")
+        return redirect('manage_invitations')
+    
+    if not invitation.is_valid():
+        messages.error(request, "This invitation has expired. Please generate a new one.")
+        return redirect('manage_invitations')
+    
+    email_sent = send_invitation_email(invitation)
+    if email_sent:
+        messages.success(request, f"Invitation email resent to {invitation.email}")
+    else:
+        messages.error(request, f"Failed to send email to {invitation.email}")
+    
+    return redirect('manage_invitations')
+
+
+@login_required
+@user_passes_test(is_officer_or_staff)
 def generate_member_invitation(request, pk):
     """Generate a new invitation code for an existing member (officers and admin)"""
     from .email_utils import send_invitation_email

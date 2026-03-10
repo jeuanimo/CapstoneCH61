@@ -130,6 +130,7 @@ urlpatterns = [
     path('invitations/', views.manage_invitations, name='manage_invitations'),
     path('invitations/create/', views.create_invitation, name='create_invitation'),
     path('invitations/delete/<int:pk>/', views.delete_invitation, name='delete_invitation'),
+    path('invitations/resend/<int:pk>/', views.resend_invitation, name='resend_invitation'),
     path('invitations/generate/<int:pk>/', views.generate_member_invitation, name='generate_member_invitation'),
     
     # SITE CONFIGURATION (Admin/Officer only)
