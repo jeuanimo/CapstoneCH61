@@ -20,6 +20,74 @@ WHAT WAS CREATED
 ✓ Security-First Approach
 
 ================================================================================
+CSS FIX LOG - DO NOT UNDO THESE CHANGES
+================================================================================
+
+LAST UPDATED: March 10, 2026
+
+FIX #1: Filter Button Vertical Alignment (March 10, 2026)
+---------------------------------------------------------
+ISSUE: Filter buttons on forms were pushed below the form inputs, not aligned 
+       with them when other fields had labels above them.
+
+FILES FIXED:
+  - templates/pages/portal/dues_and_payments.html
+  - templates/pages/portal/manage_attendance.html
+
+SOLUTION APPLIED:
+  1. Changed form class from "row g-3" to "row g-3 align-items-end"
+  2. Added invisible placeholder label to button column:
+     <label class="form-label d-block">&nbsp;</label>
+     This makes the button align with other inputs that have labels.
+
+DO NOT REMOVE: The "&nbsp;" label on filter button columns - it's required
+for proper vertical alignment with labeled form fields.
+
+PATTERN TO USE FOR FILTER FORMS:
+```html
+<form method="get" class="row g-3 align-items-end">
+    <div class="col-md-3">
+        <label for="field" class="form-label">Field Label</label>
+        <select name="field" id="field" class="form-control">...</select>
+    </div>
+    <div class="col-md-2">
+        <label class="form-label d-block">&nbsp;</label>  <!-- REQUIRED for alignment -->
+        <button type="submit" class="btn btn-primary w-100">
+            <i class="fas fa-search"></i> Filter
+        </button>
+    </div>
+</form>
+```
+
+FIX #2: Page Header Button Alignment (March 10, 2026)
+-----------------------------------------------------
+ISSUE: Action buttons next to page titles were not properly aligned.
+
+FILES FIXED:
+  - templates/pages/portal/dues_and_payments.html
+  - templates/pages/portal/manage_attendance.html
+  - templates/pages/portal/zoom/meeting_list.html
+  - templates/pages/portal/zoom/manage_meetings.html
+  - templates/pages/portal/polls/poll_list.html
+  - templates/pages/chapter_leadership.html
+  - templates/pages/portal/zoom/sms_logs.html
+
+SOLUTION APPLIED:
+  Added .page-header CSS class with flex layout:
+  ```css
+  .page-header {
+      display: flex;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+  }
+  ```
+
+DO NOT CHANGE these .page-header styles - they ensure buttons align properly
+with page titles.
+
+================================================================================
 CSS FILES STRUCTURE
 ================================================================================
 
