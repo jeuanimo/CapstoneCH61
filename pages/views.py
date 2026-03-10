@@ -3275,9 +3275,9 @@ def photo_gallery(request):
 
 @login_required
 def upload_photo(request):
-    """Upload new photo"""
+    """Upload new photos (supports multiple files)"""
     if request.method == 'POST':
-        image = request.FILES.get('image')
+        images = request.FILES.getlist('images')
         caption = request.POST.get('caption', '').strip()
         tags = request.POST.get('tags', '').strip()
         album_id = request.POST.get('album')
@@ -3285,7 +3285,7 @@ def upload_photo(request):
         program = request.POST.get('program', '')
         event_id = request.POST.get('event')
         
-        if image:
+        if images:
             album = None
             
             # Create new album if name provided
@@ -3303,18 +3303,26 @@ def upload_photo(request):
             if event_id:
                 event = Event.objects.filter(id=event_id).first()
             
-            Photo.objects.create(
-                uploaded_by=request.user,
-                image=image,
-                caption=caption,
-                tags=tags,
-                album=album,
-                event=event
-            )
-            messages.success(request, MSG_PHOTO_UPLOAD_SUCCESS)
+            # Upload all images
+            uploaded_count = 0
+            for image in images:
+                Photo.objects.create(
+                    uploaded_by=request.user,
+                    image=image,
+                    caption=caption,
+                    tags=tags,
+                    album=album,
+                    event=event
+                )
+                uploaded_count += 1
+            
+            if uploaded_count == 1:
+                messages.success(request, MSG_PHOTO_UPLOAD_SUCCESS)
+            else:
+                messages.success(request, f"Successfully uploaded {uploaded_count} photos!")
             return redirect('photo_gallery')
         else:
-            messages.error(request, "Please select an image to upload.")
+            messages.error(request, "Please select at least one image to upload.")
     
     # Get albums and events for the form
     albums = PhotoAlbum.objects.filter(is_public=True)
@@ -3395,6 +3403,38 @@ def delete_photo(request, photo_id):
         messages.success(request, "Photo deleted successfully!")
     else:
         messages.error(request, "You don't have permission to delete this photo.")
+    
+    return redirect('photo_gallery')
+
+
+@login_required
+def bulk_delete_photos(request):
+    """Bulk delete multiple photos at once"""
+    if request.method == 'POST':
+        photo_ids = request.POST.getlist('photo_ids')
+        
+        if not photo_ids:
+            messages.warning(request, "No photos selected for deletion.")
+            return redirect('photo_gallery')
+        
+        # Check permissions and delete
+        is_officer = hasattr(request.user, 'member_profile') and request.user.member_profile.is_officer
+        deleted_count = 0
+        
+        for photo_id in photo_ids:
+            try:
+                photo = Photo.objects.get(id=photo_id)
+                # Only allow deletion if user owns, is staff, or is officer
+                if photo.uploaded_by == request.user or request.user.is_staff or is_officer:
+                    photo.delete()
+                    deleted_count += 1
+            except Photo.DoesNotExist:
+                continue
+        
+        if deleted_count > 0:
+            messages.success(request, f"Successfully deleted {deleted_count} photo(s)!")
+        else:
+            messages.error(request, "No photos were deleted. You may not have permission.")
     
     return redirect('photo_gallery')
 

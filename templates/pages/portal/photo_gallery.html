@@ -31,6 +31,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        position: relative;
     }
     
     body.dark-mode .gallery-image-wrapper {
@@ -62,6 +63,43 @@
     
     body.dark-mode h2 {
         color: #e8edf7;
+    }
+    
+    /* Bulk selection styles */
+    .photo-checkbox {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        z-index: 10;
+        width: 22px;
+        height: 22px;
+        cursor: pointer;
+        opacity: 0.7;
+        transition: opacity 0.2s;
+    }
+    
+    .photo-checkbox:hover,
+    .photo-checkbox:checked {
+        opacity: 1;
+    }
+    
+    .photo-card.selected .gallery-image-wrapper {
+        outline: 3px solid var(--primary-color);
+    }
+    
+    .bulk-actions {
+        display: none;
+        padding: 1rem;
+        background: var(--primary-color);
+        color: white;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+    }
+    
+    .bulk-actions.show {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
     }
 </style>
 {% endblock %}
@@ -107,14 +145,39 @@
 
     <!-- Photo Grid -->
     {% if photos %}
-    <div class="row g-3">
-        {% for photo in photos %}
-        <div class="col-md-4 col-lg-3">
-            <div class="card h-100 gallery-card">
-                <a href="{% url 'photo_detail' photo.id %}" class="gallery-image-wrapper">
-                    <img src="{{ photo.image.url }}" class="gallery-image" alt="{{ photo.caption }}">
-                </a>
-                </a>
+    <form method="post" action="{% url 'bulk_delete_photos' %}" id="bulkDeleteForm">
+        {% csrf_token %}
+        
+        <!-- Bulk Actions Bar -->
+        <div class="bulk-actions" id="bulkActionsBar">
+            <div>
+                <input type="checkbox" id="selectAll" style="width: 18px; height: 18px; vertical-align: middle;">
+                <label for="selectAll" style="margin-left: 5px; cursor: pointer;">
+                    <span id="selectedCount">0</span> photos selected
+                </label>
+            </div>
+            <div>
+                <button type="button" class="btn btn-light btn-sm me-2" onclick="clearSelection()">
+                    <i class="fas fa-times"></i> Clear
+                </button>
+                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete the selected photos?')">
+                    <i class="fas fa-trash"></i> Delete Selected
+                </button>
+            </div>
+        </div>
+        
+        <div class="row g-3">
+            {% for photo in photos %}
+            <div class="col-md-4 col-lg-3">
+                <div class="card h-100 gallery-card photo-card" data-photo-id="{{ photo.id }}">
+                    <div class="gallery-image-wrapper">
+                        {% if photo.uploaded_by == user or user.is_staff %}
+                        <input type="checkbox" name="photo_ids" value="{{ photo.id }}" class="photo-checkbox" title="Select for bulk action">
+                        {% endif %}
+                        <a href="{% url 'photo_detail' photo.id %}">
+                            <img src="{{ photo.image.url }}" class="gallery-image" alt="{{ photo.caption }}">
+                        </a>
+                    </div>
                 <div class="card-body">
                     <p class="card-text small">
                         {% if photo.caption %}
@@ -162,6 +225,54 @@
         </div>
         {% endfor %}
     </div>
+    </form>
+    
+    <script>
+    // Bulk selection functionality
+    const checkboxes = document.querySelectorAll('.photo-checkbox');
+    const selectAllCheckbox = document.getElementById('selectAll');
+    const bulkActionsBar = document.getElementById('bulkActionsBar');
+    const selectedCountSpan = document.getElementById('selectedCount');
+    
+    function updateBulkActionsBar() {
+        const checkedCount = document.querySelectorAll('.photo-checkbox:checked').length;
+        selectedCountSpan.textContent = checkedCount;
+        
+        if (checkedCount > 0) {
+            bulkActionsBar.classList.add('show');
+        } else {
+            bulkActionsBar.classList.remove('show');
+        }
+        
+        // Update select all checkbox state
+        selectAllCheckbox.checked = checkedCount === checkboxes.length && checkboxes.length > 0;
+        selectAllCheckbox.indeterminate = checkedCount > 0 && checkedCount < checkboxes.length;
+    }
+    
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            this.closest('.photo-card').classList.toggle('selected', this.checked);
+            updateBulkActionsBar();
+        });
+    });
+    
+    selectAllCheckbox.addEventListener('change', function() {
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = this.checked;
+            checkbox.closest('.photo-card').classList.toggle('selected', this.checked);
+        });
+        updateBulkActionsBar();
+    });
+    
+    function clearSelection() {
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = false;
+            checkbox.closest('.photo-card').classList.remove('selected');
+        });
+        selectAllCheckbox.checked = false;
+        updateBulkActionsBar();
+    }
+    </script>
     {% else %}
     <div class="alert alert-info">
         <i class="fas fa-info-circle"></i> No photos found. Be the first to upload!

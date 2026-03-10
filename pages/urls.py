@@ -194,6 +194,7 @@ urlpatterns = [
     # PHOTO MANAGEMENT (Login required)
     path('portal/photos/', views.photo_gallery, name='photo_gallery'),
     path('portal/photos/upload/', views.upload_photo, name='upload_photo'),
+    path('portal/photos/bulk-delete/', views.bulk_delete_photos, name='bulk_delete_photos'),
     path('portal/photos/<int:photo_id>/', views.photo_detail, name='photo_detail'),
     path('portal/photos/<int:photo_id>/edit/', views.edit_photo, name='edit_photo'),
     path('portal/photos/<int:photo_id>/like/', views.like_photo, name='like_photo'),

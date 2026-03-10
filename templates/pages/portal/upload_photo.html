@@ -7,18 +7,16 @@
     <div class="upload-container">
         <div class="card upload-card">
             <div class="card-header">
-                <h3 class="mb-0"><i class="fas fa-camera"></i> Upload Photo</h3>
+                <h3 class="mb-0"><i class="fas fa-camera"></i> Upload Photos</h3>
             </div>
             <div class="card-body">
                 <form method="post" enctype="multipart/form-data">
                     {% csrf_token %}
                     
                     <div class="mb-3">
-                        <label for="image" class="form-label">Select Image *</label>
-                        <input type="file" class="form-control" id="image" name="image" accept="image/*" required>
-                        <div class="form-text">Supported formats: JPG, PNG, GIF</div>
-                    </div>
-
+                        <label for="image" class="form-label">Select Images *</label>
+                        <input type="file" class="form-control" id="image" name="images" accept="image/*" multiple required>
+                        <div class="form-text">Supported formats: JPG, PNG, GIF. You can select multiple images at once.</div>
                     <div class="mb-3">
                         <label for="caption" class="form-label">Caption</label>
                         <textarea class="form-control" id="caption" name="caption" rows="3" placeholder="Add a caption for your photo..."></textarea>
@@ -69,7 +67,7 @@
 
                     <div class="d-grid gap-2">
                         <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-upload"></i> Upload Photo
+                            <i class="fas fa-upload"></i> Upload Photos
                         </button>
                         <a href="{% url 'photo_gallery' %}" class="btn btn-outline-secondary">
                             <i class="fas fa-times"></i> Cancel
@@ -243,16 +241,31 @@
 </style>
 
 <script>
-// Image preview
+// Multiple image preview
 document.getElementById('image').addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = function(event) {
-            document.getElementById('preview').src = event.target.result;
-            document.getElementById('imagePreview').style.display = 'block';
-        }
-        reader.readAsDataURL(file);
+    const files = e.target.files;
+    const previewContainer = document.getElementById('imagePreview');
+    const previewBody = previewContainer.querySelector('.card-body');
+    
+    if (files.length > 0) {
+        previewBody.innerHTML = '<div class="row g-2" id="previewGrid"></div>';
+        const grid = document.getElementById('previewGrid');
+        
+        Array.from(files).forEach((file, index) => {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const col = document.createElement('div');
+                col.className = 'col-4 col-md-3';
+                col.innerHTML = `<img src="${event.target.result}" class="img-fluid rounded" alt="Preview ${index + 1}" style="max-height: 150px; object-fit: cover; width: 100%;">`;
+                grid.appendChild(col);
+            }
+            reader.readAsDataURL(file);
+        });
+        
+        previewContainer.style.display = 'block';
+        previewContainer.querySelector('.card-header h5').innerHTML = '<i class="fas fa-eye"></i> Preview (' + files.length + ' images)';
+    } else {
+        previewContainer.style.display = 'none';
     }
 });
 </script>
