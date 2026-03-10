@@ -4,7 +4,7 @@ Provides global template context variables
 """
 
 from django.conf import settings
-from .models import Cart, SiteConfiguration, StripeConfiguration
+# Lazy imports moved inside functions to prevent import errors
 
 
 def cart_context(request):
@@ -14,21 +14,25 @@ def cart_context(request):
     """
     cart_count = 0
     
-    if request.user.is_authenticated:
-        try:
-            cart = Cart.objects.get(user=request.user)
-            cart_count = cart.get_total_items()
-        except Cart.DoesNotExist:
-            pass
-    else:
-        # Check for session-based cart for anonymous users
-        session_key = request.session.session_key
-        if session_key:
+    try:
+        from .models import Cart
+        if request.user.is_authenticated:
             try:
-                cart = Cart.objects.get(session_key=session_key, user__isnull=True)
+                cart = Cart.objects.get(user=request.user)
                 cart_count = cart.get_total_items()
             except Cart.DoesNotExist:
                 pass
+        else:
+            # Check for session-based cart for anonymous users
+            session_key = request.session.session_key
+            if session_key:
+                try:
+                    cart = Cart.objects.get(session_key=session_key, user__isnull=True)
+                    cart_count = cart.get_total_items()
+                except Cart.DoesNotExist:
+                    pass
+    except Exception:
+        pass
     
     return {
         'cart_item_count': cart_count,
@@ -41,6 +45,7 @@ def site_config_context(_request):
     Provides branding info (logos, chapter name, social links, etc.)
     """
     try:
+        from .models import SiteConfiguration
         config = SiteConfiguration.get_config()
         return {
             'site_config': config,
@@ -60,22 +65,23 @@ def stripe_availability_context(_request):
     stripe_available = False
     stripe_test_mode = True
     
-    # Check environment variables first
-    env_public_key = getattr(settings, 'STRIPE_PUBLIC_KEY', '')
-    env_secret_key = getattr(settings, 'STRIPE_SECRET_KEY', '')
-    
-    if env_public_key and env_secret_key:
-        stripe_available = True
-        stripe_test_mode = env_public_key.startswith('pk_test_')
-    else:
-        # Check database configuration
-        try:
+    try:
+        # Check environment variables first
+        env_public_key = getattr(settings, 'STRIPE_PUBLIC_KEY', '')
+        env_secret_key = getattr(settings, 'STRIPE_SECRET_KEY', '')
+        
+        if env_public_key and env_secret_key:
+            stripe_available = True
+            stripe_test_mode = env_public_key.startswith('pk_test_')
+        else:
+            # Check database configuration
+            from .models import StripeConfiguration
             config = StripeConfiguration.objects.filter(is_active=True).first()
             if config and config.stripe_publishable_key and config.stripe_secret_key:
                 stripe_available = True
                 stripe_test_mode = config.is_test_mode
-        except Exception:
-            pass
+    except Exception:
+        pass
     
     return {
         'stripe_available': stripe_available,
