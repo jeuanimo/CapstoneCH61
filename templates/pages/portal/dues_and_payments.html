@@ -2,8 +2,32 @@
 
 {% block title %}Dues & Payments - Member Portal{% endblock %}
 
-{% block content %}
+{% block css %}
 <style>
+    .page-header {
+        display: flex;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    .page-header-content {
+        flex: 1;
+    }
+    .page-header h2 {
+        margin: 0;
+        padding-bottom: 0.5rem;
+        border-bottom: 3px solid var(--primary-color);
+        display: inline-block;
+    }
+    .page-header-content p {
+        margin: 0.5rem 0 0 0;
+    }
+    .page-header .btn-group-custom {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
     body.dark-mode .card {
         background-color: #1a2a4a;
         color: #e8edf7;
@@ -50,11 +74,6 @@
     /* Hidden CSRF token for bulk operations */
     #csrfTokenContainer {
         display: none;
-    }
-
-        background-color: #0d1520;
-        color: #e8edf7;
-        border-color: #2a4a7a;
     }
     body.dark-mode .form-label {
         color: #e8edf7;
@@ -153,18 +172,32 @@
     body.dark-mode .stat-red {
         background-color: #3a1a1a;
         border-left: 4px solid #ff6b6b;
-    }</style>
+    }
+</style>
+{% endblock %}
 
+{% block content %}
 <!-- Hidden CSRF token for bulk delete operations -->
 <div id="csrfTokenContainer">
     {% csrf_token %}
 </div>
 
 <div class="container my-5">
-    <div class="row mb-4">
-        <div class="col-md-12">
+    <div class="page-header">
+        <div class="page-header-content">
             <h2><i class="fas fa-money-bill-wave"></i> Dues & Payments Management</h2>
             <p class="text-muted">Manage member dues and payment information</p>
+        </div>
+        <div class="btn-group-custom">
+            <a href="{% url 'create_bill' %}" class="btn btn-success">
+                <i class="fas fa-file-invoice-dollar"></i> Create Bill
+            </a>
+            <a href="{% url 'add_dues_payment' %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Add Payment Record
+            </a>
+            <a href="{% url 'member_dues_summary' %}" class="btn btn-info">
+                <i class="fas fa-chart-bar"></i> Member Summary
+            </a>
         </div>
     </div>
 
@@ -196,28 +229,13 @@
         </div>
     </div>
 
-    <!-- Add New Payment Button -->
-    <div class="row mb-4">
-        <div class="col-md-12">
-            <a href="{% url 'create_bill' %}" class="btn btn-success btn-lg">
-                <i class="fas fa-file-invoice-dollar"></i> Create Bill
-            </a>
-            <a href="{% url 'add_dues_payment' %}" class="btn btn-primary">
-                <i class="fas fa-plus"></i> Add Payment Record
-            </a>
-            <a href="{% url 'member_dues_summary' %}" class="btn btn-info">
-                <i class="fas fa-chart-bar"></i> Member Summary
-            </a>
-        </div>
-    </div>
-
     <!-- Filters Section -->
     <div class="card filter-card">
         <div class="card-header bg-light">
             <h5 class="mb-0"><i class="fas fa-filter"></i> Filters</h5>
         </div>
         <div class="card-body">
-            <form method="get" class="row g-3">
+            <form method="get" class="row g-3 align-items-end">
                 <div class="col-md-3">
                     <label for="filter" class="form-label">Payment Status</label>
                     <select name="filter" id="filter" class="form-control">
@@ -242,7 +260,7 @@
                     <input type="text" name="member" id="member" class="form-control" 
                            placeholder="Name or Member #" value="{{ member_search }}">
                 </div>
-                <div class="col-md-2 d-flex align-items-end">
+                <div class="col-md-2">
                     <button type="submit" class="btn btn-primary w-100">
                         <i class="fas fa-search"></i> Filter
                     </button>
