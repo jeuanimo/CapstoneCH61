@@ -91,6 +91,7 @@ NAME CONVENTIONS:
 
 from django.urls import path
 from . import views
+from . import views_zoom_api
 
 urlpatterns = [
     # PUBLIC PAGES
@@ -268,10 +269,18 @@ urlpatterns = [
     path('portal/zoom/meetings/create/', views.create_zoom_meeting, name='create_zoom_meeting'),
     path('portal/zoom/meetings/<int:meeting_id>/edit/', views.edit_zoom_meeting, name='edit_zoom_meeting'),
     path('portal/zoom/meetings/<int:meeting_id>/delete/', views.delete_zoom_meeting, name='delete_zoom_meeting'),
+    path('portal/zoom/meetings/bulk-delete/', views.bulk_delete_past_meetings, name='bulk_delete_past_meetings'),
     path('portal/zoom/meetings/<int:meeting_id>/start/', views.start_zoom_meeting, name='start_zoom_meeting'),
     path('portal/zoom/meetings/<int:meeting_id>/end/', views.end_zoom_meeting, name='end_zoom_meeting'),
     path('portal/meetings/', views.meeting_list, name='meeting_list'),
     path('portal/meetings/<int:meeting_id>/join/', views.join_zoom_meeting, name='join_zoom_meeting'),
+    
+    # ZOOM MEETING SDK API (Server-side token generation)
+    path('api/zoom/sdk-signature/', views_zoom_api.zoom_sdk_signature, name='zoom_sdk_signature'),
+    path('api/zoom/host-zak/', views_zoom_api.zoom_host_zak, name='zoom_host_zak'),
+    path('api/zoom/join-config/', views_zoom_api.zoom_join_config, name='zoom_join_config'),
+    path('api/zoom/config-status/', views_zoom_api.zoom_config_status, name='zoom_config_status'),
+    path('zoom/test-join/', views_zoom_api.zoom_test_join, name='zoom_test_join'),
     
     # POLLING / VOTING SYSTEM
     path('portal/polls/', views.polls_list, name='polls_list'),

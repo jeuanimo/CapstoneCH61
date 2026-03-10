@@ -3,7 +3,8 @@ Context Processors for Pages App
 Provides global template context variables
 """
 
-from .models import Cart, SiteConfiguration
+from django.conf import settings
+from .models import Cart, SiteConfiguration, StripeConfiguration
 
 
 def cart_context(request):
@@ -49,6 +50,37 @@ def site_config_context(_request):
         return {
             'site_config': None,
         }
+
+
+def stripe_availability_context(_request):
+    """
+    Check if Stripe is configured and available for payments.
+    Checks both environment variables and database configuration.
+    """
+    stripe_available = False
+    stripe_test_mode = True
+    
+    # Check environment variables first
+    env_public_key = getattr(settings, 'STRIPE_PUBLIC_KEY', '')
+    env_secret_key = getattr(settings, 'STRIPE_SECRET_KEY', '')
+    
+    if env_public_key and env_secret_key:
+        stripe_available = True
+        stripe_test_mode = env_public_key.startswith('pk_test_')
+    else:
+        # Check database configuration
+        try:
+            config = StripeConfiguration.objects.filter(is_active=True).first()
+            if config and config.stripe_publishable_key and config.stripe_secret_key:
+                stripe_available = True
+                stripe_test_mode = config.is_test_mode
+        except Exception:
+            pass
+    
+    return {
+        'stripe_available': stripe_available,
+        'stripe_test_mode': stripe_test_mode,
+    }
 
 
 def cookie_consent_context(request):

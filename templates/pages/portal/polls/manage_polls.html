@@ -54,7 +54,12 @@
         <h2><i class="fas fa-poll-h"></i> Manage Polls</h2>
     </div>
     <div class="mb-4">
-        <a href="{% url 'create_poll' %}" class="btn btn-primary btn-sm">
+        {% if request.GET.from_meeting %}
+        <a href="{% url 'join_zoom_meeting' request.GET.from_meeting %}" class="btn btn-outline-success btn-sm me-2">
+            <i class="fas fa-arrow-left"></i> Back to Meeting
+        </a>
+        {% endif %}
+        <a href="{% url 'create_poll' %}{% if request.GET.from_meeting %}?from_meeting={{ request.GET.from_meeting }}{% endif %}" class="btn btn-primary btn-sm">
             <i class="fas fa-plus"></i> Create Poll
         </a>
     </div>

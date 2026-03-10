@@ -297,10 +297,24 @@
 
                         <hr style="margin: 30px 0;">
 
+                        {% if not stripe_available %}
+                        <div class="alert alert-warning mb-3" style="border-radius: 8px;">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>Online Payments Not Available</strong><br>
+                            <small>Online payment processing is not yet configured for this site. Please contact us for alternative payment options.</small>
+                        </div>
+                        {% endif %}
+
                         <div class="button-group" style="display: flex; gap: 15px;">
+                            {% if stripe_available %}
                             <button type="submit" class="btn-checkout" style="flex: 1;">
                                 Continue to Payment
                             </button>
+                            {% else %}
+                            <button type="button" class="btn-checkout" style="flex: 1; opacity: 0.5; cursor: not-allowed;" disabled>
+                                Continue to Payment
+                            </button>
+                            {% endif %}
                             <a href="{% url 'view_cart' %}" class="btn-back" style="flex: 1;">
                                 Back to Cart
                             </a>

@@ -33,6 +33,15 @@
 
     <div class="dues-table-container">
         <h2>Payment History</h2>
+        
+        {% if not stripe_available %}
+        <div class="alert alert-info mb-3" style="background: #e7f3ff; border: 1px solid #b6d4fe; border-radius: 8px; padding: 1rem;">
+            <i class="fas fa-info-circle me-2"></i>
+            <strong>Online Payments Coming Soon</strong><br>
+            <small>Online payment processing is not yet configured for this site. Please contact the chapter treasurer for payment instructions.</small>
+        </div>
+        {% endif %}
+        
         {% if dues_payments %}
         <table class="dues-table">
             <caption class="sr-only">Member dues and bills</caption>
@@ -64,9 +73,15 @@
                     </td>
                     <td class="action-column">
                         {% if not payment.is_verified %}
-                        <a href="{% url 'pay_dues_online' payment.id %}" class="btn-action stripe-btn" title="Pay with Stripe">
-                            <i class="fab fa-cc-stripe"></i> Pay with Stripe
-                        </a>
+                            {% if stripe_available %}
+                            <a href="{% url 'pay_dues_online' payment.id %}" class="btn-action stripe-btn" title="Pay with Stripe">
+                                <i class="fab fa-cc-stripe"></i> Pay Online
+                            </a>
+                            {% else %}
+                            <span class="btn-action disabled-btn" title="Online payments not yet available" style="opacity: 0.5; cursor: not-allowed;">
+                                <i class="fas fa-credit-card"></i> Pay Online
+                            </span>
+                            {% endif %}
                         {% endif %}
                         <a href="{% url 'delete_dues_payment' payment.id %}" class="btn-action delete-btn" title="Delete this bill" data-confirm="Are you sure you want to delete this bill? This action cannot be undone.">
                             <i class="fas fa-trash-alt"></i>

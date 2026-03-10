@@ -1269,7 +1269,11 @@ class ZoomConfigurationForm(forms.ModelForm):
     class Meta:
         from .models import ZoomConfiguration
         model = ZoomConfiguration
-        fields = ['sdk_key', 'sdk_secret', 'is_active']
+        fields = [
+            'sdk_key', 'sdk_secret', 
+            'oauth_account_id', 'oauth_client_id', 'oauth_client_secret',
+            'is_active'
+        ]
         widgets = {
             'sdk_key': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -1279,6 +1283,18 @@ class ZoomConfigurationForm(forms.ModelForm):
                 'class': 'form-control',
                 'placeholder': 'Enter your Zoom SDK Secret'
             }),
+            'oauth_account_id': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Account ID from Zoom OAuth App (optional)'
+            }),
+            'oauth_client_id': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Client ID from Zoom OAuth App (optional)'
+            }),
+            'oauth_client_secret': forms.PasswordInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Client Secret from Zoom OAuth App (optional)'
+            }),
             'is_active': forms.CheckboxInput(attrs={
                 'class': 'form-check-input'
             }),
@@ -1286,6 +1302,9 @@ class ZoomConfigurationForm(forms.ModelForm):
         help_texts = {
             'sdk_key': 'Get this from Zoom App Marketplace > Build App > Meeting SDK',
             'sdk_secret': 'Keep this secret - never expose in client-side code',
+            'oauth_account_id': 'Required for Host Mode - Get from Server-to-Server OAuth app',
+            'oauth_client_id': 'Required for Host Mode - Get from Server-to-Server OAuth app',
+            'oauth_client_secret': 'Required for Host Mode - Get from Server-to-Server OAuth app',
         }
 
 

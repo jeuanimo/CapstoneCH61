@@ -229,7 +229,7 @@
                     {% endif %}
                     
                     {% if is_host %}
-                    <a href="{% url 'create_poll' %}?meeting={{ meeting.id }}" class="btn btn-outline-primary w-100 mt-2">
+                    <a href="{% url 'create_poll' %}?meeting={{ meeting.id }}&from_meeting={{ meeting.id }}" class="btn btn-outline-primary w-100 mt-2">
                         <i class="fas fa-plus"></i> Create Poll
                     </a>
                     {% endif %}
@@ -252,7 +252,7 @@
                         <i class="fas fa-stop"></i> End Meeting
                     </a>
                     {% endif %}
-                    <a href="{% url 'manage_polls' %}" class="btn btn-outline-secondary w-100">
+                    <a href="{% url 'manage_polls' %}?from_meeting={{ meeting.id }}" class="btn btn-outline-secondary w-100">
                         <i class="fas fa-poll-h"></i> Manage Polls
                     </a>
                 </div>
@@ -294,24 +294,38 @@ document.addEventListener('DOMContentLoaded', function() {
     }).then(() => {
         document.getElementById('zoom-loading').style.display = 'none';
         
+        // Clean the meeting number (remove spaces/dashes)
+        const meetingNumber = '{{ meeting_number }}'.replace(/[\s-]/g, '');
+        
+        console.log('Attempting to join meeting:', meetingNumber);
+        
         client.join({
             sdkKey: '{{ sdk_key }}',
             signature: '{{ signature }}',
-            meetingNumber: '{{ meeting_number }}',
-            password: '{{ password }}',
+            meetingNumber: meetingNumber,
+            password: '{{ password|default:"" }}',
             userName: '{{ user_name }}',
             userEmail: '{{ user_email }}'
         }).then(() => {
             console.log('Joined meeting successfully');
         }).catch((error) => {
             console.error('Error joining meeting:', error);
+            let errorMessage = error.message || 'Please check the meeting details and try again.';
+            if (error.type === 3) {
+                errorMessage = 'Invalid signature. Please contact administrator to check SDK credentials.';
+            } else if (error.type === 1) {
+                errorMessage = 'Meeting not found or has ended. Please verify the meeting number.';
+            }
             document.getElementById('zoom-loading').innerHTML = `
                 <div class="alert alert-danger m-3">
                     <h5><i class="fas fa-exclamation-triangle"></i> Unable to Join Meeting</h5>
-                    <p>${error.message || 'Please check the meeting details and try again.'}</p>
+                    <p>${errorMessage}</p>
+                    <p><small>Error: ${JSON.stringify(error)}</small></p>
                     <a href="{% url 'meeting_list' %}" class="btn btn-outline-light">Back to Meetings</a>
                 </div>
             `;
+            document.getElementById('zoom-loading').style.display = 'block';
+        });
         });
     }).catch((error) => {
         console.error('Error initializing Zoom:', error);

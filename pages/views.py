@@ -3802,14 +3802,25 @@ def stripe_webhook(request):
         return JsonResponse({'error': 'POST required'}, status=400)
     
     payload = request.body
-    _ = request.META.get('HTTP_STRIPE_SIGNATURE')
+    sig_header = request.META.get('HTTP_STRIPE_SIGNATURE')
     
     try:
         stripe_config = StripeConfiguration.objects.get(is_active=True)
         stripe.api_key = stripe_config.stripe_secret_key
         
-        # Verify signature - in production, use webhook endpoint secret
-        event = json.loads(payload)
+        # Verify webhook signature in production
+        webhook_secret = getattr(settings, 'STRIPE_WEBHOOK_SECRET', '')
+        if webhook_secret and sig_header:
+            try:
+                event = stripe.Webhook.construct_event(
+                    payload, sig_header, webhook_secret
+                )
+            except stripe.error.SignatureVerificationError as e:
+                logger.error(f"Webhook signature verification failed: {e}")
+                return JsonResponse({'error': 'Invalid signature'}, status=400)
+        else:
+            # Development mode - no signature verification
+            event = json.loads(payload)
         
     except ValueError:
         logger.error("Invalid webhook payload")
@@ -4329,7 +4340,25 @@ def get_order_for_request(request, order_id):
 def payment(request, order_id):
     """Handle Stripe payment (works for both authenticated and anonymous users)"""
     order = get_order_for_request(request, order_id)
-    stripe.api_key = settings.STRIPE_SECRET_KEY
+    
+    # Check if Stripe is configured
+    stripe_public_key = settings.STRIPE_PUBLIC_KEY
+    stripe_secret_key = settings.STRIPE_SECRET_KEY
+    
+    if not stripe_public_key or not stripe_secret_key:
+        # Try database configuration
+        try:
+            stripe_config = StripeConfiguration.objects.get(is_active=True)
+            stripe_public_key = stripe_config.stripe_publishable_key
+            stripe_secret_key = stripe_config.stripe_secret_key
+        except StripeConfiguration.DoesNotExist:
+            pass
+    
+    if not stripe_public_key or not stripe_secret_key:
+        messages.error(request, 'Online payments are not yet available on this site. Please contact the chapter for alternative payment methods.')
+        return redirect('shop_home')
+    
+    stripe.api_key = stripe_secret_key
     
     if order.status != 'pending':
         messages.error(request, 'This order cannot be paid')
@@ -4356,7 +4385,7 @@ def payment(request, order_id):
             context = {
                 'order': order,
                 'client_secret': intent['client_secret'],
-                'stripe_public_key': settings.STRIPE_PUBLIC_KEY,
+                'stripe_public_key': stripe_public_key,
             }
             return render(request, 'pages/boutique/payment.html', context)
         except stripe.error.StripeError as e:
@@ -4365,6 +4394,7 @@ def payment(request, order_id):
     
     context = {
         'order': order,
+        'stripe_public_key': stripe_public_key,
     }
     return render(request, 'pages/boutique/payment.html', context)
 
@@ -5863,6 +5893,36 @@ def delete_zoom_meeting(request, meeting_id):
 
 
 @login_required
+@user_passes_test(is_officer_or_staff)
+def bulk_delete_past_meetings(request):
+    """Bulk delete past meetings."""
+    from .models import ZoomMeeting
+    
+    if request.method == 'POST':
+        meeting_ids = request.POST.getlist('meeting_ids')
+        
+        if meeting_ids:
+            # Convert to integers and filter out invalid IDs
+            try:
+                meeting_ids = [int(mid) for mid in meeting_ids]
+            except ValueError:
+                messages.error(request, 'Invalid meeting selection.')
+                return redirect('manage_zoom_meetings')
+            
+            # Delete the selected meetings
+            deleted_count = ZoomMeeting.objects.filter(pk__in=meeting_ids).delete()[0]
+            
+            if deleted_count > 0:
+                messages.success(request, f'Successfully deleted {deleted_count} past meeting(s).')
+            else:
+                messages.warning(request, 'No meetings were deleted.')
+        else:
+            messages.warning(request, 'No meetings selected for deletion.')
+    
+    return redirect('manage_zoom_meetings')
+
+
+@login_required
 def meeting_list(request):
     """List upcoming meetings for members."""
     from .models import ZoomMeeting
@@ -5893,13 +5953,14 @@ def meeting_list(request):
 
 def _generate_zoom_signature(meeting_number, role):
     """
-    Generate JWT signature for Zoom Web SDK.
+    Generate JWT signature for Zoom Meeting Web SDK 2.x.
     Role: 0 = participant, 1 = host
     """
     import time
     import base64
     import hmac
     import hashlib
+    import json
     from .models import ZoomConfiguration
     
     try:
@@ -5907,25 +5968,44 @@ def _generate_zoom_signature(meeting_number, role):
     except ZoomConfiguration.DoesNotExist:
         return None
     
-    timestamp = int(round(time.time() * 1000)) - 30000  # 30 second buffer
-    expires = timestamp + (60 * 60 * 2 * 1000)  # 2 hours
+    # Current time and expiration (2 hours)
+    iat = int(time.time())
+    exp = iat + 60 * 60 * 2  # 2 hours
     
-    message = f"{config.sdk_key}{meeting_number}{timestamp}{role}{expires}"
+    # JWT Header
+    header = {
+        "alg": "HS256",
+        "typ": "JWT"
+    }
     
-    signature = base64.b64encode(
-        hmac.new(
-            config.sdk_secret.encode('utf-8'),
-            message.encode('utf-8'),
-            hashlib.sha256
-        ).digest()
-    ).decode('utf-8')
+    # JWT Payload
+    payload = {
+        "sdkKey": config.sdk_key,
+        "mn": str(meeting_number),
+        "role": role,
+        "iat": iat,
+        "exp": exp,
+        "tokenExp": exp
+    }
     
-    # Create properly formatted signature for SDK
-    final_signature = base64.b64encode(
-        f"{config.sdk_key}.{meeting_number}.{timestamp}.{role}.{expires}.{signature}".encode('utf-8')
-    ).decode('utf-8')
+    # Base64url encode header and payload
+    def base64url_encode(data):
+        return base64.urlsafe_b64encode(data).rstrip(b'=').decode('utf-8')
     
-    return final_signature
+    header_encoded = base64url_encode(json.dumps(header).encode('utf-8'))
+    payload_encoded = base64url_encode(json.dumps(payload).encode('utf-8'))
+    
+    # Create signature
+    message = f"{header_encoded}.{payload_encoded}"
+    signature = hmac.new(
+        config.sdk_secret.encode('utf-8'),
+        message.encode('utf-8'),
+        hashlib.sha256
+    ).digest()
+    signature_encoded = base64url_encode(signature)
+    
+    # Return complete JWT
+    return f"{header_encoded}.{payload_encoded}.{signature_encoded}"
 
 
 def _check_meeting_access(user, meeting):
@@ -6126,6 +6206,10 @@ def create_poll(request):
                         order += 1
             
             messages.success(request, f'Poll "{poll.title}" created successfully!')
+            # Redirect back to meeting if from_meeting is set
+            from_meeting = request.GET.get('from_meeting') or request.POST.get('from_meeting')
+            if from_meeting:
+                return redirect('join_zoom_meeting', meeting_id=from_meeting)
             return redirect('manage_polls')
         else:
             # Show validation errors
@@ -6189,6 +6273,10 @@ def edit_poll(request, poll_id):
                             )
             
             messages.success(request, f'Poll "{poll.title}" updated!')
+            # Redirect back to meeting if from_meeting is set
+            from_meeting = request.GET.get('from_meeting') or request.POST.get('from_meeting')
+            if from_meeting:
+                return redirect('join_zoom_meeting', meeting_id=from_meeting)
             return redirect('manage_polls')
     else:
         form = PollForm(instance=poll)

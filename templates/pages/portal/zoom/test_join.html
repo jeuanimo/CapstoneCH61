@@ -1,0 +1,610 @@
+{% extends 'base.html' %}
+
+{% block title %}Zoom Meeting SDK Test{% endblock %}
+
+{% block css %}
+<style>
+    .zoom-test-container {
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+    
+    .zoom-form-card {
+        max-width: 500px;
+    }
+    
+    /* Zoom Component View Container */
+    #zoomMeetingContainer {
+        width: 100%;
+        height: 600px;
+        background: #1a1a1a;
+        border-radius: 8px;
+        display: none;
+        position: relative;
+    }
+    
+    #zoomMeetingContainer.active {
+        display: block;
+    }
+    
+    #zoomMeetingElement {
+        width: 100%;
+        height: 100%;
+    }
+    
+    .zoom-loading {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        color: white;
+    }
+    
+    .zoom-loading .spinner-border {
+        width: 3rem;
+        height: 3rem;
+    }
+    
+    .error-display {
+        background: #f8d7da;
+        border: 1px solid #f5c6cb;
+        border-radius: 8px;
+        padding: 15px;
+        margin-top: 15px;
+        display: none;
+    }
+    
+    .error-display.show {
+        display: block;
+    }
+    
+    .error-display h6 {
+        color: #721c24;
+        margin-bottom: 10px;
+    }
+    
+    .error-display pre {
+        background: #fff;
+        padding: 10px;
+        border-radius: 4px;
+        font-size: 0.85rem;
+        overflow-x: auto;
+        max-height: 200px;
+    }
+    
+    .status-badge {
+        font-size: 0.9rem;
+    }
+    
+    .config-status {
+        padding: 10px;
+        border-radius: 6px;
+        margin-bottom: 20px;
+    }
+    
+    .config-status.configured {
+        background: #d4edda;
+        border: 1px solid #c3e6cb;
+    }
+    
+    .config-status.not-configured {
+        background: #f8d7da;
+        border: 1px solid #f5c6cb;
+    }
+    
+    .mode-selector .form-check {
+        padding: 15px;
+        border: 2px solid #dee2e6;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .mode-selector .form-check:hover {
+        border-color: #0d6efd;
+        background: #f8f9fa;
+    }
+    
+    .mode-selector .form-check-input:checked + .form-check-label {
+        font-weight: 600;
+    }
+    
+    .mode-selector .form-check:has(.form-check-input:checked) {
+        border-color: #0d6efd;
+        background: #e7f1ff;
+    }
+    
+    .host-badge {
+        background: #ffc107;
+        color: #000;
+        font-size: 0.7em;
+        padding: 2px 6px;
+        border-radius: 4px;
+        margin-left: 5px;
+    }
+    
+    .test-instructions {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        font-size: 0.9rem;
+    }
+    
+    .test-instructions h6 {
+        color: #495057;
+    }
+    
+    .test-instructions ol {
+        margin-bottom: 0;
+        padding-left: 1.2rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container my-5 zoom-test-container">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2><i class="fas fa-video me-2"></i> Zoom Meeting SDK Test</h2>
+            <p class="text-muted">Test the Zoom Meeting SDK integration with Component View.</p>
+        </div>
+    </div>
+    
+    <!-- Configuration Status -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="config-status" id="configStatus">
+                <i class="fas fa-spinner fa-spin me-2"></i> Checking Zoom configuration...
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Form Column -->
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow zoom-form-card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0 text-white"><i class="fas fa-cog me-2"></i> Meeting Settings</h5>
+                </div>
+                <div class="card-body">
+                    <form id="zoomJoinForm">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="meetingNumber" class="form-label">Meeting Number</label>
+                            <input type="text" class="form-control" id="meetingNumber" 
+                                   placeholder="123 456 7890" required>
+                            <small class="form-text text-muted">Enter the Zoom meeting ID</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="meetingPassword" class="form-label">Meeting Password</label>
+                            <input type="text" class="form-control" id="meetingPassword" 
+                                   placeholder="Optional">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="displayName" class="form-label">Display Name</label>
+                            <input type="text" class="form-control" id="displayName" 
+                                   value="{{ display_name }}" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="userEmail" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="userEmail" 
+                                   value="{{ email }}" required>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="form-label">Join Mode</label>
+                            <div class="mode-selector">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="joinMode" 
+                                           id="modeAttendee" value="attendee" checked>
+                                    <label class="form-check-label" for="modeAttendee">
+                                        <i class="fas fa-user me-2"></i> Attendee
+                                        <br><small class="text-muted">Join an existing meeting</small>
+                                    </label>
+                                </div>
+                                
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="joinMode" 
+                                           id="modeHost" value="host" {% if not is_admin_or_officer %}disabled{% endif %}>
+                                    <label class="form-check-label" for="modeHost">
+                                        <i class="fas fa-crown me-2"></i> Host
+                                        <span class="host-badge">ZAK Required</span>
+                                        <br><small class="text-muted">Start a meeting as host</small>
+                                        {% if not is_admin_or_officer %}
+                                        <br><small class="text-danger">Requires admin/officer permissions</small>
+                                        {% endif %}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary w-100" id="joinButton">
+                            <i class="fas fa-sign-in-alt me-2"></i> Join Meeting
+                        </button>
+                    </form>
+                    
+                    <!-- Error Display -->
+                    <div class="error-display" id="errorDisplay">
+                        <h6><i class="fas fa-exclamation-triangle me-2"></i> Error</h6>
+                        <p id="errorMessage"></p>
+                        <details>
+                            <summary>Technical Details</summary>
+                            <pre id="errorDetails"></pre>
+                        </details>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Test Instructions -->
+            <div class="card mt-3">
+                <div class="card-body test-instructions">
+                    <h6><i class="fas fa-clipboard-list me-2"></i> Test Steps</h6>
+                    <ol>
+                        <li>Enter a valid Zoom meeting number</li>
+                        <li>Select <strong>Attendee</strong> mode to join</li>
+                        <li>For <strong>Host</strong> mode, use your own meeting</li>
+                        <li>Click "Join Meeting" to test</li>
+                    </ol>
+                    <hr>
+                    <p class="mb-0"><strong>Note:</strong> Host mode requires ZAK token and admin/officer permissions.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Meeting Container Column -->
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-desktop me-2"></i> Meeting View</h5>
+                    <span class="badge bg-secondary" id="connectionStatus">Not Connected</span>
+                </div>
+                <div class="card-body p-0">
+                    <div id="zoomMeetingContainer">
+                        <div id="zoomMeetingElement"></div>
+                        <div class="zoom-loading" id="zoomLoading">
+                            <div class="spinner-border text-light" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="mt-3">Connecting to Zoom...</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Placeholder when not connected -->
+                    <div id="meetingPlaceholder" class="text-center py-5">
+                        <i class="fas fa-video fa-4x text-muted mb-3"></i>
+                        <h5 class="text-muted">No Meeting Active</h5>
+                        <p class="text-muted">Fill in the meeting details and click "Join Meeting" to start.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Debug Panel (for development) -->
+            <div class="card mt-3">
+                <div class="card-header bg-secondary text-white">
+                    <h6 class="mb-0"><i class="fas fa-bug me-2"></i> Debug Info</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <small><strong>SDK Status:</strong> <span id="sdkStatus">Not initialized</span></small>
+                        </div>
+                        <div class="col-md-6">
+                            <small><strong>Last Action:</strong> <span id="lastAction">None</span></small>
+                        </div>
+                    </div>
+                    <hr>
+                    <div id="debugLog" style="max-height: 150px; overflow-y: auto; font-family: monospace; font-size: 0.8rem;">
+                        <div class="text-muted">Debug log will appear here...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Zoom Meeting SDK Component View -->
+<script src="https://source.zoom.us/3.1.6/lib/vendor/react.min.js"></script>
+<script src="https://source.zoom.us/3.1.6/lib/vendor/react-dom.min.js"></script>
+<script src="https://source.zoom.us/3.1.6/lib/vendor/redux.min.js"></script>
+<script src="https://source.zoom.us/3.1.6/lib/vendor/redux-thunk.min.js"></script>
+<script src="https://source.zoom.us/3.1.6/lib/vendor/lodash.min.js"></script>
+<script src="https://source.zoom.us/3.1.6/zoom-meeting-embedded-3.1.6.min.js"></script>
+
+<script>
+/**
+ * Zoom Meeting SDK Test Page JavaScript
+ * 
+ * Uses Zoom Meeting SDK Component View with server-side signature generation.
+ * Supports both attendee (role=0) and host (role=1) modes.
+ * 
+ * Do not use deprecated Zoom Web SDK patterns. Use current Zoom Meeting SDK 
+ * for Web with Component View and server-side signature generation.
+ */
+
+// CSRF token for Django
+const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+// Zoom client instance
+let zoomClient = null;
+
+// Debug logging
+function debugLog(message, type = 'info') {
+    const logDiv = document.getElementById('debugLog');
+    const timestamp = new Date().toLocaleTimeString();
+    const colorClass = {
+        'info': 'text-info',
+        'success': 'text-success',
+        'error': 'text-danger',
+        'warning': 'text-warning'
+    }[type] || 'text-muted';
+    
+    logDiv.innerHTML = `<div class="${colorClass}">[${timestamp}] ${message}</div>` + logDiv.innerHTML;
+    console.log(`[Zoom Test] ${message}`);
+}
+
+// Update status displays
+function updateStatus(elementId, text, badgeClass = 'bg-secondary') {
+    const element = document.getElementById(elementId);
+    if (element) {
+        element.textContent = text;
+        element.className = `badge ${badgeClass}`;
+    }
+}
+
+function updateLastAction(action) {
+    document.getElementById('lastAction').textContent = action;
+}
+
+// Show error to user
+function showError(message, details = null) {
+    const errorDisplay = document.getElementById('errorDisplay');
+    const errorMessage = document.getElementById('errorMessage');
+    const errorDetails = document.getElementById('errorDetails');
+    
+    errorMessage.textContent = message;
+    errorDetails.textContent = details ? JSON.stringify(details, null, 2) : 'No additional details';
+    errorDisplay.classList.add('show');
+    
+    debugLog(`Error: ${message}`, 'error');
+}
+
+function hideError() {
+    document.getElementById('errorDisplay').classList.remove('show');
+}
+
+// Check configuration status on page load
+async function checkConfigStatus() {
+    const statusDiv = document.getElementById('configStatus');
+    
+    try {
+        const response = await fetch('/api/zoom/config-status/', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success && data.configured) {
+            statusDiv.className = 'config-status configured';
+            statusDiv.innerHTML = `
+                <i class="fas fa-check-circle me-2"></i>
+                <strong>Zoom SDK Configured</strong>
+                ${data.has_oauth_credentials ? 
+                    '<span class="badge bg-success ms-2">OAuth Ready</span>' : 
+                    '<span class="badge bg-warning ms-2">OAuth Not Configured (Host mode unavailable)</span>'}
+            `;
+            debugLog('Configuration check: OK', 'success');
+        } else {
+            statusDiv.className = 'config-status not-configured';
+            statusDiv.innerHTML = `
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <strong>Zoom SDK Not Configured</strong>
+                <br><small>Please configure Zoom credentials in the admin panel.</small>
+            `;
+            debugLog('Configuration check: Not configured', 'warning');
+        }
+    } catch (error) {
+        statusDiv.className = 'config-status not-configured';
+        statusDiv.innerHTML = `
+            <i class="fas fa-times-circle me-2"></i>
+            <strong>Configuration Check Failed</strong>
+            <br><small>${error.message}</small>
+        `;
+        debugLog(`Configuration check failed: ${error.message}`, 'error');
+    }
+}
+
+// Initialize Zoom SDK
+async function initializeZoomSDK() {
+    debugLog('Initializing Zoom SDK...', 'info');
+    updateStatus('sdkStatus', 'Initializing...');
+    
+    try {
+        zoomClient = ZoomMtgEmbedded.createClient();
+        
+        const meetingSDKElement = document.getElementById('zoomMeetingElement');
+        
+        await zoomClient.init({
+            zoomAppRoot: meetingSDKElement,
+            language: 'en-US',
+            customize: {
+                video: {
+                    isResizable: true,
+                    viewSizes: {
+                        default: {
+                            width: 900,
+                            height: 530
+                        }
+                    }
+                },
+                meetingInfo: [
+                    'topic',
+                    'host',
+                    'mn',
+                    'pwd',
+                    'participant',
+                    'dc',
+                    'enctype'
+                ]
+            }
+        });
+        
+        document.getElementById('sdkStatus').textContent = 'Initialized';
+        debugLog('Zoom SDK initialized successfully', 'success');
+        
+        return true;
+    } catch (error) {
+        document.getElementById('sdkStatus').textContent = 'Init Failed';
+        debugLog(`SDK initialization failed: ${error.message}`, 'error');
+        throw error;
+    }
+}
+
+// Get join configuration from server
+async function getJoinConfig(meetingNumber, password, displayName, email, mode) {
+    debugLog(`Fetching join config for ${mode} mode...`, 'info');
+    updateLastAction('Fetching join config');
+    
+    const response = await fetch('/api/zoom/join-config/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+        },
+        body: JSON.stringify({
+            meetingNumber: meetingNumber,
+            password: password,
+            displayName: displayName,
+            email: email,
+            mode: mode
+        })
+    });
+    
+    const data = await response.json();
+    
+    if (!data.success) {
+        throw new Error(data.error || 'Failed to get join configuration');
+    }
+    
+    debugLog(`Join config received (has ZAK: ${!!data.zak})`, 'success');
+    return data;
+}
+
+// Join/Start meeting
+async function joinMeeting(config) {
+    debugLog('Joining meeting...', 'info');
+    updateLastAction('Joining meeting');
+    updateStatus('connectionStatus', 'Connecting...', 'bg-warning');
+    
+    const joinParams = {
+        sdkKey: config.sdkKey,
+        signature: config.signature,
+        meetingNumber: config.meetingNumber,
+        password: config.password,
+        userName: config.userName,
+        userEmail: config.userEmail
+    };
+    
+    // Add ZAK for host mode
+    // ZAK (Zoom Access Key) is REQUIRED for host to START a meeting
+    if (config.zak) {
+        joinParams.zak = config.zak;
+        debugLog('ZAK token included for host mode', 'info');
+    }
+    
+    try {
+        await zoomClient.join(joinParams);
+        
+        updateStatus('connectionStatus', 'Connected', 'bg-success');
+        debugLog('Successfully joined meeting!', 'success');
+        
+    } catch (error) {
+        updateStatus('connectionStatus', 'Failed', 'bg-danger');
+        throw error;
+    }
+}
+
+// Form submission handler
+document.getElementById('zoomJoinForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    hideError();
+    
+    const meetingNumber = document.getElementById('meetingNumber').value.trim();
+    const password = document.getElementById('meetingPassword').value.trim();
+    const displayName = document.getElementById('displayName').value.trim();
+    const email = document.getElementById('userEmail').value.trim();
+    const mode = document.querySelector('input[name="joinMode"]:checked').value;
+    
+    // Validate inputs
+    if (!meetingNumber) {
+        showError('Meeting number is required');
+        return;
+    }
+    
+    if (!displayName) {
+        showError('Display name is required');
+        return;
+    }
+    
+    if (!email) {
+        showError('Email is required');
+        return;
+    }
+    
+    // Disable form
+    const submitButton = document.getElementById('joinButton');
+    submitButton.disabled = true;
+    submitButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Connecting...';
+    
+    try {
+        // Show meeting container
+        document.getElementById('meetingPlaceholder').style.display = 'none';
+        document.getElementById('zoomMeetingContainer').classList.add('active');
+        document.getElementById('zoomLoading').style.display = 'block';
+        
+        // Initialize SDK if not already done
+        if (!zoomClient) {
+            await initializeZoomSDK();
+        }
+        
+        // Get join configuration from server
+        const config = await getJoinConfig(meetingNumber, password, displayName, email, mode);
+        
+        // Join the meeting
+        await joinMeeting(config);
+        
+        // Hide loading
+        document.getElementById('zoomLoading').style.display = 'none';
+        
+    } catch (error) {
+        debugLog(`Join failed: ${error.message}`, 'error');
+        showError(error.message, error);
+        
+        // Reset UI
+        document.getElementById('zoomMeetingContainer').classList.remove('active');
+        document.getElementById('meetingPlaceholder').style.display = 'block';
+        updateStatus('connectionStatus', 'Failed', 'bg-danger');
+        
+    } finally {
+        submitButton.disabled = false;
+        submitButton.innerHTML = '<i class="fas fa-sign-in-alt me-2"></i> Join Meeting';
+    }
+});
+
+// Check configuration on page load
+document.addEventListener('DOMContentLoaded', function() {
+    debugLog('Page loaded', 'info');
+    checkConfigStatus();
+});
+</script>
+{% endblock %}

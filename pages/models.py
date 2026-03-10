@@ -1644,6 +1644,13 @@ class ZoomConfiguration(models.Model):
     """
     Store Zoom SDK credentials for embedded meetings.
     Only one active configuration should exist at a time.
+    
+    Two types of credentials:
+    1. Meeting SDK credentials (sdk_key, sdk_secret) - for generating SDK signatures
+    2. OAuth Server-to-Server credentials - for API calls (fetching ZAK tokens for host mode)
+    
+    ZAK (Zoom Access Key) is required for hosts to START meetings via the SDK.
+    This requires Server-to-Server OAuth credentials from a separate Zoom app.
     """
     admin = models.ForeignKey(
         User, 
@@ -1652,6 +1659,8 @@ class ZoomConfiguration(models.Model):
         related_name='zoom_configs',
         help_text="Admin who configured this"
     )
+    
+    # Meeting SDK Credentials (for signature generation)
     sdk_key = models.CharField(
         max_length=255,
         help_text="Zoom Meeting SDK Key (Client ID)"
@@ -1660,6 +1669,27 @@ class ZoomConfiguration(models.Model):
         max_length=255,
         help_text="Zoom Meeting SDK Secret (Client Secret)"
     )
+    
+    # OAuth Server-to-Server Credentials (for ZAK token retrieval)
+    oauth_account_id = models.CharField(
+        max_length=255,
+        blank=True,
+        default='',
+        help_text="Zoom Account ID for Server-to-Server OAuth"
+    )
+    oauth_client_id = models.CharField(
+        max_length=255,
+        blank=True,
+        default='',
+        help_text="OAuth App Client ID (Server-to-Server)"
+    )
+    oauth_client_secret = models.CharField(
+        max_length=255,
+        blank=True,
+        default='',
+        help_text="OAuth App Client Secret (Server-to-Server)"
+    )
+    
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

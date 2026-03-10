@@ -84,6 +84,7 @@ PRODUCTION CHECKLIST:
 from pathlib import Path
 from decouple import config, Csv
 import secrets
+import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -124,6 +125,8 @@ INSTALLED_APPS = [
     
     # Third-party applications
     'axes',                              # Brute-force login protection (must be after sessions)
+    'cloudinary_storage',                # Cloudinary media storage (production)
+    'cloudinary',                        # Cloudinary API
     
     # Custom applications
     'pages',                             # Main application with all views and models
@@ -133,6 +136,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     # Security middleware stack - order matters!
     'django.middleware.security.SecurityMiddleware',              # General security headers
+    'whitenoise.middleware.WhiteNoiseMiddleware',                 # Serve static files in production
     'django.contrib.sessions.middleware.SessionMiddleware',       # Session support
     'django.middleware.common.CommonMiddleware',                  # Common utilities (URL rewriting)
     'django.middleware.csrf.CsrfViewMiddleware',                 # CSRF token protection
@@ -169,6 +173,7 @@ TEMPLATES = [
                 'pages.context_processors.cart_context',          # Add cart info to templates
                 'pages.context_processors.site_config_context',   # Add site branding/config to templates
                 'pages.context_processors.cookie_consent_context',  # Add GDPR cookie consent to templates
+                'pages.context_processors.stripe_availability_context',  # Add Stripe availability check
             ],
         },
     },
@@ -180,21 +185,27 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 # ====================== DATABASE CONFIGURATION ======================
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',                   # SQLite for development
-        'NAME': BASE_DIR / 'db.sqlite3',                          # Database file location
+# Use DATABASE_URL for production (PostgreSQL on Render)
+# Falls back to SQLite for local development
+DATABASE_URL = config('DATABASE_URL', default=None)
+
+if DATABASE_URL:
+    # Production: Use PostgreSQL from DATABASE_URL
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=DATABASE_URL,
+            conn_max_age=600,
+            conn_health_checks=True,
+        )
     }
-}
-# Production: Change to PostgreSQL
-# 'default': {
-#     'ENGINE': 'django.db.backends.postgresql',
-#     'NAME': 'chapter_database',
-#     'USER': 'chapter_user',
-#     'PASSWORD': 'secure_password',
-#     'HOST': 'localhost',
-#     'PORT': '5432',
-# }
+else:
+    # Development: Use SQLite
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 
 # ====================== PASSWORD VALIDATION ======================
@@ -245,8 +256,34 @@ STATIC_URL = 'static/'                                   # URL for static files
 STATIC_ROOT = BASE_DIR / 'staticfiles'                  # Production static files collection location
 STATICFILES_DIRS = [BASE_DIR / 'static']                # Development static files directories
 
+# Whitenoise configuration for serving static files in production
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
 MEDIA_URL = '/media/'                                   # URL for media files
 MEDIA_ROOT = BASE_DIR / 'media'                         # Location for uploaded user files
+
+# ====================== CLOUDINARY CONFIGURATION ======================
+# Use Cloudinary for media storage in production (persistent across deploys)
+# Set CLOUDINARY_URL in environment to enable: cloudinary://API_KEY:API_SECRET@CLOUD_NAME
+
+CLOUDINARY_URL = config('CLOUDINARY_URL', default=None)
+
+if CLOUDINARY_URL:
+    # Production: Use Cloudinary for media storage
+    DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+    
+    # Parse Cloudinary URL into components
+    import re
+    cloudinary_match = re.match(r'cloudinary://([^:]+):([^@]+)@(.+)', CLOUDINARY_URL)
+    if cloudinary_match:
+        CLOUDINARY_STORAGE = {
+            'CLOUD_NAME': cloudinary_match.group(3),
+            'API_KEY': cloudinary_match.group(1),
+            'API_SECRET': cloudinary_match.group(2),
+        }
+else:
+    # Development: Use local file storage
+    DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
 
 
 # ====================== LOGGING CONFIGURATION ======================
@@ -354,7 +391,7 @@ EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')              # E
 
 # From/To email addresses
 DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='noreply@nugammasigma.org')  # Default sender email
-CONTACT_EMAIL = config('CONTACT_EMAIL', default='nugammasigma@example.com')           # Email for contact form submissions
+CONTACT_EMAIL = config('CONTACT_EMAIL', default='contact@ngs1914.org')           # Email for contact form submissions
 
 
 # ====================== STRIPE PAYMENT CONFIGURATION ======================
@@ -364,18 +401,33 @@ CONTACT_EMAIL = config('CONTACT_EMAIL', default='nugammasigma@example.com')     
 # Production: Use live keys (keep secret!)
 STRIPE_PUBLIC_KEY = config('STRIPE_PUBLIC_KEY', default='')       # Stripe publishable key
 STRIPE_SECRET_KEY = config('STRIPE_SECRET_KEY', default='')       # Stripe secret key (keep secret!)
+STRIPE_WEBHOOK_SECRET = config('STRIPE_WEBHOOK_SECRET', default='')  # Webhook endpoint secret
 
 
+# ====================== PRODUCTION SECURITY SETTINGS ======================
 
-
-
-# ====================== LOGIN/LOGOUT CONFIGURATION ======================
-
-LOGIN_URL = 'login'                    # Redirect unauthenticated users to login page
-LOGIN_REDIRECT_URL = 'home'            # After successful login, redirect to home
-LOGOUT_REDIRECT_URL = 'home'           # After logout, redirect to home
-
-# ====================== DEFAULT FIELD CONFIGURATION ======================
-
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'    # Use BigAutoField for primary keys (supports large IDs)
-
+# These settings are automatically enabled when DEBUG=False
+if not DEBUG:
+    # HTTPS/SSL Security
+    SECURE_SSL_REDIRECT = True                     # Redirect HTTP to HTTPS
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')  # Trust proxy headers
+    
+    # Cookie Security
+    SESSION_COOKIE_SECURE = True                   # Only send session cookie over HTTPS
+    CSRF_COOKIE_SECURE = True                      # Only send CSRF cookie over HTTPS
+    
+    # HSTS (HTTP Strict Transport Security)
+    SECURE_HSTS_SECONDS = 31536000                 # 1 year
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True          # Apply to subdomains
+    SECURE_HSTS_PRELOAD = True                     # Allow browser preloading
+    
+    # Additional Security Headers
+    SECURE_CONTENT_TYPE_NOSNIFF = True             # Prevent MIME-type sniffing
+    X_FRAME_OPTIONS = 'DENY'                       # Prevent clickjacking
+    
+    # CSRF trusted origins for Render.com
+    CSRF_TRUSTED_ORIGINS = config(
+        'CSRF_TRUSTED_ORIGINS',
+        default='',
+        cast=Csv()
+    )
