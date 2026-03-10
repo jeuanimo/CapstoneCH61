@@ -10,16 +10,27 @@
         flex-wrap: wrap;
         gap: 1rem;
         margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #dee2e6;
     }
     .page-header h2 {
         margin: 0;
         padding-bottom: 0.5rem;
         border-bottom: 3px solid var(--primary-color);
+        font-size: 1.5rem;
     }
     .page-header .btn-group-custom {
         display: flex;
         gap: 0.5rem;
         flex-wrap: wrap;
+        align-items: center;
+    }
+    .page-header .btn-group-custom .btn {
+        font-size: 0.85rem;
+        padding: 0.4rem 0.75rem;
+    }
+    body.dark-mode .page-header {
+        border-bottom-color: #2a4a7a;
     }
     .poll-card .card-title {
         word-break: break-word;

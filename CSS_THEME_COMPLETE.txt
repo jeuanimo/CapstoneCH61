@@ -87,6 +87,59 @@ SOLUTION APPLIED:
 DO NOT CHANGE these .page-header styles - they ensure buttons align properly
 with page titles.
 
+FIX #3: Page Header Button Size Reduction (March 10, 2026)
+----------------------------------------------------------
+ISSUE: Action buttons in page headers were too large/bulky, taking up too much
+       visual space and overwhelming the page title.
+
+FILES FIXED:
+  - templates/pages/portal/dues_and_payments.html
+  - templates/pages/portal/manage_attendance.html
+  - templates/pages/portal/zoom/meeting_list.html
+  - templates/pages/portal/zoom/manage_meetings.html
+  - templates/pages/portal/polls/poll_list.html
+  - templates/pages/portal/sms_logs.html
+
+SOLUTION APPLIED:
+  1. Reduced button font-size and padding in page headers
+  2. Added border-bottom separator to page-header
+  3. Reduced h2 title font-size to 1.5rem
+
+CSS PATTERN FOR PAGE HEADERS WITH BUTTONS:
+```css
+.page-header {
+    display: flex;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #dee2e6;
+}
+.page-header h2 {
+    margin: 0;
+    padding-bottom: 0.5rem;
+    border-bottom: 3px solid var(--primary-color);
+    font-size: 1.5rem;
+}
+.page-header .btn-group-custom {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+.page-header .btn-group-custom .btn {
+    font-size: 0.85rem;         /* Smaller text */
+    padding: 0.4rem 0.75rem;    /* Smaller padding */
+}
+body.dark-mode .page-header {
+    border-bottom-color: #2a4a7a;
+}
+```
+
+DO NOT INCREASE button sizes in page headers - they should remain compact
+to not overwhelm the page title.
+
 ================================================================================
 CSS FILES STRUCTURE
 ================================================================================
