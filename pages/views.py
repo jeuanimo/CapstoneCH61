@@ -229,10 +229,12 @@ def home_view(request):
     
     # Get photos for carousel - ONLY photos that are:
     # 1. In an album with ANY program assigned (non-empty program field)
-    # 2. OR linked to an event (any event type)
-    # This excludes personal photos that have no program album or no event
+    # 2. OR have a program directly assigned to the photo
+    # 3. OR linked to an event (any event type)
+    # This excludes personal photos that have no program assignment or event
     carousel_photos = Photo.objects.filter(
         Q(album__program__isnull=False, album__program__gt='') |  # Photos in albums with ANY program set
+        Q(program__isnull=False, program__gt='') |  # Photos with program directly assigned
         Q(event__isnull=False)  # Photos linked to ANY event
     ).select_related('uploaded_by', 'event', 'album').order_by('-created_at')[:20]
     
@@ -3531,6 +3533,7 @@ def upload_photo(request):
                     caption=caption,
                     tags=tags,
                     album=album,
+                    program=program,
                     event=event
                 )
                 uploaded_count += 1

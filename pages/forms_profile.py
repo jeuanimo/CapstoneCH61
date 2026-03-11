@@ -285,7 +285,7 @@ class EditPhotoForm(forms.ModelForm):
     
     class Meta:
         model = Photo
-        fields = ['caption', 'tags', 'album', 'event']
+        fields = ['caption', 'tags', 'program', 'album', 'event']
         widgets = {
             'caption': forms.Textarea(attrs={
                 'class': 'form-control',
@@ -295,6 +295,9 @@ class EditPhotoForm(forms.ModelForm):
             'tags': forms.TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Tags (comma-separated): event, party, brothers'
+            }),
+            'program': forms.Select(attrs={
+                'class': 'form-control'
             }),
             'album': forms.Select(attrs={
                 'class': 'form-control'
@@ -306,6 +309,7 @@ class EditPhotoForm(forms.ModelForm):
         labels = {
             'caption': 'Caption',
             'tags': 'Tags',
+            'program': 'Program (for carousel)',
             'album': 'Album',
             'event': 'Event',
         }
@@ -316,6 +320,7 @@ class EditPhotoForm(forms.ModelForm):
         self.fields['album'].queryset = PhotoAlbum.objects.filter(is_public=True)
         self.fields['album'].required = False
         self.fields['event'].required = False
+        self.fields['program'].required = False
 
 
 class CreateAlbumForm(forms.ModelForm):

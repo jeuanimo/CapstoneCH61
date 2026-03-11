@@ -42,13 +42,13 @@
                     </div>
 
                     <div class="mb-3">
-                        <label for="program" class="form-label">Program (for new albums)</label>
+                        <label for="program" class="form-label">Program (Show on Homepage Carousel)</label>
                         <select class="form-select" id="program" name="program">
                             {% for value, label in program_choices %}
                             <option value="{{ value }}">{{ label }}</option>
                             {% endfor %}
                         </select>
-                        <div class="form-text">Select which fraternity program this album belongs to</div>
+                        <div class="form-text">Select a program to display this photo on the homepage carousel. Leave as "No Program" for personal photos.</div>
                     </div>
 
                     <div class="mb-3">

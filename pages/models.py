@@ -627,11 +627,20 @@ class PhotoAlbum(models.Model):
 class Photo(models.Model):
     """Member photos with comments and likes"""
     
+    PROGRAM_CHOICES = [
+        ('', 'No Program'),
+        ('bbb', 'Bigger & Better Business'),
+        ('education', 'Education'),
+        ('social_action', 'Social Action'),
+        ('sigma_beta', 'Sigma Beta Club'),
+    ]
+    
     album = models.ForeignKey(PhotoAlbum, on_delete=models.CASCADE, related_name='photos', blank=True, null=True)
     uploaded_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='uploaded_photos')
     image = models.ImageField(upload_to='member_photos/')
     caption = models.TextField(blank=True, default='')
     tags = models.CharField(max_length=500, blank=True, default='', help_text="Comma-separated tags")
+    program = models.CharField(max_length=20, choices=PROGRAM_CHOICES, blank=True, default='', help_text="Tag this photo for a program to show on homepage carousel")
     event = models.ForeignKey(Event, on_delete=models.SET_NULL, blank=True, null=True, related_name='photos')
     created_at = models.DateTimeField(auto_now_add=True)
     
