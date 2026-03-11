@@ -17,10 +17,7 @@
             <button class="cover-edit-btn" onclick="document.getElementById('coverInput').click()">
                 <i class="fas fa-camera"></i> Edit Cover Photo
             </button>
-            <form id="coverForm" method="post" enctype="multipart/form-data" action="{% url 'update_cover_photo' %}" style="display:none;">
-                {% csrf_token %}
-                <input type="file" id="coverInput" name="cover_image" accept="image/*" onchange="document.getElementById('coverForm').submit()">
-            </form>
+            <input type="file" id="coverInput" accept="image/*" onchange="openCropper(this, 'cover')" style="display:none;">
             {% endif %}
         </div>
         
@@ -39,10 +36,7 @@
             <button class="photo-edit-btn" title="Change profile photo" onclick="document.getElementById('profilePhotoInput').click()">
                 <i class="fas fa-camera"></i>
             </button>
-            <form id="profilePhotoForm" method="post" enctype="multipart/form-data" action="{% url 'update_profile_photo' %}" style="display:none;">
-                {% csrf_token %}
-                <input type="file" id="profilePhotoInput" name="profile_image" accept="image/*" onchange="document.getElementById('profilePhotoForm').submit()">
-            </form>
+            <input type="file" id="profilePhotoInput" accept="image/*" onchange="openCropper(this, 'profile')" style="display:none;">
             {% endif %}
         </div>
     </div>
@@ -409,6 +403,29 @@ document.querySelectorAll('.like-btn').forEach(btn => {
     });
 });
 </script>
+
+<!-- Image Crop Modal -->
+{% if user.is_authenticated and user.username == profile_user.username %}
+<div id="cropModal" class="crop-modal">
+    <div class="crop-modal-content">
+        <div class="crop-modal-header">
+            <h3 id="cropModalTitle">Crop Image</h3>
+            <button class="crop-modal-close" onclick="closeCropper()">&times;</button>
+        </div>
+        <div class="crop-modal-body">
+            <div class="crop-container">
+                <img id="cropImage" src="" alt="Crop Preview">
+            </div>
+        </div>
+        <div class="crop-modal-footer">
+            <button class="btn btn-secondary" onclick="closeCropper()">Cancel</button>
+            <button class="btn btn-primary" onclick="saveCroppedImage()">
+                <i class="fas fa-check"></i> Save
+            </button>
+        </div>
+    </div>
+</div>
+{% endif %}
 
 <style>
     .fb-profile-page {
@@ -1251,5 +1268,331 @@ document.querySelectorAll('.like-btn').forEach(btn => {
             padding-left: 24px;
         }
     }
+
+    /* Crop Modal Styles */
+    .crop-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 10000;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .crop-modal.active {
+        display: flex;
+    }
+
+    .crop-modal-content {
+        background: white;
+        border-radius: 12px;
+        max-width: 800px;
+        width: 95%;
+        max-height: 90vh;
+        overflow: hidden;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+
+    body.dark-mode .crop-modal-content {
+        background: #242526;
+    }
+
+    .crop-modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 20px;
+        border-bottom: 1px solid #e4e6eb;
+    }
+
+    body.dark-mode .crop-modal-header {
+        border-bottom-color: #3e4042;
+    }
+
+    .crop-modal-header h3 {
+        margin: 0;
+        font-size: 1.25rem;
+        color: #1c1e21;
+    }
+
+    body.dark-mode .crop-modal-header h3 {
+        color: #e4e6eb;
+    }
+
+    .crop-modal-close {
+        background: none;
+        border: none;
+        font-size: 1.75rem;
+        color: #65676b;
+        cursor: pointer;
+        padding: 0;
+        line-height: 1;
+    }
+
+    .crop-modal-close:hover {
+        color: #1c1e21;
+    }
+
+    body.dark-mode .crop-modal-close:hover {
+        color: #e4e6eb;
+    }
+
+    .crop-modal-body {
+        padding: 20px;
+        max-height: 60vh;
+        overflow: auto;
+    }
+
+    .crop-container {
+        max-height: 50vh;
+        background: #f0f2f5;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    body.dark-mode .crop-container {
+        background: #18191a;
+    }
+
+    .crop-container img {
+        display: block;
+        max-width: 100%;
+    }
+
+    .crop-modal-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        padding: 16px 20px;
+        border-top: 1px solid #e4e6eb;
+    }
+
+    body.dark-mode .crop-modal-footer {
+        border-top-color: #3e4042;
+    }
+
+    .crop-modal-footer .btn {
+        padding: 8px 20px;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .crop-modal-footer .btn-secondary {
+        background: #e4e6eb;
+        color: #1c1e21;
+        border: none;
+    }
+
+    .crop-modal-footer .btn-secondary:hover {
+        background: #d8dadf;
+    }
+
+    body.dark-mode .crop-modal-footer .btn-secondary {
+        background: #3a3b3c;
+        color: #e4e6eb;
+    }
+
+    body.dark-mode .crop-modal-footer .btn-secondary:hover {
+        background: #4e4f50;
+    }
+
+    .crop-modal-footer .btn-primary {
+        background: var(--primary-color, #164f90);
+        color: white;
+        border: none;
+    }
+
+    .crop-modal-footer .btn-primary:hover {
+        background: #0d3a6b;
+    }
+
+    /* Cropper.js customizations */
+    .cropper-view-box,
+    .cropper-face {
+        border-radius: 0;
+    }
+
+    .crop-modal[data-type="profile"] .cropper-view-box,
+    .crop-modal[data-type="profile"] .cropper-face {
+        border-radius: 50%;
+    }
 </style>
+
+{% if user.is_authenticated and user.username == profile_user.username %}
+<script>
+    // Image cropping functionality
+    let cropper = null;
+    let currentCropType = null;
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token }}';
+
+    function openCropper(input, type) {
+        if (input.files && input.files[0]) {
+            const file = input.files[0];
+            
+            // Validate file type
+            if (!file.type.match(/image\/(jpeg|jpg|png|gif|webp)/i)) {
+                alert('Please select a valid image file (JPEG, PNG, GIF, or WebP)');
+                input.value = '';
+                return;
+            }
+            
+            // Validate file size (max 10MB)
+            if (file.size > 10 * 1024 * 1024) {
+                alert('Image file size must be less than 10MB');
+                input.value = '';
+                return;
+            }
+
+            currentCropType = type;
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                const modal = document.getElementById('cropModal');
+                const cropImage = document.getElementById('cropImage');
+                const modalTitle = document.getElementById('cropModalTitle');
+                
+                // Set modal title and type
+                if (type === 'profile') {
+                    modalTitle.textContent = 'Crop Profile Photo';
+                    modal.setAttribute('data-type', 'profile');
+                } else {
+                    modalTitle.textContent = 'Crop Cover Photo';
+                    modal.setAttribute('data-type', 'cover');
+                }
+                
+                cropImage.src = e.target.result;
+                modal.classList.add('active');
+                
+                // Initialize Cropper after image loads
+                cropImage.onload = function() {
+                    if (cropper) {
+                        cropper.destroy();
+                    }
+                    
+                    const options = {
+                        viewMode: 1,
+                        dragMode: 'move',
+                        autoCropArea: 0.9,
+                        restore: false,
+                        guides: true,
+                        center: true,
+                        highlight: false,
+                        cropBoxMovable: true,
+                        cropBoxResizable: true,
+                        toggleDragModeOnDblclick: false,
+                    };
+                    
+                    // Profile photo: 1:1 square aspect ratio, Cover photo: ~2.6:1 ratio
+                    if (type === 'profile') {
+                        options.aspectRatio = 1;
+                    } else {
+                        options.aspectRatio = 820 / 312; // Facebook cover ratio
+                    }
+                    
+                    cropper = new Cropper(cropImage, options);
+                };
+            };
+            
+            reader.readAsDataURL(file);
+        }
+    }
+
+    function closeCropper() {
+        const modal = document.getElementById('cropModal');
+        modal.classList.remove('active');
+        
+        if (cropper) {
+            cropper.destroy();
+            cropper = null;
+        }
+        
+        // Reset file inputs
+        document.getElementById('profilePhotoInput').value = '';
+        document.getElementById('coverInput').value = '';
+        currentCropType = null;
+    }
+
+    function saveCroppedImage() {
+        if (!cropper || !currentCropType) {
+            return;
+        }
+        
+        const saveBtn = document.querySelector('.crop-modal-footer .btn-primary');
+        const originalText = saveBtn.innerHTML;
+        saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+        saveBtn.disabled = true;
+        
+        // Get cropped canvas with appropriate dimensions
+        let cropOptions = { imageSmoothingEnabled: true, imageSmoothingQuality: 'high' };
+        
+        if (currentCropType === 'profile') {
+            cropOptions.width = 400;
+            cropOptions.height = 400;
+        } else {
+            cropOptions.width = 820;
+            cropOptions.height = 312;
+        }
+        
+        const canvas = cropper.getCroppedCanvas(cropOptions);
+        
+        // Convert canvas to blob
+        canvas.toBlob(function(blob) {
+            const formData = new FormData();
+            
+            if (currentCropType === 'profile') {
+                formData.append('profile_image', blob, 'profile.jpg');
+            } else {
+                formData.append('cover_image', blob, 'cover.jpg');
+            }
+            
+            // Determine the upload URL
+            const uploadUrl = currentCropType === 'profile' 
+                ? '{% url "update_profile_photo" %}' 
+                : '{% url "update_cover_photo" %}';
+            
+            // Send the cropped image
+            fetch(uploadUrl, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken
+                },
+                body: formData
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Reload page to show new image
+                    window.location.reload();
+                } else {
+                    throw new Error('Upload failed');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to upload image. Please try again.');
+                saveBtn.innerHTML = originalText;
+                saveBtn.disabled = false;
+            });
+        }, 'image/jpeg', 0.9);
+    }
+
+    // Close modal on Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && document.getElementById('cropModal').classList.contains('active')) {
+            closeCropper();
+        }
+    });
+
+    // Close modal when clicking outside
+    document.getElementById('cropModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeCropper();
+        }
+    });
+</script>
+{% endif %}
 {% endblock %}

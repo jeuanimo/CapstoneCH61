@@ -3893,14 +3893,21 @@ def update_cover_photo(request):
         try:
             member_profile = MemberProfile.objects.get(user=request.user)
         except MemberProfile.DoesNotExist:
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.content_type == 'multipart/form-data':
+                return JsonResponse({'success': False, 'error': MSG_NO_MEMBER_PROFILE}, status=400)
             messages.error(request, MSG_NO_MEMBER_PROFILE)
             return redirect('portal_dashboard')
         
         if 'cover_image' in request.FILES:
             member_profile.cover_image = request.FILES['cover_image']
             member_profile.save()
+            # Check if AJAX request
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or 'fetch' in request.headers.get('Sec-Fetch-Mode', ''):
+                return JsonResponse({'success': True, 'message': 'Cover photo updated successfully!'})
             messages.success(request, "Cover photo updated successfully!")
         else:
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or 'fetch' in request.headers.get('Sec-Fetch-Mode', ''):
+                return JsonResponse({'success': False, 'error': 'Please select an image.'}, status=400)
             messages.error(request, "Please select an image.")
     
     return redirect('member_profile', username=request.user.username)
@@ -3913,14 +3920,21 @@ def update_profile_photo(request):
         try:
             member_profile = MemberProfile.objects.get(user=request.user)
         except MemberProfile.DoesNotExist:
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.content_type == 'multipart/form-data':
+                return JsonResponse({'success': False, 'error': MSG_NO_MEMBER_PROFILE}, status=400)
             messages.error(request, MSG_NO_MEMBER_PROFILE)
             return redirect('portal_dashboard')
         
         if 'profile_image' in request.FILES:
             member_profile.profile_image = request.FILES['profile_image']
             member_profile.save()
+            # Check if AJAX request
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or 'fetch' in request.headers.get('Sec-Fetch-Mode', ''):
+                return JsonResponse({'success': True, 'message': 'Profile photo updated successfully!'})
             messages.success(request, "Profile photo updated successfully!")
         else:
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or 'fetch' in request.headers.get('Sec-Fetch-Mode', ''):
+                return JsonResponse({'success': False, 'error': 'Please select an image.'}, status=400)
             messages.error(request, "Please select an image.")
     
     return redirect('member_profile', username=request.user.username)

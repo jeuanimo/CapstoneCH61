@@ -26,6 +26,9 @@
     
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
+    
+    <!-- CSRF Token for AJAX requests -->
+    <meta name="csrf-token" content="{{ csrf_token }}">
 
     <title>{% block title %}Capstone CH61{% endblock title %}</title>
     {% load static %}
@@ -42,6 +45,8 @@
     <link rel="stylesheet" href="{% static 'css/projects.css' %}">
     <link rel="stylesheet" href="{% static 'css/auth-forms.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.1/css/all.min.css">
+    <!-- Cropper.js for image cropping -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
 
     {% block css %} {% endblock css %}
     
@@ -810,6 +815,9 @@
         }
     </style>
 
+    <!-- Cropper.js for image cropping -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
+    
     {% block js %} {% endblock js %}
     
     <!-- GDPR Cookie Consent Banner -->
