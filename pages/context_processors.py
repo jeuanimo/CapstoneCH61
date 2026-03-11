@@ -92,9 +92,9 @@ def stripe_availability_context(_request):
 def cookie_consent_context(request):
     """
     Add cookie consent status to all templates.
-    Cookie banner disabled - middleware was causing performance issues.
+    Shows banner if user hasn't given consent yet.
     """
     return {
-        'show_cookie_banner': False,  # Disabled for performance
+        'show_cookie_banner': getattr(request, 'show_cookie_banner', True),
         'cookie_consent': getattr(request, 'cookie_consent', None),
     }

@@ -145,7 +145,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',       # Messages (alerts/notifications)
     'django.middleware.clickjacking.XFrameOptionsMiddleware',    # Clickjacking protection
     'axes.middleware.AxesMiddleware',                            # Brute-force attack prevention
-    # 'pages.middleware.CookieConsentMiddleware',                  # DISABLED: GDPR cookie consent tracking
+    'pages.middleware.CookieConsentMiddleware',                   # GDPR cookie consent tracking
     'pages.middleware.AnalyticsMiddleware',                       # DIY analytics - tracks page views
 ]
 
