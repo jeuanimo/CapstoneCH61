@@ -337,12 +337,12 @@ body.dark-mode .theme-toggle-btn {
    UNIFORM NAVBAR BUTTON SIZING RULE
    ============================================================================
    All navigation buttons must have consistent dimensions:
-   - Width: 9.25rem (fixed width for uniform appearance)
-   - Min-Height: 2.7rem (ensures vertical consistency)
+   - Width: 10.5rem (fixed width for uniform appearance)
+   - Height: 2.7rem (fixed height ensures vertical consistency)
    - Border-Radius: 6px (uniform rounded corners)
-   - Padding: 0.65rem 0.6rem (consistent internal spacing)
+   - Display: flex with align-items/justify-content: center
    
-   DO NOT add icons to nav-link items - text only for consistency.
+   Text will be centered within buttons regardless of length.
    The cart icon is the only exception (uses .navbar-cart .cart-link styling).
    ========================================================================== */
 
@@ -355,15 +355,17 @@ body.dark-mode .theme-toggle-btn {
     color: var(--text-light);
     text-decoration: none;
     padding: 0.65rem 0.6rem;
-    display: block;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     font-size: clamp(0.62rem, 0.75vw, 0.8rem);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.4px;
     transition: all 0.25s ease;
     border-radius: 6px;
-    width: 9.25rem;
-    min-height: 2.7rem;
+    width: 10.5rem;
+    height: 2.7rem;
     text-align: center;
     white-space: normal;
     line-height: 1.1;
