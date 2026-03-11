@@ -164,6 +164,7 @@ urlpatterns = [
     # PROFILE AND POST MANAGEMENT (Login required)
     path('portal/profile/edit/', views.edit_own_profile, name='edit_own_profile'),
     path('portal/profile/cover/', views.update_cover_photo, name='update_cover_photo'),
+    path('portal/profile/photo/', views.update_profile_photo, name='update_profile_photo'),
     path('portal/posts/create/', views.create_post, name='create_post'),
     path('portal/posts/my-posts/', views.my_posts, name='my_posts'),
     path('portal/posts/edit/<int:post_id>/', views.edit_post, name='edit_post'),

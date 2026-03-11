@@ -3822,6 +3822,26 @@ def update_cover_photo(request):
 
 
 @login_required
+def update_profile_photo(request):
+    """Update user's profile photo via camera icon click"""
+    if request.method == 'POST':
+        try:
+            member_profile = MemberProfile.objects.get(user=request.user)
+        except MemberProfile.DoesNotExist:
+            messages.error(request, MSG_NO_MEMBER_PROFILE)
+            return redirect('portal_dashboard')
+        
+        if 'profile_image' in request.FILES:
+            member_profile.profile_image = request.FILES['profile_image']
+            member_profile.save()
+            messages.success(request, "Profile photo updated successfully!")
+        else:
+            messages.error(request, "Please select an image.")
+    
+    return redirect('member_profile', username=request.user.username)
+
+
+@login_required
 def create_post(request):
     """Allow members to create posts/announcements"""
     if request.method == 'POST':

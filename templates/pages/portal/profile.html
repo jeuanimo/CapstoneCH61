@@ -36,9 +36,13 @@
                 {% endif %}
             </div>
             {% if user.is_authenticated and user.username == profile_user.username %}
-            <button class="photo-edit-btn" title="Change profile photo">
+            <button class="photo-edit-btn" title="Change profile photo" onclick="document.getElementById('profilePhotoInput').click()">
                 <i class="fas fa-camera"></i>
             </button>
+            <form id="profilePhotoForm" method="post" enctype="multipart/form-data" action="{% url 'update_profile_photo' %}" style="display:none;">
+                {% csrf_token %}
+                <input type="file" id="profilePhotoInput" name="profile_image" accept="image/*" onchange="document.getElementById('profilePhotoForm').submit()">
+            </form>
             {% endif %}
         </div>
     </div>
