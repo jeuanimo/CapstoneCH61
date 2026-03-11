@@ -19,9 +19,11 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
+from django.views.generic import TemplateView
 from pages import views
 
 urlpatterns = [
+    path('robots.txt', TemplateView.as_view(template_name='robots.txt', content_type='text/plain')),
     path('admin/', admin.site.urls),
     path('', views.home_view, name='home'),
     path('', include('pages.urls')),  # Pages URLs at root (no /pages/ prefix)
