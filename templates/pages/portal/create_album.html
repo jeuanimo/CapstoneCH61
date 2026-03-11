@@ -80,6 +80,20 @@
                             {% endif %}
                         </div>
 
+                        <!-- Program Field -->
+                        <div class="mb-3">
+                            {{ form.program.label_tag }}
+                            {{ form.program }}
+                            {% if form.program.errors %}
+                            <div class="text-danger">
+                                {{ form.program.errors }}
+                            </div>
+                            {% endif %}
+                            <small class="form-text text-muted d-block">
+                                Link this album to a fraternity program to display photos in that program's carousel.
+                            </small>
+                        </div>
+
                         <!-- Is Public Field -->
                         <div class="mb-3 form-check">
                             {{ form.is_public }}

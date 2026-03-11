@@ -323,7 +323,7 @@ class CreateAlbumForm(forms.ModelForm):
     
     class Meta:
         model = PhotoAlbum
-        fields = ['title', 'description', 'is_public']
+        fields = ['title', 'description', 'program', 'is_public']
         widgets = {
             'title': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -334,6 +334,9 @@ class CreateAlbumForm(forms.ModelForm):
                 'rows': 3,
                 'placeholder': 'Describe what this album is about...'
             }),
+            'program': forms.Select(attrs={
+                'class': 'form-control',
+            }),
             'is_public': forms.CheckboxInput(attrs={
                 'class': 'form-check-input'
             }),
@@ -341,7 +344,11 @@ class CreateAlbumForm(forms.ModelForm):
         labels = {
             'title': 'Album Title',
             'description': 'Description',
+            'program': 'Associated Program',
             'is_public': 'Make this album visible to all members',
+        }
+        help_texts = {
+            'program': 'Link this album to a fraternity program to show photos in that program\'s carousel',
         }
 
 
