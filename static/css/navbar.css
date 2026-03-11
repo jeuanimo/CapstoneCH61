@@ -349,27 +349,34 @@ body.dark-mode .theme-toggle-btn {
 .nav-item {
     position: relative;
     flex: 0 0 auto;
+    display: flex;
 }
 
 .nav-link {
     color: var(--text-light);
     text-decoration: none;
-    padding: 0.65rem 0.6rem;
+    padding: 0.5rem 0.4rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: clamp(0.62rem, 0.75vw, 0.8rem);
+    font-size: 0.7rem;
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.4px;
+    letter-spacing: 0.3px;
     transition: all 0.25s ease;
     border-radius: 6px;
-    width: 10.5rem;
-    height: 2.7rem;
+    width: 6.5rem !important;
+    height: 2.5rem !important;
+    min-width: 6.5rem !important;
+    max-width: 6.5rem !important;
+    min-height: 2.5rem !important;
+    max-height: 2.5rem !important;
+    box-sizing: border-box !important;
+    flex-shrink: 0;
     text-align: center;
-    white-space: normal;
+    white-space: nowrap;
+    overflow: hidden;
     line-height: 1.1;
-    word-break: break-word;
     background: linear-gradient(180deg, #2a7dd4 0%, #1e6bb8 50%, #0f3d6e 100%);
     border: 1px solid #0a2d52;
     box-shadow: 0 3px 6px rgba(0, 0, 0, 0.4),
