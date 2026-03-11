@@ -227,15 +227,18 @@ def home_view(request):
         start_date__gte=now
     ).order_by('start_date')[:5]  # Limit to next 5 events
     
-    # Get recent program photos for carousel
-    # Show photos from events with program types OR photos in program albums
-    event_program_types = ['business', 'education', 'social_action', 'sigma_beta_club']
-    album_program_types = ['bbb', 'education', 'social_action', 'sigma_beta']
-    
+    # Get ALL photos for carousel - show all photos from albums or events
+    # This includes all program photos and any other uploaded photos
     carousel_photos = Photo.objects.filter(
-        Q(event__event_type__in=event_program_types) |  # Photos linked to program events
-        Q(album__program__in=album_program_types)       # Photos in program albums
-    ).select_related('uploaded_by', 'event', 'album').order_by('-created_at')[:8]
+        Q(album__isnull=False) |  # Photos in ANY album
+        Q(event__isnull=False)    # Photos linked to ANY event
+    ).select_related('uploaded_by', 'event', 'album').order_by('-created_at')[:20]
+    
+    # If no photos from albums/events, fall back to ALL recent photos
+    if not carousel_photos.exists():
+        carousel_photos = Photo.objects.all().select_related(
+            'uploaded_by', 'event', 'album'
+        ).order_by('-created_at')[:20]
     
     context = {
         'upcoming_events': upcoming_events,
