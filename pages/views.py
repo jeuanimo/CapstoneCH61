@@ -397,34 +397,57 @@ def program_business(request):
     """Bigger and Better Business program detail - officers can upload photos"""
     is_officer = request.user.is_authenticated and (request.user.is_staff or (hasattr(request.user, 'member_profile') and request.user.member_profile.is_officer))
     
+    # Get available albums for this program  
+    program_albums = PhotoAlbum.objects.filter(program='bbb', is_public=True)
+    
     # Handle photo upload for officers
     if request.method == 'POST' and is_officer:
-        if 'photo_upload' in request.FILES:
+        images = request.FILES.getlist('photo_upload')
+        selected_album_id = request.POST.get('album_id')
+        caption = request.POST.get('caption', '')
+        
+        if images:
             # Get or create a default business event
             event, _ = Event.objects.get_or_create(
                 event_type='business',
                 defaults={'title': 'Business Program', 'start_date': timezone.now(), 'end_date': timezone.now()}
             )
-            photo = Photo(
-                uploaded_by=request.user,
-                image=request.FILES['photo_upload'],
-                caption=request.POST.get('caption', ''),
-                tags='business',  # Auto-tag as business
-                event=event  # Link to business event
-            )
-            photo.save()
-            messages.success(request, MSG_PHOTO_UPLOAD_SUCCESS)
+            
+            # Get selected album if provided
+            album = None
+            if selected_album_id:
+                album = PhotoAlbum.objects.filter(id=selected_album_id, program='bbb').first()
+            
+            uploaded_count = 0
+            for image in images:
+                photo = Photo(
+                    uploaded_by=request.user,
+                    image=image,
+                    caption=caption,
+                    tags='business',
+                    event=event,
+                    album=album
+                )
+                photo.save()
+                uploaded_count += 1
+            
+            if uploaded_count == 1:
+                messages.success(request, MSG_PHOTO_UPLOAD_SUCCESS)
+            else:
+                messages.success(request, f"Successfully uploaded {uploaded_count} photos!")
             return redirect('program_business')
     
-    # Get photos tagged with business-related keywords
+    # Get photos tagged with business OR from business albums
+    from django.db.models import Q
     photos = Photo.objects.filter(
-        tags__icontains='business'
-    ).order_by('-created_at')[:8]
+        Q(tags__icontains='business') | Q(album__program='bbb')
+    ).distinct().order_by('-created_at')[:20]
     
     context = {
         'photos': photos,
         'program_name': 'Bigger & Better Business',
-        'is_officer': is_officer
+        'is_officer': is_officer,
+        'program_albums': program_albums,
     }
     return render(request, 'pages/programs/business.html', context)
 
@@ -432,34 +455,57 @@ def program_social_action(request):
     """Social Action program detail - officers can upload photos"""
     is_officer = request.user.is_authenticated and (request.user.is_staff or (hasattr(request.user, 'member_profile') and request.user.member_profile.is_officer))
     
+    # Get available albums for this program
+    program_albums = PhotoAlbum.objects.filter(program='social_action', is_public=True)
+    
     # Handle photo upload for officers
     if request.method == 'POST' and is_officer:
-        if 'photo_upload' in request.FILES:
+        images = request.FILES.getlist('photo_upload')
+        selected_album_id = request.POST.get('album_id')
+        caption = request.POST.get('caption', '')
+        
+        if images:
             # Get or create a default social action event
             event, _ = Event.objects.get_or_create(
                 event_type='social_action',
                 defaults={'title': 'Social Action Program', 'start_date': timezone.now(), 'end_date': timezone.now()}
             )
-            photo = Photo(
-                uploaded_by=request.user,
-                image=request.FILES['photo_upload'],
-                caption=request.POST.get('caption', ''),
-                tags='social',  # Auto-tag as social
-                event=event  # Link to social action event
-            )
-            photo.save()
-            messages.success(request, MSG_PHOTO_UPLOAD_SUCCESS)
+            
+            # Get selected album if provided
+            album = None
+            if selected_album_id:
+                album = PhotoAlbum.objects.filter(id=selected_album_id, program='social_action').first()
+            
+            uploaded_count = 0
+            for image in images:
+                photo = Photo(
+                    uploaded_by=request.user,
+                    image=image,
+                    caption=caption,
+                    tags='social',
+                    event=event,
+                    album=album
+                )
+                photo.save()
+                uploaded_count += 1
+            
+            if uploaded_count == 1:
+                messages.success(request, MSG_PHOTO_UPLOAD_SUCCESS)
+            else:
+                messages.success(request, f"Successfully uploaded {uploaded_count} photos!")
             return redirect('program_social_action')
     
-    # Get photos tagged with social action-related keywords
+    # Get photos tagged with social OR from social_action albums
+    from django.db.models import Q
     photos = Photo.objects.filter(
-        tags__icontains='social'
-    ).order_by('-created_at')[:8]
+        Q(tags__icontains='social') | Q(album__program='social_action')
+    ).distinct().order_by('-created_at')[:20]
     
     context = {
         'photos': photos,
         'program_name': 'Social Action',
-        'is_officer': is_officer
+        'is_officer': is_officer,
+        'program_albums': program_albums,
     }
     return render(request, 'pages/programs/social_action.html', context)
 
@@ -467,34 +513,57 @@ def program_education(request):
     """Education program detail - officers can upload photos"""
     is_officer = request.user.is_authenticated and (request.user.is_staff or (hasattr(request.user, 'member_profile') and request.user.member_profile.is_officer))
     
+    # Get available albums for this program
+    program_albums = PhotoAlbum.objects.filter(program='education', is_public=True)
+    
     # Handle photo upload for officers
     if request.method == 'POST' and is_officer:
-        if 'photo_upload' in request.FILES:
+        images = request.FILES.getlist('photo_upload')
+        selected_album_id = request.POST.get('album_id')
+        caption = request.POST.get('caption', '')
+        
+        if images:
             # Get or create a default education event
             event, _ = Event.objects.get_or_create(
                 event_type='education',
                 defaults={'title': 'Education Program', 'start_date': timezone.now(), 'end_date': timezone.now()}
             )
-            photo = Photo(
-                uploaded_by=request.user,
-                image=request.FILES['photo_upload'],
-                caption=request.POST.get('caption', ''),
-                tags='education',  # Auto-tag as education
-                event=event  # Link to education event
-            )
-            photo.save()
-            messages.success(request, MSG_PHOTO_UPLOAD_SUCCESS)
+            
+            # Get selected album if provided
+            album = None
+            if selected_album_id:
+                album = PhotoAlbum.objects.filter(id=selected_album_id, program='education').first()
+            
+            uploaded_count = 0
+            for image in images:
+                photo = Photo(
+                    uploaded_by=request.user,
+                    image=image,
+                    caption=caption,
+                    tags='education',
+                    event=event,
+                    album=album
+                )
+                photo.save()
+                uploaded_count += 1
+            
+            if uploaded_count == 1:
+                messages.success(request, MSG_PHOTO_UPLOAD_SUCCESS)
+            else:
+                messages.success(request, f"Successfully uploaded {uploaded_count} photos!")
             return redirect('program_education')
     
-    # Get photos tagged with education-related keywords
+    # Get photos tagged with education OR from education albums
+    from django.db.models import Q
     photos = Photo.objects.filter(
-        tags__icontains='education'
-    ).order_by('-created_at')[:8]
+        Q(tags__icontains='education') | Q(album__program='education')
+    ).distinct().order_by('-created_at')[:20]
     
     context = {
         'photos': photos,
         'program_name': 'Education',
-        'is_officer': is_officer
+        'is_officer': is_officer,
+        'program_albums': program_albums,
     }
     return render(request, 'pages/programs/education.html', context)
 
@@ -502,34 +571,57 @@ def program_sigma_beta(request):
     """Sigma Beta Club program detail - officers can upload photos"""
     is_officer = request.user.is_authenticated and (request.user.is_staff or (hasattr(request.user, 'member_profile') and request.user.member_profile.is_officer))
     
+    # Get available albums for this program
+    program_albums = PhotoAlbum.objects.filter(program='sigma_beta', is_public=True)
+    
     # Handle photo upload for officers
     if request.method == 'POST' and is_officer:
-        if 'photo_upload' in request.FILES:
+        images = request.FILES.getlist('photo_upload')
+        selected_album_id = request.POST.get('album_id')
+        caption = request.POST.get('caption', '')
+        
+        if images:
             # Get or create a default sigma beta club event
             event, _ = Event.objects.get_or_create(
                 event_type='sigma_beta_club',
                 defaults={'title': 'Sigma Beta Club Program', 'start_date': timezone.now(), 'end_date': timezone.now()}
             )
-            photo = Photo(
-                uploaded_by=request.user,
-                image=request.FILES['photo_upload'],
-                caption=request.POST.get('caption', ''),
-                tags=TAG_SIGMA_BETA,  # Auto-tag as sigma beta
-                event=event  # Link to sigma beta club event
-            )
-            photo.save()
-            messages.success(request, MSG_PHOTO_UPLOAD_SUCCESS)
+            
+            # Get selected album if provided
+            album = None
+            if selected_album_id:
+                album = PhotoAlbum.objects.filter(id=selected_album_id, program='sigma_beta').first()
+            
+            uploaded_count = 0
+            for image in images:
+                photo = Photo(
+                    uploaded_by=request.user,
+                    image=image,
+                    caption=caption,
+                    tags=TAG_SIGMA_BETA,
+                    event=event,
+                    album=album
+                )
+                photo.save()
+                uploaded_count += 1
+            
+            if uploaded_count == 1:
+                messages.success(request, MSG_PHOTO_UPLOAD_SUCCESS)
+            else:
+                messages.success(request, f"Successfully uploaded {uploaded_count} photos!")
             return redirect('program_sigma_beta')
     
-    # Get photos tagged with sigma beta or youth-related keywords
+    # Get photos tagged with sigma beta OR from sigma_beta albums
+    from django.db.models import Q
     photos = Photo.objects.filter(
-        tags__icontains=TAG_SIGMA_BETA
-    ).order_by('-created_at')[:8]
+        Q(tags__icontains=TAG_SIGMA_BETA) | Q(album__program='sigma_beta')
+    ).distinct().order_by('-created_at')[:20]
     
     context = {
         'photos': photos,
         'program_name': 'Sigma Beta Club',
-        'is_officer': is_officer
+        'is_officer': is_officer,
+        'program_albums': program_albums,
     }
     return render(request, 'pages/programs/sigma_beta.html', context)
 
