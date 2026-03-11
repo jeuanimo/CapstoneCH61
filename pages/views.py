@@ -228,11 +228,11 @@ def home_view(request):
     ).order_by('start_date')[:5]  # Limit to next 5 events
     
     # Get photos for carousel - ONLY photos that are:
-    # 1. In an album with a program assigned (not personal/empty program)
+    # 1. In an album with ANY program assigned (non-empty program field)
     # 2. OR linked to an event (any event type)
-    # This excludes personal photos that have no album or no event
+    # This excludes personal photos that have no program album or no event
     carousel_photos = Photo.objects.filter(
-        Q(album__program__in=['bbb', 'education', 'social_action', 'sigma_beta']) |  # Photos in program albums
+        Q(album__program__isnull=False, album__program__gt='') |  # Photos in albums with ANY program set
         Q(event__isnull=False)  # Photos linked to ANY event
     ).select_related('uploaded_by', 'event', 'album').order_by('-created_at')[:20]
     
