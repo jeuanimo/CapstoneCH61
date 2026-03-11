@@ -540,40 +540,25 @@ SECURE CODING COMPLIANCE
 
 FIX #4: Uniform Navbar Button Sizing (March 11, 2026)
 -----------------------------------------------------
-ISSUE: Navigation buttons in the main navbar were inconsistent in size and shape,
-       especially when adding new nav items like "Change Password".
+ISSUE: Navigation buttons in the main navbar were inconsistent in size and shape.
 
 FILE FIXED:
   - static/css/navbar.css
   - templates/base.html
 
 SOLUTION APPLIED:
-  All .nav-link elements now have enforced uniform dimensions:
-  - Width: 9.25rem (fixed width for uniform appearance)
-  - Min-Height: 2.7rem (ensures vertical consistency)
-  - Border-Radius: 6px (uniform rounded corners)
-  - Padding: 0.65rem 0.6rem (consistent internal spacing)
+  ALL navbar buttons (.nav-link AND .cart-link) have IDENTICAL dimensions:
+  - Desktop: 6.5rem × 2.5rem (enforced with !important)
+  - Mobile: 100% width × 2.5rem height (full width on collapse)
+  - Border-Radius: 6px (0 on mobile for stacked appearance)
 
-DO NOT:
-  - Add icons (<i> tags) to nav-link text - text only for consistency
-  - Change the width/min-height values without updating ALL nav items
-  - Override these styles inline in the HTML
+BUTTONS COVERED:
+  Home, About Us, Programs, Events, Contact Us, Password (with key icon),
+  Logout, Member Login, AND the Cart button.
 
-The cart icon (.navbar-cart .cart-link) is the ONLY exception and has its own
-separate styling with width: 3rem for icon-only display.
+NO EXCEPTIONS - ALL buttons same size, period.
 
 CSS RULE LOCATION: static/css/navbar.css (search for "UNIFORM NAVBAR BUTTON SIZING RULE")
-
-```css
-.nav-link {
-    padding: 0.65rem 0.6rem;
-    width: 9.25rem;           /* REQUIRED: uniform width */
-    min-height: 2.7rem;       /* REQUIRED: uniform height */
-    border-radius: 6px;       /* REQUIRED: uniform corners */
-    text-align: center;
-    /* ... other styling ... */
-}
-```
 
 ================================================================================
 FINAL CHECKLIST
