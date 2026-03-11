@@ -1802,3 +1802,47 @@ class TicketPurchaseForm(forms.Form):
                 f'Maximum {self.ticket.max_per_order} tickets per order'
             )
         return quantity
+
+
+class AnnouncementForm(forms.Form):
+    """Form for creating/editing announcements (admin/officers only)"""
+    
+    PRIORITY_CHOICES = [
+        ('low', 'Low'),
+        ('normal', 'Normal'),
+        ('high', 'High'),
+        ('urgent', 'Urgent'),
+    ]
+    
+    title = forms.CharField(
+        max_length=200,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Announcement title'
+        })
+    )
+    content = forms.CharField(
+        widget=forms.Textarea(attrs={
+            'class': 'form-control',
+            'rows': 6,
+            'placeholder': 'Announcement content...'
+        })
+    )
+    priority = forms.ChoiceField(
+        choices=PRIORITY_CHOICES,
+        initial='normal',
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    is_pinned = forms.BooleanField(
+        required=False,
+        label='Pin to top',
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
+    )
+    expiry_date = forms.DateTimeField(
+        required=False,
+        label='Expiry date (optional)',
+        widget=forms.DateTimeInput(attrs={
+            'class': 'form-control',
+            'type': 'datetime-local'
+        })
+    )

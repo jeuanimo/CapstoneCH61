@@ -92,7 +92,7 @@ from .forms_profile import (
     EditPhotoForm, CreateAlbumForm, CreateEventForm, DocumentForm
 )
 from .forms_boutique import BoutiqueImportForm, ProductForm, CheckoutForm
-from .decorators import is_officer_or_staff
+from .decorators import is_officer_or_staff, officer_required
 from datetime import datetime
 import calendar
 from django.contrib.auth import login, logout, authenticate
@@ -2806,10 +2806,95 @@ def announcements_view(request):
             announcement=announcement
         )
     
+    # Check if user is officer or staff
+    is_officer = is_officer_or_staff(request.user)
+    
     context = {
         'announcements': announcements,
+        'is_officer': is_officer,
     }
     return render(request, 'pages/portal/announcements.html', context)
+
+
+@officer_required
+def create_announcement(request):
+    """Create a new announcement (officers/staff only)"""
+    from .forms import AnnouncementForm
+    
+    if request.method == 'POST':
+        form = AnnouncementForm(request.POST)
+        if form.is_valid():
+            announcement = Announcement.objects.create(
+                title=form.cleaned_data['title'],
+                content=form.cleaned_data['content'],
+                priority=form.cleaned_data['priority'],
+                is_pinned=form.cleaned_data['is_pinned'],
+                expiry_date=form.cleaned_data['expiry_date'],
+                author=request.user,
+                is_active=True,
+                publish_date=timezone.now()
+            )
+            messages.success(request, f"Announcement '{announcement.title}' created successfully!")
+            return redirect('announcements_view')
+    else:
+        form = AnnouncementForm()
+    
+    context = {
+        'form': form,
+    }
+    return render(request, 'pages/portal/create_announcement.html', context)
+
+
+@officer_required
+def edit_announcement(request, announcement_id):
+    """Edit an existing announcement (officers/staff only)"""
+    from .forms import AnnouncementForm
+    
+    announcement = get_object_or_404(Announcement, id=announcement_id)
+    
+    if request.method == 'POST':
+        form = AnnouncementForm(request.POST)
+        if form.is_valid():
+            announcement.title = form.cleaned_data['title']
+            announcement.content = form.cleaned_data['content']
+            announcement.priority = form.cleaned_data['priority']
+            announcement.is_pinned = form.cleaned_data['is_pinned']
+            announcement.expiry_date = form.cleaned_data['expiry_date']
+            announcement.save()
+            messages.success(request, f"Announcement '{announcement.title}' updated successfully!")
+            return redirect('announcements_view')
+    else:
+        form = AnnouncementForm(initial={
+            'title': announcement.title,
+            'content': announcement.content,
+            'priority': announcement.priority,
+            'is_pinned': announcement.is_pinned,
+            'expiry_date': announcement.expiry_date.strftime('%Y-%m-%dT%H:%M') if announcement.expiry_date else '',
+        })
+    
+    context = {
+        'form': form,
+        'announcement': announcement,
+        'editing': True,
+    }
+    return render(request, 'pages/portal/create_announcement.html', context)
+
+
+@officer_required
+def delete_announcement(request, announcement_id):
+    """Delete an announcement (officers/staff only)"""
+    announcement = get_object_or_404(Announcement, id=announcement_id)
+    
+    if request.method == 'POST':
+        title = announcement.title
+        announcement.delete()
+        messages.success(request, f"Announcement '{title}' deleted successfully!")
+        return redirect('announcements_view')
+    
+    context = {
+        'announcement': announcement,
+    }
+    return render(request, 'pages/portal/delete_announcement.html', context)
 
 
 @login_required

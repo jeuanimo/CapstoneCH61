@@ -177,6 +177,9 @@ urlpatterns = [
     # MEMBER PORTAL - COMMUNICATIONS (Login required)
     path('portal/dues/', views.dues_view, name='dues_view'),
     path('portal/announcements/', views.announcements_view, name='announcements_view'),
+    path('portal/announcements/create/', views.create_announcement, name='create_announcement'),
+    path('portal/announcements/<int:announcement_id>/edit/', views.edit_announcement, name='edit_announcement'),
+    path('portal/announcements/<int:announcement_id>/delete/', views.delete_announcement, name='delete_announcement'),
     path('portal/documents/', views.documents_view, name='documents_view'),
     path('portal/documents/officer-only/', views.officer_only_documents, name='officer_only_documents'),
     path('portal/messages/', views.messages_inbox, name='messages_inbox'),

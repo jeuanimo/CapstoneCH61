@@ -8,6 +8,11 @@
     <div class="portal-header">
         <h1><i class="fas fa-bullhorn"></i> Announcements</h1>
         <p>Stay updated with chapter news and important information</p>
+        {% if is_officer %}
+        <a href="{% url 'create_announcement' %}" class="btn btn-primary create-btn">
+            <i class="fas fa-plus"></i> Create Announcement
+        </a>
+        {% endif %}
     </div>
 
     <div class="announcements-list">
@@ -21,6 +26,16 @@
             {% if announcement.is_pinned %}
             <div class="pin-badge">
                 <i class="fas fa-thumbtack"></i> Pinned
+            </div>
+            {% endif %}
+            {% if is_officer %}
+            <div class="announcement-actions">
+                <a href="{% url 'edit_announcement' announcement.id %}" class="action-btn edit-btn" title="Edit">
+                    <i class="fas fa-edit"></i>
+                </a>
+                <a href="{% url 'delete_announcement' announcement.id %}" class="action-btn delete-btn" title="Delete">
+                    <i class="fas fa-trash"></i>
+                </a>
             </div>
             {% endif %}
             <div class="announcement-header">
@@ -71,6 +86,25 @@
         font-size: 1.1rem;
     }
 
+    .create-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 1rem;
+        padding: 0.75rem 1.5rem;
+        background: var(--primary-color);
+        color: white;
+        text-decoration: none;
+        border-radius: 4px;
+        font-weight: 600;
+        transition: background 0.3s ease;
+    }
+
+    .create-btn:hover {
+        background: #0d3d6e;
+        color: white;
+    }
+
     .announcements-list {
         display: flex;
         flex-direction: column;
@@ -92,6 +126,46 @@
 
     .announcement-card.pinned {
         border-left: 5px solid #e74c3c;
+    }
+
+    .announcement-actions {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        display: flex;
+        gap: 0.5rem;
+        z-index: 10;
+    }
+
+    .action-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+    .edit-btn {
+        background: #3498db;
+        color: white;
+    }
+
+    .edit-btn:hover {
+        background: #2980b9;
+        color: white;
+    }
+
+    .delete-btn {
+        background: #e74c3c;
+        color: white;
+    }
+
+    .delete-btn:hover {
+        background: #c0392b;
+        color: white;
     }
 
     .announcement-card.new-announcement {
