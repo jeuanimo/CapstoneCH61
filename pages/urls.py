@@ -200,6 +200,7 @@ urlpatterns = [
     path('portal/photos/<int:photo_id>/like/', views.like_photo, name='like_photo'),
     path('portal/photos/<int:photo_id>/delete/', views.delete_photo, name='delete_photo'),
     path('portal/albums/create/', views.create_album, name='create_album'),
+    path('portal/albums/<int:album_id>/delete/', views.delete_album, name='delete_album'),
     
     # EVENT & DOCUMENT MANAGEMENT (Login required)
     path('portal/events/create/', views.create_event, name='create_event'),

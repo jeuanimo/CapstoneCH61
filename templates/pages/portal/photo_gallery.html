@@ -130,14 +130,31 @@
     <div class="card mb-4 gallery-card">
         <div class="card-body">
             <h5 class="card-title">Filter by Album</h5>
-            <div class="d-flex flex-wrap gap-2">
+            <div class="d-flex flex-wrap gap-2 align-items-center">
                 <a href="{% url 'photo_gallery' %}" class="btn btn-sm {% if not selected_album %}btn-primary{% else %}btn-outline-primary{% endif %}">
                     All Photos
                 </a>
                 {% for album in albums %}
-                <a href="?album={{ album.id }}" class="btn btn-sm {% if selected_album == album.id|stringformat:'s' %}btn-primary{% else %}btn-outline-primary{% endif %}">
-                    {{ album.title }} ({{ album.photo_count }})
-                </a>
+                <div class="btn-group" role="group">
+                    <a href="?album={{ album.id }}" class="btn btn-sm {% if selected_album == album.id|stringformat:'s' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                        {{ album.title }} ({{ album.photo_count }})
+                    </a>
+                    {% if user.is_staff or album.created_by == user %}
+                    <a href="{% url 'delete_album' album.id %}" 
+                       class="btn btn-sm btn-outline-danger" 
+                       title="Delete album"
+                       onclick="return confirm('Are you sure you want to delete the album &quot;{{ album.title }}&quot;? This will also delete all {{ album.photo_count }} photo(s) in it!');">
+                        <i class="fas fa-trash-alt"></i>
+                    </a>
+                    {% elif user.member_profile.is_officer %}
+                    <a href="{% url 'delete_album' album.id %}" 
+                       class="btn btn-sm btn-outline-danger" 
+                       title="Delete album"
+                       onclick="return confirm('Are you sure you want to delete the album &quot;{{ album.title }}&quot;? This will also delete all {{ album.photo_count }} photo(s) in it!');">
+                        <i class="fas fa-trash-alt"></i>
+                    </a>
+                    {% endif %}
+                </div>
                 {% endfor %}
             </div>
         </div>
@@ -171,7 +188,7 @@
             <div class="col-md-4 col-lg-3">
                 <div class="card h-100 gallery-card photo-card" data-photo-id="{{ photo.id }}">
                     <div class="gallery-image-wrapper">
-                        {% if photo.uploaded_by == user or user.is_staff %}
+                        {% if photo.uploaded_by == user or user.is_staff or user.member_profile.is_officer %}
                         <input type="checkbox" name="photo_ids" value="{{ photo.id }}" class="photo-checkbox" title="Select for bulk action">
                         {% endif %}
                         <a href="{% url 'photo_detail' photo.id %}">
@@ -209,12 +226,12 @@
                 <div class="card-footer">
                     <div class="d-flex justify-content-between align-items-center">
                         <small class="text-muted">{{ photo.created_at|timesince }} ago</small>
-                        {% if photo.uploaded_by == user or user.is_staff %}
+                        {% if photo.uploaded_by == user or user.is_staff or user.member_profile.is_officer %}
                         <div class="btn-group btn-group-sm">
                             <a href="{% url 'edit_photo' photo.id %}" class="btn btn-outline-primary" title="Edit photo">
                                 <i class="fas fa-edit"></i>
                             </a>
-                            <a href="{% url 'delete_photo' photo.id %}" class="btn btn-outline-danger" title="Delete photo" data-confirm="Are you sure you want to delete this photo?">
+                            <a href="{% url 'delete_photo' photo.id %}" class="btn btn-outline-danger" title="Delete photo" onclick="return confirm('Are you sure you want to delete this photo?')">
                                 <i class="fas fa-trash"></i>
                             </a>
                         </div>

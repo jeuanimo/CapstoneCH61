@@ -3518,6 +3518,33 @@ def create_album(request):
 
 
 @login_required
+def delete_album(request, album_id):
+    """Delete a photo album (creator, officers, or staff only)"""
+    album = get_object_or_404(PhotoAlbum, id=album_id)
+    
+    # Check permissions: creator, staff, or officer
+    is_officer = hasattr(request.user, 'member_profile') and request.user.member_profile.is_officer
+    
+    if album.created_by != request.user and not request.user.is_staff and not is_officer:
+        messages.error(request, "You don't have permission to delete this album.")
+        return redirect('photo_gallery')
+    
+    # Count photos that will be deleted
+    photo_count = album.photos.count()
+    album_title = album.title
+    
+    # Delete the album (this will cascade delete all photos in the album)
+    album.delete()
+    
+    if photo_count > 0:
+        messages.success(request, f"Album '{album_title}' and {photo_count} photo(s) deleted successfully!")
+    else:
+        messages.success(request, f"Album '{album_title}' deleted successfully!")
+    
+    return redirect('photo_gallery')
+
+
+@login_required
 def create_event(request):
     """Create a new event"""
     # Staff always have permission
