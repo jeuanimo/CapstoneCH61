@@ -336,14 +336,15 @@ body.dark-mode .theme-toggle-btn {
 /* ============================================================================
    UNIFORM NAVBAR BUTTON SIZING RULE
    ============================================================================
-   All navigation buttons must have consistent dimensions:
-   - Width: 10.5rem (fixed width for uniform appearance)
-   - Height: 2.7rem (fixed height ensures vertical consistency)
-   - Border-Radius: 6px (uniform rounded corners)
-   - Display: flex with align-items/justify-content: center
+   ALL navbar buttons (.nav-link AND .cart-link) MUST have identical dimensions:
+   - Desktop: 6.5rem × 2.5rem (enforced with !important)
+   - Mobile: 100% width × 2.5rem height (full width on collapse)
+   - Border-Radius: 6px (0 on mobile for stacked appearance)
    
-   Text will be centered within buttons regardless of length.
-   The cart icon is the only exception (uses .navbar-cart .cart-link styling).
+   This includes: Home, About Us, Programs, Events, Contact Us, Password,
+   Logout, Member Login, AND the Cart button.
+   
+   NO EXCEPTIONS - all buttons same size, period.
    ========================================================================== */
 
 .nav-item {
@@ -437,13 +438,18 @@ body.dark-mode .nav-item.active .nav-link {
 .navbar-cart .cart-link {
     color: var(--text-light);
     text-decoration: none;
-    padding: 0.65rem 0.6rem;
+    padding: 0.5rem 0.4rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.3rem;
-    min-height: 2.7rem;
-    width: 3rem;
+    font-size: 1.1rem;
+    width: 6.5rem !important;
+    height: 2.5rem !important;
+    min-width: 6.5rem !important;
+    max-width: 6.5rem !important;
+    min-height: 2.5rem !important;
+    max-height: 2.5rem !important;
+    box-sizing: border-box !important;
     background: linear-gradient(180deg, #2a7dd4 0%, #1e6bb8 50%, #0f3d6e 100%);
     border-radius: 6px;
     border: 1px solid #0a2d52;
@@ -859,8 +865,11 @@ body.dark-mode .portal-nav-link.admin-link.active {
     .nav-link {
         text-align: center;
         border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 0;
-        width: 100%;
+        border-radius: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 100% !important;
+        height: 2.5rem !important;
         font-size: 0.9rem;
         letter-spacing: 0.4px;
     }
@@ -874,11 +883,14 @@ body.dark-mode .portal-nav-link.admin-link.active {
     }
 
     .navbar-cart .cart-link {
-        width: 100%;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 100% !important;
+        height: 2.5rem !important;
         justify-content: center;
-        border-radius: 0;
+        border-radius: 0 !important;
         font-size: 1.1rem;
-        padding: 0.75rem 1rem;
+        padding: 0.5rem 0.4rem;
     }
 
     .navbar-cart .cart-link::before {
@@ -935,9 +947,10 @@ body.dark-mode .portal-nav-link.admin-link.active {
     }
 
     .nav-link {
-        padding: 0.75rem 1rem;
+        padding: 0.5rem 0.4rem;
         font-size: 0.82rem;
         letter-spacing: 0.3px;
+        height: 2.5rem !important;
     }
 
     .social-link {
