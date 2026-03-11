@@ -153,6 +153,17 @@
                 </div>
             </div>
             
+            <div class="form-section">
+                <h3><i class="fas fa-shield-alt"></i> Account Security</h3>
+                
+                <div class="security-info">
+                    <p><i class="fas fa-lock"></i> Keep your account secure by using a strong, unique password.</p>
+                    <a href="{% url 'password_change' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-key"></i> Change Password
+                    </a>
+                </div>
+            </div>
+            
             <div class="form-actions">
                 <button type="submit" class="btn btn-primary">
                     <i class="fas fa-save"></i> Save Changes
@@ -329,6 +340,57 @@
 
     .btn-secondary:hover {
         background: #5a6268;
+    }
+
+    .btn-outline-primary {
+        background: transparent;
+        color: var(--primary-color);
+        border: 2px solid var(--primary-color);
+    }
+
+    .btn-outline-primary:hover {
+        background: var(--primary-color);
+        color: white;
+    }
+
+    .security-info {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 8px;
+        border-left: 4px solid var(--primary-color);
+    }
+
+    .security-info p {
+        margin: 0 0 1rem 0;
+        color: #666;
+    }
+
+    .security-info i {
+        color: var(--primary-color);
+        margin-right: 0.5rem;
+    }
+
+    body.dark-mode .security-info {
+        background: #0f172a;
+        border-left-color: #87ceeb;
+    }
+
+    body.dark-mode .security-info p {
+        color: #b0b8c8;
+    }
+
+    body.dark-mode .security-info i {
+        color: #87ceeb;
+    }
+
+    body.dark-mode .btn-outline-primary {
+        color: #87ceeb;
+        border-color: #87ceeb;
+    }
+
+    body.dark-mode .btn-outline-primary:hover {
+        background: #87ceeb;
+        color: #0f172a;
     }
 
     @media (max-width: 768px) {

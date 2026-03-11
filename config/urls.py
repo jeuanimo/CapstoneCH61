@@ -54,6 +54,19 @@ urlpatterns = [
              template_name='registration/password_reset_complete.html'
          ), 
          name='password_reset_complete'),
+    
+    # PASSWORD CHANGE (for logged-in users to change their password)
+    path('password-change/', 
+         auth_views.PasswordChangeView.as_view(
+             template_name='registration/password_change.html',
+             success_url='/password-change/done/'
+         ), 
+         name='password_change'),
+    path('password-change/done/', 
+         auth_views.PasswordChangeDoneView.as_view(
+             template_name='registration/password_change_done.html'
+         ), 
+         name='password_change_done'),
 ]
 
 # Serve media files in development
