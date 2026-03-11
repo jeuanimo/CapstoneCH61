@@ -438,7 +438,6 @@ def program_business(request):
             return redirect('program_business')
     
     # Get photos tagged with business OR from business albums
-    from django.db.models import Q
     photos = Photo.objects.filter(
         Q(tags__icontains='business') | Q(album__program='bbb')
     ).distinct().order_by('-created_at')[:20]
@@ -496,7 +495,6 @@ def program_social_action(request):
             return redirect('program_social_action')
     
     # Get photos tagged with social OR from social_action albums
-    from django.db.models import Q
     photos = Photo.objects.filter(
         Q(tags__icontains='social') | Q(album__program='social_action')
     ).distinct().order_by('-created_at')[:20]
@@ -554,7 +552,6 @@ def program_education(request):
             return redirect('program_education')
     
     # Get photos tagged with education OR from education albums
-    from django.db.models import Q
     photos = Photo.objects.filter(
         Q(tags__icontains='education') | Q(album__program='education')
     ).distinct().order_by('-created_at')[:20]
@@ -612,7 +609,6 @@ def program_sigma_beta(request):
             return redirect('program_sigma_beta')
     
     # Get photos tagged with sigma beta OR from sigma_beta albums
-    from django.db.models import Q
     photos = Photo.objects.filter(
         Q(tags__icontains=TAG_SIGMA_BETA) | Q(album__program='sigma_beta')
     ).distinct().order_by('-created_at')[:20]
@@ -6123,7 +6119,6 @@ def setup_zoom_config(request):
 def manage_zoom_meetings(request):
     """List all Zoom meetings - officers/staff only."""
     from .models import ZoomMeeting
-    from django.db.models import Q
     
     now = timezone.now()
     
