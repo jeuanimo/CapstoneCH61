@@ -478,6 +478,7 @@ document.querySelectorAll('.like-btn').forEach(btn => {
         position: absolute;
         bottom: -80px;
         left: 32px;
+        z-index: 5;
     }
 
     .profile-photo {
@@ -524,10 +525,16 @@ document.querySelectorAll('.like-btn').forEach(btn => {
         align-items: center;
         justify-content: center;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        z-index: 10;
     }
 
     .photo-edit-btn:hover {
         background: #d8dadf;
+    }
+
+    .photo-edit-btn i {
+        color: #333;
+        font-size: 1rem;
     }
 
     /* Profile Info Section */
