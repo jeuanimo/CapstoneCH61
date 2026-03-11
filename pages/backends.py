@@ -5,15 +5,16 @@ This module provides custom authentication backends that extend Django's
 default authentication capabilities.
 
 AUTHENTICATION BACKENDS:
-1. EmailBackend - Allows users to login with email + password
-2. (Default ModelBackend handles username + password)
+1. CaseInsensitiveModelBackend - Username login (case-insensitive)
+2. EmailBackend - Allows users to login with email + password
 
 USAGE:
 Users can login with either:
-- Username (member_12345) + password
+- Username (Member_12345 or member_12345) + password (case-insensitive)
 - Email (john.doe@example.com) + password
 
 SECURITY NOTES:
+- Username lookups are case-insensitive
 - Email lookups are case-insensitive
 - Multiple users with same email will fail authentication (security measure)
 - Works with django-axes brute-force protection
@@ -24,6 +25,64 @@ from django.contrib.auth.backends import ModelBackend
 
 
 User = get_user_model()
+
+
+class CaseInsensitiveModelBackend(ModelBackend):
+    """
+    Custom authentication backend that allows case-insensitive username login.
+    
+    This replaces Django's default ModelBackend to make usernames case-insensitive.
+    Users can login with 'John_Doe', 'john_doe', or 'JOHN_DOE' - all will work.
+    
+    Example:
+        # All of these work for the same user:
+        authenticate(request, username='Member_12345', password='secret')
+        authenticate(request, username='member_12345', password='secret')
+        authenticate(request, username='MEMBER_12345', password='secret')
+    
+    Security:
+        - Username lookup is case-insensitive
+        - Inactive users (is_active=False) are rejected
+        - Timing attack prevention built-in
+    """
+    
+    def authenticate(self, request, username=None, password=None, **kwargs):
+        """
+        Authenticate user by username (case-insensitive).
+        
+        Args:
+            request: The HTTP request object
+            username: The username (any case)
+            password: The user's password
+            **kwargs: Additional keyword arguments
+            
+        Returns:
+            User object if authentication successful, None otherwise
+        """
+        if username is None or password is None:
+            return None
+        
+        # Skip if it looks like an email (let EmailBackend handle it)
+        if '@' in username:
+            return None
+        
+        try:
+            # Case-insensitive username lookup
+            user = User.objects.get(username__iexact=username)
+        except User.DoesNotExist:
+            # No user with this username
+            # Run the default password hasher to prevent timing attacks
+            User().set_password(password)
+            return None
+        except User.MultipleObjectsReturned:
+            # Multiple users with same username (shouldn't happen, but be safe)
+            return None
+        
+        # Check password and user is active
+        if user.check_password(password) and self.user_can_authenticate(user):
+            return user
+        
+        return None
 
 
 class EmailBackend(ModelBackend):

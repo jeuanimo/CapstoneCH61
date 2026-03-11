@@ -152,8 +152,8 @@ MIDDLEWARE = [
 # Authentication backends (order matters - tried in sequence)
 AUTHENTICATION_BACKENDS = [
     'axes.backends.AxesStandaloneBackend',                       # Axes brute-force protection
-    'pages.backends.EmailBackend',                               # Email login support
-    'django.contrib.auth.backends.ModelBackend',                 # Default Django authentication (username)
+    'pages.backends.EmailBackend',                               # Email login support (case-insensitive)
+    'pages.backends.CaseInsensitiveModelBackend',                # Username login (case-insensitive)
 ]
 
 # Root URL configuration
@@ -208,18 +208,12 @@ else:
     }
 
 
-# ====================== PASSWORD VALIDATION ======================
+# ====================== PASSWORD VALIDATION (OWASP TOP 10 COMPLIANT) ======================
 
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
         # Prevents passwords too similar to username, email, etc.
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-        'OPTIONS': {
-            'min_length': 8,  # Minimum 8 characters required
-        }
     },
     {
         'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
@@ -228,6 +222,27 @@ AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
         # Prevents all-numeric passwords
+    },
+    {
+        # OWASP Password Complexity: uppercase, lowercase, digit, special char, min 12 chars
+        'NAME': 'pages.validators.OWASPPasswordValidator',
+        'OPTIONS': {
+            'min_length': 12,  # OWASP recommends minimum 8, we use 12 for better security
+        }
+    },
+    {
+        # Prevent repeating characters (e.g., 'aaaa', '1111')
+        'NAME': 'pages.validators.NoRepeatingCharactersValidator',
+        'OPTIONS': {
+            'max_repeats': 3,  # No more than 3 same characters in a row
+        }
+    },
+    {
+        # Prevent sequential characters (e.g., '1234', 'abcd', 'qwerty')
+        'NAME': 'pages.validators.NoSequentialCharactersValidator',
+        'OPTIONS': {
+            'max_sequential': 4,  # No sequences of 4+ characters
+        }
     },
 ]
 
