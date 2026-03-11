@@ -407,11 +407,15 @@ def program_business(request):
         caption = request.POST.get('caption', '')
         
         if images:
-            # Get or create a default business event
-            event, _ = Event.objects.get_or_create(
-                event_type='business',
-                defaults={'title': 'Business Program', 'start_date': timezone.now(), 'end_date': timezone.now()}
-            )
+            # Get first existing business event or create one
+            event = Event.objects.filter(event_type='business').first()
+            if not event:
+                event = Event.objects.create(
+                    event_type='business',
+                    title='Business Program',
+                    start_date=timezone.now(),
+                    end_date=timezone.now()
+                )
             
             # Get selected album if provided
             album = None
@@ -464,11 +468,15 @@ def program_social_action(request):
         caption = request.POST.get('caption', '')
         
         if images:
-            # Get or create a default social action event
-            event, _ = Event.objects.get_or_create(
-                event_type='social_action',
-                defaults={'title': 'Social Action Program', 'start_date': timezone.now(), 'end_date': timezone.now()}
-            )
+            # Get first existing social action event or create one
+            event = Event.objects.filter(event_type='social_action').first()
+            if not event:
+                event = Event.objects.create(
+                    event_type='social_action',
+                    title='Social Action Program',
+                    start_date=timezone.now(),
+                    end_date=timezone.now()
+                )
             
             # Get selected album if provided
             album = None
@@ -521,11 +529,15 @@ def program_education(request):
         caption = request.POST.get('caption', '')
         
         if images:
-            # Get or create a default education event
-            event, _ = Event.objects.get_or_create(
-                event_type='education',
-                defaults={'title': 'Education Program', 'start_date': timezone.now(), 'end_date': timezone.now()}
-            )
+            # Get first existing education event or create one
+            event = Event.objects.filter(event_type='education').first()
+            if not event:
+                event = Event.objects.create(
+                    event_type='education',
+                    title='Education Program',
+                    start_date=timezone.now(),
+                    end_date=timezone.now()
+                )
             
             # Get selected album if provided
             album = None
@@ -578,11 +590,15 @@ def program_sigma_beta(request):
         caption = request.POST.get('caption', '')
         
         if images:
-            # Get or create a default sigma beta club event
-            event, _ = Event.objects.get_or_create(
-                event_type='sigma_beta_club',
-                defaults={'title': 'Sigma Beta Club Program', 'start_date': timezone.now(), 'end_date': timezone.now()}
-            )
+            # Get first existing sigma beta club event or create one
+            event = Event.objects.filter(event_type='sigma_beta_club').first()
+            if not event:
+                event = Event.objects.create(
+                    event_type='sigma_beta_club',
+                    title='Sigma Beta Club Program',
+                    start_date=timezone.now(),
+                    end_date=timezone.now()
+                )
             
             # Get selected album if provided
             album = None
