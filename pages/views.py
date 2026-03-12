@@ -84,7 +84,7 @@ from .models import (
     PhotoComment, PhotoLike, InvitationCode, StripeConfiguration, StripePayment,
     TwilioConfiguration, SMSPreference, SMSLog,
     Product, Cart, CartItem, Order, OrderItem, SiteConfiguration,
-    Poll, PollVote
+    Poll, Vote
 )
 from django.db.models import Max
 from .forms import ChapterLeadershipForm, MemberProfileForm, DuesPaymentForm, StripeConfigurationForm, TwilioConfigurationForm, SMSPreferenceForm, CreateBillForm, SiteConfigurationForm
@@ -3075,12 +3075,14 @@ def message_detail(request, message_id):
 
 def _send_to_multiple_recipients(request, subject, content, parent_message):
     """Helper function to send messages to multiple recipients."""
+    from pages.email_utils import send_message_email_notification
+    
     recipient_ids = request.POST.getlist('recipients')
     message_count = 0
     for rid in recipient_ids:
         try:
             recipient_user = User.objects.get(id=rid)
-            Message.objects.create(
+            msg = Message.objects.create(
                 sender=request.user,
                 recipient=recipient_user,
                 subject=subject,
@@ -3088,6 +3090,8 @@ def _send_to_multiple_recipients(request, subject, content, parent_message):
                 parent_message=parent_message
             )
             message_count += 1
+            # Send email notification if recipient has email on file
+            send_message_email_notification(msg)
         except User.DoesNotExist:
             continue
     return message_count
@@ -3095,18 +3099,22 @@ def _send_to_multiple_recipients(request, subject, content, parent_message):
 
 def _send_to_single_recipient(request, subject, content, parent_message):
     """Helper function to send message to a single recipient."""
+    from pages.email_utils import send_message_email_notification
+    
     recipient_id = request.POST.get('recipient')
     if not recipient_id:
         return None
     
     recipient_user = User.objects.get(id=recipient_id)
-    Message.objects.create(
+    msg = Message.objects.create(
         sender=request.user,
         recipient=recipient_user,
         subject=subject,
         content=content,
         parent_message=parent_message
     )
+    # Send email notification if recipient has email on file
+    send_message_email_notification(msg)
     return recipient_user
 
 
@@ -3203,9 +3211,11 @@ def bulk_send_message(request):
             )
             
             # Create messages for each recipient
+            from pages.email_utils import send_message_email_notification
             message_count = 0
+            email_count = 0
             for recipient in recipients:
-                Message.objects.create(
+                msg = Message.objects.create(
                     sender=request.user,
                     recipient=recipient,
                     subject=subject,
@@ -3214,8 +3224,11 @@ def bulk_send_message(request):
                     category=category,
                 )
                 message_count += 1
+                # Send email notification if recipient has email on file
+                if send_message_email_notification(msg):
+                    email_count += 1
             
-            messages.success(request, f"Successfully sent {message_count} messages!")
+            messages.success(request, f"Successfully sent {message_count} messages ({email_count} email notifications)!")
             return redirect('messages_inbox')
     else:
         form = BulkMessageForm(current_user=request.user)
@@ -6671,8 +6684,10 @@ def _show_poll_form_errors_with_request(request, form, formset):
 def _send_poll_notification_to_members(poll, created_by):
     """
     Send a notification message to all active members about a new poll.
-    Creates an internal message for each member.
+    Creates an internal message for each member and sends email if they have one on file.
     """
+    from pages.email_utils import send_message_email_notification
+    
     # Get the system user or the creator as the sender
     sender = created_by
     
@@ -6684,12 +6699,13 @@ def _send_poll_notification_to_members(poll, created_by):
     
     # Create notification messages for all members
     notification_count = 0
+    email_count = 0
     poll_type_display = poll.get_poll_type_display()
     deadline_text = f" Voting ends: {poll.ends_at.strftime('%B %d, %Y at %I:%M %p')}" if poll.ends_at else " No deadline set."
     
     for user in active_members:
         try:
-            Message.objects.create(
+            msg = Message.objects.create(
                 sender=sender,
                 recipient=user,
                 subject=f"🗳️ New Poll: {poll.title}",
@@ -6709,10 +6725,15 @@ This is an automated notification. Do not reply to this message.""",
                 priority=Message.Priority.HIGH if poll.poll_type in ['election', 'motion'] else Message.Priority.NORMAL,
             )
             notification_count += 1
+            
+            # Also send email if user has email on file
+            if send_message_email_notification(msg):
+                email_count += 1
+                
         except Exception as e:
             logger.error(f"Failed to send poll notification to {user.username}: {e}")
     
-    logger.info(f"Poll notifications sent: {notification_count} messages for poll '{poll.title}'")
+    logger.info(f"Poll notifications sent: {notification_count} messages, {email_count} emails for poll '{poll.title}'")
     return notification_count
 
 

@@ -333,3 +333,131 @@ Phi Beta Sigma Fraternity, Inc.
     except Exception as e:
         logger.error(f"Failed to send invitation email to {invitation.email}: {str(e)}")
         return False
+
+
+def send_message_email_notification(message_obj, from_email=None):
+    """
+    Send an email notification for an internal Message.
+    Uses the recipient's email if they have one on file.
+    
+    Args:
+        message_obj: Message model instance
+        from_email: Optional custom sender email (defaults to CONTACT_EMAIL)
+    
+    Returns:
+        True if email was sent successfully, False otherwise
+    """
+    # Check if recipient has an email on file
+    if not message_obj.recipient.email:
+        logger.info(f"No email on file for {message_obj.recipient.username}, skipping email notification")
+        return False
+    
+    try:
+        # Use CONTACT_EMAIL as the sender (contact@ngs1914.org)
+        sender_email = from_email or getattr(settings, 'CONTACT_EMAIL', 'contact@ngs1914.org')
+        
+        # Format the subject with chapter prefix
+        subject = f"[Nu Gamma Sigma] {message_obj.subject or 'New Message'}"
+        
+        # Get priority label for urgent messages
+        priority_label = ""
+        if message_obj.priority in ['HI', 'UR']:
+            priority_label = "[IMPORTANT] "
+            subject = priority_label + subject
+        
+        # Get recipient's display name
+        recipient_name = message_obj.recipient.get_full_name() or message_obj.recipient.username
+        sender_name = message_obj.sender.get_full_name() or message_obj.sender.username
+        
+        # Build the email body
+        portal_url = getattr(settings, 'SITE_URL', 'https://ngs1914.org') + '/portal/messages/'
+        
+        plain_message = f"""Hello {recipient_name},
+
+You have a new message in the Nu Gamma Sigma Member Portal.
+
+From: {sender_name}
+Subject: {message_obj.subject or 'No Subject'}
+Category: {message_obj.get_category_display()}
+
+---
+{message_obj.content}
+---
+
+To view and reply to this message, visit the Member Portal:
+{portal_url}
+
+---
+Nu Gamma Sigma Chapter
+Phi Beta Sigma Fraternity, Inc.
+
+This is an automated notification. Please log in to the portal to reply.
+"""
+        
+        # Try to use HTML template if available
+        html_message = None
+        try:
+            context = {
+                'recipient_name': recipient_name,
+                'sender_name': sender_name,
+                'subject': message_obj.subject,
+                'content': message_obj.content,
+                'category': message_obj.get_category_display(),
+                'priority': message_obj.get_priority_display(),
+                'is_urgent': message_obj.priority in ['HI', 'UR'],
+                'portal_url': portal_url,
+                'chapter_name': CHAPTER_NAME,
+            }
+            html_message = render_to_string('pages/emails/message_notification.html', context)
+        except Exception:
+            # Fall back to plain text if template doesn't exist
+            pass
+        
+        send_mail(
+            subject=subject,
+            message=plain_message,
+            from_email=sender_email,
+            recipient_list=[message_obj.recipient.email],
+            html_message=html_message,
+            fail_silently=False,
+        )
+        
+        logger.info(f"Email notification sent to {message_obj.recipient.email} for message '{message_obj.subject}'")
+        return True
+        
+    except Exception as e:
+        logger.error(f"Failed to send email notification to {message_obj.recipient.email}: {str(e)}")
+        return False
+
+
+def send_bulk_message_email_notifications(messages_list, from_email=None):
+    """
+    Send email notifications for multiple internal Messages.
+    
+    Args:
+        messages_list: List of Message model instances
+        from_email: Optional custom sender email (defaults to CONTACT_EMAIL)
+    
+    Returns:
+        Dictionary with 'sent' and 'failed' counts
+    """
+    sent_count = 0
+    failed_count = 0
+    no_email_count = 0
+    
+    for message_obj in messages_list:
+        if not message_obj.recipient.email:
+            no_email_count += 1
+            continue
+            
+        if send_message_email_notification(message_obj, from_email):
+            sent_count += 1
+        else:
+            failed_count += 1
+    
+    logger.info(f"Bulk email notifications: {sent_count} sent, {failed_count} failed, {no_email_count} no email on file")
+    return {
+        'sent': sent_count,
+        'failed': failed_count,
+        'no_email': no_email_count
+    }
