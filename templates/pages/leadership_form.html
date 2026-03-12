@@ -133,6 +133,15 @@
         font-size: 0.9rem;
     }
     
+    .form-row {
+        display: flex;
+        gap: 1rem;
+    }
+    
+    .form-group-half {
+        flex: 1;
+    }
+    
     .form-actions {
         display: flex;
         gap: 1rem;
@@ -218,6 +227,15 @@
                 {% endif %}
             </div>
             
+            <div class="form-group" id="customPositionGroup">
+                <label for="{{ form.position_custom.id_for_label }}">Custom Position Title</label>
+                {{ form.position_custom }}
+                {% if form.position_custom.errors %}
+                    {{ form.position_custom.errors }}
+                {% endif %}
+                <small class="form-help-text">Enter custom title when Position is set to "Other"</small>
+            </div>
+            
             <div class="form-group">
                 <label for="{{ form.email.id_for_label }}">Email</label>
                 {{ form.email }}
@@ -257,6 +275,24 @@
                     {{ form.display_order.errors }}
                 {% endif %}
                 <small class="form-help-text">Lower numbers appear first (e.g., 1, 2, 3)</small>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group form-group-half">
+                    <label for="{{ form.term_start.id_for_label }}">Term Start Date</label>
+                    {{ form.term_start }}
+                    {% if form.term_start.errors %}
+                        {{ form.term_start.errors }}
+                    {% endif %}
+                </div>
+                
+                <div class="form-group form-group-half">
+                    <label for="{{ form.term_end.id_for_label }}">Term End Date</label>
+                    {{ form.term_end }}
+                    {% if form.term_end.errors %}
+                        {{ form.term_end.errors }}
+                    {% endif %}
+                </div>
             </div>
             
             <div class="form-group">

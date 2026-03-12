@@ -1016,6 +1016,25 @@ def bulk_delete_leadership(request):
 
 @login_required
 @user_passes_test(is_officer_or_staff)
+def clear_all_leadership(request):
+    """Clear all leadership records (officers/staff only)"""
+    if request.method == 'POST':
+        try:
+            count = ChapterLeadership.objects.count()
+            ChapterLeadership.objects.all().delete()
+            
+            logger.info(f"Cleared all {count} leadership records by {request.user.username}")
+            messages.success(request, f"Successfully cleared all {count} leadership record{'s' if count != 1 else ''}. You can now import a fresh CSV.")
+        
+        except Exception as e:
+            logger.error(f"Error clearing leadership: {str(e)}")
+            messages.error(request, f"Error clearing leadership: {str(e)}")
+    
+    return redirect('chapter_leadership')
+
+
+@login_required
+@user_passes_test(is_officer_or_staff)
 def upload_leader_photo(request, pk):
     """Upload or update leader's profile photo (admin/officers only)"""
     leader = get_object_or_404(ChapterLeadership, pk=pk)

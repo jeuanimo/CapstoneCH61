@@ -308,9 +308,21 @@
     }
     
     /* Bulk actions and utility classes */
+    .hidden {
+        display: none !important;
+    }
     .btn-import {
         margin-left: 10px;
         background-color: var(--success-color);
+    }
+    .btn-clear-all {
+        margin-left: 10px;
+        background-color: #dc3545;
+        border: none;
+        cursor: pointer;
+    }
+    .btn-clear-all:hover {
+        background-color: #c82333;
     }
     .member-upload-wrapper {
         margin-top: 1rem;
@@ -412,7 +424,13 @@
                 <a href="{% url 'import_officers' %}" class="btn-add btn-import">
                     <i class="fas fa-file-csv"></i> Import CSV
                 </a>
+                <button type="button" class="btn-add btn-clear-all" onclick="confirmClearAll()">
+                    <i class="fas fa-trash-alt"></i> Clear All
+                </button>
             </div>
+            <form id="clear-all-form" method="post" action="{% url 'clear_all_leadership' %}" class="hidden">
+                {% csrf_token %}
+            </form>
             {% endif %}
             {% if user.is_authenticated %}
             <div class="member-upload-wrapper">
@@ -540,6 +558,25 @@ document.addEventListener('DOMContentLoaded', function() {
     checkboxes.forEach(cb => {
         cb.addEventListener('change', updateCount);
     });
+    
+    // Confirm delete for individual delete buttons
+    document.querySelectorAll('.btn-delete').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const confirmMsg = this.getAttribute('data-confirm') || 'Are you sure you want to delete this leader?';
+            if (confirm(confirmMsg)) {
+                window.location.href = this.href;
+            }
+        });
+    });
 });
+
+function confirmClearAll() {
+    if (confirm('Are you sure you want to delete ALL leadership records? This action cannot be undone.')) {
+        if (confirm('This will remove all leadership cards from the website. Are you absolutely sure?')) {
+            document.getElementById('clear-all-form').submit();
+        }
+    }
+}
 </script>
 {% endblock content %}

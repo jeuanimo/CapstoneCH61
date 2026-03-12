@@ -113,7 +113,7 @@ class ChapterLeadershipForm(forms.ModelForm):
     
     class Meta:
         model = ChapterLeadership
-        fields = ['full_name', 'position', 'email', 'phone', 'bio', 'profile_image', 'display_order', 'is_active']
+        fields = ['full_name', 'position', 'position_custom', 'email', 'phone', 'bio', 'profile_image', 'display_order', 'is_active', 'term_start', 'term_end']
         widgets = {
             'full_name': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -121,6 +121,10 @@ class ChapterLeadershipForm(forms.ModelForm):
             }),
             'position': forms.Select(attrs={
                 'class': 'form-control'
+            }),
+            'position_custom': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Custom title (if Position is "Other")'
             }),
             'email': forms.EmailInput(attrs={
                 'class': 'form-control',
@@ -144,6 +148,14 @@ class ChapterLeadershipForm(forms.ModelForm):
             }),
             'is_active': forms.CheckboxInput(attrs={
                 'class': 'form-check-input'
+            }),
+            'term_start': forms.DateInput(attrs={
+                'class': 'form-control',
+                'type': 'date'
+            }),
+            'term_end': forms.DateInput(attrs={
+                'class': 'form-control',
+                'type': 'date'
             }),
         }
 
