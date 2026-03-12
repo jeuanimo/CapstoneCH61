@@ -9,15 +9,15 @@
     <div class="cover-section">
         <div class="cover-photo">
             {% if member_profile.cover_image %}
-            <img src="{{ member_profile.cover_image.url }}" alt="Cover photo">
+            <img src="{{ member_profile.cover_image.url }}" alt="Cover banner" width="940" height="350">
             {% else %}
-            <img src="{% static 'img/ngs_logo.png' %}" alt="Nu Gamma Sigma" class="default-cover">
+            <img src="{% static 'img/ngs_logo.png' %}" alt="Nu Gamma Sigma" class="default-cover" width="940" height="350">
             {% endif %}
             {% if user.is_authenticated and user.username == profile_user.username %}
             <button class="cover-edit-btn" onclick="document.getElementById('coverInput').click()">
                 <i class="fas fa-camera"></i> Edit Cover Photo
             </button>
-            <input type="file" id="coverInput" accept="image/*" onchange="openCropper(this, 'cover')" style="display:none;">
+            <input type="file" id="coverInput" accept="image/*" onchange="openCropper(this, 'cover')" class="hidden-input">
             {% endif %}
         </div>
         
@@ -25,7 +25,7 @@
         <div class="profile-photo-container">
             <div class="profile-photo">
                 {% if member_profile.profile_image %}
-                <img src="{{ member_profile.profile_image.url }}" alt="{{ profile_user.get_full_name }}">
+                <img src="{{ member_profile.profile_image.url }}" alt="{{ profile_user.get_full_name }}" width="168" height="168">
                 {% else %}
                 <div class="photo-placeholder">
                     <i class="fas fa-user"></i>
@@ -36,7 +36,7 @@
             <button class="photo-edit-btn" title="Change profile photo" onclick="document.getElementById('profilePhotoInput').click()">
                 <i class="fas fa-camera"></i>
             </button>
-            <input type="file" id="profilePhotoInput" accept="image/*" onchange="openCropper(this, 'profile')" style="display:none;">
+            <input type="file" id="profilePhotoInput" accept="image/*" onchange="openCropper(this, 'profile')" class="hidden-input">
             {% endif %}
         </div>
     </div>
@@ -123,14 +123,14 @@
                 <div class="photos-grid-small">
                     {% for photo in user_photos|slice:":9" %}
                     <a href="{% url 'photo_detail' photo.id %}" class="photo-thumb">
-                        <img src="{{ photo.image.url }}" alt="Photo">
+                        <img src="{{ photo.image.url }}" alt="Gallery thumbnail" width="100" height="100">
                     </a>
                     {% empty %}
                     <p class="no-photos">No photos yet</p>
                     {% endfor %}
                 </div>
                 {% if user_photos.count > 9 %}
-                <a href="#" class="see-all-link" onclick="switchTab('photos'); return false;">See all photos</a>
+                <button type="button" class="see-all-link" onclick="switchTab('photos');">See all photos</button>
                 {% endif %}
             </div>
         </div>
@@ -192,7 +192,7 @@
                     <div class="photos-grid">
                         {% for photo in user_photos %}
                         <a href="{% url 'photo_detail' photo.id %}" class="photo-item">
-                            <img src="{{ photo.image.url }}" alt="Photo">
+                            <img src="{{ photo.image.url }}" alt="Gallery item" width="200" height="200">
                             <div class="photo-overlay">
                                 <span><i class="fas fa-heart"></i> {{ photo.like_count }}</span>
                                 <span><i class="fas fa-comment"></i> {{ photo.comment_count }}</span>
@@ -216,7 +216,7 @@
                         <div class="post-input-row">
                             <div class="post-avatar">
                                 {% if user.member_profile.profile_image %}
-                                <img src="{{ user.member_profile.profile_image.url }}" alt="">
+                                <img src="{{ user.member_profile.profile_image.url }}" alt="" width="40" height="40">
                                 {% else %}
                                 <i class="fas fa-user"></i>
                                 {% endif %}
@@ -236,7 +236,7 @@
                         <div class="post-item" id="comment-{{ comment.id }}">
                             <div class="post-avatar">
                                 {% if comment.author.member_profile.profile_image %}
-                                <img src="{{ comment.author.member_profile.profile_image.url }}" alt="">
+                                <img src="{{ comment.author.member_profile.profile_image.url }}" alt="" width="40" height="40">
                                 {% else %}
                                 <i class="fas fa-user"></i>
                                 {% endif %}
@@ -266,7 +266,7 @@
                                     </button>
                                     {% endif %}
                                     {% if user == comment.author or user == profile_user %}
-                                    <form method="post" action="{% url 'delete_comment' comment.id %}" style="display: inline;" onsubmit="return confirm('Delete this post?');">
+                                    <form method="post" action="{% url 'delete_comment' comment.id %}" class="inline-form" onsubmit="return confirm('Delete this post?');">
                                         {% csrf_token %}
                                         <button type="submit" class="delete-post-btn">
                                             <i class="fas fa-trash"></i> Delete
@@ -276,7 +276,7 @@
                                 </div>
                                 
                                 <!-- Edit form -->
-                                <form method="post" action="{% url 'edit_comment' comment.id %}" class="edit-form" id="edit-form-{{ comment.id }}" style="display: none;">
+                                <form method="post" action="{% url 'edit_comment' comment.id %}" class="edit-form hidden-form" id="edit-form-{{ comment.id }}">
                                     {% csrf_token %}
                                     <textarea name="comment_content" rows="3" required>{{ comment.content }}</textarea>
                                     <div class="edit-actions">
@@ -286,7 +286,7 @@
                                 </form>
                                 
                                 <!-- Reply form -->
-                                <form method="post" class="reply-form" id="reply-form-{{ comment.id }}" style="display: none;">
+                                <form method="post" class="reply-form hidden-form" id="reply-form-{{ comment.id }}">
                                     {% csrf_token %}
                                     <input type="hidden" name="parent_id" value="{{ comment.id }}">
                                     <textarea name="comment_content" placeholder="Write a reply..." rows="2" required></textarea>
@@ -300,7 +300,7 @@
                                     <div class="reply-item" id="comment-{{ reply.id }}">
                                         <div class="reply-avatar">
                                             {% if reply.author.member_profile.profile_image %}
-                                            <img src="{{ reply.author.member_profile.profile_image.url }}" alt="">
+                                            <img src="{{ reply.author.member_profile.profile_image.url }}" alt="" width="32" height="32">
                                             {% else %}
                                             <i class="fas fa-user"></i>
                                             {% endif %}
@@ -321,14 +321,14 @@
                                                 <button class="edit-post-btn" onclick="editComment({{ reply.id }})">Edit</button>
                                                 {% endif %}
                                                 {% if user == reply.author or user == profile_user %}
-                                                <form method="post" action="{% url 'delete_comment' reply.id %}" style="display: inline;" onsubmit="return confirm('Delete?');">
+                                                <form method="post" action="{% url 'delete_comment' reply.id %}" class="inline-form" onsubmit="return confirm('Delete?');">
                                                     {% csrf_token %}
                                                     <button type="submit" class="delete-post-btn">Delete</button>
                                                 </form>
                                                 {% endif %}
                                             </div>
                                             <!-- Edit form for reply -->
-                                            <form method="post" action="{% url 'edit_comment' reply.id %}" class="edit-form" id="edit-form-{{ reply.id }}" style="display: none;">
+                                            <form method="post" action="{% url 'edit_comment' reply.id %}" class="edit-form hidden-form" id="edit-form-{{ reply.id }}">
                                                 {% csrf_token %}
                                                 <textarea name="comment_content" rows="2" required>{{ reply.content }}</textarea>
                                                 <div class="edit-actions">
@@ -410,11 +410,11 @@ document.querySelectorAll('.like-btn').forEach(btn => {
     <div class="crop-modal-content">
         <div class="crop-modal-header">
             <h3 id="cropModalTitle">Crop Image</h3>
-            <button class="crop-modal-close" onclick="closeCropper()">&times;</button>
+            <button class="crop-modal-close" onclick="closeCropper()">×</button>
         </div>
         <div class="crop-modal-body">
             <div class="crop-container">
-                <img id="cropImage" src="" alt="Crop Preview">
+                <img id="cropImage" src="" alt="Crop Preview" width="400" height="400">
             </div>
         </div>
         <div class="crop-modal-footer">
@@ -1420,6 +1420,17 @@ document.querySelectorAll('.like-btn').forEach(btn => {
     .crop-modal[data-type="profile"] .cropper-view-box,
     .crop-modal[data-type="profile"] .cropper-face {
         border-radius: 50%;
+    }
+    
+    /* Utility classes */
+    .hidden-input {
+        display: none;
+    }
+    .inline-form {
+        display: inline;
+    }
+    .hidden-form {
+        display: none;
     }
 </style>
 

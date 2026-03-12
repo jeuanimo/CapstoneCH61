@@ -20,7 +20,30 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
 from django.views.generic import TemplateView
+from django.shortcuts import render
 from pages import views
+
+
+# Custom error handlers for security
+def bad_request_view(request, exception=None):
+    """Custom 400 error handler for invalid host headers and bad requests"""
+    return render(request, '400.html', status=400)
+
+
+def page_not_found_view(request, exception=None):
+    """Custom 404 error handler"""
+    return render(request, '404.html', status=404)
+
+
+def server_error_view(request):
+    """Custom 500 error handler"""
+    return render(request, '500.html', status=500)
+
+
+# Register custom error handlers
+handler400 = bad_request_view
+handler404 = page_not_found_view
+handler500 = server_error_view
 
 urlpatterns = [
     path('robots.txt', TemplateView.as_view(template_name='robots.txt', content_type='text/plain')),

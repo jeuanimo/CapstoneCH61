@@ -306,6 +306,96 @@
             grid-template-columns: 1fr;
         }
     }
+    
+    /* Bulk actions and utility classes */
+    .btn-import {
+        margin-left: 10px;
+        background-color: var(--success-color);
+    }
+    .member-upload-wrapper {
+        margin-top: 1rem;
+    }
+    .btn-upload-my-photo {
+        display: inline-block;
+        background: linear-gradient(135deg, #2a7dd4 0%, var(--primary-color) 100%);
+        color: white;
+        padding: 0.6rem 1.2rem;
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .bulk-actions-bar {
+        background: #f8f9fa;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    body.dark-mode .bulk-actions-bar {
+        background: #2d2d2d;
+    }
+    .bulk-actions-left {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    .select-all-label {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+    }
+    .select-all-checkbox {
+        width: 18px;
+        height: 18px;
+    }
+    .select-all-text {
+        font-weight: 600;
+    }
+    .selected-count {
+        color: #666;
+    }
+    body.dark-mode .selected-count {
+        color: #9ca3af;
+    }
+    .btn-bulk-delete {
+        background: var(--error-color);
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        cursor: pointer;
+        display: none;
+    }
+    .checkbox-wrapper {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        z-index: 10;
+    }
+    .leader-checkbox {
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+    }
+    .btn-photo-upload {
+        background-color: var(--success-color);
+    }
+    .back-section {
+        text-align: center;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 2px solid var(--primary-color);
+    }
+    .btn-back {
+        display: inline-block;
+        text-decoration: none;
+    }
 </style>
 {% endblock css %}
 
@@ -319,14 +409,14 @@
                 <a href="{% url 'add_leadership' %}" class="btn-add">
                     <i class="fas fa-plus"></i> Add Leader
                 </a>
-                <a href="{% url 'import_officers' %}" class="btn-add" style="margin-left: 10px; background-color: var(--success-color);">
+                <a href="{% url 'import_officers' %}" class="btn-add btn-import">
                     <i class="fas fa-file-csv"></i> Import CSV
                 </a>
             </div>
             {% endif %}
             {% if user.is_authenticated %}
-            <div class="member-upload-action" style="margin-top: 1rem;">
-                <a href="{% url 'upload_my_leadership_photo' %}" class="btn-upload-my-photo" style="display: inline-block; background: linear-gradient(135deg, #2a7dd4 0%, var(--primary-color) 100%); color: white; padding: 0.6rem 1.2rem; border-radius: 6px; text-decoration: none; font-weight: 600; transition: transform 0.2s, box-shadow 0.2s;">
+            <div class="member-upload-wrapper">
+                <a href="{% url 'upload_my_leadership_photo' %}" class="btn-upload-my-photo">
                     <i class="fas fa-camera"></i> Upload My Leadership Photo
                 </a>
             </div>
@@ -336,19 +426,19 @@
         {% if leaders %}
             {% if user.is_authenticated and user.is_staff or user.is_authenticated and user.memberprofile and user.memberprofile.is_officer %}
             <!-- Bulk Actions Bar -->
-            <div class="bulk-actions-bar" style="background: #f8f9fa; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-                <div style="display: flex; align-items: center; gap: 1rem;">
-                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
-                        <input type="checkbox" id="select-all-leaders" style="width: 18px; height: 18px;">
-                        <span style="font-weight: 600;">Select All</span>
+            <div class="bulk-actions-bar">
+                <div class="bulk-actions-left">
+                    <label class="select-all-label">
+                        <input type="checkbox" id="select-all-leaders" class="select-all-checkbox">
+                        <span class="select-all-text">Select All</span>
                     </label>
-                    <span id="selected-count" style="color: #666;">0 selected</span>
+                    <span id="selected-count" class="selected-count">0 selected</span>
                 </div>
-                <button type="submit" form="bulk-delete-form" class="btn-delete" style="background: var(--error-color); color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; display: none;" id="bulk-delete-btn">
+                <button type="submit" form="bulk-delete-form" class="btn-bulk-delete" id="bulk-delete-btn">
                     <i class="fas fa-trash"></i> Delete Selected
                 </button>
             </div>
-            <form id="bulk-delete-form" method="POST" action="{% url 'bulk_delete_leadership' %}" onsubmit="return confirm('Are you sure you want to delete the selected leaders?');">
+            <form id="bulk-delete-form" method="post" action="{% url 'bulk_delete_leadership' %}" onsubmit="return confirm('Are you sure you want to delete the selected leaders?');">
                 {% csrf_token %}
             {% endif %}
             
@@ -356,8 +446,8 @@
                 {% for leader_data in leaders %}
                     <div class="leader-card">
                         {% if user.is_authenticated and user.is_staff or user.is_authenticated and user.memberprofile and user.memberprofile.is_officer %}
-                        <div style="position: absolute; top: 10px; left: 10px; z-index: 10;">
-                            <input type="checkbox" class="leader-checkbox" name="leader_ids" value="{{ leader_data.positions.0.pk }}" style="width: 20px; height: 20px; cursor: pointer;">
+                        <div class="checkbox-wrapper">
+                            <input type="checkbox" class="leader-checkbox" name="leader_ids" value="{{ leader_data.positions.0.pk }}">
                         </div>
                         {% endif %}
                         <div class="leader-image">
@@ -387,7 +477,7 @@
                                     {% endif %}
                             {% if user.is_authenticated and user.is_staff or user.is_authenticated and user.memberprofile and user.memberprofile.is_officer %}
                                 <div class="leader-actions">
-                                    <a href="{% url 'upload_leader_photo' leader_data.person.pk %}" class="btn-edit" style="background-color: var(--success-color);">
+                                    <a href="{% url 'upload_leader_photo' leader_data.person.pk %}" class="btn-edit btn-photo-upload">
                                         <i class="fas fa-camera"></i> Photo
                                     </a>
                                     <a href="{% url 'edit_leadership' leader_data.positions.0.pk %}" class="btn-edit">
@@ -419,8 +509,8 @@
             </div>
         {% endif %}
         
-        <div style="text-align: center; margin-top: 2rem; padding-top: 2rem; border-top: 2px solid var(--primary-color);">
-            <a href="{% url 'home' %}" class="btn-add" style="display: inline-block; text-decoration: none;">
+        <div class="back-section">
+            <a href="{% url 'home' %}" class="btn-add btn-back">
                 <i class="fas fa-arrow-left"></i> Back to Home
             </a>
         </div>

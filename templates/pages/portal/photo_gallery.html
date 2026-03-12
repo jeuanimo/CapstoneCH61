@@ -101,6 +101,17 @@
         align-items: center;
         justify-content: space-between;
     }
+    
+    /* Select all checkbox styles */
+    .select-checkbox {
+        width: 18px;
+        height: 18px;
+        vertical-align: middle;
+    }
+    .select-label {
+        margin-left: 5px;
+        cursor: pointer;
+    }
 </style>
 {% endblock css %}
 
@@ -112,7 +123,7 @@
             <p class="text-muted">Browse and share photos with fellow members</p>
         </div>
         <div class="col-md-4 text-end">
-            <div class="btn-group" role="group">
+            <div class="btn-group">
                 <a href="{% url 'upload_photo' %}" class="btn btn-primary">
                     <i class="fas fa-upload"></i> Upload Photo
                 </a>
@@ -135,7 +146,7 @@
                     All Photos
                 </a>
                 {% for album in albums %}
-                <div class="btn-group" role="group">
+                <div class="btn-group">
                     <a href="?album={{ album.id }}" class="btn btn-sm {% if selected_album == album.id|stringformat:'s' %}btn-primary{% else %}btn-outline-primary{% endif %}">
                         {{ album.title }} ({{ album.photo_count }})
                     </a>
@@ -168,8 +179,8 @@
         <!-- Bulk Actions Bar -->
         <div class="bulk-actions" id="bulkActionsBar">
             <div>
-                <input type="checkbox" id="selectAll" style="width: 18px; height: 18px; vertical-align: middle;">
-                <label for="selectAll" style="margin-left: 5px; cursor: pointer;">
+                <input type="checkbox" id="selectAll" class="select-checkbox">
+                <label for="selectAll" class="select-label">
                     <span id="selectedCount">0</span> photos selected
                 </label>
             </div>
@@ -192,7 +203,7 @@
                         <input type="checkbox" name="photo_ids" value="{{ photo.id }}" class="photo-checkbox" title="Select for bulk action">
                         {% endif %}
                         <a href="{% url 'photo_detail' photo.id %}">
-                            <img src="{{ photo.image.url }}" class="gallery-image" alt="{{ photo.caption|default:'Gallery image' }}">
+                            <img src="{{ photo.image.url }}" class="gallery-image" alt="Gallery thumbnail" width="300" height="200">
                         </a>
                     </div>
                 <div class="card-body">

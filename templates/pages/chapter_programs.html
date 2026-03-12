@@ -2,7 +2,7 @@
 
 {% load static %}
 
-{% block title %}Chapter Programs - Phi Beta Sigma Fraternity, Inc. | Nu Gamma Sigma Chapter{% endblock %}
+{% block title %}Chapter Programs - Phi Beta Sigma Fraternity, Inc. | Nu Gamma Sigma Chapter{% endblock title %}
 
 {% block css %}
 <style>
@@ -332,19 +332,77 @@
             margin-bottom: 0;
         }
     }
+    
+    /* Additional utility classes */
+    .page-subtitle {
+        font-size: 1.5rem;
+        margin: 0.5rem 0 0 0;
+        color: var(--primary-color);
+    }
+    .section-title-centered {
+        text-align: center;
+        margin-top: 0;
+    }
+    .section-title-centered-spaced {
+        text-align: center;
+        margin-top: 3rem;
+    }
+    .program-card-image-white {
+        background: #ffffff;
+    }
+    body.dark-mode .program-card-image-white {
+        background: #ffffff;
+    }
+    .program-icon {
+        font-size: 3rem;
+        margin-bottom: 0.5rem;
+        color: var(--primary-color);
+    }
+    .btn-learn-more {
+        margin-top: 1rem;
+    }
+    .program-card-img {
+        max-height: 140px;
+        max-width: 80%;
+        object-fit: contain;
+    }
+    .partner-logo {
+        height: 60px;
+        width: auto;
+    }
+    .partner-info {
+        margin-top: 1.5rem;
+        font-size: 0.9rem;
+    }
+    .back-section {
+        text-align: center;
+        margin-top: 3rem;
+        padding-top: 2rem;
+        border-top: 2px solid var(--primary-color);
+    }
+    .btn-back {
+        display: inline-block;
+        background-color: var(--primary-color);
+        color: #ffffff;
+        padding: 1rem 2rem;
+        border-radius: 4px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
 </style>
-{% endblock %}
+{% endblock css %}
 
 {% block content %}
 <div class="page-container">
     <div class="content-wrapper">
         <div class="page-header">
             <h1>Phi Beta Sigma Fraternity</h1>
-            <h2 style="font-size: 1.5rem; margin: 0.5rem 0 0 0; color: var(--primary-color);">Programs</h2>
+            <h2 class="page-subtitle">Programs</h2>
         </div>
         
         <div class="page-content">
-            <h2 style="text-align: center; margin-top: 0;">Our Community Initiatives, Partnerships and Programs</h2>
+            <h2 class="section-title-centered">Our Community Initiatives, Partnerships and Programs</h2>
             
             <p>Phi Beta Sigma Fraternity, Inc., is an international organization comprised of 225,000 college-educated men, and built primarily on the ideology of promoting <strong>Brotherhood, Scholarship and Service</strong>. Over its one hundred plus years of existence, the Fraternity has focused on improving the global community through dedicated service. This focus has compelled the development of the organization's four main programs: <strong>Bigger and Better Business, Education, Social Action and Sigma Beta Clubs</strong> that embrace these objectives:</p>
             
@@ -361,67 +419,67 @@
             <h2>Our Four Pillars</h2>
             <div class="programs-grid">
                 <div class="program-card">
-                    <div class="program-card-image" style="background: #ffffff;">
-                        <i class="fas fa-briefcase" style="font-size: 3rem; margin-bottom: 0.5rem; color: var(--primary-color);"></i>
+                    <div class="program-card-image program-card-image-white">
+                        <i class="fas fa-briefcase program-icon"></i>
                     </div>
                     <div class="program-card-content">
                         <h3>Bigger & Better Business</h3>
                         <p>Economic empowerment and business development initiatives</p>
-                        <a href="{% url 'program_business' %}" class="btn btn-primary" style="margin-top: 1rem;">Learn More</a>
+                        <a href="{% url 'program_business' %}" class="btn btn-primary btn-learn-more">Learn More</a>
                     </div>
                 </div>
                 <div class="program-card">
-                    <div class="program-card-image" style="background: #ffffff;">
-                        <i class="fas fa-graduation-cap" style="font-size: 3rem; margin-bottom: 0.5rem; color: var(--primary-color);"></i>
+                    <div class="program-card-image program-card-image-white">
+                        <i class="fas fa-graduation-cap program-icon"></i>
                     </div>
                     <div class="program-card-content">
                         <h3>Education</h3>
                         <p>Scholarships and educational advancement programs</p>
-                        <a href="{% url 'program_education' %}" class="btn btn-primary" style="margin-top: 1rem;">Learn More</a>
+                        <a href="{% url 'program_education' %}" class="btn btn-primary btn-learn-more">Learn More</a>
                     </div>
                 </div>
                 <div class="program-card">
-                    <div class="program-card-image" style="background: #ffffff;">
-                        <i class="fas fa-hands-helping" style="font-size: 3rem; margin-bottom: 0.5rem; color: var(--primary-color);"></i>
+                    <div class="program-card-image program-card-image-white">
+                        <i class="fas fa-hands-helping program-icon"></i>
                     </div>
                     <div class="program-card-content">
                         <h3>Social Action</h3>
                         <p>Community service and social change initiatives</p>
-                        <a href="{% url 'program_social_action' %}" class="btn btn-primary" style="margin-top: 1rem;">Learn More</a>
+                        <a href="{% url 'program_social_action' %}" class="btn btn-primary btn-learn-more">Learn More</a>
                     </div>
                 </div>
                 <div class="program-card">
-                    <div class="program-card-image" style="background: #ffffff;">
-                        <img src="{% static 'img/SBC_Color_Shield600px.jpg' %}" alt="Sigma Beta Club" style="max-height: 140px; max-width: 80%; object-fit: contain;">
+                    <div class="program-card-image program-card-image-white">
+                        <img src="{% static 'img/SBC_Color_Shield600px.jpg' %}" alt="Sigma Beta Club" class="program-card-img" width="140" height="140">
                     </div>
                     <div class="program-card-content">
                         <h3>Sigma Beta Club</h3>
                         <p>Youth mentoring program for ages 8-18</p>
-                        <a href="{% url 'program_sigma_beta' %}" class="btn btn-primary" style="margin-top: 1rem;">Learn More</a>
+                        <a href="{% url 'program_sigma_beta' %}" class="btn btn-primary btn-learn-more">Learn More</a>
                     </div>
                 </div>
             </div>
             
-            <h2 style="text-align: center; margin-top: 3rem;">Thank you to our Global Partners!</h2>
+            <h2 class="section-title-centered-spaced">Thank you to our Global Partners!</h2>
             <div class="partners-carousel">
                 <div class="carousel-container">
                     <div class="carousel-slide active">
-                        <img src="https://phibetasigma1914.org/wp-content/uploads/2023/04/mens_wearhouse.jpg" alt="Men's Wearhouse">
+                        <img src="https://phibetasigma1914.org/wp-content/uploads/2023/04/mens_wearhouse.jpg" alt="Men's Wearhouse" class="partner-logo" width="120" height="60">
                     </div>
                     <div class="carousel-slide">
-                        <img src="https://www.cancer.org/content/dam/cancer-org/images/logos/acs/acs-logo.svg" alt="American Cancer Society">
+                        <img src="https://www.cancer.org/content/dam/cancer-org/images/logos/acs/acs-logo.svg" alt="American Cancer Society" class="partner-logo" width="120" height="60">
                     </div>
                     <div class="carousel-slide">
-                        <img src="https://www.marchforbabies.org/image/home/2023-MOD-MFB-Logo.svg" alt="March of Dimes">
+                        <img src="https://www.marchforbabies.org/image/home/2023-MOD-MFB-Logo.svg" alt="March of Dimes" class="partner-logo" width="120" height="60">
                     </div>
                     <div class="carousel-slide">
-                        <img src="https://tools.cdc.gov/TemplatePackage/4.0/assets/imgs/logo/logo-notext.svg" alt="CDC">
+                        <img src="https://tools.cdc.gov/TemplatePackage/4.0/assets/imgs/logo/logo-notext.svg" alt="CDC" class="partner-logo" width="120" height="60">
                     </div>
                     <div class="carousel-slide">
-                        <img src="https://www.scouting.org/wp-content/uploads/2023/05/BSA_Logo.png" alt="Boy Scouts of America">
+                        <img src="https://www.scouting.org/wp-content/uploads/2023/05/BSA_Logo.png" alt="Boy Scouts of America" class="partner-logo" width="120" height="60">
                     </div>
                     <div class="carousel-slide">
-                        <img src="https://tmcf.org/wp-content/uploads/logo-tmcf-300x96.png" alt="Thurgood Marshall College Fund">
+                        <img src="https://tmcf.org/wp-content/uploads/logo-tmcf-300x96.png" alt="Thurgood Marshall College Fund" class="partner-logo" width="300" height="96">
                     </div>
                     
                     <button class="carousel-prev" id="carousel-prev">❮</button>
@@ -437,12 +495,12 @@
                     <button class="dot" data-dot-index="5" tabindex="0" role="tab" aria-selected="false"></button>
                 </div>
                 
-                <p style="margin-top: 1.5rem; font-size: 0.9rem;"><strong>Partners:</strong> American Cancer Society • March of Dimes • Center for Disease Control and Prevention • Boy Scouts of America • Thurgood Marshall College Fund</p>
+                <p class="partner-info"><strong>Partners:</strong> American Cancer Society • March of Dimes • Center for Disease Control and Prevention • Boy Scouts of America • Thurgood Marshall College Fund</p>
             </div>
         </div>
         
-        <div style="text-align: center; margin-top: 3rem; padding-top: 2rem; border-top: 2px solid var(--primary-color);">
-            <a href="{% url 'home' %}" style="display: inline-block; background-color: var(--primary-color); color: #ffffff; padding: 1rem 2rem; border-radius: 4px; text-decoration: none; font-weight: 600; transition: all 0.3s ease;">
+        <div class="back-section">
+            <a href="{% url 'home' %}" class="btn-back">
                 <i class="fas fa-arrow-left"></i> Back to Home
             </a>
         </div>
@@ -516,4 +574,4 @@
         });
     }
 </script>
-{% endblock %}
+{% endblock extra_js %}

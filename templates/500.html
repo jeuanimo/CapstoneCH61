@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Server Error - Nu Gamma Sigma</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.1/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #002d62;
+            --secondary-color: #1a5fa8;
+            --error-color: #dc3545;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .error-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+            overflow: hidden;
+        }
+        
+        .error-header {
+            background: var(--error-color);
+            color: white;
+            padding: 30px 20px;
+        }
+        
+        .error-code {
+            font-size: 5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .error-header h1 {
+            font-size: 1.5rem;
+            font-weight: 400;
+            margin: 0;
+        }
+        
+        .error-body {
+            padding: 40px 30px;
+        }
+        
+        .error-icon {
+            font-size: 3rem;
+            color: var(--error-color);
+            margin-bottom: 20px;
+        }
+        
+        .error-message {
+            font-size: 1.1rem;
+            color: #333;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        
+        .btn-home {
+            display: inline-block;
+            background: var(--primary-color);
+            color: white;
+            padding: 14px 35px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+        
+        .btn-home:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 45, 98, 0.3);
+        }
+        
+        .btn-home i {
+            margin-right: 8px;
+        }
+        
+        .btn-refresh {
+            background: #6c757d;
+        }
+        
+        .btn-refresh:hover {
+            background: #5a6268;
+        }
+        
+        .footer-text {
+            margin-top: 25px;
+            font-size: 0.85rem;
+            color: #888;
+        }
+        
+        @media (max-width: 480px) {
+            .error-code {
+                font-size: 4rem;
+            }
+            
+            .error-body {
+                padding: 30px 20px;
+            }
+            
+            .btn-home {
+                display: block;
+                margin: 10px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <div class="error-header">
+            <div class="error-code">500</div>
+            <h1>Server Error</h1>
+        </div>
+        <div class="error-body">
+            <div class="error-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <p class="error-message">
+                Something went wrong on our end. We're working to fix it.
+                <br><br>
+                Please try again in a few moments.
+            </p>
+            
+            <a href="javascript:location.reload()" class="btn-home btn-refresh">
+                <i class="fas fa-redo"></i> Try Again
+            </a>
+            <a href="/" class="btn-home">
+                <i class="fas fa-home"></i> Back to Home
+            </a>
+            
+            <p class="footer-text">
+                Phi Beta Sigma Fraternity, Inc. &bull; Nu Gamma Sigma Chapter
+            </p>
+        </div>
+    </div>
+</body>
+</html>

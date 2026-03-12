@@ -256,6 +256,10 @@
             flex-direction: column;
         }
     }
+    
+    .required-indicator {
+        color: var(--error-color);
+    }
 </style>
 {% endblock css %}
 
@@ -272,12 +276,12 @@
             <span>Your information is protected with industry-standard encryption and security measures.</span>
         </div>
         
-        <form method="POST" action="{% url 'signup' %}">
+        <form method="post" action="{% url 'signup' %}">
             {% csrf_token %}
             
             <div class="form-group">
                 <label for="invitation_code">
-                    Invitation Code <span style="color: var(--error-color);">*</span>
+                    Invitation Code <span class="required-indicator">*</span>
                 </label>
                 <input type="text" 
                        id="invitation_code" 
@@ -292,7 +296,7 @@
             
             <div class="form-group">
                 <label for="email">
-                    Email <span style="color: var(--error-color);">*</span>
+                    Email <span class="required-indicator">*</span>
                 </label>
                 <input type="email" 
                        id="email" 
@@ -307,7 +311,7 @@
             
             <div class="form-group">
                 <label for="id_username">
-                    Username <span style="color: var(--error-color);">*</span>
+                    Username <span class="required-indicator">*</span>
                 </label>
                 {{ form.username }}
                 <div class="help-text">
