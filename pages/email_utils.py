@@ -566,3 +566,92 @@ This is an automated notification. Please log in to the portal to vote.
     except Exception as e:
         logger.error(f"Failed to send poll email notification to {recipient_user.email}: {str(e)}")
         return False
+
+
+def send_profile_comment_email_notification(comment, profile_owner, commenter, from_email=None):
+    """
+    Send an email notification when someone comments on a user's profile.
+    
+    Args:
+        comment: ProfileComment model instance
+        profile_owner: User model instance (owner of the profile)
+        commenter: User model instance (person who made the comment)
+        from_email: Optional custom sender email (defaults to CONTACT_EMAIL)
+    
+    Returns:
+        True if email was sent successfully, False otherwise
+    """
+    # Check if profile owner has an email on file
+    if not profile_owner.email:
+        logger.info(f"No email on file for {profile_owner.username}, skipping profile comment email notification")
+        return False
+    
+    try:
+        # Use CONTACT_EMAIL as the sender
+        sender_email = from_email or getattr(settings, 'CONTACT_EMAIL', 'contact@ngs1914.org')
+        
+        # Get display names
+        owner_name = profile_owner.get_full_name() or profile_owner.username
+        commenter_name = commenter.get_full_name() or commenter.username
+        
+        subject = f"[Nu Gamma Sigma] {commenter_name} commented on your profile"
+        
+        # Build the profile URL
+        portal_url = getattr(settings, 'SITE_URL', 'https://ngs1914.org') + f'/portal/members/{profile_owner.username}/'
+        
+        # Truncate comment for preview
+        comment_preview = comment.content[:300] + '...' if len(comment.content) > 300 else comment.content
+        
+        plain_message = f"""Hello {owner_name},
+
+💬 NEW COMMENT ON YOUR PROFILE
+
+{commenter_name} left a comment on your profile:
+
+"{comment_preview}"
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+View and reply to this comment:
+{portal_url}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Blue Phi,
+Nu Gamma Sigma Chapter
+Phi Beta Sigma Fraternity, Inc.
+
+This is an automated notification. Please log in to the portal to reply.
+"""
+        
+        # Try to use HTML template if available
+        html_message = None
+        try:
+            context = {
+                'owner_name': owner_name,
+                'commenter_name': commenter_name,
+                'comment_content': comment.content,
+                'comment_preview': comment_preview,
+                'portal_url': portal_url,
+                'chapter_name': CHAPTER_NAME,
+            }
+            html_message = render_to_string('pages/emails/profile_comment_notification.html', context)
+        except Exception:
+            # Fall back to plain text if template doesn't exist
+            pass
+        
+        send_mail(
+            subject=subject,
+            message=plain_message,
+            from_email=sender_email,
+            recipient_list=[profile_owner.email],
+            html_message=html_message,
+            fail_silently=False,
+        )
+        
+        logger.info(f"Profile comment email notification sent to {profile_owner.email}")
+        return True
+        
+    except Exception as e:
+        logger.error(f"Failed to send profile comment email notification to {profile_owner.email}: {str(e)}")
+        return False

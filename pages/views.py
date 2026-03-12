@@ -2593,6 +2593,43 @@ def import_officers(request):
     return render(request, 'pages/portal/import_officers.html')
 
 
+def _send_profile_comment_notification(comment, profile_owner, commenter):
+    """
+    Send notification to profile owner when someone comments on their profile.
+    Creates an internal message and sends email if they have one on file.
+    """
+    from pages.email_utils import send_profile_comment_email_notification
+    
+    commenter_name = commenter.get_full_name() or commenter.username
+    profile_url = f'/portal/members/{profile_owner.username}/'
+    
+    # Create internal message notification
+    try:
+        Message.objects.create(
+            sender=commenter,
+            recipient=profile_owner,
+            subject=f"💬 New comment on your profile",
+            content=f"""{commenter_name} commented on your profile:
+
+\"{comment.content[:200]}{'...' if len(comment.content) > 200 else ''}\"
+
+Visit your profile to view and reply to this comment.
+
+---
+This is an automated notification.""",
+            category=Message.Category.GENERAL,
+            priority=Message.Priority.NORMAL,
+        )
+    except Exception as e:
+        logger.error(f"Failed to create profile comment notification: {e}")
+    
+    # Send email notification
+    try:
+        send_profile_comment_email_notification(comment, profile_owner, commenter)
+    except Exception as e:
+        logger.error(f"Failed to send profile comment email: {e}")
+
+
 @login_required
 def member_profile(request, username):
     """View individual member profile with comments"""
@@ -2618,12 +2655,17 @@ def member_profile(request, username):
             if parent_id:
                 parent_comment = ProfileComment.objects.filter(id=parent_id).first()
             
-            ProfileComment.objects.create(
+            new_comment = ProfileComment.objects.create(
                 profile=member_profile,
                 author=request.user,
                 content=content,
                 parent_comment=parent_comment
             )
+            
+            # Send notification to profile owner (if not commenting on own profile)
+            if profile_user != request.user:
+                _send_profile_comment_notification(new_comment, profile_user, request.user)
+            
             messages.success(request, "Comment posted!")
             return redirect('member_profile', username=username)
     
