@@ -6686,7 +6686,7 @@ def _send_poll_notification_to_members(poll, created_by):
     Send a notification message to all active members about a new poll.
     Creates an internal message for each member and sends email if they have one on file.
     """
-    from pages.email_utils import send_message_email_notification
+    from pages.email_utils import send_poll_email_notification
     
     # Get the system user or the creator as the sender
     sender = created_by
@@ -6705,7 +6705,7 @@ def _send_poll_notification_to_members(poll, created_by):
     
     for user in active_members:
         try:
-            msg = Message.objects.create(
+            Message.objects.create(
                 sender=sender,
                 recipient=user,
                 subject=f"🗳️ New Poll: {poll.title}",
@@ -6726,8 +6726,8 @@ This is an automated notification. Do not reply to this message.""",
             )
             notification_count += 1
             
-            # Also send email if user has email on file
-            if send_message_email_notification(msg):
+            # Send poll-specific email with "You Have a Vote to Make" header
+            if send_poll_email_notification(poll, user):
                 email_count += 1
                 
         except Exception as e:

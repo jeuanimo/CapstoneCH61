@@ -461,3 +461,108 @@ def send_bulk_message_email_notifications(messages_list, from_email=None):
         'failed': failed_count,
         'no_email': no_email_count
     }
+
+
+def send_poll_email_notification(poll, recipient_user, from_email=None):
+    """
+    Send an email notification about a new poll that requires a vote.
+    
+    Args:
+        poll: Poll model instance
+        recipient_user: User model instance (the recipient)
+        from_email: Optional custom sender email (defaults to CONTACT_EMAIL)
+    
+    Returns:
+        True if email was sent successfully, False otherwise
+    """
+    # Check if recipient has an email on file
+    if not recipient_user.email:
+        logger.info(f"No email on file for {recipient_user.username}, skipping poll email notification")
+        return False
+    
+    try:
+        # Use CONTACT_EMAIL as the sender (contact@ngs1914.org)
+        sender_email = from_email or getattr(settings, 'CONTACT_EMAIL', 'contact@ngs1914.org')
+        
+        # Subject with "You Have a Vote to Make" header
+        subject = f"[Nu Gamma Sigma] You Have a Vote to Make: {poll.title}"
+        
+        # Get recipient's display name
+        recipient_name = recipient_user.get_full_name() or recipient_user.username
+        
+        # Get poll details
+        poll_type_display = poll.get_poll_type_display()
+        deadline_text = ""
+        if poll.ends_at:
+            deadline_text = f"⏰ Voting Deadline: {poll.ends_at.strftime('%B %d, %Y at %I:%M %p')}"
+        else:
+            deadline_text = "⏰ No deadline - vote at your convenience"
+        
+        # Build the portal URL for polls
+        portal_url = getattr(settings, 'SITE_URL', 'https://ngs1914.org') + f'/portal/polls/{poll.pk}/'
+        
+        plain_message = f"""Hello {recipient_name},
+
+═══════════════════════════════════════
+   🗳️  YOU HAVE A VOTE TO MAKE  🗳️
+═══════════════════════════════════════
+
+A new {poll_type_display.lower()} has been created and YOUR VOTE is needed!
+
+Poll: {poll.title}
+Type: {poll_type_display}
+
+{poll.description if poll.description else ''}
+
+{deadline_text}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Cast your vote now:
+{portal_url}
+
+Or visit the Member Portal and go to Polls.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Blue Phi,
+Nu Gamma Sigma Chapter
+Phi Beta Sigma Fraternity, Inc.
+
+This is an automated notification. Please log in to the portal to vote.
+"""
+        
+        # Try to use HTML template if available
+        html_message = None
+        try:
+            context = {
+                'recipient_name': recipient_name,
+                'poll_title': poll.title,
+                'poll_type': poll_type_display,
+                'poll_description': poll.description,
+                'deadline_text': deadline_text,
+                'has_deadline': poll.ends_at is not None,
+                'deadline_date': poll.ends_at,
+                'portal_url': portal_url,
+                'chapter_name': CHAPTER_NAME,
+            }
+            html_message = render_to_string('pages/emails/poll_notification.html', context)
+        except Exception:
+            # Fall back to plain text if template doesn't exist
+            pass
+        
+        send_mail(
+            subject=subject,
+            message=plain_message,
+            from_email=sender_email,
+            recipient_list=[recipient_user.email],
+            html_message=html_message,
+            fail_silently=False,
+        )
+        
+        logger.info(f"Poll email notification sent to {recipient_user.email} for poll '{poll.title}'")
+        return True
+        
+    except Exception as e:
+        logger.error(f"Failed to send poll email notification to {recipient_user.email}: {str(e)}")
+        return False
