@@ -183,27 +183,32 @@ class BlockBadPathsMiddleware(MiddlewareMixin):
     
     def process_request(self, request):
         """Block bad paths before they hit the app."""
-        path = request.path.lower()
-        original_path = request.path
-        
-        # Check exact matches
-        if original_path in self.BLOCKED_EXACT or path in self.BLOCKED_EXACT:
-            logger.warning(f"Blocked probe: {original_path} from {self._get_client_ip(request)}")
-            return HttpResponseNotFound(NOT_FOUND_MESSAGE)
-        
-        # Check prefix matches
-        if path.startswith(self.BLOCKED_PREFIXES):
-            logger.warning(f"Blocked probe: {original_path} from {self._get_client_ip(request)}")
-            return HttpResponseNotFound(NOT_FOUND_MESSAGE)
-        
-        # Check blocked extensions (but allow static files)
-        if not path.startswith('/static/') and not path.startswith('/media/'):
-            for ext in self.BLOCKED_EXTENSIONS:
-                if path.endswith(ext):
+        try:
+            path = request.path.lower()
+            original_path = request.path
+            
+            # Check exact matches
+            if original_path in self.BLOCKED_EXACT or path in self.BLOCKED_EXACT:
+                logger.warning(f"Blocked probe: {original_path} from {self._get_client_ip(request)}")
+                return HttpResponseNotFound(NOT_FOUND_MESSAGE)
+            
+            # Check prefix matches
+            for prefix in self.BLOCKED_PREFIXES:
+                if path.startswith(prefix):
                     logger.warning(f"Blocked probe: {original_path} from {self._get_client_ip(request)}")
                     return HttpResponseNotFound(NOT_FOUND_MESSAGE)
-        
-        return None
+            
+            # Check blocked extensions (but allow static files)
+            if not path.startswith('/static/') and not path.startswith('/media/'):
+                for ext in self.BLOCKED_EXTENSIONS:
+                    if path.endswith(ext):
+                        logger.warning(f"Blocked probe: {original_path} from {self._get_client_ip(request)}")
+                        return HttpResponseNotFound(NOT_FOUND_MESSAGE)
+            
+            return None
+        except Exception as e:
+            logger.error(f"BlockBadPathsMiddleware error: {e} for path {request.path}")
+            return None
     
     def _get_client_ip(self, request):
         """Get real client IP, handling proxy headers."""

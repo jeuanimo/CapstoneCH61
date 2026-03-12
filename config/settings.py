@@ -135,8 +135,8 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     # Security middleware stack - order matters!
+    'pages.middleware.BlockBadPathsMiddleware',                   # Block bot probes FIRST before anything else
     'django.middleware.security.SecurityMiddleware',              # General security headers
-    'pages.middleware.BlockBadPathsMiddleware',                   # Block bot probes early
     'whitenoise.middleware.WhiteNoiseMiddleware',                 # Serve static files in production
     'django.contrib.sessions.middleware.SessionMiddleware',       # Session support
     'django.middleware.common.CommonMiddleware',                  # Common utilities (URL rewriting)
