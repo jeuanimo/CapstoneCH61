@@ -16,6 +16,7 @@ Allow: /static/
 
 # Disallow all member portal and admin pages
 Disallow: /portal/
+Disallow: /members/
 Disallow: /admin/
 Disallow: /login/
 Disallow: /logout/
@@ -23,8 +24,11 @@ Disallow: /signup/
 Disallow: /activate/
 Disallow: /chatbot/
 Disallow: /api/
+Disallow: /account/
 Disallow: /media/member_photos/
 Disallow: /media/documents/
+Disallow: /media/events/
+Disallow: /media/leadership/
 
 # Disallow search and dynamic pages
 Disallow: /*?*

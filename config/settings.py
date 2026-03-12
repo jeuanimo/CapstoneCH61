@@ -142,6 +142,8 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',                 # CSRF token protection
     'django.contrib.auth.middleware.AuthenticationMiddleware',    # User authentication
     'pages.middleware.LastSeenMiddleware',                        # Track member online status
+    'pages.middleware.PrivateAreaSecurityHeadersMiddleware',      # Anti-scraping headers for portal
+    'pages.middleware.RateLimitMiddleware',                       # Rate limit scraping attempts
     'django.contrib.messages.middleware.MessageMiddleware',       # Messages (alerts/notifications)
     'django.middleware.clickjacking.XFrameOptionsMiddleware',    # Clickjacking protection
     'axes.middleware.AxesMiddleware',                            # Brute-force attack prevention

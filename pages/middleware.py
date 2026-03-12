@@ -234,3 +234,118 @@ class LastSeenMiddleware(MiddlewareMixin):
                 logger.debug(f"LastSeenMiddleware error: {e}")
         
         return None
+
+
+class PrivateAreaSecurityHeadersMiddleware(MiddlewareMixin):
+    """
+    Middleware to add anti-scraping and privacy headers to private member areas.
+    
+    Protects against:
+    - Search engine indexing of private pages
+    - Browser/proxy caching of sensitive data
+    - Referrer leakage to external sites
+    - Content type sniffing attacks
+    
+    Private areas include:
+    - /portal/ - Member portal
+    - /admin/ - Django admin
+    - /account/ - Account management
+    - /api/ - Any API endpoints
+    """
+    
+    PRIVATE_PREFIXES = (
+        '/portal/',
+        '/admin/',
+        '/account/',
+        '/api/',
+        '/members/',
+    )
+    
+    def process_request(self, request):
+        """Mark request as private area for template context."""
+        request.is_private_area = request.path.startswith(self.PRIVATE_PREFIXES)
+        return None
+    
+    def process_response(self, request, response):
+        """Add security headers to private area responses."""
+        if request.path.startswith(self.PRIVATE_PREFIXES):
+            # Prevent search engines from indexing
+            response['X-Robots-Tag'] = 'noindex, nofollow, noarchive, nosnippet'
+            
+            # Prevent caching of sensitive data
+            response['Cache-Control'] = 'no-store, no-cache, must-revalidate, private, max-age=0'
+            response['Pragma'] = 'no-cache'
+            response['Expires'] = '0'
+            
+            # Prevent referrer leakage to external sites
+            response['Referrer-Policy'] = 'same-origin'
+            
+            # Prevent MIME type sniffing
+            response['X-Content-Type-Options'] = 'nosniff'
+            
+            # Additional security headers
+            response['X-Frame-Options'] = 'DENY'  # Prevent embedding in frames
+            response['X-Permitted-Cross-Domain-Policies'] = 'none'  # Block Flash/PDF cross-domain
+            
+        return response
+
+
+class RateLimitMiddleware(MiddlewareMixin):
+    """
+    Basic rate limiting middleware to slow down aggressive scrapers.
+    Uses session-based tracking for authenticated users.
+    
+    Note: For production, consider django-ratelimit or WAF/CDN-level protection.
+    """
+    
+    # Rate limits: {path_prefix: (max_requests, time_window_seconds)}
+    RATE_LIMITS = {
+        '/portal/members/': (60, 60),      # 60 requests per minute for member directory
+        '/portal/contact-directory/': (30, 60),  # 30 requests per minute
+        '/api/': (100, 60),                # 100 API calls per minute
+    }
+    
+    def process_request(self, request):
+        """Check and enforce rate limits."""
+        from django.http import HttpResponse
+        from django.utils import timezone
+        import time
+        
+        for prefix, (max_requests, window) in self.RATE_LIMITS.items():
+            if request.path.startswith(prefix):
+                # Get or create rate limit tracker in session
+                rate_key = f'rate_limit_{prefix.replace("/", "_")}'
+                
+                # Initialize tracking
+                if rate_key not in request.session:
+                    request.session[rate_key] = {'count': 0, 'window_start': time.time()}
+                
+                tracker = request.session[rate_key]
+                current_time = time.time()
+                
+                # Reset window if expired
+                if current_time - tracker['window_start'] > window:
+                    tracker['count'] = 0
+                    tracker['window_start'] = current_time
+                
+                # Increment and check
+                tracker['count'] += 1
+                request.session[rate_key] = tracker
+                request.session.modified = True
+                
+                if tracker['count'] > max_requests:
+                    logger.warning(
+                        f"Rate limit exceeded for {request.path} by "
+                        f"{request.user.username if request.user.is_authenticated else 'anonymous'}"
+                    )
+                    response = HttpResponse(
+                        "Too many requests. Please slow down.",
+                        status=429,
+                        content_type='text/plain'
+                    )
+                    response['Retry-After'] = str(window)
+                    return response
+                    
+                break
+        
+        return None

@@ -4,7 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <!-- SEO Meta Tags -->
+    {% if request.is_private_area %}
+    <!-- Private area - no indexing, no social previews -->
+    <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+    <meta name="description" content="Member Portal">
+    <title>{% block title %}Member Portal{% endblock title %}</title>
+    {% else %}
+    <!-- SEO Meta Tags (Public pages only) -->
     {% if site_config and site_config.meta_description %}
     <meta name="description" content="{{ site_config.meta_description }}">
     {% else %}
@@ -14,7 +20,7 @@
     <meta name="keywords" content="{{ site_config.meta_keywords }}">
     {% endif %}
     
-    <!-- Open Graph / Social Sharing -->
+    <!-- Open Graph / Social Sharing (Public pages only) -->
     <meta property="og:type" content="website">
     <meta property="og:title" content="{% block og_title %}{% if site_config %}{{ site_config.organization_name }} - {{ site_config.chapter_name }}{% else %}Phi Beta Sigma Fraternity{% endif %}{% endblock og_title %}">
     {% if site_config and site_config.meta_description %}
@@ -24,14 +30,16 @@
     <meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{{ site_config.og_image.url }}">
     {% endif %}
     
-    <!-- Twitter Card -->
+    <!-- Twitter Card (Public pages only) -->
     <meta name="twitter:card" content="summary_large_image">
     
+    <title>{% block title_public %}Capstone CH61{% endblock title_public %}</title>
+    {% endif %}
+    
+    {% load static %}
     <!-- CSRF Token for AJAX requests -->
     <meta name="csrf-token" content="{{ csrf_token }}">
 
-    <title>{% block title %}Capstone CH61{% endblock title %}</title>
-    {% load static %}
     <!-- Favicon -->
     {% if site_config and site_config.favicon %}
     <link rel="icon" type="image/png" href="{{ site_config.favicon.url }}">
