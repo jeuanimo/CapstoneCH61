@@ -336,6 +336,11 @@ LOGGING = {
             'level': 'INFO',
             'propagate': False,
         },
+        'django.request': {
+            'handlers': ['console'],
+            'level': 'ERROR',  # Suppress 404 "Not Found" logs - we handle these in BlockBadPathsMiddleware
+            'propagate': False,
+        },
         'django.security': {
             'handlers': ['console'],
             'level': 'WARNING',
