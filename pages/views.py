@@ -2045,7 +2045,8 @@ class CreateBillView(OfficerRequiredMixin, CreateView):
             messages.success(self.request, f"Bill created for {member_name}! Due: {due_date_str}")
         
         # Return redirect directly - don't call super().form_valid() as that would create another DuesPayment
-        return redirect(self.get_success_url())
+        # Use str(success_url) to avoid get_success_url() which expects self.object to be set
+        return redirect(str(self.success_url))
 
 
 def _extract_member_number(row):
