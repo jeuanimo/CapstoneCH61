@@ -217,6 +217,9 @@
                 <a href="{% url 'messages_inbox' %}" class="portal-nav-link {% if request.resolver_match.url_name == 'messages_inbox' %}active{% endif %}">
                     <i class="fas fa-envelope"></i>
                     <span>Messages</span>
+                    {% if unread_messages_count > 0 %}
+                    <span class="badge bg-danger notification-badge">{{ unread_messages_count }}</span>
+                    {% endif %}
                 </a>
                 <a href="{% url 'photo_gallery' %}" class="portal-nav-link {% if request.resolver_match.url_name == 'photo_gallery' %}active{% endif %}">
                     <i class="fas fa-images"></i>

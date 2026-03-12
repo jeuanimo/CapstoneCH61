@@ -98,3 +98,25 @@ def cookie_consent_context(request):
         'show_cookie_banner': getattr(request, 'show_cookie_banner', True),
         'cookie_consent': getattr(request, 'cookie_consent', None),
     }
+
+
+def unread_messages_context(request):
+    """
+    Add unread message count to all templates.
+    Shows notification badge for authenticated users.
+    """
+    unread_count = 0
+    
+    if request.user.is_authenticated:
+        try:
+            from .models import Message
+            unread_count = Message.objects.filter(
+                recipient=request.user,
+                is_read=False
+            ).exclude(status='DE').count()
+        except Exception:
+            pass
+    
+    return {
+        'unread_messages_count': unread_count,
+    }

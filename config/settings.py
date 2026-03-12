@@ -177,6 +177,7 @@ TEMPLATES = [
                 'pages.context_processors.site_config_context',   # Add site branding/config to templates
                 'pages.context_processors.cookie_consent_context',  # Add GDPR cookie consent to templates
                 'pages.context_processors.stripe_availability_context',  # Add Stripe availability check
+                'pages.context_processors.unread_messages_context',  # Add unread messages count to templates
             ],
         },
     },

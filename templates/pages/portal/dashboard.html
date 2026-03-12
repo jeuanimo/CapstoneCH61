@@ -50,168 +50,355 @@
         </div>
     </div>
 
-    <!-- Portal Features Grid -->
-    <div class="row g-4 mb-4">
-        <div class="col-md-3 col-6">
+    <!-- Portal Features Grid - All Member Features -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <h4 class="text-primary"><i class="fas fa-th-large"></i> Member Features</h4>
+            <hr class="mt-1">
+        </div>
+    </div>
+    <div class="row g-3 mb-4">
+        <div class="col-lg-3 col-md-4 col-6">
+            <a href="{% url 'member_profile' user.username %}" class="text-decoration-none">
+                <div class="card h-100 text-center portal-card card-glow">
+                    <div class="card-body d-flex flex-column">
+                        <i class="fas fa-user-circle fa-2x mb-2 text-primary"></i>
+                        <h6 class="card-title">My Profile</h6>
+                        <p class="text-muted small flex-grow-1">View and manage your personal member profile and information</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-lg-3 col-md-4 col-6">
             <a href="{% url 'member_roster' %}" class="text-decoration-none">
                 <div class="card h-100 text-center portal-card card-glow">
-                    <div class="card-body">
-                        <i class="fas fa-users fa-3x mb-3 text-primary"></i>
-                        <h5>Member Roster</h5>
-                        <p class="text-muted small">View all active members</p>
+                    <div class="card-body d-flex flex-column">
+                        <i class="fas fa-users fa-2x mb-2 text-info"></i>
+                        <h6 class="card-title">Member Roster</h6>
+                        <p class="text-muted small flex-grow-1">Browse the complete directory of all active chapter members</p>
                     </div>
                 </div>
             </a>
         </div>
-        <div class="col-md-3 col-6">
+        <div class="col-lg-3 col-md-4 col-6">
             <a href="{% url 'announcements_view' %}" class="text-decoration-none">
                 <div class="card h-100 text-center portal-card card-glow {% if unread_announcements > 0 %}new-posts-card{% endif %}">
-                    <div class="card-body">
-                        <i class="fas fa-bullhorn fa-3x mb-3 text-success"></i>
-                        <h5>Announcements</h5>
-                        <p class="text-muted small">Chapter news</p>
+                    <div class="card-body d-flex flex-column">
+                        <i class="fas fa-bullhorn fa-2x mb-2 text-success"></i>
+                        <h6 class="card-title">Announcements</h6>
+                        <p class="text-muted small flex-grow-1">Stay updated with important chapter news and updates</p>
                         {% if unread_announcements > 0 %}
-                        <span class="badge bg-success pulse-badge">{{ unread_announcements }} new</span>
+                        <span class="badge bg-success pulse-badge mt-auto">{{ unread_announcements }} new</span>
                         {% endif %}
                     </div>
                 </div>
             </a>
         </div>
-        <div class="col-md-3 col-6">
+        <div class="col-lg-3 col-md-4 col-6">
             <a href="{% url 'messages_inbox' %}" class="text-decoration-none">
-                <div class="card h-100 text-center portal-card card-glow">
-                    <div class="card-body">
-                        <i class="fas fa-envelope fa-3x mb-3 text-info"></i>
-                        <h5>Messages</h5>
-                        <p class="text-muted small">Chat with members</p>
+                <div class="card h-100 text-center portal-card card-glow {% if unread_count > 0 %}new-posts-card{% endif %}">
+                    <div class="card-body d-flex flex-column">
+                        <i class="fas fa-envelope fa-2x mb-2 text-warning"></i>
+                        <h6 class="card-title">Messages</h6>
+                        <p class="text-muted small flex-grow-1">Send and receive private messages with other members</p>
                         {% if unread_count > 0 %}
-                        <span class="badge bg-danger">{{ unread_count }} new</span>
+                        <span class="badge bg-danger pulse-badge mt-auto">{{ unread_count }} unread</span>
                         {% endif %}
                     </div>
                 </div>
             </a>
         </div>
-        <div class="col-md-3 col-6">
+        <div class="col-lg-3 col-md-4 col-6">
             <a href="{% url 'photo_gallery' %}" class="text-decoration-none">
                 <div class="card h-100 text-center portal-card card-glow">
-                    <div class="card-body">
-                        <i class="fas fa-images fa-3x mb-3 text-warning"></i>
-                        <h5>Photo Gallery</h5>
-                        <p class="text-muted small">View & share photos</p>
+                    <div class="card-body d-flex flex-column">
+                        <i class="fas fa-images fa-2x mb-2 text-danger"></i>
+                        <h6 class="card-title">Photo Gallery</h6>
+                        <p class="text-muted small flex-grow-1">Browse and share photos from chapter events and activities</p>
                     </div>
                 </div>
             </a>
         </div>
-        <div class="col-md-3 col-6">
+        <div class="col-lg-3 col-md-4 col-6">
             <a href="{% url 'documents_view' %}" class="text-decoration-none">
                 <div class="card h-100 text-center portal-card card-glow">
-                    <div class="card-body">
-                        <i class="fas fa-folder fa-3x mb-3 text-danger"></i>
-                        <h5>Documents</h5>
-                        <p class="text-muted small">Chapter files</p>
+                    <div class="card-body d-flex flex-column">
+                        <i class="fas fa-folder-open fa-2x mb-2 text-secondary"></i>
+                        <h6 class="card-title">Documents</h6>
+                        <p class="text-muted small flex-grow-1">Access chapter documents, bylaws, and shared files</p>
                     </div>
                 </div>
             </a>
         </div>
-        <div class="col-md-3 col-6">
+        <div class="col-lg-3 col-md-4 col-6">
             <a href="{% url 'dues_view' %}" class="text-decoration-none">
                 <div class="card h-100 text-center portal-card card-glow">
-                    <div class="card-body">
-                        <i class="fas fa-dollar-sign fa-3x mb-3 text-success"></i>
-                        <h5>Dues & Payments</h5>
-                        <p class="text-muted small">Track payments</p>
+                    <div class="card-body d-flex flex-column">
+                        <i class="fas fa-dollar-sign fa-2x mb-2 text-success"></i>
+                        <h6 class="card-title">Dues & Payments</h6>
+                        <p class="text-muted small flex-grow-1">View your payment history and current dues status</p>
                     </div>
                 </div>
             </a>
         </div>
-        <div class="col-md-3 col-6">
+        <div class="col-lg-3 col-md-4 col-6">
+            <a href="{% url 'attendance_view' %}" class="text-decoration-none">
+                <div class="card h-100 text-center portal-card card-glow">
+                    <div class="card-body d-flex flex-column">
+                        <i class="fas fa-check-circle fa-2x mb-2 text-primary"></i>
+                        <h6 class="card-title">Attendance</h6>
+                        <p class="text-muted small flex-grow-1">Track your meeting and event attendance records</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-lg-3 col-md-4 col-6">
+            <a href="{% url 'meeting_list' %}" class="text-decoration-none">
+                <div class="card h-100 text-center portal-card card-glow">
+                    <div class="card-body d-flex flex-column">
+                        <i class="fas fa-video fa-2x mb-2 text-info"></i>
+                        <h6 class="card-title">Meetings</h6>
+                        <p class="text-muted small flex-grow-1">View upcoming meetings and join Zoom sessions</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-lg-3 col-md-4 col-6">
+            <a href="{% url 'polls_list' %}" class="text-decoration-none">
+                <div class="card h-100 text-center portal-card card-glow {% if pending_polls_count > 0 %}pending-poll-card{% endif %}">
+                    <div class="card-body d-flex flex-column">
+                        <i class="fas fa-poll fa-2x mb-2 text-purple"></i>
+                        <h6 class="card-title">Polls & Voting</h6>
+                        <p class="text-muted small flex-grow-1">Participate in chapter polls and view voting results</p>
+                        {% if pending_polls_count > 0 %}
+                        <span class="badge bg-warning text-dark pulse-badge mt-auto">{{ pending_polls_count }} pending</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% if site_config.show_boutique %}
+        <div class="col-lg-3 col-md-4 col-6">
+            {% if site_config.boutique_type == 'external' and site_config.external_store_url %}
+            <a href="{{ site_config.external_store_url }}" class="text-decoration-none" target="_blank" rel="noopener noreferrer">
+                <div class="card h-100 text-center portal-card card-glow">
+                    <div class="card-body d-flex flex-column">
+                        <i class="fas fa-shopping-bag fa-2x mb-2 text-danger"></i>
+                        <h6 class="card-title">{{ site_config.external_store_name|default:"Boutique" }}</h6>
+                        <p class="text-muted small flex-grow-1">Shop for chapter merchandise and apparel</p>
+                    </div>
+                </div>
+            </a>
+            {% else %}
+            <a href="{% url 'shop_home' %}" class="text-decoration-none">
+                <div class="card h-100 text-center portal-card card-glow">
+                    <div class="card-body d-flex flex-column">
+                        <i class="fas fa-shopping-bag fa-2x mb-2 text-danger"></i>
+                        <h6 class="card-title">Boutique</h6>
+                        <p class="text-muted small flex-grow-1">Shop for chapter merchandise and apparel</p>
+                    </div>
+                </div>
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
+        {% if site_config.show_event_tickets %}
+        <div class="col-lg-3 col-md-4 col-6">
+            {% if site_config.event_tickets_type == 'external' and site_config.external_tickets_url %}
+            <a href="{{ site_config.external_tickets_url }}" class="text-decoration-none" target="_blank" rel="noopener noreferrer">
+                <div class="card h-100 text-center portal-card card-glow">
+                    <div class="card-body d-flex flex-column">
+                        <i class="fas fa-ticket-alt fa-2x mb-2 text-warning"></i>
+                        <h6 class="card-title">{{ site_config.external_tickets_name|default:"Event Tickets" }}</h6>
+                        <p class="text-muted small flex-grow-1">Purchase tickets for upcoming chapter events</p>
+                    </div>
+                </div>
+            </a>
+            {% else %}
+            <a href="{% url 'events_list' %}" class="text-decoration-none">
+                <div class="card h-100 text-center portal-card card-glow">
+                    <div class="card-body d-flex flex-column">
+                        <i class="fas fa-ticket-alt fa-2x mb-2 text-warning"></i>
+                        <h6 class="card-title">Event Tickets</h6>
+                        <p class="text-muted small flex-grow-1">Purchase tickets for upcoming chapter events</p>
+                    </div>
+                </div>
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
+        <div class="col-lg-3 col-md-4 col-6">
             <a href="{% url 'create_post' %}" class="text-decoration-none">
                 <div class="card h-100 text-center portal-card card-glow">
-                    <div class="card-body">
-                        <i class="fas fa-edit fa-3x mb-3 text-primary"></i>
-                        <h5>Create Post</h5>
-                        <p class="text-muted small">Share announcements</p>
+                    <div class="card-body d-flex flex-column">
+                        <i class="fas fa-edit fa-2x mb-2 text-success"></i>
+                        <h6 class="card-title">Create Post</h6>
+                        <p class="text-muted small flex-grow-1">Share news and announcements with fellow members</p>
                     </div>
                 </div>
             </a>
         </div>
-        <div class="col-md-3 col-6">
+        <div class="col-lg-3 col-md-4 col-6">
             <a href="{% url 'my_posts' %}" class="text-decoration-none">
                 <div class="card h-100 text-center portal-card card-glow">
-                    <div class="card-body">
-                        <i class="fas fa-newspaper fa-3x mb-3 text-secondary"></i>
-                        <h5>My Posts</h5>
-                        <p class="text-muted small">Manage posts</p>
+                    <div class="card-body d-flex flex-column">
+                        <i class="fas fa-newspaper fa-2x mb-2 text-secondary"></i>
+                        <h6 class="card-title">My Posts</h6>
+                        <p class="text-muted small flex-grow-1">Manage and edit your published announcements</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-lg-3 col-md-4 col-6">
+            <a href="{% url 'upload_photo' %}" class="text-decoration-none">
+                <div class="card h-100 text-center portal-card card-glow">
+                    <div class="card-body d-flex flex-column">
+                        <i class="fas fa-cloud-upload-alt fa-2x mb-2 text-info"></i>
+                        <h6 class="card-title">Upload Photos</h6>
+                        <p class="text-muted small flex-grow-1">Share your photos from chapter events and activities</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-lg-3 col-md-4 col-6">
+            <a href="{% url 'edit_own_profile' %}" class="text-decoration-none">
+                <div class="card h-100 text-center portal-card card-glow">
+                    <div class="card-body d-flex flex-column">
+                        <i class="fas fa-user-edit fa-2x mb-2 text-primary"></i>
+                        <h6 class="card-title">Edit Profile</h6>
+                        <p class="text-muted small flex-grow-1">Update your personal information and profile photo</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-lg-3 col-md-4 col-6">
+            <a href="{% url 'password_change' %}" class="text-decoration-none">
+                <div class="card h-100 text-center portal-card card-glow">
+                    <div class="card-body d-flex flex-column">
+                        <i class="fas fa-key fa-2x mb-2 text-secondary"></i>
+                        <h6 class="card-title">Change Password</h6>
+                        <p class="text-muted small flex-grow-1">Update your account password for security</p>
                     </div>
                 </div>
             </a>
         </div>
     </div>
 
-    <!-- Officer Tools Section -->
+    <!-- Officer/Admin Features Section -->
     {% if user.is_staff or user.member_profile.is_officer %}
-    <div class="row mb-4">
+    <div class="row mb-3">
         <div class="col-12">
-            <div class="card card-glow officer-card">
-                <div class="card-header bg-dark">
-                    <h5 class="mb-0 text-warning"><i class="fas fa-shield-alt"></i> Officer Tools</h5>
-                </div>
-                <div class="card-body">
-                    <div class="d-flex gap-2 flex-wrap">
-                        <a href="{% url 'analytics_dashboard' %}" class="btn btn-warning">
-                            <i class="fas fa-chart-line"></i> Analytics
-                        </a>
-                        <a href="{% url 'dues_and_payments' %}" class="btn btn-warning">
-                            <i class="fas fa-money-bill-wave"></i> Manage Dues
-                        </a>
-                        <a href="{% url 'manage_attendance' %}" class="btn btn-warning">
-                            <i class="fas fa-clipboard-list"></i> Attendance
-                        </a>
-                        <a href="{% url 'boutique_dashboard' %}" class="btn btn-warning">
-                            <i class="fas fa-store-alt"></i> Boutique
-                        </a>
-                        <a href="{% url 'site_configuration' %}" class="btn btn-warning">
-                            <i class="fas fa-cogs"></i> Site Config
-                        </a>
-                        <a href="{% url 'send_member_email' %}" class="btn btn-warning">
-                            <i class="fas fa-paper-plane"></i> Send Email
-                        </a>
+            <h4 class="text-warning"><i class="fas fa-shield-alt"></i> Officer & Admin Tools</h4>
+            <hr class="mt-1 border-warning">
+        </div>
+    </div>
+    <div class="row g-3 mb-4">
+        <div class="col-lg-3 col-md-4 col-6">
+            <a href="{% url 'analytics_dashboard' %}" class="text-decoration-none">
+                <div class="card h-100 text-center portal-card card-glow admin-card">
+                    <div class="card-body d-flex flex-column">
+                        <i class="fas fa-chart-line fa-2x mb-2 text-warning"></i>
+                        <h6 class="card-title">Analytics Dashboard</h6>
+                        <p class="text-muted small flex-grow-1">View chapter statistics, reports, and member activity data</p>
                     </div>
                 </div>
-            </div>
+            </a>
         </div>
+        <div class="col-lg-3 col-md-4 col-6">
+            <a href="{% url 'dues_and_payments' %}" class="text-decoration-none">
+                <div class="card h-100 text-center portal-card card-glow admin-card">
+                    <div class="card-body d-flex flex-column">
+                        <i class="fas fa-money-bill-wave fa-2x mb-2 text-warning"></i>
+                        <h6 class="card-title">Manage Dues</h6>
+                        <p class="text-muted small flex-grow-1">Record payments, manage dues, and track member finances</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-lg-3 col-md-4 col-6">
+            <a href="{% url 'manage_attendance' %}" class="text-decoration-none">
+                <div class="card h-100 text-center portal-card card-glow admin-card">
+                    <div class="card-body d-flex flex-column">
+                        <i class="fas fa-clipboard-list fa-2x mb-2 text-warning"></i>
+                        <h6 class="card-title">Manage Attendance</h6>
+                        <p class="text-muted small flex-grow-1">Record and track member attendance at meetings and events</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% if site_config.show_boutique and site_config.boutique_type != 'external' %}
+        <div class="col-lg-3 col-md-4 col-6">
+            <a href="{% url 'boutique_dashboard' %}" class="text-decoration-none">
+                <div class="card h-100 text-center portal-card card-glow admin-card">
+                    <div class="card-body d-flex flex-column">
+                        <i class="fas fa-store-alt fa-2x mb-2 text-warning"></i>
+                        <h6 class="card-title">Boutique Management</h6>
+                        <p class="text-muted small flex-grow-1">Add products, manage inventory, and process orders</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% endif %}
+        <div class="col-lg-3 col-md-4 col-6">
+            <a href="{% url 'manage_zoom_meetings' %}" class="text-decoration-none">
+                <div class="card h-100 text-center portal-card card-glow admin-card">
+                    <div class="card-body d-flex flex-column">
+                        <i class="fas fa-video fa-2x mb-2 text-warning"></i>
+                        <h6 class="card-title">Meetings Management</h6>
+                        <p class="text-muted small flex-grow-1">Schedule, edit, and manage Zoom meeting sessions</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-lg-3 col-md-4 col-6">
+            <a href="{% url 'manage_polls' %}" class="text-decoration-none">
+                <div class="card h-100 text-center portal-card card-glow admin-card">
+                    <div class="card-body d-flex flex-column">
+                        <i class="fas fa-poll-h fa-2x mb-2 text-warning"></i>
+                        <h6 class="card-title">Polls Management</h6>
+                        <p class="text-muted small flex-grow-1">Create, edit, and manage chapter polls and voting</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-lg-3 col-md-4 col-6">
+            <a href="{% url 'site_configuration' %}" class="text-decoration-none">
+                <div class="card h-100 text-center portal-card card-glow admin-card">
+                    <div class="card-body d-flex flex-column">
+                        <i class="fas fa-cogs fa-2x mb-2 text-warning"></i>
+                        <h6 class="card-title">Site Configuration</h6>
+                        <p class="text-muted small flex-grow-1">Customize site settings, branding, and features</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-lg-3 col-md-4 col-6">
+            <a href="{% url 'send_member_email' %}" class="text-decoration-none">
+                <div class="card h-100 text-center portal-card card-glow admin-card">
+                    <div class="card-body d-flex flex-column">
+                        <i class="fas fa-paper-plane fa-2x mb-2 text-warning"></i>
+                        <h6 class="card-title">Send Email</h6>
+                        <p class="text-muted small flex-grow-1">Send email communications to members or groups</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% if user.is_staff %}
+        <div class="col-lg-3 col-md-4 col-6">
+            <a href="{% url 'manage_invitations' %}" class="text-decoration-none">
+                <div class="card h-100 text-center portal-card card-glow admin-card staff-only">
+                    <div class="card-body d-flex flex-column">
+                        <i class="fas fa-user-plus fa-2x mb-2 text-danger"></i>
+                        <h6 class="card-title">Manage Invitations</h6>
+                        <p class="text-muted small flex-grow-1">Invite new members and manage pending invitations</p>
+                        <span class="badge bg-danger mt-auto">Staff Only</span>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% endif %}
     </div>
     {% endif %}
-
-    <!-- Quick Actions -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card card-glow">
-                <div class="card-header">
-                    <h4 class="mb-0"><i class="fas fa-bolt"></i> Quick Actions</h4>
-                </div>
-                <div class="card-body">
-                    <div class="d-flex gap-2 flex-wrap">
-                        <a href="{% url 'edit_own_profile' %}" class="btn btn-outline-primary">
-                            <i class="fas fa-user-edit"></i> Edit Profile
-                        </a>
-                        <a href="{% url 'password_change' %}" class="btn btn-outline-secondary">
-                            <i class="fas fa-key"></i> Change Password
-                        </a>
-                        <a href="{% url 'create_post' %}" class="btn btn-outline-success">
-                            <i class="fas fa-plus"></i> Create Post
-                        </a>
-                        <a href="{% url 'upload_photo' %}" class="btn btn-outline-warning">
-                            <i class="fas fa-upload"></i> Upload Photos
-                        </a>
-                        <a href="{% url 'member_profile' user.username %}" class="btn btn-outline-info">
-                            <i class="fas fa-eye"></i> View My Profile
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- Active Polls Section -->
     {% if active_polls %}
@@ -320,6 +507,7 @@
 .portal-card {
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     cursor: pointer;
+    min-height: 160px;
 }
 
 .portal-card:hover {
@@ -327,10 +515,40 @@
     box-shadow: 0 0 25px rgba(255, 255, 255, 1) !important;
 }
 
-.portal-card h4 {
-    word-wrap: break-word;
-    overflow-wrap: break-word;
-    word-break: break-word;
+.portal-card h6.card-title {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.portal-card .card-body {
+    padding: 1rem;
+}
+
+.portal-card p {
+    font-size: 0.8rem;
+    line-height: 1.3;
+}
+
+/* Admin card styling with golden accent */
+.admin-card {
+    border-left: 4px solid #c9a227 !important;
+    background: linear-gradient(135deg, #ffffff 0%, #fffaf0 100%);
+}
+
+.admin-card:hover {
+    background: linear-gradient(135deg, #fffaf0 0%, #fff3cd 100%) !important;
+}
+
+/* Staff-only card styling */
+.staff-only {
+    border-left: 4px solid #dc3545 !important;
+    background: linear-gradient(135deg, #ffffff 0%, #fff5f5 100%);
+}
+
+/* Poll card with pending votes */
+.pending-poll-card {
+    background: linear-gradient(135deg, #ffffff 0%, #fff3cd 100%);
+    border-left: 4px solid #ffc107 !important;
 }
 
 .new-posts-card {
@@ -396,6 +614,11 @@
     50% {
         opacity: 0.3;
     }
+}
+
+/* Custom color for polls icon */
+.text-purple {
+    color: #6f42c1 !important;
 }
 </style>
 {% endblock content %}
