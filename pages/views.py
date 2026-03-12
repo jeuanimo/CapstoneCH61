@@ -83,7 +83,8 @@ from .models import (
     ProfileComment, CommentLike, PhotoAlbum, Photo,
     PhotoComment, PhotoLike, InvitationCode, StripeConfiguration, StripePayment,
     TwilioConfiguration, SMSPreference, SMSLog,
-    Product, Cart, CartItem, Order, OrderItem, SiteConfiguration
+    Product, Cart, CartItem, Order, OrderItem, SiteConfiguration,
+    Poll, PollVote
 )
 from django.db.models import Max
 from .forms import ChapterLeadershipForm, MemberProfileForm, DuesPaymentForm, StripeConfigurationForm, TwilioConfigurationForm, SMSPreferenceForm, CreateBillForm, SiteConfigurationForm
@@ -1292,11 +1293,29 @@ def portal_dashboard(request):
         is_read=False
     ).count()
     
+    # Get active polls that user hasn't voted on
+    now = timezone.now()
+    active_polls = Poll.objects.filter(
+        is_active=True,
+        starts_at__lte=now
+    ).filter(
+        Q(ends_at__isnull=True) | Q(ends_at__gte=now)
+    ).order_by('-created_at')[:5]
+    
+    # Mark polls user has voted on and count pending polls
+    pending_polls_count = 0
+    for poll in active_polls:
+        poll.user_voted = poll.user_has_voted(request.user)
+        if not poll.user_voted:
+            pending_polls_count += 1
+    
     context = {
         'recent_announcements': recent_announcements,
         'upcoming_events': upcoming_events,
         'unread_count': unread_count,
         'unread_announcements': unread_announcements,
+        'active_polls': active_polls,
+        'pending_polls_count': pending_polls_count,
     }
     return render(request, 'pages/portal/dashboard.html', context)
 
@@ -6649,6 +6668,54 @@ def _show_poll_form_errors_with_request(request, form, formset):
             messages.error(request, f'Options: {error}')
 
 
+def _send_poll_notification_to_members(poll, created_by):
+    """
+    Send a notification message to all active members about a new poll.
+    Creates an internal message for each member.
+    """
+    # Get the system user or the creator as the sender
+    sender = created_by
+    
+    # Get all active members (excluding the sender)
+    active_members = User.objects.filter(
+        is_active=True,
+        member_profile__isnull=False
+    ).exclude(pk=sender.pk)
+    
+    # Create notification messages for all members
+    notification_count = 0
+    poll_type_display = poll.get_poll_type_display()
+    deadline_text = f" Voting ends: {poll.ends_at.strftime('%B %d, %Y at %I:%M %p')}" if poll.ends_at else " No deadline set."
+    
+    for user in active_members:
+        try:
+            Message.objects.create(
+                sender=sender,
+                recipient=user,
+                subject=f"🗳️ New Poll: {poll.title}",
+                content=f"""A new {poll_type_display.lower()} has been created and needs your vote!
+
+**{poll.title}**
+
+{poll.description if poll.description else 'No description provided.'}
+
+{deadline_text}
+
+Please visit the Member Portal to cast your vote.
+
+---
+This is an automated notification. Do not reply to this message.""",
+                category=Message.Category.OFFICIAL,
+                priority=Message.Priority.HIGH if poll.poll_type in ['election', 'motion'] else Message.Priority.NORMAL,
+            )
+            notification_count += 1
+        except Exception as e:
+            logger.error(f"Failed to send poll notification to {user.username}: {e}")
+    
+    logger.info(f"Poll notifications sent: {notification_count} messages for poll '{poll.title}'")
+    return notification_count
+
+
 @login_required
 @user_passes_test(is_officer_or_staff)
 def create_poll(request):
@@ -6665,7 +6732,11 @@ def create_poll(request):
             poll.created_by = request.user
             poll.save()
             _process_poll_options_create(formset, poll)
-            messages.success(request, f'Poll "{poll.title}" created successfully!')
+            
+            # Send notification to all members about the new poll
+            notification_count = _send_poll_notification_to_members(poll, request.user)
+            
+            messages.success(request, f'Poll "{poll.title}" created successfully! {notification_count} members have been notified.')
             return _get_poll_redirect(request)
         _show_poll_form_errors_with_request(request, form, formset)
     else:
