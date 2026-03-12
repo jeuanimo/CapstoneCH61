@@ -109,7 +109,7 @@ DEBUG = config('DEBUG', default=True, cast=bool)
 
 # Comma-separated list of allowed hosts (domains that can serve this app)
 # Example: 'example.com,www.example.com,localhost,127.0.0.1'
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1', cast=Csv())
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1,capstonech61.onrender.com,.onrender.com,ngs1914.org,www.ngs1914.org', cast=Csv())
 
 
 # ====================== APPLICATION DEFINITION ======================
