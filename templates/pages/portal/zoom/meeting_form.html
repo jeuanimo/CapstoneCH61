@@ -1,6 +1,17 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 
-{% block title %}{{ title }} - Virtual Meetings{% endblock %}
+{% block title %}{{ title }} - Virtual Meetings{% endblock title %}
+
+{% block css %}
+<style>
+.form-check-static {
+    position: static !important;
+}
+body.dark-mode .form-check-static {
+    position: static !important;
+}
+</style>
+{% endblock css %}
 
 {% block content %}
 <div class="container my-5">
@@ -21,18 +32,18 @@
                         {% endif %}
                         
                         <div class="mb-3">
-                            <label class="form-label">Meeting Title *</label>
+                            <label class="form-label" for="{{ form.title.id_for_label }}">Meeting Title *</label>
                             {{ form.title }}
                         </div>
                         
                         <div class="mb-3">
-                            <label class="form-label">Description</label>
+                            <label class="form-label" for="{{ form.description.id_for_label }}">Description</label>
                             {{ form.description }}
                         </div>
                         
                         <!-- Platform Selection -->
                         <div class="mb-3">
-                            <label class="form-label">Meeting Platform *</label>
+                            <label class="form-label" for="{{ form.platform.id_for_label }}">Meeting Platform *</label>
                             {{ form.platform }}
                             <small class="form-text text-muted">
                                 Zoom meetings can be embedded in the website. Other platforms open in a new tab.
@@ -43,7 +54,7 @@
                         <div id="zoom-fields">
                             <div class="row">
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label">
+                                    <label class="form-label" for="{{ form.meeting_number.id_for_label }}">
                                         <span class="zoom-only">Zoom Meeting ID</span>
                                     </label>
                                     {{ form.meeting_number }}
@@ -52,7 +63,7 @@
                                     </small>
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label">Meeting Password</label>
+                                    <label class="form-label" for="{{ form.meeting_password.id_for_label }}">Meeting Password</label>
                                     {{ form.meeting_password }}
                                 </div>
                             </div>
@@ -60,7 +71,7 @@
                         
                         <!-- Meeting URL (for all platforms including Zoom fallback) -->
                         <div class="mb-3" id="url-field">
-                            <label class="form-label">
+                            <label class="form-label" for="{{ form.meeting_url.id_for_label }}">
                                 <span id="url-label">Meeting URL</span> <span id="url-required">*</span>
                             </label>
                             {{ form.meeting_url }}
@@ -71,30 +82,30 @@
                         
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">Scheduled Date/Time *</label>
+                                <label class="form-label" for="{{ form.scheduled_time.id_for_label }}">Scheduled Date/Time *</label>
                                 {{ form.scheduled_time }}
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">Duration (minutes)</label>
+                                <label class="form-label" for="{{ form.duration_minutes.id_for_label }}">Duration (minutes)</label>
                                 {{ form.duration_minutes }}
                             </div>
                         </div>
                         
                         <div class="mb-3">
-                            <label class="form-label">Link to Event (Optional)</label>
+                            <label class="form-label" for="{{ form.event.id_for_label }}">Link to Event (Optional)</label>
                             {{ form.event }}
                         </div>
                         
                         <div class="card bg-light mb-3">
                             <div class="card-body">
                                 <h6 class="card-title">Access Control</h6>
-                                <div class="form-check mb-2" style="position: static !important;">
+                                <div class="form-check mb-2 form-check-static">
                                     {{ form.members_only }}
                                     <label class="form-check-label" for="{{ form.members_only.id_for_label }}">
                                         Members Only (require login)
                                     </label>
                                 </div>
-                                <div class="form-check" style="position: static !important;">
+                                <div class="form-check form-check-static">
                                     {{ form.financial_only }}
                                     <label class="form-check-label" for="{{ form.financial_only.id_for_label }}">
                                         Financial Members Only
@@ -169,4 +180,4 @@ document.addEventListener('DOMContentLoaded', function() {
     updateFieldVisibility();
 });
 </script>
-{% endblock %}
+{% endblock content %}

@@ -1,6 +1,6 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 
-{% block title %}Zoom Configuration - Admin{% endblock %}
+{% block title %}Zoom Configuration - Admin{% endblock title %}
 
 {% block content %}
 <div class="container my-5">
@@ -29,13 +29,13 @@
                                 
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
-                                        <label class="form-label">SDK Key (Client ID) <span class="text-danger">*</span></label>
+                                        <label class="form-label" for="{{ form.sdk_key.id_for_label }}">SDK Key (Client ID) <span class="text-danger">*</span></label>
                                         {{ form.sdk_key }}
                                         <small class="form-text text-muted">{{ form.sdk_key.help_text }}</small>
                                     </div>
                                     
                                     <div class="col-md-6 mb-3">
-                                        <label class="form-label">SDK Secret (Client Secret) <span class="text-danger">*</span></label>
+                                        <label class="form-label" for="{{ form.sdk_secret.id_for_label }}">SDK Secret (Client Secret) <span class="text-danger">*</span></label>
                                         {{ form.sdk_secret }}
                                         <small class="form-text text-muted">{{ form.sdk_secret.help_text }}</small>
                                     </div>
@@ -59,19 +59,19 @@
                                 
                                 <div class="row">
                                     <div class="col-md-4 mb-3">
-                                        <label class="form-label">Account ID</label>
+                                        <label class="form-label" for="{{ form.oauth_account_id.id_for_label }}">Account ID</label>
                                         {{ form.oauth_account_id }}
                                         <small class="form-text text-muted">{{ form.oauth_account_id.help_text }}</small>
                                     </div>
                                     
                                     <div class="col-md-4 mb-3">
-                                        <label class="form-label">OAuth Client ID</label>
+                                        <label class="form-label" for="{{ form.oauth_client_id.id_for_label }}">OAuth Client ID</label>
                                         {{ form.oauth_client_id }}
                                         <small class="form-text text-muted">{{ form.oauth_client_id.help_text }}</small>
                                     </div>
                                     
                                     <div class="col-md-4 mb-3">
-                                        <label class="form-label">OAuth Client Secret</label>
+                                        <label class="form-label" for="{{ form.oauth_client_secret.id_for_label }}">OAuth Client Secret</label>
                                         {{ form.oauth_client_secret }}
                                         <small class="form-text text-muted">{{ form.oauth_client_secret.help_text }}</small>
                                     </div>
@@ -117,4 +117,4 @@
         </div>
     </div>
 </div>
-{% endblock %}
+{% endblock content %}

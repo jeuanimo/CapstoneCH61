@@ -1,7 +1,7 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% load static %}
 
-{% block title %}{{ profile_user.get_full_name }} - Profile{% endblock %}
+{% block title %}{{ profile_user.get_full_name }} - Profile{% endblock title %}
 
 {% block content %}
 <div class="fb-profile-page">
@@ -1595,4 +1595,4 @@ document.querySelectorAll('.like-btn').forEach(btn => {
     });
 </script>
 {% endif %}
-{% endblock %}
+{% endblock content %}

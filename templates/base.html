@@ -165,7 +165,8 @@
                         <a href="{% url 'login' %}" class="nav-link">Member Login</a>
                     </li>
                     {% endif %}
-                    <!-- Cart Icon - Visible to all users for guest checkout -->
+                    <!-- Cart Icon - Visible when boutique is enabled -->
+                    {% if site_config.show_boutique %}
                     <li class="nav-item navbar-cart">
                         <a href="{% url 'view_cart' %}" class="cart-link" title="Shopping Cart">
                             <i class="fas fa-shopping-cart"></i>
@@ -174,6 +175,7 @@
                             {% endif %}
                         </a>
                     </li>
+                    {% endif %}
                 </ul>
             </div>
         </div>

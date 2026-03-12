@@ -1,6 +1,6 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 
-{% block title %}Delete Product - Boutique{% endblock %}
+{% block title %}Delete Product - Boutique{% endblock title %}
 
 {% block content %}
 <style>
@@ -93,6 +93,22 @@
         background-color: rgba(220, 53, 69, 0.2);
         border-color: var(--error-color, #d32f2f);
     }
+
+    .alert-rounded {
+        border-radius: 10px;
+    }
+
+    .product-title-blue {
+        color: var(--pbs-blue);
+    }
+
+    body.dark-mode .product-title-blue {
+        color: #4a90e2;
+    }
+
+    .product-preview-img {
+        max-height: 200px;
+    }
 </style>
 
 <div class="container my-5">
@@ -105,7 +121,7 @@
                     </h4>
                 </div>
                 <div class="card-body">
-                    <div class="alert alert-danger" style="border-radius: 10px;">
+                    <div class="alert alert-danger alert-rounded">
                         <i class="fas fa-exclamation-triangle"></i> 
                         <strong>Warning:</strong> This action cannot be undone!
                     </div>
@@ -114,9 +130,9 @@
 
                     <div class="card product-preview-card mb-4">
                         <div class="card-body">
-                            <h5 class="card-title" style="color: var(--pbs-blue);">{{ product.name }}</h5>
+                            <h5 class="card-title product-title-blue">{{ product.name }}</h5>
                             {% if product.image %}
-                            <img src="{{ product.image.url }}" alt="{{ product.name }}" class="img-fluid rounded mb-3" style="max-height: 200px;">
+                            <img src="{{ product.image.url }}" alt="{{ product.name }}" class="img-fluid rounded mb-3 product-preview-img" width="200" height="200">
                             {% endif %}
                             <p class="card-text">{{ product.description|truncatewords:30 }}</p>
                             <p class="card-text">
@@ -143,4 +159,4 @@
         </div>
     </div>
 </div>
-{% endblock %}
+{% endblock content %}

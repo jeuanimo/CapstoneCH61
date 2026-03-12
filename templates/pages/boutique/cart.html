@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% load static %}
 {% load math_filters %}
 
@@ -264,8 +264,138 @@
             height: 200px !important;
         }
     }
+
+    /* Additional utility classes */
+    .card-body-no-pad {
+        padding: 0;
+    }
+
+    .cart-item-flex {
+        display: flex;
+        gap: 20px;
+        padding: 20px;
+        border-bottom: 1px solid #dee2e6;
+        align-items: flex-start;
+    }
+
+    body.dark-mode .cart-item-flex {
+        border-bottom-color: #444;
+    }
+
+    .flex-shrink-0 {
+        flex-shrink: 0;
+    }
+
+    .flex-grow-1 {
+        flex-grow: 1;
+    }
+
+    .item-detail {
+        margin: 5px 0;
+        color: #6c757d;
+    }
+
+    body.dark-mode .item-detail {
+        color: #adb5bd;
+    }
+
+    .item-total-blue {
+        color: var(--pbs-blue);
+    }
+
+    body.dark-mode .item-total-blue {
+        color: #4a90e2;
+    }
+
+    .actions-row {
+        margin-top: 15px;
+        display: flex;
+        gap: 15px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .qty-form {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .qty-label {
+        margin: 0;
+        color: #6c757d;
+    }
+
+    body.dark-mode .qty-label {
+        color: #adb5bd;
+    }
+
+    .qty-input {
+        width: 70px;
+    }
+
+    .remove-form {
+        margin: 0;
+    }
+
+    .sticky-card {
+        position: sticky;
+        top: 20px;
+    }
+
+    .card-body-padded-lg {
+        padding: 25px;
+    }
+
+    .summary-section {
+        margin-bottom: 15px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    body.dark-mode .summary-section {
+        border-bottom-color: #444;
+    }
+
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+    }
+
+    .total-row-lg {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        font-size: 1.2em;
+    }
+
+    .buttons-col {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .alert-empty {
+        margin-bottom: 30px;
+        border-radius: 12px;
+    }
+
+    .alert-heading-blue {
+        color: var(--pbs-blue);
+    }
+
+    body.dark-mode .alert-heading-blue {
+        color: #4a90e2;
+    }
+
+    .cart-item-img {
+        width: 120px;
+        height: 120px;
+    }
 </style>
-{% endblock %}
+{% endblock css %}
 
 {% block content %}
 <div class="container mt-4">
@@ -276,13 +406,13 @@
         <!-- Cart Items -->
         <div class="col-md-8">
             <div class="card cart-card">
-                <div class="card-body" style="padding: 0;">
+                <div class="card-body card-body-no-pad">
                     {% for item in cart.items.all %}
-                    <div class="cart-item" style="display: flex; gap: 20px; padding: 20px; border-bottom: 1px solid #dee2e6; align-items: flex-start;">
+                    <div class="cart-item cart-item-flex">
                         <!-- Product Image -->
-                        <div style="flex-shrink: 0;">
+                        <div class="flex-shrink-0">
                             {% if item.product.image %}
-                            <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="cart-item-image">
+                            <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="cart-item-image cart-item-img" width="120" height="120">
                             {% else %}
                             <div class="no-image-placeholder">
                                 <span>No Image</span>
@@ -291,37 +421,37 @@
                         </div>
 
                         <!-- Product Info -->
-                        <div style="flex-grow: 1;">
+                        <div class="flex-grow-1">
                             <h5 class="product-name">
                                 <a href="{% url 'product_detail' item.product.id %}">{{ item.product.name }}</a>
                             </h5>
-                            <p style="margin: 5px 0; color: #6c757d;">
+                            <p class="item-detail">
                                 Price: <strong>${{ item.product.price }}</strong>
                             </p>
                             {% if item.size %}
-                            <p style="margin: 5px 0; color: #6c757d;">
+                            <p class="item-detail">
                                 Size: <strong>{{ item.size }}</strong>
                             </p>
                             {% endif %}
                             {% if item.color %}
-                            <p style="margin: 5px 0; color: #6c757d;">
+                            <p class="item-detail">
                                 Color: <strong>{{ item.color }}</strong>
                             </p>
                             {% endif %}
-                            <p style="margin: 5px 0; color: #6c757d;">
-                                Item Total: <strong style="color: var(--pbs-blue);">${{ item.product.price|mul:item.quantity }}</strong>
+                            <p class="item-detail">
+                                Item Total: <strong class="item-total-blue">${{ item.product.price|mul:item.quantity }}</strong>
                             </p>
 
                             <!-- Quantity & Actions -->
-                            <div style="margin-top: 15px; display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
-                                <form method="POST" action="{% url 'update_cart_item' item.id %}" style="display: flex; align-items: center; gap: 10px;">
+                            <div class="actions-row">
+                                <form method="post" action="{% url 'update_cart_item' item.id %}" class="qty-form">
                                     {% csrf_token %}
-                                    <label style="margin: 0; color: #6c757d;">Qty:</label>
-                                    <input type="number" name="quantity" value="{{ item.quantity }}" min="1" max="{{ item.product.inventory }}" class="form-control" style="width: 70px;">
+                                    <label for="qty-{{ item.id }}" class="qty-label">Qty:</label>
+                                    <input type="number" id="qty-{{ item.id }}" name="quantity" value="{{ item.quantity }}" min="1" max="{{ item.product.inventory }}" class="form-control qty-input">
                                     <button type="submit" class="btn-update">Update</button>
                                 </form>
 
-                                <form method="POST" action="{% url 'remove_from_cart' item.id %}" style="margin: 0;">
+                                <form method="post" action="{% url 'remove_from_cart' item.id %}" class="remove-form">
                                     {% csrf_token %}
                                     <button type="submit" class="btn-remove">Remove</button>
                                 </form>
@@ -335,31 +465,31 @@
 
         <!-- Cart Summary -->
         <div class="col-md-4">
-            <div class="card cart-card" style="position: sticky; top: 20px;">
-                <div class="card-body" style="padding: 25px;">
+            <div class="card cart-card sticky-card">
+                <div class="card-body card-body-padded-lg">
                     <h5 class="card-title section-title">Order Summary</h5>
 
-                    <div style="margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #dee2e6;">
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                    <div class="summary-section">
+                        <div class="summary-row">
                             <span class="summary-label">Subtotal:</span>
                             <span class="summary-value">${{ cart.get_total_price }}</span>
                         </div>
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                        <div class="summary-row">
                             <span class="summary-label">Shipping:</span>
                             <span class="summary-value">TBD</span>
                         </div>
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                        <div class="summary-row">
                             <span class="summary-label">Tax:</span>
                             <span class="summary-value">TBD</span>
                         </div>
                     </div>
 
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; font-size: 1.2em;">
+                    <div class="total-row-lg">
                         <span class="total-label">Total:</span>
                         <span class="total-value">${{ cart.get_total_price }}</span>
                     </div>
 
-                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <div class="buttons-col">
                         <a href="{% url 'checkout' %}" class="btn-checkout">
                             Proceed to Checkout
                         </a>
@@ -373,8 +503,8 @@
     </div>
 
     {% else %}
-    <div class="alert alert-info" role="alert" style="margin-bottom: 30px; border-radius: 12px;">
-        <h4 class="alert-heading" style="color: var(--pbs-blue);">Your cart is empty</h4>
+    <div class="alert alert-info alert-empty" role="alert">
+        <h4 class="alert-heading alert-heading-blue">Your cart is empty</h4>
         <p>You haven't added any products to your cart yet.</p>
         <a href="{% url 'shop_home' %}" class="empty-cart-btn">
             Start Shopping
@@ -382,4 +512,4 @@
     </div>
     {% endif %}
 </div>
-{% endblock %}
+{% endblock content %}

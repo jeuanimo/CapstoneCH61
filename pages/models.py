@@ -25,6 +25,16 @@ from django.core.exceptions import ValidationError
 # Upload path constants
 SITE_BRANDING_PATH = 'site_branding/'
 
+# Program label constants (SonarQube: avoid duplicate literals)
+PROGRAM_LABEL_SOCIAL_ACTION = 'Social Action'
+PROGRAM_LABEL_SIGMA_BETA = 'Sigma Beta Club'
+PROGRAM_LABEL_EDUCATION = 'Education'
+PROGRAM_LABEL_BBB = 'Bigger & Better Business'
+PROGRAM_LABEL_SIGMA_WELLNESS = 'Sigma Wellness'
+PROGRAM_LABEL_BUSINESS = 'Business'
+PROGRAM_LABEL_OTHER = 'Other'
+PROGRAM_LABEL_NO_PROGRAM = 'No Program'
+
 
 class Category(models.Model):
     """
@@ -37,7 +47,7 @@ class Category(models.Model):
         created_at (DateTimeField): Auto-set timestamp when created
     
     Usage:
-        category = Category.objects.create(name='Social Action', color='#164f90')
+        category = Category.objects.create(name=PROGRAM_LABEL_SOCIAL_ACTION, color='#164f90')
         events = category.events.all()  # Get all events in this category
     """
     name = models.CharField(max_length=100, unique=True)
@@ -56,12 +66,12 @@ class Category(models.Model):
 
 class Event(models.Model):
     EVENT_TYPE_CHOICES = [
-        ('social_action', 'Social Action'),
-        ('education', 'Education'),
-        ('business', 'Business'),
-        ('sigma_beta_club', 'Sigma Beta Club'),
-        ('sigma_wellness', 'Sigma Wellness'),
-        ('other', 'Other'),
+        ('social_action', PROGRAM_LABEL_SOCIAL_ACTION),
+        ('education', PROGRAM_LABEL_EDUCATION),
+        ('business', PROGRAM_LABEL_BUSINESS),
+        ('sigma_beta_club', PROGRAM_LABEL_SIGMA_BETA),
+        ('sigma_wellness', PROGRAM_LABEL_SIGMA_WELLNESS),
+        ('other', PROGRAM_LABEL_OTHER),
     ]
     
     title = models.CharField(max_length=200)
@@ -597,11 +607,11 @@ class PhotoAlbum(models.Model):
     """Photo albums for organizing member photos"""
     
     PROGRAM_CHOICES = [
-        ('', 'No Program'),
-        ('bbb', 'Bigger & Better Business'),
-        ('education', 'Education'),
-        ('social_action', 'Social Action'),
-        ('sigma_beta', 'Sigma Beta Club'),
+        ('', PROGRAM_LABEL_NO_PROGRAM),
+        ('bbb', PROGRAM_LABEL_BBB),
+        ('education', PROGRAM_LABEL_EDUCATION),
+        ('social_action', PROGRAM_LABEL_SOCIAL_ACTION),
+        ('sigma_beta', PROGRAM_LABEL_SIGMA_BETA),
     ]
     
     title = models.CharField(max_length=200)
@@ -628,11 +638,11 @@ class Photo(models.Model):
     """Member photos with comments and likes"""
     
     PROGRAM_CHOICES = [
-        ('', 'No Program'),
-        ('bbb', 'Bigger & Better Business'),
-        ('education', 'Education'),
-        ('social_action', 'Social Action'),
-        ('sigma_beta', 'Sigma Beta Club'),
+        ('', PROGRAM_LABEL_NO_PROGRAM),
+        ('bbb', PROGRAM_LABEL_BBB),
+        ('education', PROGRAM_LABEL_EDUCATION),
+        ('social_action', PROGRAM_LABEL_SOCIAL_ACTION),
+        ('sigma_beta', PROGRAM_LABEL_SIGMA_BETA),
     ]
     
     album = models.ForeignKey(PhotoAlbum, on_delete=models.CASCADE, related_name='photos', blank=True, null=True)

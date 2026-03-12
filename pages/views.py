@@ -128,6 +128,7 @@ SYNC_MEMBERS_TEMPLATE = 'pages/portal/sync_members.html'
 MSG_PHOTO_UPLOAD_SUCCESS = 'Photo uploaded successfully!'
 MSG_FORM_ERRORS = 'Please correct the errors below.'
 MSG_NO_MEMBER_PROFILE = "You don't have a member profile."
+MSG_TICKETS_UNAVAILABLE = 'Event tickets are currently unavailable.'
 TAG_SIGMA_BETA = 'sigma beta'
 
 # Date format constants
@@ -394,55 +395,83 @@ def chapter_programs(request):
     """Chapter Programs page view"""
     return render(request, 'pages/chapter_programs.html')
 
+
+# ============================================================================
+# PROGRAM HELPER FUNCTIONS (SonarQube: reduce cognitive complexity)
+# ============================================================================
+
+def _is_officer(user):
+    """Check if user is an officer or staff member."""
+    if not user.is_authenticated:
+        return False
+    if user.is_staff:
+        return True
+    return hasattr(user, 'member_profile') and user.member_profile.is_officer
+
+
+def _get_or_create_program_event(event_type, title):
+    """Get existing program event or create a new one."""
+    event = Event.objects.filter(event_type=event_type).first()
+    if not event:
+        event = Event.objects.create(
+            event_type=event_type,
+            title=title,
+            start_date=timezone.now(),
+            end_date=timezone.now()
+        )
+    return event
+
+
+def _handle_program_photo_upload(request, program_key, event_type, event_title, tag, redirect_name):
+    """
+    Handle photo upload for program pages.
+    Returns redirect response if photos uploaded, None otherwise.
+    """
+    images = request.FILES.getlist('photo_upload')
+    if not images:
+        return None
+    
+    selected_album_id = request.POST.get('album_id')
+    caption = request.POST.get('caption', '')
+    
+    event = _get_or_create_program_event(event_type, event_title)
+    
+    album = None
+    if selected_album_id:
+        album = PhotoAlbum.objects.filter(id=selected_album_id, program=program_key).first()
+    
+    uploaded_count = 0
+    for image in images:
+        Photo.objects.create(
+            uploaded_by=request.user,
+            image=image,
+            caption=caption,
+            tags=tag,
+            event=event,
+            album=album
+        )
+        uploaded_count += 1
+    
+    if uploaded_count == 1:
+        messages.success(request, MSG_PHOTO_UPLOAD_SUCCESS)
+    else:
+        messages.success(request, f"Successfully uploaded {uploaded_count} photos!")
+    
+    return redirect(redirect_name)
+
+
 def program_business(request):
     """Bigger and Better Business program detail - officers can upload photos"""
-    is_officer = request.user.is_authenticated and (request.user.is_staff or (hasattr(request.user, 'member_profile') and request.user.member_profile.is_officer))
-    
-    # Get available albums for this program  
+    is_officer = _is_officer(request.user)
     program_albums = PhotoAlbum.objects.filter(program='bbb', is_public=True)
     
-    # Handle photo upload for officers
     if request.method == 'POST' and is_officer:
-        images = request.FILES.getlist('photo_upload')
-        selected_album_id = request.POST.get('album_id')
-        caption = request.POST.get('caption', '')
-        
-        if images:
-            # Get first existing business event or create one
-            event = Event.objects.filter(event_type='business').first()
-            if not event:
-                event = Event.objects.create(
-                    event_type='business',
-                    title='Business Program',
-                    start_date=timezone.now(),
-                    end_date=timezone.now()
-                )
-            
-            # Get selected album if provided
-            album = None
-            if selected_album_id:
-                album = PhotoAlbum.objects.filter(id=selected_album_id, program='bbb').first()
-            
-            uploaded_count = 0
-            for image in images:
-                photo = Photo(
-                    uploaded_by=request.user,
-                    image=image,
-                    caption=caption,
-                    tags='business',
-                    event=event,
-                    album=album
-                )
-                photo.save()
-                uploaded_count += 1
-            
-            if uploaded_count == 1:
-                messages.success(request, MSG_PHOTO_UPLOAD_SUCCESS)
-            else:
-                messages.success(request, f"Successfully uploaded {uploaded_count} photos!")
-            return redirect('program_business')
+        result = _handle_program_photo_upload(
+            request, 'bbb', 'business', 'Business Program', 'business', 'program_business'
+        )
+        if result:
+            return result
     
-    # Get photos tagged with business OR from business albums
     photos = Photo.objects.filter(
         Q(tags__icontains='business') | Q(album__program='bbb')
     ).distinct().order_by('-created_at')[:20]
@@ -457,53 +486,16 @@ def program_business(request):
 
 def program_social_action(request):
     """Social Action program detail - officers can upload photos"""
-    is_officer = request.user.is_authenticated and (request.user.is_staff or (hasattr(request.user, 'member_profile') and request.user.member_profile.is_officer))
-    
-    # Get available albums for this program
+    is_officer = _is_officer(request.user)
     program_albums = PhotoAlbum.objects.filter(program='social_action', is_public=True)
     
-    # Handle photo upload for officers
     if request.method == 'POST' and is_officer:
-        images = request.FILES.getlist('photo_upload')
-        selected_album_id = request.POST.get('album_id')
-        caption = request.POST.get('caption', '')
-        
-        if images:
-            # Get first existing social action event or create one
-            event = Event.objects.filter(event_type='social_action').first()
-            if not event:
-                event = Event.objects.create(
-                    event_type='social_action',
-                    title='Social Action Program',
-                    start_date=timezone.now(),
-                    end_date=timezone.now()
-                )
-            
-            # Get selected album if provided
-            album = None
-            if selected_album_id:
-                album = PhotoAlbum.objects.filter(id=selected_album_id, program='social_action').first()
-            
-            uploaded_count = 0
-            for image in images:
-                photo = Photo(
-                    uploaded_by=request.user,
-                    image=image,
-                    caption=caption,
-                    tags='social',
-                    event=event,
-                    album=album
-                )
-                photo.save()
-                uploaded_count += 1
-            
-            if uploaded_count == 1:
-                messages.success(request, MSG_PHOTO_UPLOAD_SUCCESS)
-            else:
-                messages.success(request, f"Successfully uploaded {uploaded_count} photos!")
-            return redirect('program_social_action')
+        result = _handle_program_photo_upload(
+            request, 'social_action', 'social_action', 'Social Action Program', 'social', 'program_social_action'
+        )
+        if result:
+            return result
     
-    # Get photos tagged with social OR from social_action albums
     photos = Photo.objects.filter(
         Q(tags__icontains='social') | Q(album__program='social_action')
     ).distinct().order_by('-created_at')[:20]
@@ -518,53 +510,16 @@ def program_social_action(request):
 
 def program_education(request):
     """Education program detail - officers can upload photos"""
-    is_officer = request.user.is_authenticated and (request.user.is_staff or (hasattr(request.user, 'member_profile') and request.user.member_profile.is_officer))
-    
-    # Get available albums for this program
+    is_officer = _is_officer(request.user)
     program_albums = PhotoAlbum.objects.filter(program='education', is_public=True)
     
-    # Handle photo upload for officers
     if request.method == 'POST' and is_officer:
-        images = request.FILES.getlist('photo_upload')
-        selected_album_id = request.POST.get('album_id')
-        caption = request.POST.get('caption', '')
-        
-        if images:
-            # Get first existing education event or create one
-            event = Event.objects.filter(event_type='education').first()
-            if not event:
-                event = Event.objects.create(
-                    event_type='education',
-                    title='Education Program',
-                    start_date=timezone.now(),
-                    end_date=timezone.now()
-                )
-            
-            # Get selected album if provided
-            album = None
-            if selected_album_id:
-                album = PhotoAlbum.objects.filter(id=selected_album_id, program='education').first()
-            
-            uploaded_count = 0
-            for image in images:
-                photo = Photo(
-                    uploaded_by=request.user,
-                    image=image,
-                    caption=caption,
-                    tags='education',
-                    event=event,
-                    album=album
-                )
-                photo.save()
-                uploaded_count += 1
-            
-            if uploaded_count == 1:
-                messages.success(request, MSG_PHOTO_UPLOAD_SUCCESS)
-            else:
-                messages.success(request, f"Successfully uploaded {uploaded_count} photos!")
-            return redirect('program_education')
+        result = _handle_program_photo_upload(
+            request, 'education', 'education', 'Education Program', 'education', 'program_education'
+        )
+        if result:
+            return result
     
-    # Get photos tagged with education OR from education albums
     photos = Photo.objects.filter(
         Q(tags__icontains='education') | Q(album__program='education')
     ).distinct().order_by('-created_at')[:20]
@@ -579,53 +534,16 @@ def program_education(request):
 
 def program_sigma_beta(request):
     """Sigma Beta Club program detail - officers can upload photos"""
-    is_officer = request.user.is_authenticated and (request.user.is_staff or (hasattr(request.user, 'member_profile') and request.user.member_profile.is_officer))
-    
-    # Get available albums for this program
+    is_officer = _is_officer(request.user)
     program_albums = PhotoAlbum.objects.filter(program='sigma_beta', is_public=True)
     
-    # Handle photo upload for officers
     if request.method == 'POST' and is_officer:
-        images = request.FILES.getlist('photo_upload')
-        selected_album_id = request.POST.get('album_id')
-        caption = request.POST.get('caption', '')
-        
-        if images:
-            # Get first existing sigma beta club event or create one
-            event = Event.objects.filter(event_type='sigma_beta_club').first()
-            if not event:
-                event = Event.objects.create(
-                    event_type='sigma_beta_club',
-                    title='Sigma Beta Club Program',
-                    start_date=timezone.now(),
-                    end_date=timezone.now()
-                )
-            
-            # Get selected album if provided
-            album = None
-            if selected_album_id:
-                album = PhotoAlbum.objects.filter(id=selected_album_id, program='sigma_beta').first()
-            
-            uploaded_count = 0
-            for image in images:
-                photo = Photo(
-                    uploaded_by=request.user,
-                    image=image,
-                    caption=caption,
-                    tags=TAG_SIGMA_BETA,
-                    event=event,
-                    album=album
-                )
-                photo.save()
-                uploaded_count += 1
-            
-            if uploaded_count == 1:
-                messages.success(request, MSG_PHOTO_UPLOAD_SUCCESS)
-            else:
-                messages.success(request, f"Successfully uploaded {uploaded_count} photos!")
-            return redirect('program_sigma_beta')
+        result = _handle_program_photo_upload(
+            request, 'sigma_beta', 'sigma_beta_club', 'Sigma Beta Club Program', TAG_SIGMA_BETA, 'program_sigma_beta'
+        )
+        if result:
+            return result
     
-    # Get photos tagged with sigma beta OR from sigma_beta albums
     photos = Photo.objects.filter(
         Q(tags__icontains=TAG_SIGMA_BETA) | Q(album__program='sigma_beta')
     ).distinct().order_by('-created_at')[:20]
@@ -1123,27 +1041,43 @@ def upload_leader_photo(request, pk):
     return render(request, 'pages/portal/upload_leader_photo.html', context)
 
 
-@login_required
-def upload_my_leadership_photo(request):
-    """Allow members to upload their own leadership photo"""
-    # Find leadership entries that belong to this user
-    # Match by: linked member profile OR email address
-    user = request.user
-    my_leadership = None
-    
+def _find_user_leadership(user):
+    """Find active leadership entry for a user by member profile or email."""
     # First try to find by linked member profile
     if hasattr(user, 'member_profile'):
-        my_leadership = ChapterLeadership.objects.filter(
+        leadership = ChapterLeadership.objects.filter(
             member=user.member_profile, 
             is_active=True
         ).first()
+        if leadership:
+            return leadership
     
     # If not found, try matching by email
-    if not my_leadership and user.email:
-        my_leadership = ChapterLeadership.objects.filter(
+    if user.email:
+        return ChapterLeadership.objects.filter(
             email__iexact=user.email, 
             is_active=True
         ).first()
+    
+    return None
+
+
+def _delete_old_image(image_field):
+    """Safely delete an old image file."""
+    if not image_field:
+        return
+    try:
+        if os.path.exists(image_field.path):
+            os.remove(image_field.path)
+    except Exception:
+        pass
+
+
+@login_required
+def upload_my_leadership_photo(request):
+    """Allow members to upload their own leadership photo"""
+    user = request.user
+    my_leadership = _find_user_leadership(user)
     
     if not my_leadership:
         messages.warning(request, "You don't have an active leadership position. Contact an officer if this is incorrect.")
@@ -1151,18 +1085,9 @@ def upload_my_leadership_photo(request):
     
     if request.method == 'POST':
         if 'profile_image' in request.FILES:
-            # Delete old image if exists
-            if my_leadership.profile_image:
-                try:
-                    if os.path.exists(my_leadership.profile_image.path):
-                        os.remove(my_leadership.profile_image.path)
-                except Exception:
-                    pass  # File might not exist
-            
-            # Save new image
+            _delete_old_image(my_leadership.profile_image)
             my_leadership.profile_image = request.FILES['profile_image']
             
-            # Link to member profile if not already linked
             if hasattr(user, 'member_profile') and not my_leadership.member:
                 my_leadership.member = user.member_profile
             
@@ -1170,8 +1095,7 @@ def upload_my_leadership_photo(request):
             logger.info(f"Member uploaded own leadership photo: {my_leadership.full_name} by {user.username}")
             messages.success(request, "Your leadership photo has been updated!")
             return redirect('chapter_leadership')
-        else:
-            messages.error(request, "Please select an image to upload.")
+        messages.error(request, "Please select an image to upload.")
     
     context = {
         'leader': my_leadership,
@@ -3494,59 +3418,66 @@ def photo_gallery(request):
     return render(request, 'pages/portal/photo_gallery.html', context)
 
 
+def _get_or_create_album(request, album_id, new_album_name, program):
+    """Get existing album or create a new one if name provided."""
+    if new_album_name:
+        return PhotoAlbum.objects.create(
+            title=new_album_name,
+            program=program,
+            created_by=request.user,
+            is_public=True
+        )
+    if album_id:
+        return PhotoAlbum.objects.filter(id=album_id).first()
+    return None
+
+
+def _upload_photos(request, images, caption, tags, album, program, event):
+    """Upload multiple photos and return the count uploaded."""
+    uploaded_count = 0
+    for image in images:
+        Photo.objects.create(
+            uploaded_by=request.user,
+            image=image,
+            caption=caption,
+            tags=tags,
+            album=album,
+            program=program,
+            event=event
+        )
+        uploaded_count += 1
+    return uploaded_count
+
+
 @login_required
 def upload_photo(request):
     """Upload new photos (supports multiple files)"""
     if request.method == 'POST':
         images = request.FILES.getlist('images')
-        caption = request.POST.get('caption', '').strip()
-        tags = request.POST.get('tags', '').strip()
-        album_id = request.POST.get('album')
-        new_album_name = request.POST.get('new_album_name', '').strip()
-        program = request.POST.get('program', '')
-        event_id = request.POST.get('event')
-        
-        if images:
-            album = None
+        if not images:
+            messages.error(request, "Please select at least one image to upload.")
+        else:
+            caption = request.POST.get('caption', '').strip()
+            tags = request.POST.get('tags', '').strip()
+            program = request.POST.get('program', '')
             
-            # Create new album if name provided
-            if new_album_name:
-                album = PhotoAlbum.objects.create(
-                    title=new_album_name,
-                    program=program,
-                    created_by=request.user,
-                    is_public=True
-                )
-            elif album_id:
-                album = PhotoAlbum.objects.filter(id=album_id).first()
+            album = _get_or_create_album(
+                request, 
+                request.POST.get('album'), 
+                request.POST.get('new_album_name', '').strip(),
+                program
+            )
+            event_id = request.POST.get('event')
+            event = Event.objects.filter(id=event_id).first() if event_id else None
             
-            event = None
-            if event_id:
-                event = Event.objects.filter(id=event_id).first()
-            
-            # Upload all images
-            uploaded_count = 0
-            for image in images:
-                Photo.objects.create(
-                    uploaded_by=request.user,
-                    image=image,
-                    caption=caption,
-                    tags=tags,
-                    album=album,
-                    program=program,
-                    event=event
-                )
-                uploaded_count += 1
+            uploaded_count = _upload_photos(request, images, caption, tags, album, program, event)
             
             if uploaded_count == 1:
                 messages.success(request, MSG_PHOTO_UPLOAD_SUCCESS)
             else:
                 messages.success(request, f"Successfully uploaded {uploaded_count} photos!")
             return redirect('photo_gallery')
-        else:
-            messages.error(request, "Please select at least one image to upload.")
     
-    # Get albums and events for the form
     albums = PhotoAlbum.objects.filter(is_public=True)
     events = Event.objects.all().order_by('-start_date')[:20]
     program_choices = PhotoAlbum.PROGRAM_CHOICES
@@ -3629,34 +3560,38 @@ def delete_photo(request, photo_id):
     return redirect('photo_gallery')
 
 
+def _can_delete_photo(user, photo):
+    """Check if user has permission to delete a photo."""
+    if photo.uploaded_by == user or user.is_staff:
+        return True
+    return hasattr(user, 'member_profile') and user.member_profile.is_officer
+
+
 @login_required
 def bulk_delete_photos(request):
     """Bulk delete multiple photos at once"""
-    if request.method == 'POST':
-        photo_ids = request.POST.getlist('photo_ids')
-        
-        if not photo_ids:
-            messages.warning(request, "No photos selected for deletion.")
-            return redirect('photo_gallery')
-        
-        # Check permissions and delete
-        is_officer = hasattr(request.user, 'member_profile') and request.user.member_profile.is_officer
-        deleted_count = 0
-        
-        for photo_id in photo_ids:
-            try:
-                photo = Photo.objects.get(id=photo_id)
-                # Only allow deletion if user owns, is staff, or is officer
-                if photo.uploaded_by == request.user or request.user.is_staff or is_officer:
-                    photo.delete()
-                    deleted_count += 1
-            except Photo.DoesNotExist:
-                continue
-        
-        if deleted_count > 0:
-            messages.success(request, f"Successfully deleted {deleted_count} photo(s)!")
-        else:
-            messages.error(request, "No photos were deleted. You may not have permission.")
+    if request.method != 'POST':
+        return redirect('photo_gallery')
+    
+    photo_ids = request.POST.getlist('photo_ids')
+    if not photo_ids:
+        messages.warning(request, "No photos selected for deletion.")
+        return redirect('photo_gallery')
+    
+    deleted_count = 0
+    for photo_id in photo_ids:
+        try:
+            photo = Photo.objects.get(id=photo_id)
+            if _can_delete_photo(request.user, photo):
+                photo.delete()
+                deleted_count += 1
+        except Photo.DoesNotExist:
+            continue
+    
+    if deleted_count > 0:
+        messages.success(request, f"Successfully deleted {deleted_count} photo(s)!")
+    else:
+        messages.error(request, "No photos were deleted. You may not have permission.")
     
     return redirect('photo_gallery')
 
@@ -3888,58 +3823,67 @@ def edit_own_profile(request):
     return render(request, 'pages/portal/edit_profile.html', context)
 
 
+def _is_ajax_request(request):
+    """Check if request is an AJAX/fetch request."""
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return True
+    if request.content_type == 'multipart/form-data':
+        return True
+    return 'fetch' in request.headers.get('Sec-Fetch-Mode', '')
+
+
+def _profile_error_response(request, error_msg, redirect_url='portal_dashboard'):
+    """Return error response for profile operations (handles AJAX and regular requests)."""
+    if _is_ajax_request(request):
+        return JsonResponse({'success': False, 'error': error_msg}, status=400)
+    messages.error(request, error_msg)
+    return redirect(redirect_url)
+
+
+def _profile_success_response(request, success_msg, username):
+    """Return success response for profile operations (handles AJAX and regular requests)."""
+    if _is_ajax_request(request):
+        return JsonResponse({'success': True, 'message': success_msg})
+    messages.success(request, success_msg)
+    return redirect('member_profile', username=username)
+
+
 @login_required
 def update_cover_photo(request):
     """Update user's cover photo"""
-    if request.method == 'POST':
-        try:
-            member_profile = MemberProfile.objects.get(user=request.user)
-        except MemberProfile.DoesNotExist:
-            if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.content_type == 'multipart/form-data':
-                return JsonResponse({'success': False, 'error': MSG_NO_MEMBER_PROFILE}, status=400)
-            messages.error(request, MSG_NO_MEMBER_PROFILE)
-            return redirect('portal_dashboard')
-        
-        if 'cover_image' in request.FILES:
-            member_profile.cover_image = request.FILES['cover_image']
-            member_profile.save()
-            # Check if AJAX request
-            if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or 'fetch' in request.headers.get('Sec-Fetch-Mode', ''):
-                return JsonResponse({'success': True, 'message': 'Cover photo updated successfully!'})
-            messages.success(request, "Cover photo updated successfully!")
-        else:
-            if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or 'fetch' in request.headers.get('Sec-Fetch-Mode', ''):
-                return JsonResponse({'success': False, 'error': 'Please select an image.'}, status=400)
-            messages.error(request, "Please select an image.")
+    if request.method != 'POST':
+        return redirect('member_profile', username=request.user.username)
     
-    return redirect('member_profile', username=request.user.username)
+    try:
+        member_profile = MemberProfile.objects.get(user=request.user)
+    except MemberProfile.DoesNotExist:
+        return _profile_error_response(request, MSG_NO_MEMBER_PROFILE)
+    
+    if 'cover_image' not in request.FILES:
+        return _profile_error_response(request, 'Please select an image.', f'member_profile/{request.user.username}')
+    
+    member_profile.cover_image = request.FILES['cover_image']
+    member_profile.save()
+    return _profile_success_response(request, 'Cover photo updated successfully!', request.user.username)
 
 
 @login_required
 def update_profile_photo(request):
     """Update user's profile photo via camera icon click"""
-    if request.method == 'POST':
-        try:
-            member_profile = MemberProfile.objects.get(user=request.user)
-        except MemberProfile.DoesNotExist:
-            if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.content_type == 'multipart/form-data':
-                return JsonResponse({'success': False, 'error': MSG_NO_MEMBER_PROFILE}, status=400)
-            messages.error(request, MSG_NO_MEMBER_PROFILE)
-            return redirect('portal_dashboard')
-        
-        if 'profile_image' in request.FILES:
-            member_profile.profile_image = request.FILES['profile_image']
-            member_profile.save()
-            # Check if AJAX request
-            if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or 'fetch' in request.headers.get('Sec-Fetch-Mode', ''):
-                return JsonResponse({'success': True, 'message': 'Profile photo updated successfully!'})
-            messages.success(request, "Profile photo updated successfully!")
-        else:
-            if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or 'fetch' in request.headers.get('Sec-Fetch-Mode', ''):
-                return JsonResponse({'success': False, 'error': 'Please select an image.'}, status=400)
-            messages.error(request, "Please select an image.")
+    if request.method != 'POST':
+        return redirect('member_profile', username=request.user.username)
     
-    return redirect('member_profile', username=request.user.username)
+    try:
+        member_profile = MemberProfile.objects.get(user=request.user)
+    except MemberProfile.DoesNotExist:
+        return _profile_error_response(request, MSG_NO_MEMBER_PROFILE)
+    
+    if 'profile_image' not in request.FILES:
+        return _profile_error_response(request, 'Please select an image.', f'member_profile/{request.user.username}')
+    
+    member_profile.profile_image = request.FILES['profile_image']
+    member_profile.save()
+    return _profile_success_response(request, 'Profile photo updated successfully!', request.user.username)
 
 
 @login_required
@@ -6633,11 +6577,82 @@ def manage_polls(request):
     return render(request, 'pages/portal/polls/manage_polls.html', context)
 
 
+# ============================================================================
+# POLL HELPER FUNCTIONS (SonarQube: reduce cognitive complexity)
+# ============================================================================
+
+def _get_poll_redirect(request, default_redirect='manage_polls'):
+    """Get redirect URL, handling from_meeting parameter."""
+    from_meeting = request.GET.get('from_meeting') or request.POST.get('from_meeting')
+    if from_meeting:
+        return redirect('join_zoom_meeting', meeting_id=from_meeting)
+    return redirect(default_redirect)
+
+
+def _process_poll_options_create(formset, poll):
+    """Process poll option formset for creating new poll options."""
+    from .models import PollOption
+    order = 0
+    for option_form in formset:
+        if not option_form.cleaned_data:
+            continue
+        if option_form.cleaned_data.get('DELETE', False):
+            continue
+        text = option_form.cleaned_data.get('text', '').strip()
+        if text:
+            PollOption.objects.create(poll=poll, text=text, order=order)
+            order += 1
+
+
+def _process_poll_options_edit(formset, poll):
+    """Process poll option formset for editing existing poll options."""
+    from .models import PollOption
+    for option_form in formset:
+        if not option_form.cleaned_data:
+            continue
+        _handle_single_option_edit(option_form, poll)
+
+
+def _handle_single_option_edit(option_form, poll):
+    """Handle a single poll option edit/create/delete."""
+    from .models import PollOption
+    if option_form.cleaned_data.get('DELETE', False):
+        if option_form.instance.pk:
+            option_form.instance.delete()
+        return
+    
+    text = option_form.cleaned_data.get('text', '').strip()
+    if option_form.instance.pk:
+        _update_existing_option(option_form.instance, text)
+    elif text:
+        PollOption.objects.create(poll=poll, text=text, order=poll.options.count())
+
+
+def _update_existing_option(instance, text):
+    """Update or delete an existing poll option."""
+    if text:
+        instance.text = text
+        instance.save()
+    else:
+        instance.delete()
+
+
+def _show_poll_form_errors_with_request(request, form, formset):
+    """Display poll form validation errors as messages."""
+    if form.errors:
+        for field, errors in form.errors.items():
+            for error in errors:
+                messages.error(request, f'{field}: {error}')
+    if formset.non_form_errors():
+        for error in formset.non_form_errors():
+            messages.error(request, f'Options: {error}')
+
+
 @login_required
 @user_passes_test(is_officer_or_staff)
 def create_poll(request):
     """Create a new poll with options."""
-    from .models import Poll, PollOption
+    from .models import Poll
     from .forms import PollForm, PollOptionFormSet
     
     if request.method == 'POST':
@@ -6648,35 +6663,10 @@ def create_poll(request):
             poll = form.save(commit=False)
             poll.created_by = request.user
             poll.save()
-            
-            # Save options, filtering out empty ones
-            order = 0
-            for option_form in formset:
-                if option_form.cleaned_data and not option_form.cleaned_data.get('DELETE', False):
-                    text = option_form.cleaned_data.get('text', '').strip()
-                    if text:
-                        PollOption.objects.create(
-                            poll=poll,
-                            text=text,
-                            order=order
-                        )
-                        order += 1
-            
+            _process_poll_options_create(formset, poll)
             messages.success(request, f'Poll "{poll.title}" created successfully!')
-            # Redirect back to meeting if from_meeting is set
-            from_meeting = request.GET.get('from_meeting') or request.POST.get('from_meeting')
-            if from_meeting:
-                return redirect('join_zoom_meeting', meeting_id=from_meeting)
-            return redirect('manage_polls')
-        else:
-            # Show validation errors
-            if form.errors:
-                for field, errors in form.errors.items():
-                    for error in errors:
-                        messages.error(request, f'{field}: {error}')
-            if formset.non_form_errors():
-                for error in formset.non_form_errors():
-                    messages.error(request, f'Options: {error}')
+            return _get_poll_redirect(request)
+        _show_poll_form_errors_with_request(request, form, formset)
     else:
         form = PollForm()
         formset = PollOptionFormSet()
@@ -6693,7 +6683,7 @@ def create_poll(request):
 @user_passes_test(is_officer_or_staff)
 def edit_poll(request, poll_id):
     """Edit an existing poll."""
-    from .models import Poll, PollOption
+    from .models import Poll
     from .forms import PollForm, PollOptionFormSet
     
     poll = get_object_or_404(Poll, pk=poll_id)
@@ -6704,37 +6694,9 @@ def edit_poll(request, poll_id):
         
         if form.is_valid() and formset.is_valid():
             form.save()
-            
-            # Handle existing options (delete those marked for deletion)
-            for option_form in formset:
-                if option_form.cleaned_data:
-                    if option_form.cleaned_data.get('DELETE', False):
-                        if option_form.instance.pk:
-                            option_form.instance.delete()
-                    elif option_form.instance.pk:
-                        # Update existing option
-                        text = option_form.cleaned_data.get('text', '').strip()
-                        if text:
-                            option_form.instance.text = text
-                            option_form.instance.save()
-                        else:
-                            option_form.instance.delete()
-                    else:
-                        # Create new option
-                        text = option_form.cleaned_data.get('text', '').strip()
-                        if text:
-                            PollOption.objects.create(
-                                poll=poll,
-                                text=text,
-                                order=poll.options.count()
-                            )
-            
+            _process_poll_options_edit(formset, poll)
             messages.success(request, f'Poll "{poll.title}" updated!')
-            # Redirect back to meeting if from_meeting is set
-            from_meeting = request.GET.get('from_meeting') or request.POST.get('from_meeting')
-            if from_meeting:
-                return redirect('join_zoom_meeting', meeting_id=from_meeting)
-            return redirect('manage_polls')
+            return _get_poll_redirect(request)
     else:
         form = PollForm(instance=poll)
         formset = PollOptionFormSet(instance=poll)
@@ -6791,44 +6753,37 @@ def _check_poll_access(user, poll):
     return True, None
 
 
+def _save_poll_vote(poll, user, selected_options):
+    """Save vote(s) for a poll. Handles single and multiple selection polls."""
+    from .models import Vote
+    voter = user if not poll.is_anonymous else None
+    
+    if poll.allow_multiple:
+        for option in selected_options:
+            Vote.objects.create(poll=poll, option=option, voter=voter)
+    else:
+        Vote.objects.create(poll=poll, option=selected_options, voter=voter)
+
+
 @login_required
 def view_poll(request, poll_id):
     """View poll and cast vote."""
-    from .models import Poll, Vote
+    from .models import Poll
     from .forms import VoteForm
     
     poll = get_object_or_404(Poll, pk=poll_id)
-    
-    # Check access
     allowed, error = _check_poll_access(request.user, poll)
     has_voted = poll.user_has_voted(request.user)
     
     if request.method == 'POST' and allowed:
         form = VoteForm(poll, request.POST)
         if form.is_valid():
-            selected_options = form.cleaned_data['option']
-            
-            # Handle multiple selections
-            if poll.allow_multiple:
-                for option in selected_options:
-                    Vote.objects.create(
-                        poll=poll,
-                        option=option,
-                        voter=request.user if not poll.is_anonymous else None
-                    )
-            else:
-                Vote.objects.create(
-                    poll=poll,
-                    option=selected_options,
-                    voter=request.user if not poll.is_anonymous else None
-                )
-            
+            _save_poll_vote(poll, request.user, form.cleaned_data['option'])
             messages.success(request, 'Your vote has been recorded!')
             return redirect('view_poll', poll_id=poll_id)
     else:
         form = VoteForm(poll) if allowed else None
     
-    # Get results
     results = poll.get_results() if poll.show_results_during or not poll.is_open else None
     
     context = {
@@ -6938,7 +6893,7 @@ def event_tickets(request):
     
     # Check if tickets are enabled
     if not site_config.show_event_tickets:
-        messages.info(request, 'Event tickets are currently unavailable.')
+        messages.info(request, MSG_TICKETS_UNAVAILABLE)
         return redirect('home')
     
     # Check if using external ticketing
@@ -6971,7 +6926,7 @@ def event_ticket_detail(request, pk):
     site_config = SiteConfiguration.get_config()
     
     if not site_config.show_event_tickets:
-        messages.info(request, 'Event tickets are currently unavailable.')
+        messages.info(request, MSG_TICKETS_UNAVAILABLE)
         return redirect('home')
     
     ticket = get_object_or_404(EventTicket, pk=pk, is_active=True)
@@ -6988,74 +6943,87 @@ def event_ticket_detail(request, pk):
     return render(request, 'pages/tickets/event_ticket_detail.html', context)
 
 
-def purchase_ticket(request, pk):
-    """Handle ticket purchase"""
-    from .models import EventTicket, TicketPurchase, SiteConfiguration
-    from .forms import TicketPurchaseForm
-    import uuid
-    
-    site_config = SiteConfiguration.get_config()
-    
-    if not site_config.show_event_tickets:
-        messages.info(request, 'Event tickets are currently unavailable.')
-        return redirect('home')
-    
-    ticket = get_object_or_404(EventTicket, pk=pk, is_active=True)
-    
-    # Check if member-only
+def _check_ticket_availability(request, ticket, pk):
+    """Check if tickets are available. Returns redirect response if not, None if OK."""
     if ticket.requires_member and not request.user.is_authenticated:
         messages.info(request, 'This event requires member login to purchase tickets.')
         return redirect('login')
     
-    # Check availability
     if ticket.tickets_remaining <= 0:
         messages.error(request, 'Sorry, this event is sold out.')
         return redirect('event_ticket_detail', pk=pk)
+    
+    return None
+
+
+def _create_ticket_purchase(ticket, form, user, confirmation_code):
+    """Create a ticket purchase record."""
+    from .models import TicketPurchase
+    quantity = form.cleaned_data['quantity']
+    
+    purchase = TicketPurchase.objects.create(
+        ticket=ticket,
+        quantity=quantity,
+        price_per_ticket=ticket.price,
+        total_price=ticket.price * quantity,
+        user=user if user.is_authenticated else None,
+        email=form.cleaned_data['email'],
+        full_name=form.cleaned_data['full_name'],
+        phone=form.cleaned_data.get('phone', ''),
+        status='pending',
+        confirmation_code=confirmation_code,
+    )
+    
+    ticket.quantity_sold += quantity
+    ticket.save()
+    
+    purchase.status = 'completed'
+    purchase.save()
+    return purchase
+
+
+def _get_ticket_form_initial(user):
+    """Get initial form data for ticket purchase form."""
+    initial = {}
+    if user.is_authenticated:
+        initial['email'] = user.email
+        if hasattr(user, 'first_name') and hasattr(user, 'last_name'):
+            initial['full_name'] = f"{user.first_name} {user.last_name}".strip()
+    return initial
+
+
+def purchase_ticket(request, pk):
+    """Handle ticket purchase"""
+    from .models import EventTicket, SiteConfiguration
+    from .forms import TicketPurchaseForm
+    import uuid
+    
+    site_config = SiteConfiguration.get_config()
+    if not site_config.show_event_tickets:
+        messages.info(request, MSG_TICKETS_UNAVAILABLE)
+        return redirect('home')
+    
+    ticket = get_object_or_404(EventTicket, pk=pk, is_active=True)
+    
+    availability_check = _check_ticket_availability(request, ticket, pk)
+    if availability_check:
+        return availability_check
     
     if request.method == 'POST':
         form = TicketPurchaseForm(request.POST, ticket=ticket)
         if form.is_valid():
             quantity = form.cleaned_data['quantity']
-            
-            # Verify tickets still available
             if quantity > ticket.tickets_remaining:
                 messages.error(request, f'Only {ticket.tickets_remaining} tickets remaining.')
                 return redirect('event_ticket_detail', pk=pk)
             
-            # Generate confirmation code
             confirmation_code = str(uuid.uuid4())[:8].upper()
-            
-            # Create purchase
-            purchase = TicketPurchase.objects.create(
-                ticket=ticket,
-                quantity=quantity,
-                price_per_ticket=ticket.price,
-                total_price=ticket.price * quantity,
-                user=request.user if request.user.is_authenticated else None,
-                email=form.cleaned_data['email'],
-                full_name=form.cleaned_data['full_name'],
-                phone=form.cleaned_data.get('phone', ''),
-                status='pending',
-                confirmation_code=confirmation_code,
-            )
-            
-            # Update quantity sold
-            ticket.quantity_sold += quantity
-            ticket.save()
-            
-            # For now, mark as completed (no payment integration)
-            purchase.status = 'completed'
-            purchase.save()
+            purchase = _create_ticket_purchase(ticket, form, request.user, confirmation_code)
             
             messages.success(request, f'Tickets purchased successfully! Confirmation: {confirmation_code}')
             return redirect('ticket_purchase_success', purchase_id=purchase.id)
     else:
-        initial = {}
-        if request.user.is_authenticated:
-            initial['email'] = request.user.email
-            if hasattr(request.user, 'first_name') and hasattr(request.user, 'last_name'):
-                initial['full_name'] = f"{request.user.first_name} {request.user.last_name}".strip()
-        form = TicketPurchaseForm(ticket=ticket, initial=initial)
+        form = TicketPurchaseForm(ticket=ticket, initial=_get_ticket_form_initial(request.user))
     
     context = {
         'ticket': ticket,

@@ -1,6 +1,6 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 
-{% block title %}Photo Gallery - Member Portal{% endblock %}
+{% block title %}Photo Gallery - Member Portal{% endblock title %}
 
 {% block css %}
 <style>
@@ -102,7 +102,7 @@
         justify-content: space-between;
     }
 </style>
-{% endblock %}
+{% endblock css %}
 
 {% block content %}
 <div class="container my-5">
@@ -192,7 +192,7 @@
                         <input type="checkbox" name="photo_ids" value="{{ photo.id }}" class="photo-checkbox" title="Select for bulk action">
                         {% endif %}
                         <a href="{% url 'photo_detail' photo.id %}">
-                            <img src="{{ photo.image.url }}" class="gallery-image" alt="{{ photo.caption }}">
+                            <img src="{{ photo.image.url }}" class="gallery-image" alt="{{ photo.caption|default:'Gallery image' }}">
                         </a>
                     </div>
                 <div class="card-body">
@@ -296,4 +296,4 @@
     </div>
     {% endif %}
 </div>
-{% endblock %}
+{% endblock content %}

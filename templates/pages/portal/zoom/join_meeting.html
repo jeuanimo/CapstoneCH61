@@ -1,6 +1,6 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 
-{% block title %}{{ meeting.title }} - Meeting Room{% endblock %}
+{% block title %}{{ meeting.title }} - Meeting Room{% endblock title %}
 
 {% block css %}
 <style>
@@ -111,7 +111,7 @@
         }
     }
 </style>
-{% endblock %}
+{% endblock css %}
 
 {% block content %}
 <div class="container-fluid my-4">
@@ -140,9 +140,9 @@
         <div class="zoom-container">
             <div id="meetingSDKElement" class="zoom-meeting-embedded"></div>
             <div id="zoom-loading" class="text-center py-5">
-                <div class="spinner-border text-primary" role="status">
+                <output class="spinner-border text-primary" aria-live="polite">
                     <span class="visually-hidden">Loading...</span>
-                </div>
+                </output>
                 <p class="text-white mt-3">Loading Zoom Meeting...</p>
                 <p class="text-muted small">If the meeting doesn't load, ensure pop-ups are enabled.</p>
             </div>
@@ -199,8 +199,8 @@
                                         <span>{{ option.vote_count }} ({{ option.percentage }}%)</span>
                                     </div>
                                     <div class="progress poll-progress">
-                                        <div class="progress-bar" role="progressbar" 
-                                             style="width: {{ option.percentage }}%"></div>
+                                        <progress class="progress-bar" max="100" 
+                                             value="{{ option.percentage }}" aria-label="{{ option.text }}">{{ option.percentage }}%</progress>
                                     </div>
                                 </div>
                                 {% endfor %}
@@ -349,4 +349,4 @@ setInterval(function() {
 }, 10000);
 {% endif %}
 </script>
-{% endblock %}
+{% endblock content %}

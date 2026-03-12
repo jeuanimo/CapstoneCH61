@@ -2,7 +2,7 @@
 
 {% load static %}
 
-{% block title %}Contact Us - Phi Beta Sigma Fraternity, Inc. | Nu Gamma Sigma Chapter{% endblock %}
+{% block title %}Contact Us - Phi Beta Sigma Fraternity, Inc. | Nu Gamma Sigma Chapter{% endblock title %}
 
 {% block css %}
 <style>
@@ -209,7 +209,7 @@
         }
     }
 </style>
-{% endblock %}
+{% endblock css %}
 
 {% block content %}
 <div class="contact-container">
@@ -224,7 +224,7 @@
             <span>This form is protected by CSRF security. Your information is encrypted and secure.</span>
         </div>
         
-        <form method="POST" action="{% url 'contact' %}">
+        <form method="post" action="{% url 'contact' %}">
             {% csrf_token %}
             
             <div class="form-group">
@@ -287,4 +287,4 @@
         </form>
     </div>
 </div>
-{% endblock %}
+{% endblock content %}

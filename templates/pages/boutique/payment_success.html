@@ -1,8 +1,8 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% load static %}
 {% load math_filters %}
 
-{% block content %}
+{% block css %}
 <style>
     /* Theme Colors - Use project standard colors */
     :root {
@@ -208,7 +208,72 @@
             font-size: 0.9em;
         }
     }
+
+    /* Additional utility classes */
+    .order-value-normal {
+        font-size: 1em;
+    }
+
+    .items-title {
+        color: var(--pbs-blue);
+        margin-bottom: 20px;
+        font-weight: 600;
+    }
+
+    body.dark-mode .items-title {
+        color: #5c9fff;
+    }
+
+    .order-table-clean {
+        border: none;
+        margin: 0;
+    }
+
+    .text-right {
+        text-align: right;
+    }
+
+    .item-details {
+        color: #6c757d;
+    }
+
+    body.dark-mode .item-details {
+        color: #adb5bd;
+    }
+
+    .text-bold {
+        font-weight: bold;
+    }
+
+    .total-row-separator {
+        margin-bottom: 20px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid #dee2e6;
+    }
+
+    body.dark-mode .total-row-separator {
+        border-bottom-color: #2a4a6a;
+    }
+
+    .grand-total-spaced {
+        margin-right: 20px;
+    }
+
+    .grand-total-value-styled {
+        min-width: 100px;
+        text-align: right;
+    }
+
+    .action-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        margin-top: 30px;
+    }
 </style>
+{% endblock css %}
+
+{% block content %}
 
 <div class="container mt-4">
     <!-- Success Message -->
@@ -247,7 +312,7 @@
                             <p class="order-label">
                                 <strong>Shipping Address:</strong>
                             </p>
-                            <p class="order-value" style="font-size: 1em;">
+                            <p class="order-value order-value-normal">
                                 {{ order.address }}<br>
                                 {{ order.city }}, {{ order.state }} {{ order.zip_code }}
                             </p>
@@ -263,15 +328,15 @@
                     <hr>
 
                     <!-- Order Items -->
-                    <h6 style="color: var(--pbs-blue); margin-bottom: 20px; font-weight: 600;">Items Ordered:</h6>
-                    <table class="table order-table" style="border: none; margin: 0;">
+                    <h6 class="items-title">Items Ordered:</h6>
+                    <table class="table order-table order-table-clean">
                         <caption class="sr-only">Order summary</caption>
                         <thead>
                             <tr>
                                 <th>Product</th>
-                                <th style="text-align: right;">Qty</th>
-                                <th style="text-align: right;">Price</th>
-                                <th style="text-align: right;">Total</th>
+                                <th class="text-right">Qty</th>
+                                <th class="text-right">Price</th>
+                                <th class="text-right">Total</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -279,12 +344,12 @@
                             <tr>
                                 <td>
                                     {{ item.product.name }}
-                                    {% if item.size %}<br><small style="color: #6c757d;">Size: {{ item.size }}</small>{% endif %}
-                                    {% if item.color %}<br><small style="color: #6c757d;">Color: {{ item.color }}</small>{% endif %}
+                                    {% if item.size %}<br><small class="item-details">Size: {{ item.size }}</small>{% endif %}
+                                    {% if item.color %}<br><small class="item-details">Color: {{ item.color }}</small>{% endif %}
                                 </td>
-                                <td style="text-align: right;">{{ item.quantity }}</td>
-                                <td style="text-align: right;">${{ item.price }}</td>
-                                <td style="text-align: right; font-weight: bold;">${{ item.price|mul:item.quantity }}</td>
+                                <td class="text-right">{{ item.quantity }}</td>
+                                <td class="text-right">${{ item.price }}</td>
+                                <td class="text-right text-bold">${{ item.price|mul:item.quantity }}</td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -302,13 +367,13 @@
                             <span class="total-label">Shipping:</span>
                             <span class="total-value">TBD</span>
                         </div>
-                        <div class="total-row" style="margin-bottom: 20px; padding-bottom: 20px; border-bottom: 2px solid #dee2e6;">
+                        <div class="total-row total-row-separator">
                             <span class="total-label">Tax:</span>
                             <span class="total-value">TBD</span>
                         </div>
                         <div class="total-row">
-                            <span class="grand-total" style="margin-right: 20px;">Total:</span>
-                            <span class="grand-total-value" style="min-width: 100px; text-align: right;">${{ order.total_price }}</span>
+                            <span class="grand-total grand-total-spaced">Total:</span>
+                            <span class="grand-total-value grand-total-value-styled">${{ order.total_price }}</span>
                         </div>
                     </div>
                 </div>
@@ -325,7 +390,7 @@
             </div>
 
             <!-- Action Buttons -->
-            <div style="display: flex; flex-direction: column; gap: 15px; margin-top: 30px;">
+            <div class="action-buttons">
                 <a href="{% url 'order_history' %}" class="btn btn-orders">
                     View All Orders
                 </a>
@@ -336,4 +401,4 @@
         </div>
     </div>
 </div>
-{% endblock %}
+{% endblock content %}

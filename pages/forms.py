@@ -42,6 +42,13 @@ from django.contrib.auth.models import User
 ACCEPT_IMAGE_ALL = 'image/*'
 ACCEPT_IMAGE_ICON = 'image/png,image/x-icon,image/svg+xml'
 
+# Constants for help texts
+OAUTH_HOST_MODE_HELP = 'Required for Host Mode - Get from Server-to-Server OAuth app'
+
+# Constants for datetime formats
+DATETIME_LOCAL_FORMAT = '%Y-%m-%dT%H:%M'
+DATETIME_INPUT_FORMATS = [DATETIME_LOCAL_FORMAT, '%Y-%m-%d %H:%M:%S', '%Y-%m-%d %H:%M']
+
 class ContactForm(forms.Form):
     """Secure contact form with CSRF protection and validation"""
     
@@ -1144,7 +1151,7 @@ class ChapterHistorySectionForm(forms.ModelForm):
             }),
             'image': forms.FileInput(attrs={
                 'class': 'form-control',
-                'accept': 'image/*'
+                'accept': ACCEPT_IMAGE_ALL
             }),
         }
 
@@ -1337,9 +1344,9 @@ class ZoomConfigurationForm(forms.ModelForm):
         help_texts = {
             'sdk_key': 'Get this from Zoom App Marketplace > Build App > Meeting SDK',
             'sdk_secret': 'Keep this secret - never expose in client-side code',
-            'oauth_account_id': 'Required for Host Mode - Get from Server-to-Server OAuth app',
-            'oauth_client_id': 'Required for Host Mode - Get from Server-to-Server OAuth app',
-            'oauth_client_secret': 'Required for Host Mode - Get from Server-to-Server OAuth app',
+            'oauth_account_id': OAUTH_HOST_MODE_HELP,
+            'oauth_client_id': OAUTH_HOST_MODE_HELP,
+            'oauth_client_secret': OAUTH_HOST_MODE_HELP,
         }
 
 
@@ -1502,11 +1509,11 @@ class PollForm(forms.ModelForm):
             'starts_at': forms.DateTimeInput(attrs={
                 'class': 'form-control',
                 'type': 'datetime-local'
-            }, format='%Y-%m-%dT%H:%M'),
+            }, format=DATETIME_LOCAL_FORMAT),
             'ends_at': forms.DateTimeInput(attrs={
                 'class': 'form-control',
                 'type': 'datetime-local'
-            }, format='%Y-%m-%dT%H:%M'),
+            }, format=DATETIME_LOCAL_FORMAT),
             'is_active': forms.CheckboxInput(attrs={
                 'class': 'form-check-input'
             }),
@@ -1523,8 +1530,8 @@ class PollForm(forms.ModelForm):
         self.fields['ends_at'].required = False
         
         # Allow datetime-local format for date fields
-        self.fields['starts_at'].input_formats = ['%Y-%m-%dT%H:%M', '%Y-%m-%d %H:%M:%S', '%Y-%m-%d %H:%M']
-        self.fields['ends_at'].input_formats = ['%Y-%m-%dT%H:%M', '%Y-%m-%d %H:%M:%S', '%Y-%m-%d %H:%M']
+        self.fields['starts_at'].input_formats = DATETIME_INPUT_FORMATS
+        self.fields['ends_at'].input_formats = DATETIME_INPUT_FORMATS
     
     def clean(self):
         cleaned_data = super().clean()
@@ -1714,7 +1721,7 @@ class EventTicketForm(forms.ModelForm):
             }),
             'image': forms.FileInput(attrs={
                 'class': 'form-control',
-                'accept': 'image/*'
+                'accept': ACCEPT_IMAGE_ALL
             }),
             'is_active': forms.CheckboxInput(attrs={
                 'class': 'form-check-input'

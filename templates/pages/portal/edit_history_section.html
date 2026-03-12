@@ -1,7 +1,7 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% load static %}
 
-{% block title %}Edit History Section - Admin Portal{% endblock %}
+{% block title %}Edit History Section - Admin Portal{% endblock title %}
 
 {% block css %}
 <style>
@@ -164,8 +164,92 @@
     body.dark-mode .help-text {
         color: #adb5bd;
     }
+
+    .messages-container {
+        margin-bottom: 20px;
+    }
+
+    .alert-message {
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 10px;
+    }
+
+    .alert-success-bg {
+        background: #d4edda;
+    }
+
+    .alert-error-bg {
+        background: #f8d7da;
+    }
+
+    .alert-warning-bg {
+        background: #fff3cd;
+    }
+
+    body.dark-mode .alert-success-bg {
+        background: #1e4a2c;
+    }
+
+    body.dark-mode .alert-error-bg {
+        background: #4a1e1e;
+    }
+
+    body.dark-mode .alert-warning-bg {
+        background: #5c4a1a;
+    }
+
+    .section-preview-img {
+        max-width: 200px;
+        height: auto;
+    }
+
+    .additional-actions {
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid #e9ecef;
+    }
+
+    body.dark-mode .additional-actions {
+        border-top-color: #2a4a7a;
+    }
+
+    .actions-title {
+        color: #6c757d;
+        margin-bottom: 15px;
+    }
+
+    .actions-row {
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+
+    .inline-form {
+        display: inline;
+    }
+
+    .btn-danger {
+        background: var(--error-color);
+        color: white;
+    }
+
+    .btn-danger:hover {
+        opacity: 0.9;
+    }
+
+    .meta-info {
+        margin-top: 20px;
+        text-align: center;
+        color: #6c757d;
+        font-size: 0.9em;
+    }
+
+    body.dark-mode .meta-info {
+        color: #adb5bd;
+    }
 </style>
-{% endblock %}
+{% endblock css %}
 
 {% block content %}
 <div class="edit-container">
@@ -178,9 +262,9 @@
     </div>
 
     {% if messages %}
-    <div class="messages" style="margin-bottom: 20px;">
+    <div class="messages-container">
         {% for message in messages %}
-        <div class="alert" style="padding: 15px; border-radius: 8px; margin-bottom: 10px; background: {% if message.tags == 'success' %}#d4edda{% elif message.tags == 'error' %}#f8d7da{% else %}#fff3cd{% endif %};">
+        <div class="alert-message {% if message.tags == 'success' %}alert-success-bg{% elif message.tags == 'error' %}alert-error-bg{% else %}alert-warning-bg{% endif %}">
             {{ message }}
         </div>
         {% endfor %}
@@ -218,7 +302,7 @@
                 {% if section.image %}
                 <div class="current-image">
                     <p><strong>Current image:</strong></p>
-                    <img src="{{ section.image.url }}" alt="{{ section.title }}">
+                    <img src="{{ section.image.url }}" alt="{{ section.title }}" width="200" height="150" class="section-preview-img">
                 </div>
                 {% endif %}
                 {{ form.image }}
@@ -241,11 +325,11 @@
         </form>
 
         <!-- Additional Actions -->
-        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e9ecef;">
-            <h4 style="color: #6c757d; margin-bottom: 15px;"><i class="fas fa-tools"></i> Additional Actions</h4>
-            <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+        <div class="additional-actions">
+            <h4 class="actions-title"><i class="fas fa-tools"></i> Additional Actions</h4>
+            <div class="actions-row">
                 <!-- Duplicate Section -->
-                <form method="post" action="{% url 'manage_chapter_history' %}" style="display: inline;">
+                <form method="post" action="{% url 'manage_chapter_history' %}" class="inline-form">
                     {% csrf_token %}
                     <input type="hidden" name="action" value="duplicate_section">
                     <input type="hidden" name="section_id" value="{{ section.id }}">
@@ -255,11 +339,11 @@
                 </form>
                 
                 <!-- Delete Section -->
-                <form method="post" action="{% url 'manage_chapter_history' %}" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this section? This cannot be undone.');">
+                <form method="post" action="{% url 'manage_chapter_history' %}" class="inline-form" onsubmit="return confirm('Are you sure you want to delete this section? This cannot be undone.');">
                     {% csrf_token %}
                     <input type="hidden" name="action" value="delete_section">
                     <input type="hidden" name="section_id" value="{{ section.id }}">
-                    <button type="submit" class="btn" style="background: var(--error-color); color: white;">
+                    <button type="submit" class="btn btn-danger">
                         <i class="fas fa-trash"></i> Delete Section
                     </button>
                 </form>
@@ -267,10 +351,10 @@
         </div>
     </div>
 
-    <div style="margin-top: 20px; text-align: center; color: #6c757d; font-size: 0.9em;">
+    <div class="meta-info">
         <p>Created: {{ section.created_at|date:"F d, Y at g:i A" }} 
            {% if section.created_by %}by {{ section.created_by.get_full_name|default:section.created_by.username }}{% endif %}</p>
         <p>Last updated: {{ section.updated_at|date:"F d, Y at g:i A" }}</p>
     </div>
 </div>
-{% endblock %}
+{% endblock content %}

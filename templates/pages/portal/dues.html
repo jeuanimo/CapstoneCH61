@@ -1,7 +1,7 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% load static %}
 
-{% block title %}Dues Payments - Nu Gamma Sigma{% endblock %}
+{% block title %}Dues Payments - Nu Gamma Sigma{% endblock title %}
 
 {% block content %}
 <div class="portal-page">
@@ -11,7 +11,7 @@
     </div>
 
     <!-- Member Warning/Notification Banner -->
-    {% include 'pages/portal/member_notification_banner.html' %}
+    {% include "pages/portal/member_notification_banner.html" %}
 
     {% if member_profile %}
     <div class="dues-summary">
@@ -35,7 +35,7 @@
         <h2>Payment History</h2>
         
         {% if not stripe_available %}
-        <div class="alert alert-info mb-3" style="background: #e7f3ff; border: 1px solid #b6d4fe; border-radius: 8px; padding: 1rem;">
+        <div class="alert alert-info mb-3 payment-info-alert">
             <i class="fas fa-info-circle me-2"></i>
             <strong>Online Payments Coming Soon</strong><br>
             <small>Online payment processing is not yet configured for this site. Please contact the chapter treasurer for payment instructions.</small>
@@ -78,7 +78,7 @@
                                 <i class="fab fa-cc-stripe"></i> Pay Online
                             </a>
                             {% else %}
-                            <span class="btn-action disabled-btn" title="Online payments not yet available" style="opacity: 0.5; cursor: not-allowed;">
+                            <span class="btn-action disabled-btn btn-disabled" title="Online payments not yet available">
                                 <i class="fas fa-credit-card"></i> Pay Online
                             </span>
                             {% endif %}
@@ -107,6 +107,20 @@
 </div>
 
 <style>
+    .payment-info-alert {
+        background: #e7f3ff;
+        border: 1px solid #b6d4fe;
+        border-radius: 8px;
+        padding: 1rem;
+    }
+    .btn-disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    body.dark-mode .payment-info-alert {
+        background: #1a3a5c;
+        border-color: #2a5a8c;
+    }
     .portal-page {
         padding: 2rem 0;
     }
@@ -362,4 +376,4 @@
         box-shadow: 0 4px 8px rgba(99, 91, 255, 0.5);
     }
 </style>
-{% endblock %}
+{% endblock content %}

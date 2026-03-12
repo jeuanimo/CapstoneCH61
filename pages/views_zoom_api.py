@@ -24,6 +24,9 @@ from .zoom_service import get_zoom_service, ZoomServiceError
 
 logger = logging.getLogger(__name__)
 
+# Error message constants
+ERROR_INTERNAL_SERVER = 'Internal server error'
+
 
 def is_admin_or_officer(user):
     """Check if user is staff or has officer permissions."""
@@ -124,7 +127,7 @@ def zoom_sdk_signature(request):
         return json_error_response(e.message, e.error_code)
     except Exception as e:
         logger.exception("Unexpected error in sdk_signature endpoint")
-        return json_error_response('Internal server error', 'INTERNAL_ERROR', status=500)
+        return json_error_response(ERROR_INTERNAL_SERVER, 'INTERNAL_ERROR', status=500)
 
 
 @require_POST
@@ -160,7 +163,7 @@ def zoom_host_zak(request):
         return json_error_response(e.message, e.error_code)
     except Exception as e:
         logger.exception("Unexpected error in host_zak endpoint")
-        return json_error_response('Internal server error', 'INTERNAL_ERROR', status=500)
+        return json_error_response(ERROR_INTERNAL_SERVER, 'INTERNAL_ERROR', status=500)
 
 
 @require_POST
@@ -253,7 +256,7 @@ def zoom_join_config(request):
         return json_error_response(e.message, e.error_code)
     except Exception as e:
         logger.exception("Unexpected error in join_config endpoint")
-        return json_error_response('Internal server error', 'INTERNAL_ERROR', status=500)
+        return json_error_response(ERROR_INTERNAL_SERVER, 'INTERNAL_ERROR', status=500)
 
 
 @login_required
@@ -313,6 +316,6 @@ def zoom_config_status(request):
             'has_oauth_credentials': has_oauth,
         })
         
-    except Exception as e:
+    except Exception as _:
         logger.exception("Error checking Zoom config status")
-        return json_error_response('Internal server error', 'INTERNAL_ERROR', status=500)
+        return json_error_response(ERROR_INTERNAL_SERVER, 'INTERNAL_ERROR', status=500)

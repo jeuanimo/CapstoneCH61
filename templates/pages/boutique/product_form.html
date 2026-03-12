@@ -1,6 +1,6 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 
-{% block title %}{{ title }} - Boutique{% endblock %}
+{% block title %}{{ title }} - Boutique{% endblock title %}
 
 {% block css %}
 <style>
@@ -98,6 +98,14 @@
     .btn-save:hover {
         background: linear-gradient(135deg, var(--pbs-blue-light) 0%, var(--pbs-blue) 100%);
         color: white;
+    }
+
+    .card-body-padded {
+        padding: 30px;
+    }
+
+    .product-preview-img {
+        max-height: 200px;
         transform: translateY(-2px);
         box-shadow: 0 6px 20px rgba(0, 71, 171, 0.4);
     }
@@ -178,7 +186,7 @@
         color: #e8edf7;
     }
 </style>
-{% endblock %}
+{% endblock css %}
 
 {% block content %}
 <div class="container my-5">
@@ -190,7 +198,7 @@
                         <i class="fas fa-box"></i> {{ title }}
                     </h4>
                 </div>
-                <div class="card-body" style="padding: 30px;">
+                <div class="card-body card-body-padded">
                     <form method="post" enctype="multipart/form-data">
                         {% csrf_token %}
                         
@@ -202,7 +210,7 @@
 
                         <!-- Product Name -->
                         <div class="mb-3">
-                            <label class="form-label">{{ form.name.label }}</label>
+                            <label class="form-label" for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
                             {{ form.name }}
                             {% if form.name.errors %}
                             <div class="text-danger">
@@ -213,7 +221,7 @@
 
                         <!-- Description -->
                         <div class="mb-3">
-                            <label class="form-label">{{ form.description.label }}</label>
+                            <label class="form-label" for="{{ form.description.id_for_label }}">{{ form.description.label }}</label>
                             {{ form.description }}
                             {% if form.description.errors %}
                             <div class="text-danger">
@@ -224,7 +232,7 @@
 
                         <!-- Category -->
                         <div class="mb-3">
-                            <label class="form-label">{{ form.category.label }}</label>
+                            <label class="form-label" for="{{ form.category.id_for_label }}">{{ form.category.label }}</label>
                             {{ form.category }}
                             {% if form.category.errors %}
                             <div class="text-danger">
@@ -235,7 +243,7 @@
 
                         <!-- Price -->
                         <div class="mb-3">
-                            <label class="form-label">{{ form.price.label }}</label>
+                            <label class="form-label" for="{{ form.price.id_for_label }}">{{ form.price.label }}</label>
                             {{ form.price }}
                             {% if form.price.errors %}
                             <div class="text-danger">
@@ -246,7 +254,7 @@
 
                         <!-- Inventory -->
                         <div class="mb-3">
-                            <label class="form-label">{{ form.inventory.label }}</label>
+                            <label class="form-label" for="{{ form.inventory.id_for_label }}">{{ form.inventory.label }}</label>
                             {{ form.inventory }}
                             {% if form.inventory.errors %}
                             <div class="text-danger">
@@ -257,7 +265,7 @@
 
                         <!-- Sizes (Multi-Select Checkboxes) -->
                         <div class="mb-3">
-                            <label class="form-label"><strong>{{ form.sizes_multi.label }}</strong></label>
+                            <span class="form-label d-block"><strong>{{ form.sizes_multi.label }}</strong></span>
                             <div class="row">
                                 {% for checkbox in form.sizes_multi %}
                                 <div class="col-4 col-md-3">
@@ -282,7 +290,7 @@
 
                         <!-- Colors (Multi-Select Checkboxes) -->
                         <div class="mb-3">
-                            <label class="form-label"><strong>{{ form.colors_multi.label }}</strong></label>
+                            <span class="form-label d-block"><strong>{{ form.colors_multi.label }}</strong></span>
                             <div class="row">
                                 {% for checkbox in form.colors_multi %}
                                 <div class="col-4 col-md-3">
@@ -307,10 +315,10 @@
 
                         <!-- Image -->
                         <div class="mb-4">
-                            <label class="form-label">{{ form.image.label }}</label>
+                            <label class="form-label" for="{{ form.image.id_for_label }}">{{ form.image.label }}</label>
                             {% if product and product.image %}
                             <div class="mb-2">
-                                <img src="{{ product.image.url }}" alt="{{ product.name }}" style="max-height: 200px;" class="img-fluid rounded">
+                                <img src="{{ product.image.url }}" alt="{{ product.name }}" class="img-fluid rounded product-preview-img" width="200" height="200">
                             </div>
                             {% endif %}
                             {{ form.image }}
@@ -336,4 +344,4 @@
         </div>
     </div>
 </div>
-{% endblock %}
+{% endblock content %}

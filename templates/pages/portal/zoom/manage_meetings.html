@@ -1,6 +1,6 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 
-{% block title %}Manage Meetings - Admin{% endblock %}
+{% block title %}Manage Meetings - Admin{% endblock title %}
 
 {% block css %}
 <style>
@@ -32,8 +32,12 @@
     body.dark-mode .page-header {
         border-bottom-color: #2a4a7a;
     }
+
+    .th-checkbox-col {
+        width: 40px;
+    }
 </style>
-{% endblock %}
+{% endblock css %}
 
 {% block content %}
 <div class="container my-5">
@@ -155,7 +159,7 @@
                     <table class="table table-sm">
                         <thead>
                             <tr>
-                                <th style="width: 40px;"></th>
+                                <th class="th-checkbox-col"></th>
                                 <th>Title</th>
                                 <th>Platform</th>
                                 <th>Date</th>
@@ -250,4 +254,4 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 {% endif %}
-{% endblock %}
+{% endblock content %}

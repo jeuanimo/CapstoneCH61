@@ -1,6 +1,6 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 
-{% block title %}Polls & Voting{% endblock %}
+{% block title %}Polls & Voting{% endblock title %}
 
 {% block css %}
 <style>
@@ -51,7 +51,7 @@
         min-height: 280px;
     }
 </style>
-{% endblock %}
+{% endblock css %}
 
 {% block content %}
 <div class="container my-5">
@@ -187,4 +187,4 @@
     {% endif %}
     {% endif %}
 </div>
-{% endblock %}
+{% endblock content %}

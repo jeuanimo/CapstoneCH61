@@ -1,7 +1,7 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% load static %}
 
-{% block title %}Boutique Dashboard - Sales & Inventory{% endblock %}
+{% block title %}Boutique Dashboard - Sales & Inventory{% endblock title %}
 
 {% block css %}
 <style>
@@ -265,8 +265,121 @@
             font-size: 1.8rem;
         }
     }
+
+    .header-title {
+        margin-bottom: 10px;
+    }
+
+    .header-subtitle {
+        opacity: 0.9;
+        margin-bottom: 20px;
+    }
+
+    .abandoned-form {
+        margin-top: 10px;
+    }
+
+    .btn-clear-abandoned {
+        background: var(--error-color, #d32f2f);
+        color: white;
+        font-size: 0.75rem;
+        padding: 4px 10px;
+    }
+
+    .product-link {
+        color: inherit;
+        text-decoration: none;
+    }
+
+    .revenue-cell {
+        color: var(--success-color, #4caf50);
+        font-weight: bold;
+    }
+
+    .empty-state {
+        text-align: center;
+        color: #999;
+        padding: 40px;
+    }
+
+    .empty-state-icon {
+        font-size: 2rem;
+        margin-bottom: 10px;
+        display: block;
+    }
+
+    .category-item {
+        margin-bottom: 15px;
+    }
+
+    .category-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 5px;
+    }
+
+    .category-revenue {
+        font-weight: bold;
+    }
+
+    .category-bar-container {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .category-bar-flex {
+        flex: 1;
+    }
+
+    .category-units {
+        font-size: 0.85rem;
+        color: #666;
+    }
+
+    body.dark-mode .category-units {
+        color: #a0b0c0;
+    }
+
+    .small-empty-state {
+        text-align: center;
+        color: #999;
+        padding: 20px;
+    }
+
+    .stock-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .stock-list-item {
+        padding: 10px 0;
+        border-bottom: 1px solid #eee;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    body.dark-mode .stock-list-item {
+        border-bottom-color: #2a4a6a;
+    }
+
+    .stock-count {
+        font-weight: bold;
+    }
+
+    .success-empty-state {
+        text-align: center;
+        color: var(--success-color, #4caf50);
+        padding: 20px;
+    }
+
+    .order-total {
+        font-weight: bold;
+    }
 </style>
-{% endblock %}
+{% endblock css %}
 
 {% block content %}
 <div class="dashboard-container">
@@ -276,10 +389,10 @@
             <a href="{% url 'shop_home' %}" class="back-link">
                 <i class="fas fa-arrow-left"></i> Back to Shop
             </a>
-            <h1 style="margin-bottom: 10px;">
+            <h1 class="header-title">
                 <i class="fas fa-chart-line"></i> Boutique Dashboard
             </h1>
-            <p style="opacity: 0.9; margin-bottom: 20px;">Sales analytics and inventory management</p>
+            <p class="header-subtitle">Sales analytics and inventory management</p>
             
             <!-- Time Filter -->
             <div class="time-filter">
@@ -316,9 +429,9 @@
                     <div class="stat-value">{{ pending_orders }}</div>
                     <div class="stat-label">Pending Orders</div>
                     {% if pending_orders > 0 %}
-                    <form method="post" action="{% url 'clear_abandoned_orders' %}" style="margin-top: 10px;" onsubmit="return confirm('Clear all {{ pending_orders }} abandoned/unpaid orders?\n\nThis will permanently delete orders that were never paid for.');">
+                    <form method="post" action="{% url 'clear_abandoned_orders' %}" class="abandoned-form" onsubmit="return confirm('Clear all {{ pending_orders }} abandoned/unpaid orders?\n\nThis will permanently delete orders that were never paid for.');">
                         {% csrf_token %}
-                        <button type="submit" class="btn btn-sm" style="background: var(--error-color, #d32f2f); color: white; font-size: 0.75rem; padding: 4px 10px;">
+                        <button type="submit" class="btn btn-sm btn-clear-abandoned">
                             <i class="fas fa-broom"></i> Clear Abandoned
                         </button>
                     </form>
@@ -338,7 +451,7 @@
             <div class="col-6 col-md-3 mb-3">
                 <div class="stat-card {% if low_stock_count > 0 %}warning{% endif %}">
                     <div class="stat-value">{{ low_stock_count }}</div>
-                    <div class="stat-label">Low Stock (&le;{{ low_stock_threshold }})</div>
+                    <div class="stat-label">Low Stock (≤{{ low_stock_threshold }})</div>
                 </div>
             </div>
             <div class="col-6 col-md-3 mb-3">
@@ -379,13 +492,13 @@
                                 {% for stat in product_stats %}
                                 <tr>
                                     <td>
-                                        <a href="{% url 'product_detail' stat.product__id %}" style="color: inherit; text-decoration: none;">
+                                        <a href="{% url 'product_detail' stat.product__id %}" class="product-link">
                                             {{ stat.product__name }}
                                         </a>
                                     </td>
                                     <td>{{ stat.product__category|title }}</td>
                                     <td><strong>{{ stat.units_sold }}</strong></td>
-                                    <td style="color: var(--success-color, #4caf50); font-weight: bold;">${{ stat.revenue|floatformat:2 }}</td>
+                                    <td class="revenue-cell">${{ stat.revenue|floatformat:2 }}</td>
                                     <td class="{% if stat.product__inventory <= low_stock_threshold %}low-stock{% else %}in-stock{% endif %}">
                                         {{ stat.product__inventory }}
                                     </td>
@@ -395,8 +508,8 @@
                         </table>
                     </div>
                     {% else %}
-                    <p style="text-align: center; color: #999; padding: 40px;">
-                        <i class="fas fa-chart-bar" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
+                    <p class="empty-state">
+                        <i class="fas fa-chart-bar empty-state-icon"></i>
                         No sales data for this period.
                     </p>
                     {% endif %}
@@ -411,19 +524,19 @@
                     </h4>
                     {% if category_stats %}
                     {% for cat in category_stats %}
-                    <div style="margin-bottom: 15px;">
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                    <div class="category-item">
+                        <div class="category-header">
                             <span>{{ cat.product__category|title }}</span>
-                            <span style="font-weight: bold;">${{ cat.revenue|floatformat:2 }}</span>
+                            <span class="category-revenue">${{ cat.revenue|floatformat:2 }}</span>
                         </div>
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <div class="category-bar" style="flex: 1;"></div>
-                            <span style="font-size: 0.85rem; color: #666;">{{ cat.units_sold }} units</span>
+                        <div class="category-bar-container">
+                            <div class="category-bar category-bar-flex"></div>
+                            <span class="category-units">{{ cat.units_sold }} units</span>
                         </div>
                     </div>
                     {% endfor %}
                     {% else %}
-                    <p style="text-align: center; color: #999; padding: 20px;">No category data available.</p>
+                    <p class="small-empty-state">No category data available.</p>
                     {% endif %}
                 </div>
 
@@ -433,13 +546,13 @@
                         <i class="fas fa-exclamation-triangle"></i> Low Stock Alerts
                     </h4>
                     {% if low_stock_products %}
-                    <ul style="list-style: none; padding: 0; margin: 0;">
+                    <ul class="stock-list">
                         {% for product in low_stock_products %}
-                        <li style="padding: 10px 0; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
-                            <a href="{% url 'edit_product' product.id %}" style="color: inherit; text-decoration: none;">
+                        <li class="stock-list-item">
+                            <a href="{% url 'edit_product' product.id %}" class="product-link">
                                 {{ product.name }}
                             </a>
-                            <span class="{% if product.inventory == 0 %}low-stock{% else %}{% if product.inventory <= 5 %}low-stock{% else %}{% endif %}{% endif %}" style="font-weight: bold;">
+                            <span class="{% if product.inventory == 0 %}low-stock{% else %}{% if product.inventory <= 5 %}low-stock{% else %}{% endif %}{% endif %} stock-count">
                                 {% if product.inventory == 0 %}
                                     OUT
                                 {% else %}
@@ -450,7 +563,7 @@
                         {% endfor %}
                     </ul>
                     {% else %}
-                    <p style="text-align: center; color: var(--success-color, #4caf50); padding: 20px;">
+                    <p class="success-empty-state">
                         <i class="fas fa-check-circle"></i> All products are well stocked!
                     </p>
                     {% endif %}
@@ -484,7 +597,7 @@
                             <td>{% if order.user %}{{ order.user.get_full_name|default:order.user.username }}{% else %}<em>Guest</em>{% endif %}</td>
                             <td>{{ order.created_at|date:"M d, Y" }}</td>
                             <td>{{ order.items.count }} item{% if order.items.count != 1 %}s{% endif %}</td>
-                            <td style="font-weight: bold;">${{ order.total_price|floatformat:2 }}</td>
+                            <td class="order-total">${{ order.total_price|floatformat:2 }}</td>
                             <td>
                                 <span class="status-badge status-{{ order.status }}">
                                     {{ order.get_status_display }}
@@ -496,12 +609,12 @@
                 </table>
             </div>
             {% else %}
-            <p style="text-align: center; color: #999; padding: 40px;">
-                <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
+            <p class="empty-state">
+                <i class="fas fa-inbox empty-state-icon"></i>
                 No orders yet.
             </p>
             {% endif %}
         </div>
     </div>
 </div>
-{% endblock %}
+{% endblock content %}

@@ -1,6 +1,6 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 
-{% block title %}Upcoming Meetings{% endblock %}
+{% block title %}Upcoming Meetings{% endblock title %}
 
 {% block css %}
 <style>
@@ -28,7 +28,7 @@
         border-bottom-color: #2a4a7a;
     }
 </style>
-{% endblock %}
+{% endblock css %}
 
 {% block content %}
 <div class="container my-5">
@@ -119,4 +119,4 @@
     </div>
     {% endif %}
 </div>
-{% endblock %}
+{% endblock content %}

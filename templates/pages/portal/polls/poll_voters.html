@@ -1,6 +1,6 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 
-{% block title %}Poll Voters - {{ poll.title }}{% endblock %}
+{% block title %}Poll Voters - {{ poll.title }}{% endblock title %}
 
 {% block css %}
 <style>
@@ -13,7 +13,7 @@
         overflow-wrap: break-word;
     }
 </style>
-{% endblock %}
+{% endblock css %}
 
 {% block content %}
 <div class="container my-5">
@@ -87,4 +87,4 @@
         </div>
     </div>
 </div>
-{% endblock %}
+{% endblock content %}

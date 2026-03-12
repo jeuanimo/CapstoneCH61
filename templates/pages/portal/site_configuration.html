@@ -1,7 +1,7 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% load static %}
 
-{% block title %}Site Configuration - Admin Portal{% endblock %}
+{% block title %}Site Configuration - Admin Portal{% endblock title %}
 
 {% block css %}
 <style>
@@ -338,8 +338,216 @@
     .tab-content.active {
         display: block;
     }
+
+    /* Additional utility classes for inline style replacements */
+    .help-text-spaced {
+        margin-bottom: 20px;
+    }
+
+    .form-group-half {
+        max-width: 50%;
+    }
+
+    .form-group-narrow {
+        max-width: 300px;
+    }
+
+    .favicon-img {
+        max-width: 48px;
+        max-height: 48px;
+    }
+
+    .config-section-chatbot {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-left: 4px solid var(--success-color);
+    }
+
+    body.dark-mode .config-section-chatbot {
+        background: linear-gradient(135deg, #1a2a4a 0%, #0b1020 100%);
+    }
+
+    .chatbot-section-title {
+        margin: 0 0 10px 0;
+        color: var(--success-color);
+    }
+
+    .chatbot-section-desc {
+        margin: 0 0 15px 0;
+        color: #666;
+    }
+
+    body.dark-mode .chatbot-section-desc {
+        color: #adb5bd;
+    }
+
+    .btn-success-bg {
+        background: var(--success-color);
+    }
+
+    .feature-options-section {
+        margin-left: 30px;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+
+    body.dark-mode .feature-options-section {
+        background: #0b1020;
+    }
+
+    .boutique-options-styled {
+        border-left: 4px solid #0047AB;
+    }
+
+    .tickets-options-styled {
+        border-left: 4px solid #9c27b0;
+    }
+
+    .feature-section-title {
+        margin-top: 0;
+    }
+
+    .boutique-title {
+        color: #0047AB;
+    }
+
+    .tickets-title {
+        color: #9c27b0;
+    }
+
+    .maintenance-title {
+        color: var(--error-color);
+    }
+
+    .help-text-sm-spaced {
+        margin-bottom: 15px;
+    }
+
+    .form-check-spaced {
+        margin-bottom: 10px;
+    }
+
+    .external-fields-section {
+        margin-top: 20px;
+        padding-top: 15px;
+        border-top: 1px solid #dee2e6;
+        display: none;
+    }
+
+    body.dark-mode .external-fields-section {
+        border-top-color: #2a4a7a;
+    }
+
+    .form-check-transparent {
+        background: transparent;
+        padding: 0;
+    }
+
+    .config-section-spaced {
+        margin-top: 30px;
+    }
+
+    .section-desc {
+        color: #666;
+        margin-bottom: 20px;
+    }
+
+    body.dark-mode .section-desc {
+        color: #adb5bd;
+    }
+
+    .content-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+
+    @media (max-width: 768px) {
+        .content-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .content-card {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        padding: 25px;
+        border-radius: 12px;
+    }
+
+    body.dark-mode .content-card {
+        background: linear-gradient(135deg, #1a2a4a 0%, #0b1020 100%);
+    }
+
+    .content-card-history {
+        border-left: 4px solid #0047AB;
+    }
+
+    .content-card-chatbot {
+        border-left: 4px solid var(--success-color);
+    }
+
+    .content-card-title {
+        margin: 0 0 10px 0;
+    }
+
+    .content-card-title-history {
+        color: #0047AB;
+    }
+
+    body.dark-mode .content-card-title-history {
+        color: #4a90e2;
+    }
+
+    .content-card-title-chatbot {
+        color: var(--success-color);
+    }
+
+    .content-card-desc {
+        margin: 0 0 15px 0;
+        color: #666;
+        font-size: 0.9em;
+    }
+
+    body.dark-mode .content-card-desc {
+        color: #adb5bd;
+    }
+
+    .content-card-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .content-card-link:hover {
+        opacity: 0.9;
+        color: white;
+    }
+
+    .content-card-link-history {
+        background: #0047AB;
+    }
+
+    .content-card-link-chatbot {
+        background: var(--success-color);
+    }
+
+    .preview-img-sm {
+        width: 48px;
+        height: 48px;
+    }
+
+    .preview-img-md {
+        width: 100px;
+        height: 100px;
+    }
 </style>
-{% endblock %}
+{% endblock css %}
 
 {% block content %}
 <div class="config-container">
@@ -393,7 +601,7 @@
                     <label for="{{ form.pbs_seal.id_for_label }}">Phi Beta Sigma Seal/Logo</label>
                     {% if config.pbs_seal %}
                     <div class="current-image-preview">
-                        <img src="{{ config.pbs_seal.url }}" alt="Current PBS Seal">
+                        <img src="{{ config.pbs_seal.url }}" alt="Current PBS Seal" width="100" height="100" class="preview-img-md">
                         <div class="image-info">
                             <strong><i class="fas fa-check-circle"></i> Current image uploaded</strong>
                             <span>{{ config.pbs_seal.name|truncatechars:50 }}</span>
@@ -409,7 +617,7 @@
                     <label for="{{ form.chapter_logo.id_for_label }}">Chapter Logo (Optional)</label>
                     {% if config.chapter_logo %}
                     <div class="current-image-preview">
-                        <img src="{{ config.chapter_logo.url }}" alt="Current Chapter Logo">
+                        <img src="{{ config.chapter_logo.url }}" alt="Current Chapter Logo" width="100" height="100" class="preview-img-md">
                         <div class="image-info">
                             <strong><i class="fas fa-check-circle"></i> Current image uploaded</strong>
                             <span>{{ config.chapter_logo.name|truncatechars:50 }}</span>
@@ -425,7 +633,7 @@
                     <label for="{{ form.favicon.id_for_label }}">Site Favicon</label>
                     {% if config.favicon %}
                     <div class="current-image-preview">
-                        <img src="{{ config.favicon.url }}" alt="Current Favicon" style="max-width: 48px; max-height: 48px;">
+                        <img src="{{ config.favicon.url }}" alt="Current Favicon" width="48" height="48" class="favicon-img">
                         <div class="image-info">
                             <strong><i class="fas fa-check-circle"></i> Current favicon uploaded</strong>
                             <span>{{ config.favicon.name|truncatechars:50 }}</span>
@@ -453,7 +661,7 @@
         <div id="chapter" class="tab-content">
             <div class="config-section">
                 <h3><i class="fas fa-info-circle"></i> Chapter Details</h3>
-                <p class="help-text" style="margin-bottom: 20px;">This information appears on the About page and home page.</p>
+                <p class="help-text help-text-spaced">This information appears on the About page and home page.</p>
 
                 <div class="form-row">
                     <div class="form-group">
@@ -501,7 +709,7 @@
         <div id="about" class="tab-content">
             <div class="config-section">
                 <h3><i class="fas fa-file-alt"></i> About Us Content</h3>
-                <p class="help-text" style="margin-bottom: 20px;">This content appears on the About page and in the home page modal.</p>
+                <p class="help-text help-text-spaced">This content appears on the About page and in the home page modal.</p>
 
                 <div class="form-group">
                     <label for="{{ form.about_us_text.id_for_label }}">About Us Text</label>
@@ -578,7 +786,7 @@
                     </div>
                 </div>
 
-                <div class="form-group" style="max-width: 50%;">
+                <div class="form-group form-group-half">
                     <label for="{{ form.twitter_url.id_for_label }}"><i class="fab fa-twitter"></i> Twitter/X URL</label>
                     {{ form.twitter_url }}
                 </div>
@@ -589,7 +797,7 @@
         <div id="seo" class="tab-content">
             <div class="config-section">
                 <h3><i class="fas fa-search"></i> SEO & Meta Tags</h3>
-                <p class="help-text" style="margin-bottom: 20px;">Optimize your site for search engines and social sharing.</p>
+                <p class="help-text help-text-spaced">Optimize your site for search engines and social sharing.</p>
 
                 <div class="form-group">
                     <label for="{{ form.meta_description.id_for_label }}">Meta Description</label>
@@ -607,7 +815,7 @@
                     <label for="{{ form.og_image.id_for_label }}">Social Sharing Image</label>
                     {% if config.og_image %}
                     <div class="current-image-preview">
-                        <img src="{{ config.og_image.url }}" alt="Current OG Image">
+                        <img src="{{ config.og_image.url }}" alt="Current Social Sharing Preview" width="100" height="100" class="preview-img-md">
                         <div class="image-info">
                             <strong><i class="fas fa-check-circle"></i> Current image uploaded</strong>
                             <span>{{ config.og_image.name|truncatechars:50 }}</span>
@@ -640,7 +848,7 @@
                     <p class="help-text">Message displayed when users first open the chatbot</p>
                 </div>
 
-                <div class="form-group" style="max-width: 300px;">
+                <div class="form-group form-group-narrow">
                     <label for="{{ form.chatbot_rate_limit.id_for_label }}">Rate Limit (requests/minute)</label>
                     {{ form.chatbot_rate_limit }}
                     <p class="help-text">Maximum requests per minute per IP to prevent abuse</p>
@@ -648,10 +856,10 @@
             </div>
 
             <!-- Quick Link to Q&A Management -->
-            <div class="config-section" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-left: 4px solid var(--success-color);">
-                <h4 style="margin: 0 0 10px 0; color: var(--success-color);"><i class="fas fa-question-circle"></i> Chatbot Knowledge Base</h4>
-                <p style="margin: 0 0 15px 0; color: #666;">Configure the questions and answers your chatbot can respond to.</p>
-                <a href="{% url 'manage_chatbot_qa' %}" class="btn-save" style="background: var(--success-color);">
+            <div class="config-section config-section-chatbot">
+                <h4 class="chatbot-section-title"><i class="fas fa-question-circle"></i> Chatbot Knowledge Base</h4>
+                <p class="chatbot-section-desc">Configure the questions and answers your chatbot can respond to.</p>
+                <a href="{% url 'manage_chatbot_qa' %}" class="btn-save btn-success-bg">
                     <i class="fas fa-cog"></i> Manage Q&A
                 </a>
             </div>
@@ -697,7 +905,7 @@
         <div id="features" class="tab-content">
             <div class="config-section">
                 <h3><i class="fas fa-toggle-on"></i> Feature Toggles</h3>
-                <p class="help-text" style="margin-bottom: 20px;">Enable or disable major site features.</p>
+                <p class="help-text help-text-spaced">Enable or disable major site features.</p>
 
                 <div class="form-group">
                     <div class="form-check">
@@ -709,12 +917,12 @@
                 </div>
 
                 <!-- Boutique Type Options (shown when boutique is enabled) -->
-                <div id="boutique-options" class="boutique-options-section" style="margin-left: 30px; padding: 15px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #0047AB; margin-bottom: 20px;">
-                    <h5 style="margin-top: 0; color: #0047AB;"><i class="fas fa-store"></i> Boutique Type</h5>
-                    <p class="help-text" style="margin-bottom: 15px;">Choose how you want to handle your merchandise store.</p>
+                <div id="boutique-options" class="boutique-options-section feature-options-section boutique-options-styled">
+                    <h5 class="feature-section-title boutique-title"><i class="fas fa-store"></i> Boutique Type</h5>
+                    <p class="help-text help-text-sm-spaced">Choose how you want to handle your merchandise store.</p>
                     
                     <div class="boutique-type-options">
-                        <div class="form-check" style="margin-bottom: 10px;">
+                        <div class="form-check form-check-spaced">
                             <input type="radio" class="form-check-input" name="boutique_type" id="boutique_type_internal" value="internal" {% if form.instance.boutique_type == 'internal' or not form.instance.boutique_type %}checked{% endif %}>
                             <label class="form-check-label" for="boutique_type_internal">
                                 <strong>Use Internal Boutique</strong>
@@ -731,7 +939,7 @@
                     </div>
                     
                     <!-- External Store Fields (shown when external is selected) -->
-                    <div id="external-store-fields" class="external-store-fields" style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #dee2e6; display: none;">
+                    <div id="external-store-fields" class="external-store-fields external-fields-section">
                         <div class="form-group">
                             <label for="{{ form.external_store_url.id_for_label }}">
                                 <i class="fas fa-link"></i> External Store URL <span class="text-danger">*</span>
@@ -761,7 +969,7 @@
                 <div class="section-divider"></div>
 
                 <!-- Event Ticketing Section -->
-                <h4 style="color: #9c27b0;"><i class="fas fa-ticket-alt"></i> Event Ticketing</h4>
+                <h4 class="tickets-title"><i class="fas fa-ticket-alt"></i> Event Ticketing</h4>
                 
                 <div class="form-group">
                     <div class="form-check">
@@ -773,12 +981,12 @@
                 </div>
 
                 <!-- Event Tickets Type Options (shown when ticketing is enabled) -->
-                <div id="tickets-options" class="tickets-options-section" style="margin-left: 30px; padding: 15px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #9c27b0; margin-bottom: 20px;">
-                    <h5 style="margin-top: 0; color: #9c27b0;"><i class="fas fa-ticket-alt"></i> Ticketing Type</h5>
-                    <p class="help-text" style="margin-bottom: 15px;">Choose how you want to handle event ticketing.</p>
+                <div id="tickets-options" class="tickets-options-section feature-options-section tickets-options-styled">
+                    <h5 class="feature-section-title tickets-title"><i class="fas fa-ticket-alt"></i> Ticketing Type</h5>
+                    <p class="help-text help-text-sm-spaced">Choose how you want to handle event ticketing.</p>
                     
                     <div class="tickets-type-options">
-                        <div class="form-check" style="margin-bottom: 10px;">
+                        <div class="form-check form-check-spaced">
                             <input type="radio" class="form-check-input" name="event_tickets_type" id="tickets_type_internal" value="internal" {% if form.instance.event_tickets_type == 'internal' or not form.instance.event_tickets_type %}checked{% endif %}>
                             <label class="form-check-label" for="tickets_type_internal">
                                 <strong>Use Internal Ticketing</strong>
@@ -795,7 +1003,7 @@
                     </div>
                     
                     <!-- External Tickets Fields (shown when external is selected) -->
-                    <div id="external-tickets-fields" class="external-tickets-fields" style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #dee2e6; display: none;">
+                    <div id="external-tickets-fields" class="external-tickets-fields external-fields-section">
                         <div class="form-group">
                             <label for="{{ form.external_tickets_url.id_for_label }}">
                                 <i class="fas fa-link"></i> External Tickets URL <span class="text-danger">*</span>
@@ -815,10 +1023,10 @@
 
                 <div class="section-divider"></div>
 
-                <h4 style="color: var(--error-color);"><i class="fas fa-exclamation-triangle"></i> Maintenance Mode</h4>
+                <h4 class="maintenance-title"><i class="fas fa-exclamation-triangle"></i> Maintenance Mode</h4>
                 
                 <div class="danger-toggle">
-                    <div class="form-check" style="background: transparent; padding: 0;">
+                    <div class="form-check form-check-transparent">
                         {{ form.maintenance_mode }}
                         <label class="form-check-label" for="{{ form.maintenance_mode.id_for_label }}">
                             <strong>Enable Maintenance Mode</strong> - Only staff members can access the site
@@ -846,25 +1054,25 @@
     </form>
 
     <!-- Content Management Section -->
-    <div class="config-section" style="margin-top: 30px;">
+    <div class="config-section config-section-spaced">
         <h3><i class="fas fa-edit"></i> Content Management</h3>
-        <p style="color: #666; margin-bottom: 20px;">Manage dynamic content without editing HTML code directly.</p>
+        <p class="section-desc">Manage dynamic content without editing HTML code directly.</p>
         
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+        <div class="content-grid">
             <!-- Chapter History Management -->
-            <div style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 25px; border-radius: 12px; border-left: 4px solid #0047AB;">
-                <h4 style="margin: 0 0 10px 0; color: #0047AB;"><i class="fas fa-history"></i> Chapter History</h4>
-                <p style="margin: 0 0 15px 0; color: #666; font-size: 0.9em;">Add, edit, and organize your chapter's history page content. Import via CSV or enter manually.</p>
-                <a href="{% url 'manage_chapter_history' %}" style="display: inline-flex; align-items: center; gap: 8px; background: #0047AB; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600;">
+            <div class="content-card content-card-history">
+                <h4 class="content-card-title content-card-title-history"><i class="fas fa-history"></i> Chapter History</h4>
+                <p class="content-card-desc">Add, edit, and organize your chapter's history page content. Import via CSV or enter manually.</p>
+                <a href="{% url 'manage_chapter_history' %}" class="content-card-link content-card-link-history">
                     <i class="fas fa-cog"></i> Manage History
                 </a>
             </div>
             
             <!-- Chatbot Q&A Management -->
-            <div style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 25px; border-radius: 12px; border-left: 4px solid var(--success-color);">
-                <h4 style="margin: 0 0 10px 0; color: var(--success-color);"><i class="fas fa-robot"></i> Chatbot Q&A</h4>
-                <p style="margin: 0 0 15px 0; color: #666; font-size: 0.9em;">Configure the chatbot's knowledge base. Add questions and answers visitors can ask about.</p>
-                <a href="{% url 'manage_chatbot_qa' %}" style="display: inline-flex; align-items: center; gap: 8px; background: var(--success-color); color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600;">
+            <div class="content-card content-card-chatbot">
+                <h4 class="content-card-title content-card-title-chatbot"><i class="fas fa-robot"></i> Chatbot Q&A</h4>
+                <p class="content-card-desc">Configure the chatbot's knowledge base. Add questions and answers visitors can ask about.</p>
+                <a href="{% url 'manage_chatbot_qa' %}" class="content-card-link content-card-link-chatbot">
                     <i class="fas fa-cog"></i> Manage Chatbot
                 </a>
             </div>
@@ -982,4 +1190,4 @@ if (ticketsTypeExternal) {
 }
 updateExternalTicketsFields(); // Set initial state
 </script>
-{% endblock %}
+{% endblock content %}

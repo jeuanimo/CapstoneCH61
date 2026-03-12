@@ -1,6 +1,6 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 
-{% block title %}{{ title }} - Polls{% endblock %}
+{% block title %}{{ title }} - Polls{% endblock title %}
 
 {% block css %}
 <style>
@@ -22,7 +22,7 @@
         border-radius: 8px;
     }
 </style>
-{% endblock %}
+{% endblock css %}
 
 {% block content %}
 <div class="container my-5">
@@ -77,23 +77,23 @@
                         
                         <!-- Basic Info -->
                         <div class="mb-3">
-                            <label class="form-label">Poll Title *</label>
+                            <label class="form-label" for="{{ form.title.id_for_label }}">Poll Title *</label>
                             {{ form.title }}
                         </div>
                         
                         <div class="mb-3">
-                            <label class="form-label">Description</label>
+                            <label class="form-label" for="{{ form.description.id_for_label }}">Description</label>
                             {{ form.description }}
                             <small class="form-text text-muted">Help voters understand what they're voting on</small>
                         </div>
                         
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">Poll Type</label>
+                                <label class="form-label" for="{{ form.poll_type.id_for_label }}">Poll Type</label>
                                 {{ form.poll_type }}
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">Link to Meeting (Optional)</label>
+                                <label class="form-label" for="{{ form.meeting.id_for_label }}">Link to Meeting (Optional)</label>
                                 {{ form.meeting }}
                             </div>
                         </div>
@@ -113,8 +113,8 @@
                                     {{ option_form.order }}
                                     {% if option_form.instance.pk %}
                                     <div class="form-check">
-                                        {{ option_form.DELETE }}
-                                        <label class="form-check-label text-danger btn-delete" for="{{ option_form.DELETE.id_for_label }}">
+                                        <label class="form-check-label text-danger btn-delete">
+                                            {{ option_form.DELETE }}
                                             <i class="fas fa-trash"></i>
                                         </label>
                                     </div>
@@ -157,7 +157,7 @@
                                         </div>
                                         
                                         <div class="mb-2">
-                                            <label class="form-label small">Max Selections (if multiple)</label>
+                                            <label class="form-label small" for="{{ form.max_selections.id_for_label }}">Max Selections (if multiple)</label>
                                             {{ form.max_selections }}
                                         </div>
                                         
@@ -175,11 +175,11 @@
                         <!-- Timing -->
                         <div class="row mb-4">
                             <div class="col-md-6">
-                                <label class="form-label">Start Date/Time</label>
+                                <label class="form-label" for="{{ form.starts_at.id_for_label }}">Start Date/Time</label>
                                 {{ form.starts_at }}
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label">End Date/Time (Optional)</label>
+                                <label class="form-label" for="{{ form.ends_at.id_for_label }}">End Date/Time (Optional)</label>
                                 {{ form.ends_at }}
                                 <small class="form-text text-muted">Leave blank for no deadline</small>
                             </div>
@@ -206,4 +206,4 @@
         </div>
     </div>
 </div>
-{% endblock %}
+{% endblock content %}

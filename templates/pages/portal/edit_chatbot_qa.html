@@ -1,7 +1,7 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% load static %}
 
-{% block title %}Edit Chatbot Q&A - Admin Portal{% endblock %}
+{% block title %}Edit Chatbot Q&A - Admin Portal{% endblock title %}
 
 {% block css %}
 <style>
@@ -172,8 +172,42 @@
     body.dark-mode .meta-info {
         color: #adb5bd;
     }
+
+    .messages-container {
+        margin-bottom: 20px;
+    }
+
+    .alert-message {
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 10px;
+    }
+
+    .alert-success-bg {
+        background: #d4edda;
+    }
+
+    .alert-error-bg {
+        background: #f8d7da;
+    }
+
+    .alert-warning-bg {
+        background: #fff3cd;
+    }
+
+    body.dark-mode .alert-success-bg {
+        background: #1e4a2c;
+    }
+
+    body.dark-mode .alert-error-bg {
+        background: #4a1e1e;
+    }
+
+    body.dark-mode .alert-warning-bg {
+        background: #5c4a1a;
+    }
 </style>
-{% endblock %}
+{% endblock css %}
 
 {% block content %}
 <div class="edit-container">
@@ -191,9 +225,9 @@
     </div>
 
     {% if messages %}
-    <div class="messages" style="margin-bottom: 20px;">
+    <div class="messages-container">
         {% for message in messages %}
-        <div class="alert" style="padding: 15px; border-radius: 8px; margin-bottom: 10px; background: {% if message.tags == 'success' %}#d4edda{% elif message.tags == 'error' %}#f8d7da{% else %}#fff3cd{% endif %};">
+        <div class="alert-message {% if message.tags == 'success' %}alert-success-bg{% elif message.tags == 'error' %}alert-error-bg{% else %}alert-warning-bg{% endif %}">
             {{ message }}
         </div>
         {% endfor %}
@@ -260,4 +294,4 @@
         <p>Last updated: {{ qa.updated_at|date:"F d, Y at g:i A" }}</p>
     </div>
 </div>
-{% endblock %}
+{% endblock content %}
