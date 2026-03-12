@@ -452,7 +452,7 @@
                         {% endif %}
                         <div class="leader-image">
                             {% if leader_data.person.profile_image %}
-                                <img src="{{ leader_data.person.profile_image.url }}" alt="{{ leader_data.person.full_name }}">
+                                <img src="{{ leader_data.person.profile_image.url }}" alt="{{ leader_data.person.full_name }}" width="150" height="150" loading="lazy">
                             {% else %}
                                 <i class="fas fa-user-circle"></i>
                             {% endif %}

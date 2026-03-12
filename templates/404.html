@@ -1,8 +1,11 @@
 <!DOCTYPE html>
+{% load static %}
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Page not found - Nu Gamma Sigma Chapter">
+    <meta name="keywords" content="page not found, 404, Nu Gamma Sigma">
     <title>Page Not Found - Nu Gamma Sigma</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.1/css/all.min.css">
     <style>
@@ -120,12 +123,12 @@
                 Please check the URL or navigate back to the homepage.
             </p>
             
-            <a href="/" class="btn-home">
+            <a href="{% url 'home' %}" class="btn-home">
                 <i class="fas fa-home"></i> Back to Home
             </a>
             
             <p class="footer-text">
-                Phi Beta Sigma Fraternity, Inc. &bull; Nu Gamma Sigma Chapter
+                Phi Beta Sigma Fraternity, Inc. - Nu Gamma Sigma Chapter
             </p>
         </div>
     </div>

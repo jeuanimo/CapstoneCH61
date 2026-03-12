@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% load static %}
 
 {% block css %}
@@ -135,8 +135,71 @@
             width: 100%;
         }
     }
+
+    .order-card-body {
+        padding: 25px;
+    }
+
+    .order-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+
+    .order-status-badge {
+        color: white;
+    }
+
+    .order-date-text {
+        color: #6c757d;
+        margin: 10px 0;
+        font-size: 0.9em;
+    }
+
+    .order-total-section {
+        margin: 20px 0;
+        padding: 15px 0;
+        border-top: 1px solid #dee2e6;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .order-total-label {
+        margin: 0;
+        color: #6c757d;
+    }
+
+    .order-total-value {
+        margin: 5px 0 0 0;
+    }
+
+    .shipping-label {
+        margin: 0 0 10px 0;
+        color: #6c757d;
+        font-size: 0.9em;
+    }
+
+    .shipping-address {
+        margin: 0;
+        color: var(--pbs-blue);
+        font-size: 0.9em;
+    }
+
+    .empty-orders-alert {
+        background-color: #e7f1ff;
+        border-color: var(--pbs-blue);
+        border-radius: 12px;
+    }
+
+    .empty-orders-heading {
+        color: var(--pbs-blue);
+    }
+
+    .empty-orders-text {
+        color: #6c757d;
+    }
 </style>
-{% endblock %}
+{% endblock css %}
 
 {% block content %}
 <div class="container mt-4">
@@ -147,39 +210,39 @@
         {% for order in orders %}
         <div class="col-md-6 mb-4">
             <div class="card order-card">
-                <div class="card-body" style="padding: 25px;">
+                <div class="card-body order-card-body">
                     <!-- Order Header -->
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <div class="order-header">
                         <h5 class="order-title">Order #{{ order.id }}</h5>
-                        <span class="badge" style="background-color: {% if order.status == 'completed' %}var(--success-color, #4caf50){% elif order.status == 'shipped' %}#0066cc{% elif order.status == 'pending' %}var(--warning-color, #ff9800){% else %}#6c757d{% endif %}; color: white;">
+                        <span class="badge order-status-badge" style="background-color: {% if order.status == 'completed' %}var(--success-color, #4caf50){% elif order.status == 'shipped' %}#0066cc{% elif order.status == 'pending' %}var(--warning-color, #ff9800){% else %}#6c757d{% endif %};">
                             {{ order.get_status_display }}
                         </span>
                     </div>
 
                     <!-- Order Date -->
-                    <p style="color: #6c757d; margin: 10px 0; font-size: 0.9em;">
+                    <p class="order-date-text">
                         {{ order.created_at|date:"M d, Y \a\t g:i A" }}
                     </p>
 
                     <!-- Items Count -->
-                    <p style="color: #6c757d; margin: 10px 0; font-size: 0.9em;">
+                    <p class="order-date-text">
                         <strong>Items:</strong> {{ order.orderitem_set.count }}
                     </p>
 
                     <!-- Order Total -->
-                    <div style="margin: 20px 0; padding: 15px 0; border-top: 1px solid #dee2e6; border-bottom: 1px solid #dee2e6;">
-                        <p style="margin: 0; color: #6c757d;">Order Total</p>
-                        <p class="order-total" style="margin: 5px 0 0 0;">
+                    <div class="order-total-section">
+                        <p class="order-total-label">Order Total</p>
+                        <p class="order-total order-total-value">
                             ${{ order.total_price }}
                         </p>
                     </div>
 
                     <!-- Shipping Info -->
                     <div class="shipping-box">
-                        <p style="margin: 0 0 10px 0; color: #6c757d; font-size: 0.9em;">
+                        <p class="shipping-label">
                             <strong>Shipping To:</strong>
                         </p>
-                        <p style="margin: 0; color: var(--pbs-blue); font-size: 0.9em;">
+                        <p class="shipping-address">
                             {{ order.address }}<br>
                             {{ order.city }}, {{ order.state }} {{ order.zip_code }}
                         </p>
@@ -196,13 +259,13 @@
     </div>
 
     {% else %}
-    <div class="alert alert-info" role="alert" style="background-color: #e7f1ff; border-color: var(--pbs-blue); border-radius: 12px;">
-        <h4 class="alert-heading" style="color: var(--pbs-blue);">No Orders Yet</h4>
-        <p style="color: #6c757d;">You haven't placed any orders yet. Start shopping to make your first purchase!</p>
+    <div class="alert alert-info empty-orders-alert" role="alert">
+        <h4 class="alert-heading empty-orders-heading">No Orders Yet</h4>
+        <p class="empty-orders-text">You haven't placed any orders yet. Start shopping to make your first purchase!</p>
         <a href="{% url 'shop_home' %}" class="btn-shop">
             Start Shopping
         </a>
     </div>
     {% endif %}
 </div>
-{% endblock %}
+{% endblock content %}

@@ -5,7 +5,7 @@ from django.db import migrations
 
 def populate_chatbot_qa(apps, schema_editor):
     """Populate chatbot Q&A data."""
-    PublicAnswer = apps.get_model('pages', 'PublicAnswer')
+    public_answer = apps.get_model('pages', 'PublicAnswer')
     
     qa_entries = [
         {
@@ -171,7 +171,7 @@ def populate_chatbot_qa(apps, schema_editor):
     ]
     
     for qa in qa_entries:
-        PublicAnswer.objects.update_or_create(
+        public_answer.objects.update_or_create(
             question=qa['question'],
             defaults={
                 'keywords': qa['keywords'],

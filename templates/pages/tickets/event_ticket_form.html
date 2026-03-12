@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% load static %}
 
 {% block css %}
@@ -127,7 +127,7 @@
         color: #dc3545;
     }
 </style>
-{% endblock %}
+{% endblock css %}
 
 {% block content %}
 <div class="form-container">
@@ -145,7 +145,7 @@
                 <i class="fas fa-ticket-alt"></i> {{ title }}
             </h1>
 
-            <form method="POST" enctype="multipart/form-data">
+            <form method="post" enctype="multipart/form-data">
                 {% csrf_token %}
 
                 <!-- Event Details Section -->
@@ -156,14 +156,14 @@
                     
                     <div class="row">
                         <div class="col-md-8 mb-3">
-                            <label class="form-label">Event Name <span class="required-indicator">*</span></label>
+                            <label class="form-label" for="id_event_name">Event Name <span class="required-indicator">*</span></label>
                             {{ form.event_name }}
                             {% if form.event_name.errors %}
                             <div class="text-danger small">{{ form.event_name.errors.0 }}</div>
                             {% endif %}
                         </div>
                         <div class="col-md-4 mb-3">
-                            <label class="form-label">Ticket Type <span class="required-indicator">*</span></label>
+                            <label class="form-label" for="id_ticket_type">Ticket Type <span class="required-indicator">*</span></label>
                             {{ form.ticket_type }}
                             {% if form.ticket_type.errors %}
                             <div class="text-danger small">{{ form.ticket_type.errors.0 }}</div>
@@ -172,7 +172,7 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Description</label>
+                        <label class="form-label" for="id_description">Description</label>
                         {{ form.description }}
                         {% if form.description.errors %}
                         <div class="text-danger small">{{ form.description.errors.0 }}</div>
@@ -189,21 +189,21 @@
                     
                     <div class="row">
                         <div class="col-md-4 mb-3">
-                            <label class="form-label">Event Date <span class="required-indicator">*</span></label>
+                            <label class="form-label" for="id_event_date">Event Date <span class="required-indicator">*</span></label>
                             {{ form.event_date }}
                             {% if form.event_date.errors %}
                             <div class="text-danger small">{{ form.event_date.errors.0 }}</div>
                             {% endif %}
                         </div>
                         <div class="col-md-4 mb-3">
-                            <label class="form-label">Start Time</label>
+                            <label class="form-label" for="id_event_time">Start Time</label>
                             {{ form.event_time }}
                             {% if form.event_time.errors %}
                             <div class="text-danger small">{{ form.event_time.errors.0 }}</div>
                             {% endif %}
                         </div>
                         <div class="col-md-4 mb-3">
-                            <label class="form-label">End Time</label>
+                            <label class="form-label" for="id_end_time">End Time</label>
                             {{ form.end_time }}
                             {% if form.end_time.errors %}
                             <div class="text-danger small">{{ form.end_time.errors.0 }}</div>
@@ -220,14 +220,14 @@
                     
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Venue Name</label>
+                            <label class="form-label" for="id_venue_name">Venue Name</label>
                             {{ form.venue_name }}
                             {% if form.venue_name.errors %}
                             <div class="text-danger small">{{ form.venue_name.errors.0 }}</div>
                             {% endif %}
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Address</label>
+                            <label class="form-label" for="id_location">Address</label>
                             {{ form.location }}
                             {% if form.location.errors %}
                             <div class="text-danger small">{{ form.location.errors.0 }}</div>
@@ -237,14 +237,14 @@
                     
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">City</label>
+                            <label class="form-label" for="id_city">City</label>
                             {{ form.city }}
                             {% if form.city.errors %}
                             <div class="text-danger small">{{ form.city.errors.0 }}</div>
                             {% endif %}
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">State</label>
+                            <label class="form-label" for="id_state">State</label>
                             {{ form.state }}
                             {% if form.state.errors %}
                             <div class="text-danger small">{{ form.state.errors.0 }}</div>
@@ -261,7 +261,7 @@
                     
                     <div class="row">
                         <div class="col-md-3 mb-3">
-                            <label class="form-label">Price <span class="required-indicator">*</span></label>
+                            <label class="form-label" for="id_price">Price <span class="required-indicator">*</span></label>
                             {{ form.price }}
                             {% if form.price.errors %}
                             <div class="text-danger small">{{ form.price.errors.0 }}</div>
@@ -269,14 +269,14 @@
                             <div class="help-text">Enter 0 for free events</div>
                         </div>
                         <div class="col-md-3 mb-3">
-                            <label class="form-label">Quantity Available <span class="required-indicator">*</span></label>
+                            <label class="form-label" for="id_quantity_available">Quantity Available <span class="required-indicator">*</span></label>
                             {{ form.quantity_available }}
                             {% if form.quantity_available.errors %}
                             <div class="text-danger small">{{ form.quantity_available.errors.0 }}</div>
                             {% endif %}
                         </div>
                         <div class="col-md-3 mb-3">
-                            <label class="form-label">Max Per Order</label>
+                            <label class="form-label" for="id_max_per_order">Max Per Order</label>
                             {{ form.max_per_order }}
                             {% if form.max_per_order.errors %}
                             <div class="text-danger small">{{ form.max_per_order.errors.0 }}</div>
@@ -285,7 +285,7 @@
                         </div>
                         {% if ticket %}
                         <div class="col-md-3 mb-3">
-                            <label class="form-label">Quantity Sold</label>
+                            <label class="form-label" for="id_quantity_sold">Quantity Sold</label>
                             {{ form.quantity_sold }}
                             {% if form.quantity_sold.errors %}
                             <div class="text-danger small">{{ form.quantity_sold.errors.0 }}</div>
@@ -304,13 +304,13 @@
                     
                     {% if ticket and ticket.image %}
                     <div class="mb-3">
-                        <label class="form-label">Current Image:</label><br>
-                        <img src="{{ ticket.image.url }}" alt="Current image" class="current-image">
+                        <span class="form-label">Current Image:</span><br>
+                        <img src="{{ ticket.image.url }}" alt="Current event thumbnail" class="current-image" width="200" height="100" loading="lazy">
                     </div>
                     {% endif %}
                     
                     <div class="mb-3">
-                        <label class="form-label">{% if ticket and ticket.image %}Replace{% else %}Upload{% endif %} Image</label>
+                        <label class="form-label" for="id_image">{% if ticket and ticket.image %}Replace{% else %}Upload{% endif %} Image</label>
                         {{ form.image }}
                         {% if form.image.errors %}
                         <div class="text-danger small">{{ form.image.errors.0 }}</div>
@@ -369,4 +369,4 @@
         </div>
     </div>
 </div>
-{% endblock %}
+{% endblock content %}

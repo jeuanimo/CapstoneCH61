@@ -1,6 +1,6 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 
-{% block title %}Create Album - Member Portal{% endblock %}
+{% block title %}Create Album - Member Portal{% endblock title %}
 
 {% block content %}
 <style>
@@ -38,11 +38,14 @@
         color: #e8edf7;
         border-color: #2a4a7a;
     }
+    .card-glow {
+        box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+    }
 </style>
 <div class="container my-5">
     <div class="row justify-content-center">
         <div class="col-md-8">
-            <div class="card" style="box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);">
+            <div class="card card-glow">
                 <div class="card-header bg-primary text-white">
                     <h4 class="mb-0">
                         <i class="fas fa-folder-plus"></i> Create New Album
@@ -134,4 +137,4 @@
         </div>
     </div>
 </div>
-{% endblock %}
+{% endblock content %}

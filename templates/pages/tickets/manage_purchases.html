@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% load static %}
 
 {% block css %}
@@ -153,8 +153,25 @@
         opacity: 0.9;
         font-size: 0.9em;
     }
+
+    .stat-card-success {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    }
+
+    .page-header-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-bottom: 30px;
+    }
+
+    .inline-form {
+        display: inline;
+    }
 </style>
-{% endblock %}
+{% endblock css %}
 
 {% block content %}
 <div class="purchases-container">
@@ -168,7 +185,7 @@
         </nav>
 
         <div class="purchases-card">
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 30px;">
+            <div class="page-header-row">
                 <h1 class="page-header mb-0">
                     <i class="fas fa-shopping-cart"></i> Ticket Purchases
                 </h1>
@@ -181,10 +198,10 @@
 
             <!-- Filter Bar -->
             <div class="filter-bar">
-                <form method="GET" class="row g-3 align-items-end">
+                <form method="get" class="row g-3 align-items-end">
                     <div class="col-md-4">
-                        <label class="form-label">Filter by Status</label>
-                        <select name="status" class="form-select">
+                        <label class="form-label" for="status-filter">Filter by Status</label>
+                        <select name="status" id="status-filter" class="form-select">
                             <option value="">All Statuses</option>
                             <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
                             <option value="completed" {% if status_filter == 'completed' %}selected{% endif %}>Completed</option>
@@ -193,8 +210,8 @@
                         </select>
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label">Filter by Event</label>
-                        <input type="text" name="ticket" value="{{ ticket_filter }}" class="form-control" placeholder="Event ID">
+                        <label class="form-label" for="ticket-filter">Filter by Event</label>
+                        <input type="text" name="ticket" id="ticket-filter" value="{{ ticket_filter }}" class="form-control" placeholder="Event ID">
                     </div>
                     <div class="col-md-auto">
                         <button type="submit" class="btn btn-primary">
@@ -214,7 +231,7 @@
                     </div>
                 </div>
                 <div class="col-md-3 mb-3">
-                    <div class="stat-card" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">
+                    <div class="stat-card stat-card-success">
                         <h4>{{ purchases|length }}</h4>
                         <p>Showing</p>
                     </div>
@@ -282,7 +299,7 @@
                                     </button>
                                     <ul class="dropdown-menu">
                                         <li>
-                                            <form method="POST" action="{% url 'update_ticket_purchase_status' purchase.id %}" style="display: inline;">
+                                            <form method="post" action="{% url 'update_ticket_purchase_status' purchase.id %}" class="inline-form">
                                                 {% csrf_token %}
                                                 <input type="hidden" name="status" value="completed">
                                                 <button type="submit" class="dropdown-item">
@@ -291,7 +308,7 @@
                                             </form>
                                         </li>
                                         <li>
-                                            <form method="POST" action="{% url 'update_ticket_purchase_status' purchase.id %}" style="display: inline;">
+                                            <form method="post" action="{% url 'update_ticket_purchase_status' purchase.id %}" class="inline-form">
                                                 {% csrf_token %}
                                                 <input type="hidden" name="status" value="cancelled">
                                                 <button type="submit" class="dropdown-item">
@@ -300,7 +317,7 @@
                                             </form>
                                         </li>
                                         <li>
-                                            <form method="POST" action="{% url 'update_ticket_purchase_status' purchase.id %}" style="display: inline;">
+                                            <form method="post" action="{% url 'update_ticket_purchase_status' purchase.id %}" class="inline-form">
                                                 {% csrf_token %}
                                                 <input type="hidden" name="status" value="refunded">
                                                 <button type="submit" class="dropdown-item">
@@ -337,4 +354,4 @@
         </div>
     </div>
 </div>
-{% endblock %}
+{% endblock content %}

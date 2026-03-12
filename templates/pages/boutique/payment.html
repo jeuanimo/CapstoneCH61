@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% load static %}
 
 {% block css %}
@@ -115,13 +115,83 @@
         border-color: #555;
     }
 
+    .payment-card-body {
+        padding: 30px;
+    }
+
+    .card-errors-text {
+        color: var(--error-color, #d32f2f);
+        margin-bottom: 20px;
+    }
+
+    .security-badge {
+        text-align: center;
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid #dee2e6;
+    }
+
+    .security-text {
+        color: #6c757d;
+        font-size: 0.9em;
+        margin-bottom: 10px;
+    }
+
+    .stripe-badge {
+        height: 30px;
+        opacity: 0.7;
+    }
+
+    .shipping-text {
+        margin: 5px 0;
+        color: #6c757d;
+    }
+
+    .order-summary-section {
+        margin-bottom: 20px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+    }
+
+    .summary-row-last {
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .total-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 1.2em;
+    }
+
+    .total-label {
+        color: var(--pbs-blue);
+        font-weight: bold;
+    }
+
+    .summary-card-sticky {
+        position: sticky;
+        top: 20px;
+    }
+
+    .summary-card-body {
+        padding: 25px;
+    }
+
     @media (max-width: 768px) {
         .col-md-4 {
             margin-top: 30px;
         }
     }
 </style>
-{% endblock %}
+{% endblock css %}
 
 {% block content %}
 <div class="container mt-4">
@@ -131,17 +201,17 @@
         <!-- Payment Form -->
         <div class="col-md-8">
             <div class="card payment-card">
-                <div class="card-body" style="padding: 30px;">
+                <div class="card-body payment-card-body">
                     <h5 class="card-title section-title">💳 Payment Information</h5>
 
-                    <form id="payment-form" method="POST">
+                    <form id="payment-form" method="post">
                         {% csrf_token %}
 
                         <!-- Stripe Card Element -->
                         <div id="card-element"></div>
 
                         <!-- Card Errors -->
-                        <div id="card-errors" role="alert" style="color: var(--error-color, #d32f2f); margin-bottom: 20px;"></div>
+                        <div id="card-errors" role="alert" class="card-errors-text"></div>
 
                         <!-- Submit Button -->
                         <button type="submit" id="submit-button" class="btn-pay">
@@ -150,11 +220,11 @@
                     </form>
 
                     <!-- Security Badge -->
-                    <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #dee2e6;">
-                        <p style="color: #6c757d; font-size: 0.9em; margin-bottom: 10px;">
+                    <div class="security-badge">
+                        <p class="security-text">
                             🔒 Your payment information is secure and encrypted
                         </p>
-                        <img src="https://www.vectorlogo.zone/logos/stripe/stripe-ar21.svg" alt="Stripe" style="height: 30px; opacity: 0.7;">
+                        <img src="https://www.vectorlogo.zone/logos/stripe/stripe-ar21.svg" alt="Stripe" class="stripe-badge" width="84" height="30">
                     </div>
                 </div>
             </div>
@@ -162,13 +232,13 @@
 
         <!-- Order Summary -->
         <div class="col-md-4">
-            <div class="card payment-card" style="position: sticky; top: 20px;">
-                <div class="card-body" style="padding: 25px;">
+            <div class="card payment-card summary-card-sticky">
+                <div class="card-body summary-card-body">
                     <h5 class="card-title section-title">Order #{{ order.id }}</h5>
 
                     <!-- Order Details -->
                     <div class="shipping-box">
-                        <p style="margin: 5px 0; color: #6c757d;">
+                        <p class="shipping-text">
                             <strong>Shipping To:</strong><br>
                             {{ order.address }}<br>
                             {{ order.city }}, {{ order.state }} {{ order.zip_code }}<br>
@@ -177,23 +247,23 @@
                     </div>
 
                     <!-- Order Total -->
-                    <div style="margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid #dee2e6;">
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                    <div class="order-summary-section">
+                        <div class="summary-row">
                             <span class="summary-label">Subtotal:</span>
                             <span class="summary-value">${{ order.total_price }}</span>
                         </div>
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                        <div class="summary-row">
                             <span class="summary-label">Shipping:</span>
                             <span class="summary-value">TBD</span>
                         </div>
-                        <div style="display: flex; justify-content: space-between;">
+                        <div class="summary-row-last">
                             <span class="summary-label">Tax:</span>
                             <span class="summary-value">TBD</span>
                         </div>
                     </div>
 
-                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 1.2em;">
-                        <span style="color: var(--pbs-blue); font-weight: bold;">Total Due:</span>
+                    <div class="total-row">
+                        <span class="total-label">Total Due:</span>
                         <span class="total-due">${{ order.total_price }}</span>
                     </div>
                 </div>
@@ -247,4 +317,4 @@
         }
     });
 </script>
-{% endblock %}
+{% endblock content %}

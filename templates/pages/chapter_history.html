@@ -2,7 +2,7 @@
 
 {% load static %}
 
-{% block title %}Chapter History - Phi Beta Sigma Fraternity, Inc. | {{ site_config.chapter_name|default:"Nu Gamma Sigma Chapter" }}{% endblock %}
+{% block title %}Chapter History - Phi Beta Sigma Fraternity, Inc. | {{ site_config.chapter_name|default:"Nu Gamma Sigma Chapter" }}{% endblock title %}
 
 {% block css %}
 <style>
@@ -146,7 +146,7 @@
         }
     }
 </style>
-{% endblock %}
+{% endblock css %}
 
 {% block content %}
 <div class="page-container">
@@ -162,7 +162,7 @@
                 <div class="history-section">
                     <h2>{{ section.title }}</h2>
                     {% if section.image %}
-                    <img src="{{ section.image.url }}" alt="{{ section.title }}" class="section-image">
+                    <img src="{{ section.image.url }}" alt="{{ section.title }}" class="section-image" width="800" height="400" loading="lazy">
                     {% endif %}
                     {{ section.content|safe }}
                 </div>
@@ -190,4 +190,4 @@
         </div>
     </div>
 </div>
-{% endblock %}
+{% endblock content %}

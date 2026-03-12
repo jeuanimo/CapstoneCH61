@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% load static %}
 
 {% block css %}
@@ -190,8 +190,15 @@
         background-color: rgba(13, 110, 253, 0.2);
         color: #6ea8fe;
     }
+
+    .btn-group-responsive {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
 </style>
-{% endblock %}
+{% endblock css %}
 
 {% block content %}
 <div class="success-container">
@@ -257,7 +264,7 @@
                 </div>
             </div>
             
-            <div class="mt-4" style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+            <div class="mt-4 btn-group-responsive">
                 <a href="{% url 'event_tickets' %}" class="btn btn-primary-custom">
                     <i class="fas fa-calendar-alt"></i> Browse More Events
                 </a>
@@ -272,4 +279,4 @@
         </div>
     </div>
 </div>
-{% endblock %}
+{% endblock content %}

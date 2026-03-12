@@ -1,6 +1,6 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 
-{% block title %}SMS Logs - Message Tracking{% endblock %}
+{% block title %}SMS Logs - Message Tracking{% endblock title %}
 
 {% block css %}
 <style>
@@ -47,8 +47,15 @@
     .badge {
         font-size: 0.85em;
     }
+    .card-glow {
+        box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+    }
+    .message-expand-bg {
+        background-color: rgba(0, 0, 0, 0.1);
+        border-radius: 3px;
+    }
 </style>
-{% endblock %}
+{% endblock css %}
 
 {% block content %}
 <div class="container my-5">
@@ -73,7 +80,7 @@
                 </p>
             {% endif %}
 
-            <div class="card" style="box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);">
+            <div class="card card-glow">
                 <div class="card-body">
                     {% if sms_logs %}
                         <div class="table-responsive">
@@ -114,7 +121,7 @@
                                                         View full message
                                                     </button>
                                                     <div class="collapse mt-2" id="message-{{ log.id }}">
-                                                        <div class="p-2" style="background-color: rgba(0, 0, 0, 0.1); border-radius: 3px;">
+                                                        <div class="p-2 message-expand-bg">
                                                             {{ log.message_body }}
                                                         </div>
                                                     </div>
@@ -224,4 +231,4 @@
         </div>
     </div>
 </div>
-{% endblock %}
+{% endblock content %}

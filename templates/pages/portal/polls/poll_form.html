@@ -112,12 +112,12 @@
                                     {{ option_form.text }}
                                     {{ option_form.order }}
                                     {% if option_form.instance.pk %}
-                                    <div class="form-check">
+                                    <span class="form-check">
                                         {{ option_form.DELETE }}
-                                        <label class="form-check-label text-danger btn-delete" for="{{ option_form.DELETE.id_for_label }}">
+                                        <span class="form-check-label text-danger btn-delete">
                                             <i class="fas fa-trash"></i>
-                                        </label>
-                                    </div>
+                                        </span>
+                                    </span>
                                     {% endif %}
                                 </div>
                                 {% endfor %}

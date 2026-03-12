@@ -1,7 +1,7 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% load static %}
 
-{% block title %}Bigger & Better Business - Nu Gamma Sigma{% endblock %}
+{% block title %}Bigger & Better Business - Nu Gamma Sigma{% endblock title %}
 
 {% block css %}
 <style>
@@ -489,8 +489,85 @@
             max-width: 100%;
         }
     }
+
+    /* Form upload styling */
+    .form-input {
+        width: 100%;
+        padding: 0.5rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+
+    .form-input-text {
+        font-size: 0.9rem;
+    }
+
+    .form-small-text {
+        color: #666;
+        font-size: 0.8rem;
+    }
+
+    .upload-btn-full {
+        width: 100%;
+        cursor: pointer;
+    }
+
+    .info-text-small {
+        margin-top: 0.75rem;
+        font-size: 0.8rem;
+        color: #666;
+    }
+
+    .info-text-small a {
+        color: var(--primary-color);
+    }
+
+    .no-photos-placeholder {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, var(--primary-color) 0%, #1e3a5f 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+    }
+
+    .no-photos-content {
+        text-align: center;
+    }
+
+    .no-photos-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+
+    .carousel-nav-wrapper {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 1rem;
+    }
+
+    .carousel-nav-btn {
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.9rem;
+    }
+
+    .upload-form {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
 </style>
-{% endblock %}
+{% endblock css %}
 
 {% block content %}
 <div class="program-hero">
@@ -505,24 +582,26 @@
             <div class="carousel-image-wrapper">
                 {% if photos %}
                     {% for photo in photos %}
+                        {% with item=photo %}
                         <div class="carousel-image-container">
-                            <img src="{{ photo.image.url }}" alt="{{ photo.caption }}" class="carousel-image {% if forloop.first %}active{% endif %}" data-index="{{ forloop.counter0 }}" data-photo-id="{{ photo.id }}">
-                            {% if is_officer and request.user == photo.uploaded_by %}
+                            <img src="{{ item.image.url }}" alt="{{ item.caption|default:'Activity' }}" class="carousel-image {% if forloop.first %}active{% endif %}" data-index="{{ forloop.counter0 }}" data-photo-id="{{ item.id }}" width="800" height="500" loading="lazy">
+                            {% if is_officer and request.user == item.uploaded_by %}
                             <div class="photo-actions">
-                                <a href="{% url 'edit_program_photo' photo.id %}" class="photo-action-btn edit-btn" title="Edit caption">
+                                <a href="{% url 'edit_program_photo' item.id %}" class="photo-action-btn edit-btn" title="Edit caption">
                                     <i class="fas fa-edit"></i>
                                 </a>
-                                <a href="{% url 'delete_program_photo' photo.id %}" class="photo-action-btn delete-btn" title="Delete photo">
+                                <a href="{% url 'delete_program_photo' item.id %}" class="photo-action-btn delete-btn" title="Delete">
                                     <i class="fas fa-trash"></i>
                                 </a>
                             </div>
                             {% endif %}
                         </div>
+                        {% endwith %}
                     {% endfor %}
                 {% else %}
-                    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, var(--primary-color) 0%, #1e3a5f 100%); display: flex; align-items: center; justify-content: center; color: white;">
-                        <div style="text-align: center;">
-                            <i class="fas fa-image" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                    <div class="no-photos-placeholder">
+                        <div class="no-photos-content">
+                            <i class="fas fa-image no-photos-icon"></i>
                             <p>Event photos coming soon!</p>
                         </div>
                     </div>
@@ -537,10 +616,10 @@
                             <div class="carousel-dot {% if forloop.first %}active{% endif %}" data-slide-index="{{ forloop.counter0 }}"></div>
                         {% endfor %}
                     </div>
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem;">
-                        <button class="carousel-nav-btn" id="carousel-prev" style="background: var(--primary-color); color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-size: 0.9rem;">← Prev</button>
+                    <div class="carousel-nav-wrapper">
+                        <button class="carousel-nav-btn" id="carousel-prev">← Prev</button>
                         <div class="carousel-counter" id="carousel-counter">1 / {{ photos|length }}</div>
-                        <button class="carousel-nav-btn" id="carousel-next" style="background: var(--primary-color); color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-size: 0.9rem;">Next →</button>
+                        <button class="carousel-nav-btn" id="carousel-next">Next →</button>
                     </div>
                 {% else %}
                     <p class="carousel-caption">Showcase your program activities here</p>
@@ -551,32 +630,33 @@
             {% if is_officer %}
             <div class="admin-panel">
                 <h4><i class="fas fa-camera"></i> Add Program Photos</h4>
-                <form method="post" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 0.75rem;">
+                <form method="post" enctype="multipart/form-data" class="upload-form">
                     {% csrf_token %}
                     <div>
-                        <input type="file" name="photo_upload" accept="image/*" multiple required aria-label="Upload program photos" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
-                        <small style="color: #666; font-size: 0.8rem;">Select multiple images at once</small>
+                        <input type="file" name="photo_upload" accept="image/*" multiple required aria-label="Upload program photos" class="form-input">
+                        <small class="form-small-text">Select multiple images at once</small>
                     </div>
                     <div>
-                        <input type="text" name="caption" placeholder="Photo caption (optional)" aria-label="Photo caption" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-size: 0.9rem;">
+                        <input type="text" name="caption" placeholder="Photo caption (optional)" aria-label="Photo caption" class="form-input form-input-text">
                     </div>
                     {% if program_albums %}
                     <div>
-                        <select name="album_id" aria-label="Select album" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-size: 0.9rem;">
+                        <label for="album_id_select" class="form-small-text">Select album</label>
+                        <select name="album_id" id="album_id_select" class="form-input form-input-text">
                             <option value="">-- No album (or upload without album) --</option>
                             {% for album in program_albums %}
                             <option value="{{ album.id }}">{{ album.title }} ({{ album.photo_count }} photos)</option>
                             {% endfor %}
                         </select>
-                        <small style="color: #666; font-size: 0.8rem;">Link photos to an existing album</small>
+                        <small class="form-small-text">Link photos to an existing album</small>
                     </div>
                     {% endif %}
-                    <button type="submit" class="upload-btn" style="width: 100%; cursor: pointer;">
+                    <button type="submit" class="upload-btn upload-btn-full">
                         <i class="fas fa-upload"></i> Upload Photos
                     </button>
                 </form>
-                <p style="margin-top: 0.75rem; font-size: 0.8rem; color: #666;">
-                    <i class="fas fa-info-circle"></i> Creating albums with "Bigger & Better Business" program in the <a href="{% url 'photo_gallery' %}" style="color: var(--primary-color);">Photo Gallery</a> will make them available here.
+                <p class="info-text-small">
+                    <i class="fas fa-info-circle"></i> Creating albums with "Bigger & Better Business" program in the <a href="{% url 'photo_gallery' %}">Photo Gallery</a> will make them available here.
                 </p>
             </div>
             {% else %}
@@ -738,4 +818,4 @@
     }, 5000);
     {% endif %}
 </script>
-{% endblock %}
+{% endblock content %}

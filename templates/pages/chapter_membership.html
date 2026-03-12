@@ -2,7 +2,7 @@
 
 {% load static %}
 
-{% block title %}Chapter Membership - Phi Beta Sigma Fraternity, Inc. | Nu Gamma Sigma Chapter{% endblock %}
+{% block title %}Chapter Membership - Phi Beta Sigma Fraternity, Inc. | Nu Gamma Sigma Chapter{% endblock title %}
 
 {% block css %}
 <style>
@@ -318,7 +318,7 @@
         if (openBtn) openBtn.addEventListener('click', openReturnModal);
     });
 </script>
-{% endblock %}
+{% endblock css %}
 
 {% block content %}
 <!-- Return Home Modal -->
@@ -382,4 +382,4 @@
         </div>
     </div>
 </div>
-{% endblock %}
+{% endblock content %}

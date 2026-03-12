@@ -1,7 +1,7 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% load static %}
 
-{% block title %}{{ title }} - Nu Gamma Sigma{% endblock %}
+{% block title %}{{ title }} - Nu Gamma Sigma{% endblock title %}
 
 {% block content %}
 <div class="portal-page">
@@ -102,7 +102,7 @@
                     {% if member_profile and member_profile.profile_image %}
                     <div class="current-image">
                         <p>Current image:</p>
-                        <img src="{{ member_profile.profile_image.url }}" alt="Member profile avatar">
+                        <img src="{{ member_profile.profile_image.url }}" alt="Member profile avatar" width="150" height="150" loading="lazy">
                     </div>
                     {% endif %}
                 </div>
@@ -115,8 +115,8 @@
             <!-- Leadership Position Section -->
             <div class="form-section">
                 <h2><i class="fas fa-crown"></i> Leadership Position</h2>
-                <div style="background: #e3f2fd; padding: 1rem; border-radius: 6px; border-left: 4px solid var(--primary-color); margin-bottom: 1rem;">
-                    <p style="color: #1565c0; font-size: 0.9rem; margin: 0;">
+                <div class="info-box info-box-blue">
+                    <p>
                         <strong>Auto-Sync to Leadership Page:</strong> Select a position to automatically show this member on the public Leadership page. 
                         Choose "--- None (Regular Member) ---" to remove them from the Leadership page.
                     </p>
@@ -133,20 +133,20 @@
             <!-- Admin Actions Section -->
             <div class="form-section admin-actions-section">
                 <h2><i class="fas fa-shield-alt"></i> Officer Actions</h2>
-                <div style="background: #fff3cd; padding: 1rem; border-radius: 6px; border-left: 4px solid var(--warning-color); margin-bottom: 1rem;">
-                    <p style="color: #856404; font-size: 0.9rem; margin: 0;">
+                <div class="info-box info-box-yellow">
+                    <p>
                         <strong>Manual Marking:</strong> Check the box below to immediately mark this member as non-financial. 
                         They will lose document access and see a 90-day countdown on their dashboard.
                     </p>
                 </div>
-                <div class="form-group checkbox-group" style="background: #f0f0f0; padding: 1rem; border-radius: 6px; border: 2px solid var(--error-color);">
+                <div class="form-group checkbox-group non-financial-checkbox-group">
                     {{ form.mark_non_financial }}
-                    <label for="id_mark_non_financial" style="color: var(--error-color); font-weight: bold;">{{ form.mark_non_financial.label_tag }}</label>
+                    <label for="id_mark_non_financial" class="non-financial-label">{{ form.mark_non_financial.label_tag }}</label>
                 </div>
-                <p style="color: #666; font-size: 0.85rem; margin-top: 0.75rem;">
+                <p class="info-text">
                     <i class="fas fa-info-circle"></i> This action will:
                 </p>
-                <ul style="color: #666; font-size: 0.85rem; margin: 0.5rem 0 0 1.5rem;">
+                <ul class="info-list">
                     <li>Set member status to Non-Financial</li>
                     <li>Start 90-day countdown for dues payment</li>
                     <li>Remove document access immediately</li>
@@ -386,5 +386,50 @@
     body.dark-mode .admin-actions-section ul {
         color: #b0b8c8;
     }
+
+    /* Info boxes */
+    .info-box {
+        padding: 1rem;
+        border-radius: 6px;
+        margin-bottom: 1rem;
+    }
+    .info-box p {
+        font-size: 0.9rem;
+        margin: 0;
+    }
+    .info-box-blue {
+        background: #e3f2fd;
+        border-left: 4px solid var(--primary-color);
+    }
+    .info-box-blue p {
+        color: #1565c0;
+    }
+    .info-box-yellow {
+        background: #fff3cd;
+        border-left: 4px solid var(--warning-color);
+    }
+    .info-box-yellow p {
+        color: #856404;
+    }
+    .non-financial-checkbox-group {
+        background: #f0f0f0;
+        padding: 1rem;
+        border-radius: 6px;
+        border: 2px solid var(--error-color);
+    }
+    .non-financial-label {
+        color: var(--error-color);
+        font-weight: bold;
+    }
+    .info-text {
+        color: #666;
+        font-size: 0.85rem;
+        margin-top: 0.75rem;
+    }
+    .info-list {
+        color: #666;
+        font-size: 0.85rem;
+        margin: 0.5rem 0 0 1.5rem;
+    }
 </style>
-{% endblock %}
+{% endblock content %}

@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% load static %}
 
 {% block css %}
@@ -183,8 +183,22 @@
     body.dark-mode .price-per-ticket {
         color: #4a90e2;
     }
+
+    /* Utility classes */
+    .page-title-color {
+        color: var(--pbs-blue);
+    }
+    .placeholder-bg {
+        background-color: #e9ecef;
+    }
+    .placeholder-icon-color {
+        color: #6c757d;
+    }
+    .order-total-line {
+        margin-bottom: 0;
+    }
 </style>
-{% endblock %}
+{% endblock css %}
 
 {% block content %}
 <div class="purchase-container">
@@ -198,11 +212,11 @@
             </ol>
         </nav>
 
-        <h1 class="text-center mb-4" style="color: var(--pbs-blue);">
+        <h1 class="text-center mb-4 page-title-color">
             <i class="fas fa-ticket-alt"></i> Purchase Tickets
         </h1>
 
-        <form method="POST" id="purchaseForm">
+        <form method="post" id="purchaseForm">
             {% csrf_token %}
             <div class="row">
                 <!-- Purchase Form -->
@@ -213,10 +227,10 @@
                             <div class="row align-items-center">
                                 <div class="col-md-3">
                                     {% if ticket.image %}
-                                    <img src="{{ ticket.image.url }}" alt="{{ ticket.event_name }}" class="event-summary-image">
+                                    <img src="{{ ticket.image.url }}" alt="{{ ticket.event_name }}" class="event-summary-image" width="150" height="150" loading="lazy">
                                     {% else %}
-                                    <div class="event-summary-image d-flex align-items-center justify-content-center" style="background-color: #e9ecef;">
-                                        <i class="fas fa-calendar-alt fa-3x" style="color: #6c757d;"></i>
+                                    <div class="event-summary-image d-flex align-items-center justify-content-center placeholder-bg">
+                                        <i class="fas fa-calendar-alt fa-3x placeholder-icon-color"></i>
                                     </div>
                                     {% endif %}
                                 </div>
@@ -240,7 +254,7 @@
                         
                         <div class="row mb-4">
                             <div class="col-md-6">
-                                <label class="form-label">Number of Tickets</label>
+                                <label class="form-label" for="id_quantity">Number of Tickets</label>
                                 {{ form.quantity }}
                                 {% if form.quantity.errors %}
                                 <div class="text-danger small">{{ form.quantity.errors.0 }}</div>
@@ -267,14 +281,14 @@
                         
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">Full Name *</label>
+                                <label class="form-label" for="id_full_name">Full Name *</label>
                                 {{ form.full_name }}
                                 {% if form.full_name.errors %}
                                 <div class="text-danger small">{{ form.full_name.errors.0 }}</div>
                                 {% endif %}
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">Email Address *</label>
+                                <label class="form-label" for="id_email">Email Address *</label>
                                 {{ form.email }}
                                 {% if form.email.errors %}
                                 <div class="text-danger small">{{ form.email.errors.0 }}</div>
@@ -285,7 +299,7 @@
                         
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">Phone Number</label>
+                                <label class="form-label" for="id_phone">Phone Number</label>
                                 {{ form.phone }}
                                 {% if form.phone.errors %}
                                 <div class="text-danger small">{{ form.phone.errors.0 }}</div>
@@ -316,7 +330,7 @@
                         </div>
                         
                         <div class="order-total">
-                            <div class="order-line" style="margin-bottom: 0;">
+                            <div class="order-line order-total-line">
                                 <span>Total:</span>
                                 <span id="summaryTotal">{% if ticket.price == 0 %}FREE{% else %}${{ ticket.price }}{% endif %}</span>
                             </div>
@@ -368,4 +382,4 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
-{% endblock %}
+{% endblock content %}

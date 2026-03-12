@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% load static %}
 
 {% block css %}
@@ -233,8 +233,34 @@
     body.dark-mode .admin-actions {
         border-top-color: #2a4a7a;
     }
+
+    /* Utility classes for inline styles */
+    .icon-placeholder-color {
+        color: #6c757d;
+    }
+    .price-unit {
+        font-size: 0.5em;
+        font-weight: normal;
+    }
+    .flex-between {
+        display: flex;
+        justify-content: space-between;
+    }
+    .flex-gap-wrap {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+    .description-no-border {
+        border-top: none;
+        padding-top: 0;
+        margin-top: 0;
+    }
+    .preline-text {
+        white-space: pre-line;
+    }
 </style>
-{% endblock %}
+{% endblock css %}
 
 {% block content %}
 <div class="ticket-detail-container">
@@ -255,10 +281,10 @@
                     <span class="featured-badge"><i class="fas fa-star"></i> Featured Event</span>
                     {% endif %}
                     {% if ticket.image %}
-                    <img src="{{ ticket.image.url }}" alt="{{ ticket.event_name }}" class="ticket-image">
+                    <img src="{{ ticket.image.url }}" alt="{{ ticket.event_name }}" class="ticket-image" width="600" height="400" loading="lazy">
                     {% else %}
                     <div class="no-image-placeholder">
-                        <i class="fas fa-calendar-alt fa-5x" style="color: #6c757d;"></i>
+                        <i class="fas fa-calendar-alt fa-5x icon-placeholder-color"></i>
                     </div>
                     {% endif %}
                 </div>
@@ -310,11 +336,11 @@
                         {% else %}
                             ${{ ticket.price }}
                         {% endif %}
-                        <small style="font-size: 0.5em; font-weight: normal;">per ticket</small>
+                        <small class="price-unit">per ticket</small>
                     </div>
                     
                     <div class="availability-section">
-                        <div style="display: flex; justify-content: space-between;">
+                        <div class="flex-between">
                             <span><strong>Availability:</strong></span>
                             <span>{{ ticket.tickets_remaining }} of {{ ticket.quantity_available }} remaining</span>
                         </div>
@@ -342,7 +368,7 @@
                     {% if user.is_staff or user.member_profile.is_officer %}
                     <div class="admin-actions">
                         <h6><i class="fas fa-cog"></i> Admin Actions</h6>
-                        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <div class="flex-gap-wrap">
                             <a href="{% url 'edit_event_ticket' ticket.id %}" class="btn btn-outline-primary btn-sm">
                                 <i class="fas fa-edit"></i> Edit
                             </a>
@@ -360,9 +386,9 @@
                 <!-- Event Description -->
                 {% if ticket.description %}
                 <div class="ticket-info-card mt-4">
-                    <div class="description-section" style="border-top: none; padding-top: 0; margin-top: 0;">
+                    <div class="description-section description-no-border">
                         <h5><i class="fas fa-info-circle"></i> Event Details</h5>
-                        <p style="white-space: pre-line;">{{ ticket.description }}</p>
+                        <p class="preline-text">{{ ticket.description }}</p>
                     </div>
                 </div>
                 {% endif %}
@@ -376,4 +402,4 @@
         </div>
     </div>
 </div>
-{% endblock %}
+{% endblock content %}

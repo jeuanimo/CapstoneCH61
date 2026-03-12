@@ -1,6 +1,6 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 
-{% block title %}Upload Photo - Member Portal{% endblock %}
+{% block title %}Upload Photo - Member Portal{% endblock title %}
 
 {% block content %}
 <div class="upload-page">
@@ -80,13 +80,13 @@
         </div>
 
         <!-- Preview Area -->
-        <div id="imagePreview" class="mt-4" style="display: none;">
+        <div id="imagePreview" class="mt-4 hidden-preview">
             <div class="card upload-card">
                 <div class="card-header">
                     <h5 class="mb-0"><i class="fas fa-eye"></i> Preview</h5>
                 </div>
                 <div class="card-body text-center">
-                    <img id="preview" src="" alt="Preview" class="preview-image">
+                    <img id="preview" src="" alt="Preview" class="preview-image" width="300" height="200">
                 </div>
             </div>
         </div>
@@ -190,6 +190,10 @@
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
 
+    .hidden-preview {
+        display: none;
+    }
+
     /* Dark Mode */
     body.dark-mode .upload-card {
         background: #1a2a4a;
@@ -264,11 +268,11 @@ document.getElementById('image').addEventListener('change', function(e) {
             reader.readAsDataURL(file);
         });
         
-        previewContainer.style.display = 'block';
+        previewContainer.classList.remove('hidden-preview');
         previewContainer.querySelector('.card-header h5').innerHTML = '<i class="fas fa-eye"></i> Preview (' + files.length + ' images)';
     } else {
-        previewContainer.style.display = 'none';
+        previewContainer.classList.add('hidden-preview');
     }
 });
 </script>
-{% endblock %}
+{% endblock content %}

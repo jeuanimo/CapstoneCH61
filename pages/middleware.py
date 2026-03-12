@@ -11,6 +11,9 @@ from django.utils.deprecation import MiddlewareMixin
 
 logger = logging.getLogger(__name__)
 
+# Constants
+NOT_FOUND_MESSAGE = "Not Found"
+
 
 class BlockBadPathsMiddleware(MiddlewareMixin):
     """
@@ -186,19 +189,19 @@ class BlockBadPathsMiddleware(MiddlewareMixin):
         # Check exact matches
         if original_path in self.BLOCKED_EXACT or path in self.BLOCKED_EXACT:
             logger.warning(f"Blocked probe: {original_path} from {self._get_client_ip(request)}")
-            return HttpResponseNotFound("Not Found")
+            return HttpResponseNotFound(NOT_FOUND_MESSAGE)
         
         # Check prefix matches
         if path.startswith(self.BLOCKED_PREFIXES):
             logger.warning(f"Blocked probe: {original_path} from {self._get_client_ip(request)}")
-            return HttpResponseNotFound("Not Found")
+            return HttpResponseNotFound(NOT_FOUND_MESSAGE)
         
         # Check blocked extensions (but allow static files)
         if not path.startswith('/static/') and not path.startswith('/media/'):
             for ext in self.BLOCKED_EXTENSIONS:
                 if path.endswith(ext):
                     logger.warning(f"Blocked probe: {original_path} from {self._get_client_ip(request)}")
-                    return HttpResponseNotFound("Not Found")
+                    return HttpResponseNotFound(NOT_FOUND_MESSAGE)
         
         return None
     
@@ -520,47 +523,58 @@ class RateLimitMiddleware(MiddlewareMixin):
         '/portal/search': (30, 60),             # 30 searches per minute
     }
     
-    def process_request(self, request):
-        """Check and enforce rate limits."""
+    def _get_rate_key(self, prefix):
+        """Generate session key for rate limit tracking."""
+        return f'rate_limit_{prefix.replace("/", "_")}'
+    
+    def _get_user_identifier(self, request):
+        """Get user identifier for logging."""
+        if request.user.is_authenticated:
+            return request.user.username
+        return 'anonymous'
+    
+    def _create_rate_limit_response(self, window):
+        """Create 429 rate limit exceeded response."""
         from django.http import HttpResponse
-        from django.utils import timezone
+        response = HttpResponse(
+            "Too many requests. Please slow down.",
+            status=429,
+            content_type='text/plain'
+        )
+        response['Retry-After'] = str(window)
+        return response
+    
+    def _check_rate_limit(self, request, prefix, max_requests, window):
+        """Check rate limit for a specific path prefix. Returns response if exceeded."""
         import time
         
+        rate_key = self._get_rate_key(prefix)
+        
+        if rate_key not in request.session:
+            request.session[rate_key] = {'count': 0, 'window_start': time.time()}
+        
+        tracker = request.session[rate_key]
+        current_time = time.time()
+        
+        if current_time - tracker['window_start'] > window:
+            tracker['count'] = 0
+            tracker['window_start'] = current_time
+        
+        tracker['count'] += 1
+        request.session[rate_key] = tracker
+        request.session.modified = True
+        
+        if tracker['count'] > max_requests:
+            user_id = self._get_user_identifier(request)
+            logger.warning(f"Rate limit exceeded for {request.path} by {user_id}")
+            return self._create_rate_limit_response(window)
+        
+        return None
+    
+    def process_request(self, request):
+        """Check and enforce rate limits."""
         for prefix, (max_requests, window) in self.RATE_LIMITS.items():
             if request.path.startswith(prefix):
-                # Get or create rate limit tracker in session
-                rate_key = f'rate_limit_{prefix.replace("/", "_")}'
-                
-                # Initialize tracking
-                if rate_key not in request.session:
-                    request.session[rate_key] = {'count': 0, 'window_start': time.time()}
-                
-                tracker = request.session[rate_key]
-                current_time = time.time()
-                
-                # Reset window if expired
-                if current_time - tracker['window_start'] > window:
-                    tracker['count'] = 0
-                    tracker['window_start'] = current_time
-                
-                # Increment and check
-                tracker['count'] += 1
-                request.session[rate_key] = tracker
-                request.session.modified = True
-                
-                if tracker['count'] > max_requests:
-                    logger.warning(
-                        f"Rate limit exceeded for {request.path} by "
-                        f"{request.user.username if request.user.is_authenticated else 'anonymous'}"
-                    )
-                    response = HttpResponse(
-                        "Too many requests. Please slow down.",
-                        status=429,
-                        content_type='text/plain'
-                    )
-                    response['Retry-After'] = str(window)
-                    return response
-                    
-                break
+                return self._check_rate_limit(request, prefix, max_requests, window)
         
         return None

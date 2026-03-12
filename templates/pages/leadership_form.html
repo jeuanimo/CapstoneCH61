@@ -2,7 +2,7 @@
 
 {% load static %}
 
-{% block title %}{{ action }} Leadership - Phi Beta Sigma Fraternity, Inc. | Nu Gamma Sigma Chapter{% endblock %}
+{% block title %}{{ action }} Leadership - Phi Beta Sigma Fraternity, Inc. | Nu Gamma Sigma Chapter{% endblock title %}
 
 {% block css %}
 <style>
@@ -65,6 +65,10 @@
     
     body.dark-mode .form-header h1 {
         color: #87ceeb;
+    }
+
+    .form-help-text {
+        color: #666;
     }
     
     .form-group {
@@ -186,7 +190,7 @@
         }
     }
 </style>
-{% endblock %}
+{% endblock css %}
 
 {% block content %}
 <div class="form-container">
@@ -195,7 +199,7 @@
             <h1>{{ action }} Chapter Leadership</h1>
         </div>
         
-        <form method="POST" enctype="multipart/form-data">
+        <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
             
             <div class="form-group">
@@ -252,7 +256,7 @@
                 {% if form.display_order.errors %}
                     {{ form.display_order.errors }}
                 {% endif %}
-                <small style="color: #666;">Lower numbers appear first (e.g., 1, 2, 3)</small>
+                <small class="form-help-text">Lower numbers appear first (e.g., 1, 2, 3)</small>
             </div>
             
             <div class="form-group">
@@ -276,4 +280,4 @@
         </form>
     </div>
 </div>
-{% endblock %}
+{% endblock content %}

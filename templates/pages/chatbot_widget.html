@@ -1,7 +1,7 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% load static %}
 
-{% block title %}Fraternity Information Chatbot - {{ site_config.chapter_name|default:"Nu Gamma Sigma" }}{% endblock %}
+{% block title %}Fraternity Information Chatbot - {{ site_config.chapter_name|default:"Nu Gamma Sigma" }}{% endblock title %}
 
 {% block css %}
 <style>
@@ -314,8 +314,12 @@
             max-width: 90%;
         }
     }
+
+    .powered-small {
+        color: #888;
+    }
 </style>
-{% endblock %}
+{% endblock css %}
 
 {% block content %}
 <div class="chatbot-container">
@@ -332,7 +336,7 @@
                 <div class="message-content">
                     <p><strong>Hello! 👋</strong></p>
                     <p>{% if site_config and site_config.chatbot_welcome_message %}{{ site_config.chatbot_welcome_message }}{% else %}I'm here to help answer questions about our fraternity. You can ask me about our history, membership, events, values, and more.{% endif %}</p>
-                    <p><small style="color: #888;">Powered by Public Knowledge Base</small></p>
+                    <p><small class="powered-small">Powered by Public Knowledge Base</small></p>
                 </div>
             </div>
         </div>
@@ -501,4 +505,4 @@ document.addEventListener('DOMContentLoaded', function() {
     window.handleSubmit = handleSubmit;
 });
 </script>
-{% endblock %}
+{% endblock content %}

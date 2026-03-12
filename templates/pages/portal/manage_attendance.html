@@ -1,6 +1,6 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 
-{% block title %}Manage Attendance - Member Portal{% endblock %}
+{% block title %}Manage Attendance - Member Portal{% endblock title %}
 
 {% block css %}
 <style>
@@ -105,7 +105,7 @@
         margin-right: 0.25rem;
     }
 </style>
-{% endblock %}
+{% endblock css %}
 
 {% block content %}
 <div class="container my-5">
@@ -152,7 +152,7 @@
                            placeholder="Name or Member #" value="{{ member_search }}">
                 </div>
                 <div class="col-md-2">
-                    <label class="form-label d-block">&nbsp;</label>
+                    <span class="form-label d-block">&nbsp;</span>
                     <button type="submit" class="btn btn-primary w-100">
                         <i class="fas fa-search"></i> Filter
                     </button>
@@ -229,4 +229,4 @@
         </div>
     </div>
 </div>
-{% endblock %}
+{% endblock content %}

@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% load static %}
 
 {% block css %}
@@ -149,8 +149,36 @@
         margin: 0;
         opacity: 0.9;
     }
+
+    .stats-card-success {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    }
+
+    .stats-card-warning {
+        background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+    }
+
+    .stats-card-info {
+        background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .table-action-buttons {
+        display: flex;
+        gap: 5px;
+        flex-wrap: wrap;
+    }
+
+    .ticket-placeholder-bg {
+        background-color: #e9ecef;
+    }
 </style>
-{% endblock %}
+{% endblock css %}
 
 {% block content %}
 <div class="manage-container">
@@ -167,7 +195,7 @@
                 <h1 class="page-header mb-0">
                     <i class="fas fa-ticket-alt"></i> Manage Event Tickets
                 </h1>
-                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <div class="action-buttons">
                     <a href="{% url 'create_event_ticket' %}" class="btn btn-success">
                         <i class="fas fa-plus"></i> Create Event Ticket
                     </a>
@@ -189,19 +217,19 @@
                     </div>
                 </div>
                 <div class="col-md-3 mb-3">
-                    <div class="stats-card" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">
+                    <div class="stats-card stats-card-success">
                         <h3>{{ tickets|length }}</h3>
                         <p>Active Events</p>
                     </div>
                 </div>
                 <div class="col-md-3 mb-3">
-                    <div class="stats-card" style="background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);">
+                    <div class="stats-card stats-card-warning">
                         <h3>{% for t in tickets %}{{ t.quantity_sold }}{% if not forloop.last %}+{% endif %}{% empty %}0{% endfor %}</h3>
                         <p>Tickets Sold</p>
                     </div>
                 </div>
                 <div class="col-md-3 mb-3">
-                    <div class="stats-card" style="background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);">
+                    <div class="stats-card stats-card-info">
                         <h3>{% for t in tickets %}{{ t.tickets_remaining }}{% if not forloop.last %}+{% endif %}{% empty %}0{% endfor %}</h3>
                         <p>Tickets Available</p>
                     </div>
@@ -228,9 +256,9 @@
                         <tr>
                             <td>
                                 {% if ticket.image %}
-                                <img src="{{ ticket.image.url }}" alt="{{ ticket.event_name }}" class="ticket-image-thumb">
+                                <img src="{{ ticket.image.url }}" alt="{{ ticket.event_name }}" class="ticket-image-thumb" width="60" height="60" loading="lazy">
                                 {% else %}
-                                <div class="ticket-image-thumb d-flex align-items-center justify-content-center" style="background-color: #e9ecef;">
+                                <div class="ticket-image-thumb ticket-placeholder-bg d-flex align-items-center justify-content-center">
                                     <i class="fas fa-calendar-alt text-muted"></i>
                                 </div>
                                 {% endif %}
@@ -274,7 +302,7 @@
                                 {% endif %}
                             </td>
                             <td>
-                                <div style="display: flex; gap: 5px; flex-wrap: wrap;">
+                                <div class="table-action-buttons">
                                     <a href="{% url 'event_ticket_detail' ticket.id %}" class="btn btn-outline-info btn-action" title="View">
                                         <i class="fas fa-eye"></i>
                                     </a>
@@ -307,4 +335,4 @@
         </div>
     </div>
 </div>
-{% endblock %}
+{% endblock content %}

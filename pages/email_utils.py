@@ -12,8 +12,19 @@ logger = logging.getLogger(__name__)
 
 # Email constants
 CHAPTER_NAME = 'Nu Gamma Sigma'
-DEFAULT_CONTACT_EMAIL = 'nugammasigma@example.com'
+DEFAULT_CONTACT_EMAIL = 'contact@ngs1914.org'
+DEFAULT_SITE_URL = 'https://ngs1914.org'
 CHAPTER_FULL_NAME = 'Phi Beta Sigma - Nu Gamma Sigma Chapter'
+
+
+def get_contact_email():
+    """Get the contact email from settings or use default."""
+    return getattr(settings, 'CONTACT_EMAIL', DEFAULT_CONTACT_EMAIL)
+
+
+def get_site_url():
+    """Get the site URL from settings or use default."""
+    return getattr(settings, 'SITE_URL', DEFAULT_SITE_URL)
 
 
 def send_dues_reminder_email(member_profile):
@@ -293,7 +304,7 @@ def send_invitation_email(invitation):
     try:
         subject = "Nu Gamma Sigma Chapter - Your Invitation to Join"
         
-        signup_url = "https://ngs1914.org/signup"
+        signup_url = get_site_url() + "/signup"
         
         name = invitation.first_name or "Brother"
         
@@ -312,7 +323,7 @@ To create your account:
 
 This code expires on {invitation.expires_at.strftime('%B %d, %Y')}.
 
-If you have any questions, please contact us at {getattr(settings, 'CONTACT_EMAIL', 'contact@ngs1914.org')}.
+If you have any questions, please contact us at {get_contact_email()}.
 
 Blue Phi,
 Nu Gamma Sigma Chapter
@@ -353,8 +364,8 @@ def send_message_email_notification(message_obj, from_email=None):
         return False
     
     try:
-        # Use CONTACT_EMAIL as the sender (contact@ngs1914.org)
-        sender_email = from_email or getattr(settings, 'CONTACT_EMAIL', 'contact@ngs1914.org')
+        # Use CONTACT_EMAIL as the sender
+        sender_email = from_email or get_contact_email()
         
         # Format the subject with chapter prefix
         subject = f"[Nu Gamma Sigma] {message_obj.subject or 'New Message'}"
@@ -370,7 +381,7 @@ def send_message_email_notification(message_obj, from_email=None):
         sender_name = message_obj.sender.get_full_name() or message_obj.sender.username
         
         # Build the email body
-        portal_url = getattr(settings, 'SITE_URL', 'https://ngs1914.org') + '/portal/messages/'
+        portal_url = get_site_url() + '/portal/messages/'
         
         plain_message = f"""Hello {recipient_name},
 
@@ -481,8 +492,8 @@ def send_poll_email_notification(poll, recipient_user, from_email=None):
         return False
     
     try:
-        # Use CONTACT_EMAIL as the sender (contact@ngs1914.org)
-        sender_email = from_email or getattr(settings, 'CONTACT_EMAIL', 'contact@ngs1914.org')
+        # Use CONTACT_EMAIL as the sender
+        sender_email = from_email or get_contact_email()
         
         # Subject with "You Have a Vote to Make" header
         subject = f"[Nu Gamma Sigma] You Have a Vote to Make: {poll.title}"
@@ -499,7 +510,7 @@ def send_poll_email_notification(poll, recipient_user, from_email=None):
             deadline_text = "⏰ No deadline - vote at your convenience"
         
         # Build the portal URL for polls
-        portal_url = getattr(settings, 'SITE_URL', 'https://ngs1914.org') + f'/portal/polls/{poll.pk}/'
+        portal_url = get_site_url() + f'/portal/polls/{poll.pk}/'
         
         plain_message = f"""Hello {recipient_name},
 
@@ -588,7 +599,7 @@ def send_profile_comment_email_notification(comment, profile_owner, commenter, f
     
     try:
         # Use CONTACT_EMAIL as the sender
-        sender_email = from_email or getattr(settings, 'CONTACT_EMAIL', 'contact@ngs1914.org')
+        sender_email = from_email or get_contact_email()
         
         # Get display names
         owner_name = profile_owner.get_full_name() or profile_owner.username
@@ -597,7 +608,7 @@ def send_profile_comment_email_notification(comment, profile_owner, commenter, f
         subject = f"[Nu Gamma Sigma] {commenter_name} commented on your profile"
         
         # Build the profile URL
-        portal_url = getattr(settings, 'SITE_URL', 'https://ngs1914.org') + f'/portal/members/{profile_owner.username}/'
+        portal_url = get_site_url() + f'/portal/members/{profile_owner.username}/'
         
         # Truncate comment for preview
         comment_preview = comment.content[:300] + '...' if len(comment.content) > 300 else comment.content

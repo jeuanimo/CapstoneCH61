@@ -1,7 +1,7 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% load static %}
 
-{% block title %}Upload My Leadership Photo - {{ site_config.chapter_name|default:"Nu Gamma Sigma" }}{% endblock %}
+{% block title %}Upload My Leadership Photo - {{ site_config.chapter_name|default:"Nu Gamma Sigma" }}{% endblock title %}
 
 {% block css %}
 <style>
@@ -205,7 +205,7 @@
         }
     }
 </style>
-{% endblock %}
+{% endblock css %}
 
 {% block content %}
 <div class="upload-container">
@@ -217,7 +217,7 @@
         
         <div class="current-photo">
             {% if leader.profile_image %}
-                <img src="{{ leader.profile_image.url }}" alt="{{ leader.full_name }}">
+                <img src="{{ leader.profile_image.url }}" alt="{{ leader.full_name }}" width="200" height="200" loading="lazy">
             {% else %}
                 <div class="no-photo">
                     <i class="fas fa-user"></i>
@@ -252,4 +252,4 @@
         </a>
     </div>
 </div>
-{% endblock %}
+{% endblock content %}

@@ -1,8 +1,11 @@
 <!DOCTYPE html>
+{% load static %}
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Server error - Nu Gamma Sigma Chapter">
+    <meta name="keywords" content="server error, 500, Nu Gamma Sigma">
     <title>Server Error - Nu Gamma Sigma</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.1/css/all.min.css">
     <style>
@@ -143,15 +146,15 @@
                 Please try again in a few moments.
             </p>
             
-            <a href="javascript:location.reload()" class="btn-home btn-refresh">
+            <button type="button" onclick="location.reload()" class="btn-home btn-refresh">
                 <i class="fas fa-redo"></i> Try Again
-            </a>
-            <a href="/" class="btn-home">
+            </button>
+            <a href="{% url 'home' %}" class="btn-home">
                 <i class="fas fa-home"></i> Back to Home
             </a>
             
             <p class="footer-text">
-                Phi Beta Sigma Fraternity, Inc. &bull; Nu Gamma Sigma Chapter
+                Phi Beta Sigma Fraternity, Inc. - Nu Gamma Sigma Chapter
             </p>
         </div>
     </div>

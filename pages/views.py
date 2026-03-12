@@ -2601,14 +2601,13 @@ def _send_profile_comment_notification(comment, profile_owner, commenter):
     from pages.email_utils import send_profile_comment_email_notification
     
     commenter_name = commenter.get_full_name() or commenter.username
-    profile_url = f'/portal/members/{profile_owner.username}/'
     
     # Create internal message notification
     try:
         Message.objects.create(
             sender=commenter,
             recipient=profile_owner,
-            subject=f"💬 New comment on your profile",
+            subject="💬 New comment on your profile",
             content=f"""{commenter_name} commented on your profile:
 
 \"{comment.content[:200]}{'...' if len(comment.content) > 200 else ''}\"
