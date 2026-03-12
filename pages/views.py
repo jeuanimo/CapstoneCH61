@@ -1320,6 +1320,39 @@ def portal_dashboard(request):
     return render(request, 'pages/portal/dashboard.html', context)
 
 
+@login_required
+def member_search_api(request):
+    """
+    API endpoint for AJAX member search.
+    Returns JSON list of members matching the search query.
+    """
+    query = request.GET.get('q', '').strip().lower()
+    
+    if len(query) < 2:
+        return JsonResponse([], safe=False)
+    
+    # Search financial members by name, line name, or member number
+    members = MemberProfile.objects.financial_members().select_related('user').filter(
+        Q(user__first_name__icontains=query) |
+        Q(user__last_name__icontains=query) |
+        Q(line_name__icontains=query) |
+        Q(member_number__icontains=query)
+    ).order_by('user__last_name')[:10]
+    
+    results = []
+    for member in members:
+        results.append({
+            'id': member.pk,
+            'username': member.user.username,
+            'name': member.user.get_full_name() or member.user.username,
+            'line_name': member.line_name or '',
+            'member_number': member.member_number or '',
+            'profile_image': member.profile_image.url if member.profile_image else None,
+        })
+    
+    return JsonResponse(results, safe=False)
+
+
 # ==================== CLASS-BASED VIEWS (CBV) - MEMBER MANAGEMENT ====================
 # These are modern Django views that are more maintainable and DRY than FBVs above.
 # Gradually replace FBV versions with these as you migrate your codebase.

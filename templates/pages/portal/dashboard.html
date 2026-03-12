@@ -50,6 +50,21 @@
         </div>
     </div>
 
+    <!-- Quick Member Finder -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card card-glow member-finder-card">
+                <div class="card-body">
+                    <h5 class="mb-3"><i class="fas fa-search"></i> Quick Member Finder</h5>
+                    <div class="member-finder-search">
+                        <input type="text" id="dashboardMemberSearch" class="form-control" placeholder="Search brothers by name, line name, or member #..." autocomplete="off">
+                        <div class="member-finder-results" id="memberFinderResults"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Portal Features Grid - All Member Features -->
     <div class="row mb-3">
         <div class="col-12">
@@ -620,5 +635,220 @@
 .text-purple {
     color: #6f42c1 !important;
 }
+
+/* Member Finder Styles */
+.member-finder-card {
+    border-left: 4px solid var(--primary-color) !important;
+}
+
+.member-finder-search {
+    position: relative;
+}
+
+.member-finder-search input {
+    font-size: 1.1rem;
+    padding: 0.75rem 1rem;
+    border-radius: 30px;
+    border: 2px solid #e0e0e0;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.member-finder-search input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 15px rgba(42, 125, 212, 0.2);
+}
+
+.member-finder-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.15);
+    max-height: 350px;
+    overflow-y: auto;
+    z-index: 1000;
+    display: none;
+    margin-top: 0.5rem;
+}
+
+.member-finder-results.show {
+    display: block;
+}
+
+.member-result-item {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+    transition: background 0.2s;
+    text-decoration: none;
+    color: inherit;
+}
+
+.member-result-item:hover {
+    background: #f8f9fa;
+}
+
+.member-result-item:last-child {
+    border-bottom: none;
+}
+
+.member-result-avatar {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 1rem;
+    background: linear-gradient(135deg, #1a3a5c 0%, #0d1f33 100%);
+}
+
+.member-result-avatar-placeholder {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #1a3a5c 0%, #0d1f33 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    margin-right: 1rem;
+}
+
+.member-result-info {
+    flex: 1;
+}
+
+.member-result-name {
+    font-weight: 600;
+    color: #1a3a5c;
+    margin: 0;
+}
+
+.member-result-line {
+    font-size: 0.85rem;
+    color: #c9a227;
+    margin: 0;
+}
+
+.member-result-number {
+    font-size: 0.8rem;
+    color: #666;
+}
+
+.member-result-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.member-result-empty {
+    padding: 1.5rem;
+    text-align: center;
+    color: #666;
+}
+
+body.dark-mode .member-finder-results {
+    background: #1a2a4a;
+}
+
+body.dark-mode .member-result-item:hover {
+    background: #243657;
+}
+
+body.dark-mode .member-result-item {
+    border-bottom-color: #2d3e5f;
+}
+
+body.dark-mode .member-result-name {
+    color: #87ceeb;
+}
+
+body.dark-mode .member-finder-search input {
+    background: #1a2a4a;
+    border-color: #2d3e5f;
+    color: #fff;
+}
 </style>
+
+<script>
+// Member Finder functionality
+const memberSearchInput = document.getElementById('dashboardMemberSearch');
+const memberFinderResults = document.getElementById('memberFinderResults');
+let searchTimeout;
+
+// Load members data from API
+async function searchMembers(query) {
+    if (query.length < 2) {
+        memberFinderResults.classList.remove('show');
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/portal/api/members/search/?q=${encodeURIComponent(query)}`);
+        const members = await response.json();
+        displayResults(members, query);
+    } catch (error) {
+        console.error('Search error:', error);
+        memberFinderResults.innerHTML = '<div class="member-result-empty">Error loading members</div>';
+        memberFinderResults.classList.add('show');
+    }
+}
+
+function displayResults(members, query) {
+    if (members.length === 0) {
+        memberFinderResults.innerHTML = `<div class="member-result-empty">No members found matching "${query}"</div>`;
+        memberFinderResults.classList.add('show');
+        return;
+    }
+    
+    let html = '';
+    members.forEach(member => {
+        const avatarHtml = member.profile_image 
+            ? `<img src="${member.profile_image}" class="member-result-avatar" alt="${member.name}">`
+            : `<div class="member-result-avatar-placeholder"><i class="fas fa-user"></i></div>`;
+        
+        const lineHtml = member.line_name ? `<p class="member-result-line">"${member.line_name}"</p>` : '';
+        
+        html += `
+            <a href="/portal/members/${member.username}/" class="member-result-item">
+                ${avatarHtml}
+                <div class="member-result-info">
+                    <p class="member-result-name">${member.name}</p>
+                    ${lineHtml}
+                    <span class="member-result-number">#${member.member_number}</span>
+                </div>
+                <div class="member-result-actions">
+                    <span class="btn btn-sm btn-outline-primary"><i class="fas fa-eye"></i></span>
+                </div>
+            </a>
+        `;
+    });
+    
+    memberFinderResults.innerHTML = html;
+    memberFinderResults.classList.add('show');
+}
+
+memberSearchInput.addEventListener('input', function() {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+        searchMembers(this.value.trim());
+    }, 300);
+});
+
+// Close results when clicking outside
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.member-finder-search')) {
+        memberFinderResults.classList.remove('show');
+    }
+});
+
+// Show results again when focusing on input
+memberSearchInput.addEventListener('focus', function() {
+    if (this.value.trim().length >= 2) {
+        memberFinderResults.classList.add('show');
+    }
+});
+</script>
 {% endblock content %}

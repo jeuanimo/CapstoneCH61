@@ -1,7 +1,7 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% load static %}
 
-{% block title %}Send Message - Nu Gamma Sigma{% endblock %}
+{% block title %}Send Message - Nu Gamma Sigma{% endblock title %}
 
 {% block content %}
 <div class="portal-page">
@@ -25,20 +25,25 @@
             
             <!-- Single Recipient (default) -->
             <div class="form-group" id="singleRecipient">
-                <label for="recipient">To:</label>
-                <select name="recipient" id="recipient">
-                    <option value="">Select a member...</option>
-                    {% for member in all_members %}
-                    <option value="{{ member.id }}" {% if recipient and member.id == recipient.id %}selected{% endif %}>
-                        {{ member.get_full_name|default:member.username }}
-                    </option>
-                    {% endfor %}
-                </select>
+                <label for="recipientSearch">To:</label>
+                <div class="recipient-autocomplete">
+                    <input type="text" id="recipientSearch" placeholder="Search for a member..." autocomplete="off" {% if recipient %}class="hidden"{% endif %}>
+                    <input type="hidden" name="recipient" id="recipient" {% if recipient %}value="{{ recipient.id }}"{% endif %}>
+                    <div class="autocomplete-results" id="autocompleteResults"></div>
+                    <div class="selected-recipient{% if not recipient %} hidden{% endif %}" id="selectedRecipient">
+                        {% if recipient %}
+                        <span class="recipient-badge">
+                            <i class="fas fa-user"></i> {{ recipient.get_full_name }}
+                            <button type="button" class="remove-recipient" onclick="clearRecipient()"><i class="fas fa-times"></i></button>
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
             
             <!-- Multiple Recipients (hidden by default) -->
-            <div class="form-group" id="multipleRecipients" style="display: none;">
-                <label>To: <small class="text-muted">(select multiple members)</small></label>
+            <div class="form-group hidden" id="multipleRecipients">
+                <span id="multiRecipientsLabel">To: <small class="text-muted">(select multiple members)</small></span>
                 <div class="recipients-controls">
                     <button type="button" class="btn btn-sm btn-outline" onclick="selectAllRecipients()">Select All</button>
                     <button type="button" class="btn btn-sm btn-outline" onclick="deselectAllRecipients()">Deselect All</button>
@@ -78,6 +83,11 @@
 </div>
 
 <style>
+    /* Utility classes */
+    .hidden {
+        display: none !important;
+    }
+
     .portal-page {
         padding: 2rem 0;
     }
@@ -141,6 +151,138 @@
     .form-group textarea:focus {
         outline: none;
         border-color: #2a7dd4;
+    }
+
+    /* Autocomplete Recipient Styles */
+    .recipient-autocomplete {
+        position: relative;
+    }
+
+    .recipient-autocomplete input[type="text"] {
+        width: 100%;
+    }
+
+    .autocomplete-results {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: white;
+        border: 2px solid #2a7dd4;
+        border-top: none;
+        border-radius: 0 0 8px 8px;
+        max-height: 250px;
+        overflow-y: auto;
+        z-index: 1000;
+        display: none;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .autocomplete-results.show {
+        display: block;
+    }
+
+    .autocomplete-item {
+        padding: 0.75rem 1rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        border-bottom: 1px solid #eee;
+        transition: background 0.2s;
+    }
+
+    .autocomplete-item:hover {
+        background: #f0f7ff;
+    }
+
+    .autocomplete-item:last-child {
+        border-bottom: none;
+    }
+
+    .autocomplete-avatar {
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        margin-right: 0.75rem;
+        background: linear-gradient(135deg, #1a3a5c 0%, #0d1f33 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 0.9rem;
+    }
+
+    .autocomplete-avatar img {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .autocomplete-info {
+        flex: 1;
+    }
+
+    .autocomplete-name {
+        font-weight: 600;
+        color: #1a3a5c;
+    }
+
+    .autocomplete-line {
+        font-size: 0.85rem;
+        color: #c9a227;
+    }
+
+    .autocomplete-empty {
+        padding: 1rem;
+        text-align: center;
+        color: #666;
+    }
+
+    .selected-recipient {
+        margin-top: 0.5rem;
+    }
+
+    .recipient-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: linear-gradient(135deg, #1a3a5c 0%, #0d1f33 100%);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.95rem;
+    }
+
+    .remove-recipient {
+        background: none;
+        border: none;
+        color: white;
+        cursor: pointer;
+        padding: 0;
+        opacity: 0.8;
+        transition: opacity 0.2s;
+    }
+
+    .remove-recipient:hover {
+        opacity: 1;
+    }
+
+    body.dark-mode .autocomplete-results {
+        background: #1a2a4a;
+        border-color: #2a7dd4;
+    }
+
+    body.dark-mode .autocomplete-item:hover {
+        background: #243657;
+    }
+
+    body.dark-mode .autocomplete-name {
+        color: #87ceeb;
+    }
+
+    body.dark-mode .autocomplete-item {
+        border-bottom-color: #2d3e5f;
     }
 
     .form-group textarea {
@@ -417,19 +559,111 @@ document.addEventListener('DOMContentLoaded', function() {
     const toggle = document.getElementById('sendToMultiple');
     const singleRecipient = document.getElementById('singleRecipient');
     const multipleRecipients = document.getElementById('multipleRecipients');
-    const recipientSelect = document.getElementById('recipient');
+    const recipientHidden = document.getElementById('recipient');
+    const recipientSearch = document.getElementById('recipientSearch');
+    const autocompleteResults = document.getElementById('autocompleteResults');
+    const selectedRecipientDiv = document.getElementById('selectedRecipient');
     const checkboxes = document.querySelectorAll('input[name="recipients"]');
     const selectedCountEl = document.getElementById('selectedCount');
+    let searchTimeout;
+    
+    // Recipient autocomplete
+    recipientSearch.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        const query = this.value.trim();
+        
+        if (query.length < 2) {
+            autocompleteResults.classList.remove('show');
+            return;
+        }
+        
+        searchTimeout = setTimeout(async () => {
+            try {
+                const response = await fetch(`/portal/api/members/search/?q=${encodeURIComponent(query)}`);
+                const members = await response.json();
+                displayAutocomplete(members, query);
+            } catch (error) {
+                console.error('Search error:', error);
+            }
+        }, 300);
+    });
+    
+    function displayAutocomplete(members, query) {
+        if (members.length === 0) {
+            autocompleteResults.innerHTML = `<div class="autocomplete-empty">No members found matching "${query}"</div>`;
+            autocompleteResults.classList.add('show');
+            return;
+        }
+        
+        let html = '';
+        members.forEach(member => {
+            const avatarHtml = member.profile_image 
+                ? `<div class="autocomplete-avatar"><img src="${member.profile_image}" alt="${member.name}"></div>`
+                : `<div class="autocomplete-avatar"><i class="fas fa-user"></i></div>`;
+            
+            const lineHtml = member.line_name ? `<div class="autocomplete-line">"${member.line_name}"</div>` : '';
+            
+            html += `
+                <div class="autocomplete-item" data-id="${member.id}" data-name="${member.name}">
+                    ${avatarHtml}
+                    <div class="autocomplete-info">
+                        <div class="autocomplete-name">${member.name}</div>
+                        ${lineHtml}
+                    </div>
+                </div>
+            `;
+        });
+        
+        autocompleteResults.innerHTML = html;
+        autocompleteResults.classList.add('show');
+        
+        // Add click handlers to results
+        autocompleteResults.querySelectorAll('.autocomplete-item').forEach(item => {
+            item.addEventListener('click', function() {
+                selectRecipient(this.dataset.id, this.dataset.name);
+            });
+        });
+    }
+    
+    function selectRecipient(id, name) {
+        recipientHidden.value = id;
+        recipientSearch.value = '';
+        recipientSearch.classList.add('hidden');
+        autocompleteResults.classList.remove('show');
+        
+        selectedRecipientDiv.innerHTML = `
+            <span class="recipient-badge">
+                <i class="fas fa-user"></i> ${name}
+                <button type="button" class="remove-recipient" onclick="clearRecipient()"><i class="fas fa-times"></i></button>
+            </span>
+        `;
+        selectedRecipientDiv.classList.remove('hidden');
+    }
+    
+    // Make clearRecipient available globally
+    window.clearRecipient = function() {
+        recipientHidden.value = '';
+        recipientSearch.classList.remove('hidden');
+        recipientSearch.value = '';
+        selectedRecipientDiv.classList.add('hidden');
+        recipientSearch.focus();
+    };
+    
+    // Close autocomplete on outside click
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.recipient-autocomplete')) {
+            autocompleteResults.classList.remove('show');
+        }
+    });
     
     // Toggle between single and multiple recipients
     toggle.addEventListener('change', function() {
         if (this.checked) {
-            singleRecipient.style.display = 'none';
-            multipleRecipients.style.display = 'block';
-            recipientSelect.removeAttribute('required');
+            singleRecipient.classList.add('hidden');
+            multipleRecipients.classList.remove('hidden');
         } else {
-            singleRecipient.style.display = 'block';
-            multipleRecipients.style.display = 'none';
+            singleRecipient.classList.remove('hidden');
+            multipleRecipients.classList.add('hidden');
         }
     });
     
@@ -453,7 +687,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 return false;
             }
         } else {
-            if (!recipientSelect.value) {
+            if (!recipientHidden.value) {
                 e.preventDefault();
                 alert('Please select a recipient.');
                 return false;
@@ -477,4 +711,4 @@ function deselectAllRecipients() {
     document.getElementById('selectedCount').textContent = '0';
 }
 </script>
-{% endblock %}
+{% endblock content %}

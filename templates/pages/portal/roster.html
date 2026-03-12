@@ -23,6 +23,24 @@
         </div>
     </div>
 
+    <!-- Search and View Controls -->
+    <div class="roster-controls">
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="memberSearch" placeholder="Search by name, line name, or member #..." autocomplete="off">
+            <span class="search-clear hidden" id="searchClear"><i class="fas fa-times"></i></span>
+        </div>
+        <div class="view-toggle">
+            <button type="button" class="view-btn active" id="tableViewBtn" onclick="setView('table')" title="Table View">
+                <i class="fas fa-list"></i>
+            </button>
+            <button type="button" class="view-btn" id="cardViewBtn" onclick="setView('cards')" title="Card View">
+                <i class="fas fa-th-large"></i>
+            </button>
+        </div>
+        <div class="search-results-count" id="searchResultsCount"></div>
+    </div>
+
     <!-- Member Warning/Notification Banner -->
     {% include "pages/portal/member_notification_banner.html" %}
 
@@ -135,9 +153,57 @@
             </tbody>
         </table>
     </div>
+
+    <!-- Card View (hidden by default) -->
+    <div class="roster-cards-container hidden" id="cardView">
+        <div class="roster-cards-grid">
+            {% for member in members %}
+            <div class="member-card" data-member-id="{{ member.pk }}" data-searchable="{{ member.user.get_full_name|lower }} {{ member.line_name|lower|default:'' }} {{ member.member_number|lower }}">
+                <div class="member-card-photo">
+                    {% if member.profile_image %}
+                    <img src="{{ member.profile_image.url }}" alt="{{ member.user.get_full_name }}" width="120" height="120">
+                    {% else %}
+                    <div class="card-avatar-placeholder">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    {% endif %}
+                    {% if member.is_online %}
+                    <span class="card-online-indicator"></span>
+                    {% endif %}
+                </div>
+                <div class="member-card-body">
+                    <h5 class="member-card-name">{{ member.user.get_full_name|default:member.user.username }}</h5>
+                    {% if member.line_name %}
+                    <p class="member-card-line">"{{ member.line_name }}"</p>
+                    {% endif %}
+                    <p class="member-card-number">#{{ member.member_number }}</p>
+                    <span class="status-badge status-{{ member.status }}">{{ member.get_status_display }}</span>
+                </div>
+                <div class="member-card-actions">
+                    <a href="{% url 'member_profile' member.user.username %}" class="btn btn-primary btn-sm" title="View Profile">
+                        <i class="fas fa-eye"></i>
+                    </a>
+                    <a href="{% url 'send_message_to' member.user.username %}" class="btn btn-secondary btn-sm" title="Message">
+                        <i class="fas fa-envelope"></i>
+                    </a>
+                </div>
+            </div>
+            {% empty %}
+            <div class="empty-state-card">
+                <i class="fas fa-users"></i>
+                <p>No active members found.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
 </div>
 
 <style>
+    /* Utility classes */
+    .hidden {
+        display: none !important;
+    }
+
     .portal-page {
         padding: 2rem 0;
     }
@@ -163,6 +229,233 @@
         gap: 1rem;
         justify-content: center;
         margin-top: 1rem;
+    }
+
+    /* Search and View Controls */
+    .roster-controls {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .search-box {
+        flex: 1;
+        min-width: 250px;
+        max-width: 500px;
+        position: relative;
+        display: flex;
+        align-items: center;
+        background: white;
+        border: 2px solid #e0e0e0;
+        border-radius: 30px;
+        padding: 0.5rem 1rem;
+        transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+    .search-box:focus-within {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 10px rgba(42, 125, 212, 0.2);
+    }
+
+    .search-box i {
+        color: #999;
+        margin-right: 0.75rem;
+    }
+
+    .search-box input {
+        flex: 1;
+        border: none;
+        outline: none;
+        font-size: 1rem;
+        background: transparent;
+    }
+
+    .search-clear {
+        cursor: pointer;
+        color: #999;
+        padding: 0.25rem;
+    }
+
+    .search-clear:hover {
+        color: #666;
+    }
+
+    .view-toggle {
+        display: flex;
+        background: #f5f5f5;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .view-btn {
+        border: none;
+        background: transparent;
+        padding: 0.6rem 1rem;
+        cursor: pointer;
+        color: #666;
+        transition: all 0.3s;
+    }
+
+    .view-btn:hover {
+        background: #e0e0e0;
+    }
+
+    .view-btn.active {
+        background: var(--primary-color);
+        color: white;
+    }
+
+    .search-results-count {
+        color: #666;
+        font-size: 0.9rem;
+    }
+
+    body.dark-mode .search-box {
+        background: #1a2a4a;
+        border-color: #2d3e5f;
+    }
+
+    body.dark-mode .search-box input {
+        color: #fff;
+    }
+
+    body.dark-mode .view-toggle {
+        background: #1a2a4a;
+    }
+
+    body.dark-mode .view-btn {
+        color: #b0b8c8;
+    }
+
+    body.dark-mode .view-btn:hover {
+        background: #243657;
+    }
+
+    body.dark-mode .view-btn.active {
+        background: var(--primary-color);
+        color: white;
+    }
+
+    /* Card View Styles */
+    .roster-cards-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .member-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .member-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    }
+
+    .member-card-photo {
+        position: relative;
+        height: 150px;
+        background: linear-gradient(135deg, #1a3a5c 0%, #0d1f33 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .member-card-photo img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .card-avatar-placeholder {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 2rem;
+    }
+
+    .card-online-indicator {
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+        width: 14px;
+        height: 14px;
+        background: #28a745;
+        border-radius: 50%;
+        border: 2px solid white;
+    }
+
+    .member-card-body {
+        padding: 1rem;
+        text-align: center;
+    }
+
+    .member-card-name {
+        margin: 0 0 0.25rem;
+        font-size: 1.1rem;
+        color: #1a3a5c;
+    }
+
+    .member-card-line {
+        margin: 0 0 0.25rem;
+        font-size: 0.9rem;
+        color: #c9a227;
+        font-style: italic;
+    }
+
+    .member-card-number {
+        margin: 0 0 0.5rem;
+        font-size: 0.85rem;
+        color: #666;
+    }
+
+    .member-card-actions {
+        display: flex;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.75rem;
+        background: #f8f9fa;
+        border-top: 1px solid #e0e0e0;
+    }
+
+    .empty-state-card {
+        grid-column: 1 / -1;
+        text-align: center;
+        padding: 3rem;
+        color: #666;
+    }
+
+    .empty-state-card i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+
+    body.dark-mode .member-card {
+        background: #1a2a4a;
+    }
+
+    body.dark-mode .member-card-name {
+        color: #87ceeb;
+    }
+
+    body.dark-mode .member-card-number {
+        color: #b0b8c8;
+    }
+
+    body.dark-mode .member-card-actions {
+        background: #0d1f33;
+        border-top-color: #2d3e5f;
     }
 
     .roster-table-container {
@@ -627,6 +920,97 @@ document.getElementById('bulkActionsForm').addEventListener('submit', function(e
         if (!confirm(`Are you sure you want to delete ${selectedCount} member(s)? This action cannot be undone.`)) {
             e.preventDefault();
         }
+    }
+});
+
+// Search and View Toggle functionality
+const searchInput = document.getElementById('memberSearch');
+const searchClear = document.getElementById('searchClear');
+const searchResultsCount = document.getElementById('searchResultsCount');
+const tableView = document.getElementById('tableViewBtn').closest('.roster-table-container') ? 
+    document.querySelector('.roster-table-container') : document.querySelector('.roster-table-container');
+const cardView = document.getElementById('cardView');
+let currentView = 'table';
+
+// Search functionality
+searchInput.addEventListener('input', function() {
+    const query = this.value.toLowerCase().trim();
+    searchClear.classList.toggle('hidden', !query);
+    filterMembers(query);
+});
+
+searchClear.addEventListener('click', function() {
+    searchInput.value = '';
+    searchClear.classList.add('hidden');
+    filterMembers('');
+    searchInput.focus();
+});
+
+function filterMembers(query) {
+    let visibleCount = 0;
+    const totalCount = document.querySelectorAll('.roster-row').length;
+    
+    // Filter table rows
+    document.querySelectorAll('.roster-row').forEach(row => {
+        const name = row.querySelector('.member-name')?.textContent.toLowerCase() || '';
+        const memberId = row.getAttribute('data-member-id') || '';
+        // Also search in member number column
+        const memberNum = row.querySelector('td:nth-child(4)')?.textContent.toLowerCase() || 
+                          row.querySelector('td:nth-child(3)')?.textContent.toLowerCase() || '';
+        
+        if (!query || name.includes(query) || memberNum.includes(query)) {
+            row.style.display = '';
+            visibleCount++;
+        } else {
+            row.style.display = 'none';
+        }
+    });
+    
+    // Filter cards
+    document.querySelectorAll('.member-card').forEach(card => {
+        const searchable = card.getAttribute('data-searchable') || '';
+        if (!query || searchable.includes(query)) {
+            card.style.display = '';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+    
+    // Update results count
+    if (query) {
+        searchResultsCount.textContent = `Showing ${visibleCount} of ${totalCount} members`;
+    } else {
+        searchResultsCount.textContent = '';
+    }
+}
+
+// View toggle functionality
+function setView(view) {
+    currentView = view;
+    const tableContainer = document.querySelector('.roster-table-container');
+    const cardsContainer = document.getElementById('cardView');
+    
+    if (view === 'table') {
+        tableContainer.classList.remove('hidden');
+        cardsContainer.classList.add('hidden');
+        document.getElementById('tableViewBtn').classList.add('active');
+        document.getElementById('cardViewBtn').classList.remove('active');
+    } else {
+        tableContainer.classList.add('hidden');
+        cardsContainer.classList.remove('hidden');
+        document.getElementById('tableViewBtn').classList.remove('active');
+        document.getElementById('cardViewBtn').classList.add('active');
+    }
+    
+    // Save preference
+    localStorage.setItem('rosterViewPreference', view);
+}
+
+// Restore view preference on load
+document.addEventListener('DOMContentLoaded', function() {
+    const savedView = localStorage.getItem('rosterViewPreference');
+    if (savedView) {
+        setView(savedView);
     }
 });
 </script>

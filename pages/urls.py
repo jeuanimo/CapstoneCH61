@@ -149,6 +149,9 @@ urlpatterns = [
     # MEMBER PORTAL - MAIN SECTIONS (Login required)
     path('portal/', views.portal_dashboard, name='portal_dashboard'),
     
+    # MEMBER API (for AJAX search)
+    path('portal/api/members/search/', views.member_search_api, name='member_search_api'),
+    
     # MEMBER ROSTER MANAGEMENT (Officer only)
     path('portal/roster/', views.MemberListView.as_view(), name='member_roster'),
     path('portal/roster/contacts/', views.contact_directory, name='contact_directory'),
