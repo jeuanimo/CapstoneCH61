@@ -6,13 +6,13 @@ Implements bot blocking, page view tracking and GDPR cookie consent.
 import hashlib
 import logging
 import re
-from django.http import HttpResponseNotFound
+from django.http import HttpResponse
 from django.utils.deprecation import MiddlewareMixin
 
 logger = logging.getLogger(__name__)
 
-# Constants
-NOT_FOUND_MESSAGE = "Not Found"
+# Constants - use HttpResponse with 404 status for simpler blocking
+NOT_FOUND_MESSAGE = b"Not Found"
 
 
 class BlockBadPathsMiddleware(MiddlewareMixin):
@@ -181,6 +181,10 @@ class BlockBadPathsMiddleware(MiddlewareMixin):
         ".env",
     )
     
+    def _block_response(self):
+        """Return a simple 404 response that bypasses Django's 404 logging."""
+        return HttpResponse(NOT_FOUND_MESSAGE, status=404, content_type='text/plain')
+    
     def process_request(self, request):
         """Block bad paths before they hit the app."""
         try:
@@ -189,25 +193,25 @@ class BlockBadPathsMiddleware(MiddlewareMixin):
             
             # Check exact matches
             if original_path in self.BLOCKED_EXACT or path in self.BLOCKED_EXACT:
-                logger.warning(f"Blocked probe: {original_path} from {self._get_client_ip(request)}")
-                return HttpResponseNotFound(NOT_FOUND_MESSAGE)
+                logger.warning(f"[BOT-BLOCK] {original_path} from {self._get_client_ip(request)}")
+                return self._block_response()
             
             # Check prefix matches
             for prefix in self.BLOCKED_PREFIXES:
                 if path.startswith(prefix):
-                    logger.warning(f"Blocked probe: {original_path} from {self._get_client_ip(request)}")
-                    return HttpResponseNotFound(NOT_FOUND_MESSAGE)
+                    logger.warning(f"[BOT-BLOCK] {original_path} from {self._get_client_ip(request)}")
+                    return self._block_response()
             
             # Check blocked extensions (but allow static files)
             if not path.startswith('/static/') and not path.startswith('/media/'):
                 for ext in self.BLOCKED_EXTENSIONS:
                     if path.endswith(ext):
-                        logger.warning(f"Blocked probe: {original_path} from {self._get_client_ip(request)}")
-                        return HttpResponseNotFound(NOT_FOUND_MESSAGE)
+                        logger.warning(f"[BOT-BLOCK] {original_path} from {self._get_client_ip(request)}")
+                        return self._block_response()
             
             return None
         except Exception as e:
-            logger.error(f"BlockBadPathsMiddleware error: {e} for path {request.path}")
+            logger.error(f"[BOT-BLOCK-ERROR] {e} for path {request.path}")
             return None
     
     def _get_client_ip(self, request):
