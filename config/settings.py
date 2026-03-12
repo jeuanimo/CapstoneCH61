@@ -136,6 +136,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     # Security middleware stack - order matters!
     'django.middleware.security.SecurityMiddleware',              # General security headers
+    'pages.middleware.BlockBadPathsMiddleware',                   # Block bot probes early
     'whitenoise.middleware.WhiteNoiseMiddleware',                 # Serve static files in production
     'django.contrib.sessions.middleware.SessionMiddleware',       # Session support
     'django.middleware.common.CommonMiddleware',                  # Common utilities (URL rewriting)
@@ -398,6 +399,7 @@ if not DEBUG:
     # HTTPS/SSL Security
     SECURE_SSL_REDIRECT = True                     # Redirect HTTP to HTTPS
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')  # Trust proxy headers
+    USE_X_FORWARDED_HOST = True                    # Trust X-Forwarded-Host header from Render
     
     # Cookie Security
     SESSION_COOKIE_SECURE = True                   # Only send session cookie over HTTPS
@@ -410,6 +412,8 @@ if not DEBUG:
     
     # Additional Security Headers
     SECURE_CONTENT_TYPE_NOSNIFF = True             # Prevent MIME-type sniffing
+    SECURE_REFERRER_POLICY = 'same-origin'         # Prevent referrer leakage
+    SECURE_BROWSER_XSS_FILTER = True               # Enable browser XSS filter
     X_FRAME_OPTIONS = 'DENY'                       # Prevent clickjacking
     
     # CSRF trusted origins for Render.com

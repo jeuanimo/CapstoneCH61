@@ -1,14 +1,214 @@
 """
-Analytics and Privacy Middleware for Django
-Implements DIY page view tracking and GDPR cookie consent.
+Security, Analytics and Privacy Middleware for Django
+Implements bot blocking, page view tracking and GDPR cookie consent.
 """
 
 import hashlib
 import logging
 import re
+from django.http import HttpResponseNotFound
 from django.utils.deprecation import MiddlewareMixin
 
 logger = logging.getLogger(__name__)
+
+
+class BlockBadPathsMiddleware(MiddlewareMixin):
+    """
+    Middleware to block common scanner/bot probe paths.
+    
+    Returns 404 (not 403) to give scanners less useful information.
+    These paths are commonly probed by automated vulnerability scanners
+    looking for WordPress, phpMyAdmin, exposed config files, etc.
+    """
+    
+    # Paths that start with these prefixes are blocked
+    BLOCKED_PREFIXES = (
+        # WordPress/CMS probes
+        "/wp-admin",
+        "/wp-login",
+        "/wp-includes",
+        "/wp-content",
+        "/wordpress",
+        "/xmlrpc.php",
+        "/wp-",
+        
+        # PHP admin tools
+        "/phpmyadmin",
+        "/phpMyAdmin",
+        "/pma",
+        "/myadmin",
+        "/mysql",
+        "/mysqladmin",
+        "/adminer",
+        
+        # CGI/router exploits
+        "/cgi-bin",
+        "/cgi/",
+        "/HNAP1",
+        "/boaform",
+        "/GponForm",
+        "/goform",
+        "/formLogin",
+        "/currentsetting.htm",
+        
+        # Common CMS/framework paths
+        "/vendor/",
+        "/node_modules/",
+        "/telescope/",
+        "/elfinder/",
+        "/filemanager/",
+        "/ckfinder/",
+        
+        # Shells and backdoors
+        "/shell",
+        "/c99",
+        "/r57",
+        "/wso",
+        "/alfa",
+        "/webshell",
+        
+        # Config/backup probes
+        "/.well-known/security.txt",
+        "/backup",
+        "/bak/",
+        "/old/",
+        "/temp/",
+        "/tmp/",
+        "/test/",
+        "/debug/",
+        
+        # API probes for other platforms
+        "/api/v1/",
+        "/rest/",
+        "/graphql",
+        "/actuator",
+        "/swagger",
+        "/redoc",
+    )
+    
+    # Exact paths that are blocked
+    BLOCKED_EXACT = {
+        # Config files
+        "/.env",
+        "/.env.local",
+        "/.env.production",
+        "/.env.backup",
+        "/.git",
+        "/.git/config",
+        "/.git/HEAD",
+        "/.gitignore",
+        "/.svn",
+        "/.hg",
+        "/.htaccess",
+        "/.htpasswd",
+        "/.DS_Store",
+        
+        # Package manager files
+        "/composer.json",
+        "/composer.lock",
+        "/package.json",
+        "/package-lock.json",
+        "/yarn.lock",
+        "/Gemfile",
+        "/Gemfile.lock",
+        "/Pipfile",
+        "/Pipfile.lock",
+        
+        # Build/deploy files (hide from production)
+        "/requirements.txt",
+        "/docker-compose.yml",
+        "/docker-compose.yaml",
+        "/Dockerfile",
+        "/Makefile",
+        "/Vagrantfile",
+        
+        # PHP installation files
+        "/setup.php",
+        "/install.php",
+        "/config.php",
+        "/configuration.php",
+        "/info.php",
+        "/phpinfo.php",
+        "/i.php",
+        "/test.php",
+        
+        # Database dumps
+        "/dump.sql",
+        "/database.sql",
+        "/db.sql",
+        "/backup.sql",
+        
+        # Other sensitive files
+        "/web.config",
+        "/server.xml",
+        "/crossdomain.xml",
+        "/clientaccesspolicy.xml",
+        "/elmah.axd",
+        "/trace.axd",
+        "/.aws/credentials",
+        "/id_rsa",
+        "/id_dsa",
+    }
+    
+    # File extensions that should never be served
+    BLOCKED_EXTENSIONS = (
+        ".php",
+        ".asp",
+        ".aspx",
+        ".jsp",
+        ".cgi",
+        ".pl",
+        ".py",  # Direct .py file access (Django handles routing)
+        ".rb",
+        ".sh",
+        ".bash",
+        ".bak",
+        ".old",
+        ".orig",
+        ".swp",
+        ".swo",
+        ".log",
+        ".sql",
+        ".conf",
+        ".cfg",
+        ".ini",
+        ".yml",
+        ".yaml",
+        ".toml",
+        ".env",
+    )
+    
+    def process_request(self, request):
+        """Block bad paths before they hit the app."""
+        path = request.path.lower()
+        original_path = request.path
+        
+        # Check exact matches
+        if original_path in self.BLOCKED_EXACT or path in self.BLOCKED_EXACT:
+            logger.warning(f"Blocked probe: {original_path} from {self._get_client_ip(request)}")
+            return HttpResponseNotFound("Not Found")
+        
+        # Check prefix matches
+        if path.startswith(self.BLOCKED_PREFIXES):
+            logger.warning(f"Blocked probe: {original_path} from {self._get_client_ip(request)}")
+            return HttpResponseNotFound("Not Found")
+        
+        # Check blocked extensions (but allow static files)
+        if not path.startswith('/static/') and not path.startswith('/media/'):
+            for ext in self.BLOCKED_EXTENSIONS:
+                if path.endswith(ext):
+                    logger.warning(f"Blocked probe: {original_path} from {self._get_client_ip(request)}")
+                    return HttpResponseNotFound("Not Found")
+        
+        return None
+    
+    def _get_client_ip(self, request):
+        """Get real client IP, handling proxy headers."""
+        xff = request.META.get('HTTP_X_FORWARDED_FOR')
+        if xff:
+            return xff.split(',')[0].strip()
+        return request.META.get('REMOTE_ADDR', 'unknown')
+
 
 # Paths to exclude from tracking
 EXCLUDED_PATHS = [
@@ -295,14 +495,29 @@ class RateLimitMiddleware(MiddlewareMixin):
     Basic rate limiting middleware to slow down aggressive scrapers.
     Uses session-based tracking for authenticated users.
     
-    Note: For production, consider django-ratelimit or WAF/CDN-level protection.
+    Note: Login brute-force is handled by django-axes middleware.
+    For WAF-level protection, consider Cloudflare in front of Render.
     """
     
     # Rate limits: {path_prefix: (max_requests, time_window_seconds)}
     RATE_LIMITS = {
-        '/portal/members/': (60, 60),      # 60 requests per minute for member directory
-        '/portal/contact-directory/': (30, 60),  # 30 requests per minute
-        '/api/': (100, 60),                # 100 API calls per minute
+        # Member data endpoints
+        '/portal/members/': (60, 60),           # 60 requests per minute for member directory
+        '/portal/contact-directory/': (30, 60), # 30 requests per minute for contacts
+        '/api/': (100, 60),                     # 100 API calls per minute
+        
+        # Auth endpoints (backup to axes)
+        '/login': (10, 60),                     # 10 login attempts per minute
+        '/accounts/login/': (10, 60),           # 10 login attempts per minute
+        '/accounts/password_reset/': (5, 300),  # 5 password resets per 5 minutes
+        '/signup': (5, 60),                     # 5 signup attempts per minute
+        
+        # Export/download endpoints
+        '/portal/export': (10, 60),             # 10 exports per minute
+        '/portal/download': (20, 60),           # 20 downloads per minute
+        
+        # Search endpoints
+        '/portal/search': (30, 60),             # 30 searches per minute
     }
     
     def process_request(self, request):
