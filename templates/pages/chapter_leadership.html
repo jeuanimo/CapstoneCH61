@@ -168,6 +168,49 @@
         margin-bottom: 0.5rem;
     }
     
+    .position-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 5px;
+    }
+    
+    .position-edit-btn, .position-delete-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        font-size: 10px;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        opacity: 0.6;
+    }
+    
+    .position-edit-btn {
+        background: var(--secondary-color, #ffc107);
+        color: #333;
+    }
+    
+    .position-delete-btn {
+        background: #dc3545;
+        color: white;
+    }
+    
+    .position-edit-btn:hover, .position-delete-btn:hover {
+        opacity: 1;
+        transform: scale(1.15);
+    }
+    
+    .btn-add-position {
+        background: #17a2b8 !important;
+    }
+    
+    .btn-add-position:hover {
+        background: #138496 !important;
+    }
+    
     body.dark-mode .leader-position {
         color: #87ceeb;
     }
@@ -466,8 +509,20 @@
                         <div class="leader-info">
                             <div class="leader-position">
                                 {% for pos in leader_data.positions %}
-                                    <span class="badge badge-primary">{{ pos.get_position_title }}</span>
-                                    {% if not forloop.last %}<br>{% endif %}
+                                    {% if user.is_authenticated and user.is_staff or user.is_authenticated and user.memberprofile and user.memberprofile.is_officer %}
+                                        <div class="position-item">
+                                            <span class="badge badge-primary">{{ pos.get_position_title }}</span>
+                                            <a href="{% url 'edit_leadership' pos.pk %}" class="position-edit-btn" title="Edit this title">
+                                                <i class="fas fa-pencil-alt"></i>
+                                            </a>
+                                            <a href="{% url 'delete_leadership' pos.pk %}" class="position-delete-btn" title="Remove this title" data-confirm="Remove the title '{{ pos.get_position_title }}' from {{ leader_data.person.full_name }}?">
+                                                <i class="fas fa-times"></i>
+                                            </a>
+                                        </div>
+                                    {% else %}
+                                        <span class="badge badge-primary">{{ pos.get_position_title }}</span>
+                                        {% if not forloop.last %}<br>{% endif %}
+                                    {% endif %}
                                 {% endfor %}
                             </div>
                             <h2 class="leader-name">{{ leader_data.person.full_name }}</h2>
@@ -486,11 +541,11 @@
                                     <a href="{% url 'upload_leader_photo' leader_data.person.pk %}" class="btn-edit btn-photo-upload">
                                         <i class="fas fa-camera"></i> Photo
                                     </a>
-                                    <a href="{% url 'edit_leadership' leader_data.positions.0.pk %}" class="btn-edit">
-                                        <i class="fas fa-edit"></i> Edit
+                                    <a href="{% url 'add_position_to_leader' leader_data.person.pk %}" class="btn-edit btn-add-position">
+                                        <i class="fas fa-plus"></i> Add Title
                                     </a>
-                                    <a href="{% url 'delete_leadership' leader_data.positions.0.pk %}" class="btn-delete" data-confirm="Are you sure you want to delete {{ leader_data.person.full_name }}?">
-                                        <i class="fas fa-trash"></i> Delete
+                                    <a href="{% url 'delete_all_for_leader' leader_data.person.full_name|urlencode %}" class="btn-delete" data-confirm="Are you sure you want to delete {{ leader_data.person.full_name }} and ALL their titles?">
+                                        <i class="fas fa-trash"></i> Delete Leader
                                     </a>
                                 </div>
                             {% endif %}

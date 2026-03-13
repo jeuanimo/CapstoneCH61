@@ -205,12 +205,16 @@
 <div class="form-container">
     <div class="form-card">
         <div class="form-header">
-            <h1>{{ action }} Chapter Leadership</h1>
+            <h1>{{ action }}</h1>
+            {% if is_add_position %}
+            <p style="color: #666; margin-top: 0.5rem;">Adding a new title/position for {{ leader.full_name }}</p>
+            {% endif %}
         </div>
         
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
             
+            {% if not is_add_position %}
             <div class="form-group">
                 <label for="{{ form.full_name.id_for_label }}">Full Name *</label>
                 {{ form.full_name }}
@@ -218,6 +222,7 @@
                     {{ form.full_name.errors }}
                 {% endif %}
             </div>
+            {% endif %}
             
             <div class="form-group">
                 <label for="{{ form.position.id_for_label }}">Position Category *</label>
@@ -237,6 +242,7 @@
                 <small class="form-help-text">If filled, this title will be displayed on the card instead of the position above</small>
             </div>
             
+            {% if not is_add_position %}
             <div class="form-group">
                 <label for="{{ form.email.id_for_label }}">Email</label>
                 {{ form.email }}
@@ -268,6 +274,7 @@
                     {{ form.profile_image.errors }}
                 {% endif %}
             </div>
+            {% endif %}
             
             <div class="form-group">
                 <label for="{{ form.display_order.id_for_label }}">Display Order</label>

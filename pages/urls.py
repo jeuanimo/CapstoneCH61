@@ -128,6 +128,8 @@ urlpatterns = [
     path('leadership/clear-all/', views.clear_all_leadership, name='clear_all_leadership'),
     path('leadership/upload-photo/<int:pk>/', views.upload_leader_photo, name='upload_leader_photo'),
     path('leadership/my-photo/', views.upload_my_leadership_photo, name='upload_my_leadership_photo'),
+    path('leadership/add-position/<int:pk>/', views.add_position_to_leader, name='add_position_to_leader'),
+    path('leadership/delete-leader/<str:full_name>/', views.delete_all_for_leader, name='delete_all_for_leader'),
     
     # INVITATION CODE MANAGEMENT (Officer only)
     path('invitations/', views.manage_invitations, name='manage_invitations'),
@@ -312,6 +314,8 @@ urlpatterns = [
     path('tickets/<int:pk>/', views.event_ticket_detail, name='event_ticket_detail'),
     path('tickets/<int:pk>/purchase/', views.purchase_ticket, name='purchase_ticket'),
     path('tickets/confirmation/<int:purchase_id>/', views.ticket_purchase_success, name='ticket_purchase_success'),
+    path('tickets/payment/<int:purchase_id>/', views.ticket_payment, name='ticket_payment'),
+    path('tickets/payment-success/<int:purchase_id>/', views.ticket_payment_success, name='ticket_payment_success'),
     
     # EVENT TICKETS - ADMIN PAGES (Officer/Staff only)
     path('portal/tickets/manage/', views.manage_event_tickets, name='manage_event_tickets'),

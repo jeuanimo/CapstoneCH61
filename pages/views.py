@@ -1035,6 +1035,63 @@ def clear_all_leadership(request):
 
 @login_required
 @user_passes_test(is_officer_or_staff)
+def add_position_to_leader(request, pk):
+    """Add a new position/title to an existing leader (admin/officers only)"""
+    existing_leader = get_object_or_404(ChapterLeadership, pk=pk)
+    
+    if request.method == 'POST':
+        form = ChapterLeadershipForm(request.POST)
+        if form.is_valid():
+            # Create new leadership record with same info but new position
+            new_position = form.save(commit=False)
+            # Copy core info from existing leader
+            new_position.full_name = existing_leader.full_name
+            new_position.email = existing_leader.email
+            new_position.phone = existing_leader.phone
+            new_position.bio = existing_leader.bio
+            new_position.profile_image = existing_leader.profile_image
+            new_position.member = existing_leader.member
+            new_position.is_active = True
+            new_position.save()
+            logger.info(f"New position added for {new_position.full_name}: {new_position.get_position_title()} by {request.user.username}")
+            messages.success(request, f"Added new title '{new_position.get_position_title()}' for {new_position.full_name}!")
+            return redirect('chapter_leadership')
+        else:
+            messages.error(request, MSG_FORM_ERRORS)
+    else:
+        # Pre-fill form with just position fields (user only needs to set position)
+        form = ChapterLeadershipForm()
+    
+    context = {
+        'form': form,
+        'leader': existing_leader,
+        'action': f'Add Title for {existing_leader.full_name}',
+        'is_add_position': True,
+    }
+    return render(request, 'pages/leadership_form.html', context)
+
+
+@login_required
+@user_passes_test(is_officer_or_staff)
+def delete_all_for_leader(request, full_name):
+    """Delete all positions/records for a specific leader (admin/officers only)"""
+    from urllib.parse import unquote
+    decoded_name = unquote(full_name)
+    leaders = ChapterLeadership.objects.filter(full_name=decoded_name)
+    count = leaders.count()
+    
+    if count > 0:
+        leaders.delete()
+        logger.info(f"Deleted all {count} position(s) for leader: {decoded_name} by {request.user.username}")
+        messages.success(request, f"Successfully deleted {decoded_name} and all {count} title{'s' if count != 1 else ''}.")
+    else:
+        messages.warning(request, f"No records found for {decoded_name}.")
+    
+    return redirect('chapter_leadership')
+
+
+@login_required
+@user_passes_test(is_officer_or_staff)
 def upload_leader_photo(request, pk):
     """Upload or update leader's profile photo (admin/officers only)"""
     leader = get_object_or_404(ChapterLeadership, pk=pk)
@@ -7142,7 +7199,7 @@ def _check_ticket_availability(request, ticket, pk):
     return None
 
 
-def _create_ticket_purchase(ticket, form, user, confirmation_code):
+def _create_ticket_purchase(ticket, form, user, confirmation_code, is_free=False):
     """Create a ticket purchase record."""
     from .models import TicketPurchase
     quantity = form.cleaned_data['quantity']
@@ -7160,11 +7217,14 @@ def _create_ticket_purchase(ticket, form, user, confirmation_code):
         confirmation_code=confirmation_code,
     )
     
-    ticket.quantity_sold += quantity
-    ticket.save()
+    # Only update quantity sold immediately for free tickets
+    # For paid tickets, this happens after successful payment
+    if is_free:
+        ticket.quantity_sold += quantity
+        ticket.save()
+        purchase.status = 'completed'
+        purchase.save()
     
-    purchase.status = 'completed'
-    purchase.save()
     return purchase
 
 
@@ -7204,10 +7264,16 @@ def purchase_ticket(request, pk):
                 return redirect('event_ticket_detail', pk=pk)
             
             confirmation_code = str(uuid.uuid4())[:8].upper()
-            purchase = _create_ticket_purchase(ticket, form, request.user, confirmation_code)
+            is_free = ticket.price == 0
+            purchase = _create_ticket_purchase(ticket, form, request.user, confirmation_code, is_free=is_free)
             
-            messages.success(request, f'Tickets purchased successfully! Confirmation: {confirmation_code}')
-            return redirect('ticket_purchase_success', purchase_id=purchase.id)
+            if is_free:
+                # Free ticket - complete immediately
+                messages.success(request, f'Tickets reserved successfully! Confirmation: {confirmation_code}')
+                return redirect('ticket_purchase_success', purchase_id=purchase.id)
+            else:
+                # Paid ticket - redirect to payment
+                return redirect('ticket_payment', purchase_id=purchase.id)
     else:
         form = TicketPurchaseForm(ticket=ticket, initial=_get_ticket_form_initial(request.user))
     
@@ -7234,6 +7300,101 @@ def ticket_purchase_success(request, purchase_id):
         'purchase': purchase,
     }
     return render(request, 'pages/tickets/purchase_success.html', context)
+
+
+def ticket_payment(request, purchase_id):
+    """Handle Stripe payment for ticket purchase"""
+    from .models import TicketPurchase
+    
+    purchase = get_object_or_404(TicketPurchase, pk=purchase_id)
+    
+    # Verify user has access
+    if request.user.is_authenticated:
+        if purchase.user and purchase.user != request.user:
+            messages.error(request, 'You do not have access to this purchase.')
+            return redirect('event_tickets')
+    
+    # Check if already paid
+    if purchase.status == 'completed':
+        return redirect('ticket_purchase_success', purchase_id=purchase.id)
+    
+    # Check Stripe configuration
+    stripe_public_key = settings.STRIPE_PUBLIC_KEY
+    stripe_secret_key = settings.STRIPE_SECRET_KEY
+    
+    if not stripe_public_key or not stripe_secret_key:
+        try:
+            stripe_config = StripeConfiguration.objects.get(is_active=True)
+            stripe_public_key = stripe_config.stripe_publishable_key
+            stripe_secret_key = stripe_config.stripe_secret_key
+        except StripeConfiguration.DoesNotExist:
+            pass
+    
+    if not stripe_public_key or not stripe_secret_key:
+        messages.error(request, 'Online payments are not yet available. Please contact the chapter.')
+        return redirect('event_tickets')
+    
+    stripe.api_key = stripe_secret_key
+    
+    if request.method == 'POST':
+        try:
+            metadata = {
+                'purchase_id': purchase.id,
+                'ticket_id': purchase.ticket.id,
+                'confirmation_code': purchase.confirmation_code,
+            }
+            if request.user.is_authenticated:
+                metadata['user_id'] = request.user.id
+            else:
+                metadata['email'] = purchase.email
+            
+            intent = stripe.PaymentIntent.create(
+                amount=int(purchase.total_price * 100),  # Convert to cents
+                currency='usd',
+                metadata=metadata
+            )
+            
+            purchase.stripe_payment_intent = intent['id']
+            purchase.save()
+            
+            context = {
+                'purchase': purchase,
+                'client_secret': intent['client_secret'],
+                'stripe_public_key': stripe_public_key,
+            }
+            return render(request, 'pages/tickets/ticket_payment.html', context)
+        except stripe.error.StripeError as e:
+            logger.error(f'Ticket payment Stripe error: {str(e)}')
+            messages.error(request, f'Payment error: {str(e)}')
+            return redirect('event_tickets')
+    
+    context = {
+        'purchase': purchase,
+        'stripe_public_key': stripe_public_key,
+    }
+    return render(request, 'pages/tickets/ticket_payment.html', context)
+
+
+def ticket_payment_success(request, purchase_id):
+    """Handle successful ticket payment"""
+    from .models import TicketPurchase
+    
+    purchase = get_object_or_404(TicketPurchase, pk=purchase_id)
+    
+    # Mark as completed and update ticket inventory
+    if purchase.status != 'completed':
+        purchase.status = 'completed'
+        purchase.save()
+        
+        # Update ticket inventory
+        ticket = purchase.ticket
+        ticket.quantity_sold += purchase.quantity
+        ticket.save()
+        
+        logger.info(f'Ticket payment completed: {purchase.confirmation_code}')
+    
+    messages.success(request, f'Payment successful! Your confirmation code is: {purchase.confirmation_code}')
+    return redirect('ticket_purchase_success', purchase_id=purchase.id)
 
 
 # Event Ticket Admin Views

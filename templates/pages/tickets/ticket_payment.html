@@ -1,0 +1,413 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Pay for Tickets - {{ purchase.ticket.event_name }}{% endblock title %}
+
+{% block css %}
+<style>
+    :root {
+        --pbs-blue: var(--primary-color, #164f90);
+        --pbs-blue-dark: #0d3a6b;
+        --pbs-blue-light: #2a7dd4;
+    }
+
+    .payment-title {
+        color: var(--pbs-blue);
+        margin-bottom: 30px;
+        font-weight: bold;
+    }
+
+    body.dark-mode .payment-title {
+        color: #4a90e2;
+    }
+
+    .payment-card {
+        border: 1px solid #dee2e6;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    }
+
+    body.dark-mode .payment-card {
+        background: #2d2d2d;
+        border-color: #444;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .section-title {
+        color: var(--pbs-blue);
+        margin-bottom: 25px;
+        font-weight: 600;
+    }
+
+    body.dark-mode .section-title {
+        color: #4a90e2;
+    }
+
+    .btn-pay {
+        background: linear-gradient(135deg, var(--pbs-blue) 0%, var(--pbs-blue-dark) 100%);
+        border: none;
+        color: white;
+        padding: 14px 28px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 1.1em;
+        transition: all 0.3s ease;
+        width: 100%;
+    }
+
+    .btn-pay:hover:not(:disabled) {
+        background: linear-gradient(135deg, var(--pbs-blue-light) 0%, var(--pbs-blue) 100%);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 71, 171, 0.4);
+    }
+
+    .btn-pay:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
+
+    body.dark-mode .btn-pay {
+        background: linear-gradient(135deg, #2a5a9a 0%, #1a4a8a 100%);
+    }
+
+    .summary-label {
+        color: #6c757d;
+    }
+
+    .summary-value {
+        color: var(--pbs-blue);
+    }
+
+    body.dark-mode .summary-value {
+        color: #a0c4f0;
+    }
+
+    .total-due {
+        color: var(--success-color, #4caf50);
+        font-weight: bold;
+        font-size: 1.3em;
+    }
+
+    .event-box {
+        background-color: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+
+    body.dark-mode .event-box {
+        background-color: #3d3d3d;
+    }
+
+    .event-name {
+        font-weight: bold;
+        color: var(--pbs-blue);
+        font-size: 1.1em;
+        margin-bottom: 10px;
+    }
+
+    body.dark-mode .event-name {
+        color: #4a90e2;
+    }
+
+    .event-detail {
+        margin: 5px 0;
+        color: #6c757d;
+    }
+
+    #card-element {
+        border: 2px solid #dee2e6;
+        padding: 14px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        transition: border-color 0.2s ease;
+    }
+
+    #card-element:focus-within {
+        border-color: var(--pbs-blue);
+    }
+
+    body.dark-mode #card-element {
+        background: #3d3d3d;
+        border-color: #555;
+    }
+
+    .payment-card-body {
+        padding: 30px;
+    }
+
+    .card-errors-text {
+        color: var(--error-color, #d32f2f);
+        margin-bottom: 20px;
+    }
+
+    .security-badge {
+        text-align: center;
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid #dee2e6;
+    }
+
+    .security-text {
+        color: #6c757d;
+        font-size: 0.9em;
+        margin-bottom: 10px;
+    }
+
+    .stripe-badge {
+        height: 30px;
+        opacity: 0.7;
+    }
+
+    .summary-card-sticky {
+        position: sticky;
+        top: 20px;
+    }
+
+    .summary-card-body {
+        padding: 25px;
+    }
+
+    .ticket-icon {
+        font-size: 2rem;
+        color: var(--pbs-blue);
+        margin-bottom: 15px;
+    }
+
+    body.dark-mode .ticket-icon {
+        color: #4a90e2;
+    }
+
+    .confirmation-code {
+        background: #e8f4fd;
+        padding: 10px 15px;
+        border-radius: 6px;
+        font-family: monospace;
+        font-size: 1.1em;
+        color: var(--pbs-blue);
+    }
+
+    body.dark-mode .confirmation-code {
+        background: #1a3a5c;
+        color: #a0c4f0;
+    }
+
+    .order-summary-section {
+        margin-bottom: 20px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+    }
+
+    .total-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 2px solid #dee2e6;
+    }
+
+    .total-label {
+        color: var(--pbs-blue);
+        font-weight: bold;
+        font-size: 1.1em;
+    }
+
+    @media (max-width: 768px) {
+        .col-md-4 {
+            margin-top: 30px;
+        }
+    }
+</style>
+{% endblock css %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="payment-title"><i class="fas fa-ticket-alt"></i> Complete Your Ticket Purchase</h1>
+
+    <div class="row">
+        <!-- Payment Form -->
+        <div class="col-md-8">
+            <div class="card payment-card">
+                <div class="card-body payment-card-body">
+                    <h5 class="card-title section-title">💳 Payment Information</h5>
+
+                    <form id="payment-form" method="post">
+                        {% csrf_token %}
+
+                        <!-- Stripe Card Element -->
+                        <div id="card-element"></div>
+
+                        <!-- Card Errors -->
+                        <div id="card-errors" role="alert" class="card-errors-text"></div>
+
+                        <!-- Submit Button -->
+                        <button type="submit" id="submit-button" class="btn-pay">
+                            <i class="fas fa-lock"></i> Pay ${{ purchase.total_price }}
+                        </button>
+                    </form>
+
+                    <!-- Security Badge -->
+                    <div class="security-badge">
+                        <p class="security-text">
+                            🔒 Your payment information is secure and encrypted
+                        </p>
+                        <img src="https://www.vectorlogo.zone/logos/stripe/stripe-ar21.svg" alt="Stripe" class="stripe-badge" width="84" height="30">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Summary -->
+        <div class="col-md-4">
+            <div class="card payment-card summary-card-sticky">
+                <div class="card-body summary-card-body">
+                    <div class="text-center">
+                        <i class="fas fa-ticket-alt ticket-icon"></i>
+                    </div>
+                    <h5 class="card-title section-title text-center">Ticket Summary</h5>
+
+                    <!-- Event Details -->
+                    <div class="event-box">
+                        <div class="event-name">{{ purchase.ticket.event_name }}</div>
+                        <p class="event-detail">
+                            <i class="fas fa-calendar"></i> {{ purchase.ticket.event_date|date:"l, F j, Y" }}
+                        </p>
+                        {% if purchase.ticket.event_time %}
+                        <p class="event-detail">
+                            <i class="fas fa-clock"></i> {{ purchase.ticket.event_time|time:"g:i A" }}
+                        </p>
+                        {% endif %}
+                        {% if purchase.ticket.venue_name %}
+                        <p class="event-detail">
+                            <i class="fas fa-map-marker-alt"></i> {{ purchase.ticket.venue_name }}
+                        </p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Ticket Details -->
+                    <div class="order-summary-section">
+                        <div class="summary-row">
+                            <span class="summary-label">Ticket Price:</span>
+                            <span class="summary-value">${{ purchase.price_per_ticket }}</span>
+                        </div>
+                        <div class="summary-row">
+                            <span class="summary-label">Quantity:</span>
+                            <span class="summary-value">{{ purchase.quantity }} ticket{% if purchase.quantity != 1 %}s{% endif %}</span>
+                        </div>
+                        <div class="summary-row">
+                            <span class="summary-label">Buyer:</span>
+                            <span class="summary-value">{{ purchase.full_name }}</span>
+                        </div>
+                        <div class="summary-row">
+                            <span class="summary-label">Email:</span>
+                            <span class="summary-value">{{ purchase.email }}</span>
+                        </div>
+                    </div>
+
+                    <div class="total-row">
+                        <span class="total-label">Total Due:</span>
+                        <span class="total-due">${{ purchase.total_price }}</span>
+                    </div>
+
+                    <div class="text-center mt-3">
+                        <small class="text-muted">Confirmation Code:</small><br>
+                        <span class="confirmation-code">{{ purchase.confirmation_code }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Stripe Script -->
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+    var stripe = Stripe('{{ stripe_public_key }}');
+    var elements = stripe.elements();
+    
+    var style = {
+        base: {
+            fontSize: '16px',
+            color: '#424770',
+            '::placeholder': {
+                color: '#aab7c4',
+            },
+        },
+        invalid: {
+            color: '#9e2146',
+        },
+    };
+    
+    var cardElement = elements.create('card', {style: style});
+    cardElement.mount('#card-element');
+
+    // Handle card errors
+    cardElement.addEventListener('change', function(event) {
+        var displayError = document.getElementById('card-errors');
+        if (event.error) {
+            displayError.textContent = event.error.message;
+        } else {
+            displayError.textContent = '';
+        }
+    });
+
+    // Handle form submission
+    var form = document.getElementById('payment-form');
+    form.addEventListener('submit', async function(event) {
+        event.preventDefault();
+        
+        var submitButton = document.getElementById('submit-button');
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+
+        {% if client_secret %}
+        // Use PaymentIntent confirmation
+        const {paymentIntent, error} = await stripe.confirmCardPayment(
+            '{{ client_secret }}',
+            {
+                payment_method: {
+                    card: cardElement,
+                    billing_details: {
+                        name: '{{ purchase.full_name }}',
+                        email: '{{ purchase.email }}'
+                    }
+                }
+            }
+        );
+
+        if (error) {
+            var displayError = document.getElementById('card-errors');
+            displayError.textContent = error.message;
+            submitButton.disabled = false;
+            submitButton.innerHTML = '<i class="fas fa-lock"></i> Pay ${{ purchase.total_price }}';
+        } else if (paymentIntent.status === 'succeeded') {
+            // Payment successful - redirect to success page
+            window.location.href = '{% url "ticket_payment_success" purchase.id %}';
+        }
+        {% else %}
+        // Create PaymentIntent first
+        const {token} = await stripe.createToken(cardElement);
+
+        if (token) {
+            var hiddenInput = document.createElement('input');
+            hiddenInput.setAttribute('type', 'hidden');
+            hiddenInput.setAttribute('name', 'stripeToken');
+            hiddenInput.setAttribute('value', token.id);
+            form.appendChild(hiddenInput);
+            form.submit();
+        } else {
+            submitButton.disabled = false;
+            submitButton.innerHTML = '<i class="fas fa-lock"></i> Pay ${{ purchase.total_price }}';
+        }
+        {% endif %}
+    });
+</script>
+{% endblock content %}
