@@ -93,36 +93,24 @@
     
     .leadership-grid {
         display: grid;
-        grid-template-columns: repeat(6, 1fr);
-        gap: 1rem;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1.5rem;
         margin-top: 2rem;
     }
     
-    @media (max-width: 1600px) {
-        .leadership-grid {
-            grid-template-columns: repeat(5, 1fr);
-        }
-    }
-    
-    @media (max-width: 1300px) {
-        .leadership-grid {
-            grid-template-columns: repeat(4, 1fr);
-        }
-    }
-    
-    @media (max-width: 1000px) {
+    @media (max-width: 1200px) {
         .leadership-grid {
             grid-template-columns: repeat(3, 1fr);
         }
     }
     
-    @media (max-width: 768px) {
+    @media (max-width: 900px) {
         .leadership-grid {
             grid-template-columns: repeat(2, 1fr);
         }
     }
     
-    @media (max-width: 480px) {
+    @media (max-width: 550px) {
         .leadership-grid {
             grid-template-columns: 1fr;
         }
@@ -130,16 +118,16 @@
     
     .leader-card {
         background: #f9f9f9;
-        border-radius: 8px;
+        border-radius: 10px;
         overflow: hidden;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         transition: transform 0.3s ease, box-shadow 0.3s ease;
         position: relative;
     }
     
     .leader-card:hover {
         transform: translateY(-5px);
-        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
     }
     
     body.dark-mode .leader-card {
@@ -148,7 +136,7 @@
     
     .leader-image {
         width: 100%;
-        height: 180px;
+        height: 280px;
         background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
         display: flex;
         align-items: center;
@@ -163,21 +151,21 @@
     }
     
     .leader-image i {
-        font-size: 3.5rem;
+        font-size: 5rem;
         color: rgba(255, 255, 255, 0.5);
     }
     
     .leader-info {
-        padding: 0.75rem;
+        padding: 1.25rem;
     }
     
     .leader-position {
         color: var(--primary-color);
-        font-size: 0.7rem;
+        font-size: 0.85rem;
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.5px;
-        margin-bottom: 0.25rem;
+        margin-bottom: 0.5rem;
     }
     
     body.dark-mode .leader-position {
@@ -186,10 +174,10 @@
     
     .leader-name {
         color: var(--primary-color);
-        font-size: 1rem;
+        font-size: 1.25rem;
         font-weight: 700;
-        margin: 0 0 0.5rem 0;
-        line-height: 1.2;
+        margin: 0 0 0.75rem 0;
+        line-height: 1.3;
     }
     
     body.dark-mode .leader-name {
