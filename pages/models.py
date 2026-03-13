@@ -136,12 +136,12 @@ class ChapterLeadership(models.Model):
         verbose_name_plural = 'Chapter Leadership'
     
     def __str__(self):
-        position_name = self.position_custom if self.position == 'other' else self.get_position_display()
+        position_name = self.position_custom if self.position_custom else self.get_position_display()
         return f"{self.full_name} - {position_name}"
     
     def get_position_title(self):
-        """Return the display position title"""
-        if self.position == 'other' and self.position_custom:
+        """Return the display position title - custom title overrides category"""
+        if self.position_custom:
             return self.position_custom
         return self.get_position_display()
 
