@@ -111,6 +111,21 @@ class ContactForm(forms.Form):
 class ChapterLeadershipForm(forms.ModelForm):
     """Form for adding/editing chapter leadership"""
     
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        # Handle records with position values not in POSITION_CHOICES
+        # This can happen with CSV imports or legacy data
+        if self.instance and self.instance.pk:
+            valid_positions = [choice[0] for choice in ChapterLeadership.POSITION_CHOICES]
+            
+            if self.instance.position not in valid_positions:
+                # Save the original position as custom title if not already set
+                if not self.instance.position_custom:
+                    self.initial['position_custom'] = self.instance.position
+                # Map to 'other' for the dropdown
+                self.initial['position'] = 'other'
+    
     class Meta:
         model = ChapterLeadership
         fields = ['full_name', 'position', 'position_custom', 'email', 'phone', 'bio', 'profile_image', 'display_order', 'is_active', 'term_start', 'term_end']

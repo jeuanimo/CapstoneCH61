@@ -2,6 +2,274 @@
 CAPSTONE CH61 PROJECT - SECURITY & DEVELOPMENT GUIDELINES
 ================================================================================
 
+================================================================================
+                        QUICK START - PROJECT SETUP
+================================================================================
+
+PREREQUISITES:
+--------------
+- Python 3.10 or higher
+- pip (Python package manager)
+- Git
+- A text editor or IDE (VS Code recommended)
+
+STEP 1: CLONE THE REPOSITORY
+----------------------------
+Open a terminal and run:
+
+    git clone https://github.com/YOUR_USERNAME/CapstoneCH61.git
+    cd CapstoneCH61
+
+STEP 2: CREATE VIRTUAL ENVIRONMENT
+----------------------------------
+Create and activate a Python virtual environment:
+
+    # Linux/macOS:
+    python3 -m venv venv
+    source venv/bin/activate
+
+    # Windows (Command Prompt):
+    python -m venv venv
+    venv\Scripts\activate
+
+    # Windows (PowerShell):
+    python -m venv venv
+    .\venv\Scripts\Activate.ps1
+
+You should see (venv) at the beginning of your terminal prompt.
+
+STEP 3: INSTALL DEPENDENCIES
+----------------------------
+Install all required packages:
+
+    pip install -r requirements.txt
+
+STEP 4: CREATE ENVIRONMENT FILE
+-------------------------------
+Create a .env file in the project root with your configuration:
+
+    # Linux/macOS:
+    touch .env
+
+    # Windows:
+    type nul > .env
+
+Add the following content to .env (edit with your values):
+
+    # Django Settings
+    SECRET_KEY=your-secret-key-here-generate-a-random-one
+    DEBUG=True
+    ALLOWED_HOSTS=localhost,127.0.0.1
+
+    # Database (SQLite is default, leave empty for development)
+    DATABASE_URL=
+
+    # Stripe Payment Keys (get from https://dashboard.stripe.com/test/apikeys)
+    STRIPE_PUBLIC_KEY=pk_test_your_key_here
+    STRIPE_SECRET_KEY=sk_test_your_key_here
+    STRIPE_WEBHOOK_SECRET=whsec_your_webhook_secret
+
+    # Twilio SMS (optional - get from https://console.twilio.com)
+    TWILIO_ACCOUNT_SID=your_account_sid
+    TWILIO_AUTH_TOKEN=your_auth_token
+    TWILIO_PHONE_NUMBER=+1234567890
+
+    # Email Settings (optional - for email features)
+    EMAIL_HOST=smtp.gmail.com
+    EMAIL_PORT=587
+    EMAIL_USE_TLS=True
+    EMAIL_HOST_USER=your-email@gmail.com
+    EMAIL_HOST_PASSWORD=your-app-password
+
+To generate a secure SECRET_KEY, run:
+
+    python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
+
+STEP 5: RUN DATABASE MIGRATIONS
+-------------------------------
+Set up the database tables:
+
+    python manage.py migrate
+
+STEP 6: CREATE ADMIN SUPERUSER
+------------------------------
+Create an admin account to access the system:
+
+    python manage.py createsuperuser
+
+Follow the prompts to enter username, email, and password.
+
+STEP 7: COLLECT STATIC FILES (Optional for Development)
+-------------------------------------------------------
+For production or if static files don't load:
+
+    python manage.py collectstatic
+
+STEP 8: RUN THE DEVELOPMENT SERVER
+----------------------------------
+Start the Django development server:
+
+    python manage.py runserver
+
+Open your browser and navigate to:
+    - Main site: http://127.0.0.1:8000/
+    - Admin panel: http://127.0.0.1:8000/admin/
+
+STEP 9: LOGIN AND EXPLORE
+-------------------------
+1. Go to http://127.0.0.1:8000/admin/
+2. Login with your superuser credentials
+3. Create member profiles and test the features
+
+================================================================================
+                        COMMON COMMANDS REFERENCE
+================================================================================
+
+    # Activate virtual environment
+    source venv/bin/activate          # Linux/macOS
+    venv\Scripts\activate             # Windows
+
+    # Start development server
+    python manage.py runserver
+
+    # Run on specific port
+    python manage.py runserver 8080
+
+    # Make database migrations after model changes
+    python manage.py makemigrations
+    python manage.py migrate
+
+    # Create superuser
+    python manage.py createsuperuser
+
+    # Collect static files
+    python manage.py collectstatic
+
+    # Run tests
+    python manage.py test
+
+    # Check for issues
+    python manage.py check
+
+    # Security check for production
+    python manage.py check --deploy
+
+    # Open Django shell
+    python manage.py shell
+
+    # Deactivate virtual environment
+    deactivate
+
+================================================================================
+                        TROUBLESHOOTING
+================================================================================
+
+ISSUE: "ModuleNotFoundError: No module named 'xyz'"
+SOLUTION: Make sure virtual environment is activated and run:
+    pip install -r requirements.txt
+
+ISSUE: "OperationalError: no such table"
+SOLUTION: Run migrations:
+    python manage.py migrate
+
+ISSUE: Static files not loading (CSS/images missing)
+SOLUTION: Run collectstatic and check STATIC_URL in settings:
+    python manage.py collectstatic
+
+ISSUE: "Invalid HTTP_HOST header"
+SOLUTION: Add the host to ALLOWED_HOSTS in .env:
+    ALLOWED_HOSTS=localhost,127.0.0.1,your-domain.com
+
+ISSUE: Stripe payments not working
+SOLUTION: Ensure STRIPE_PUBLIC_KEY and STRIPE_SECRET_KEY are set in .env
+
+ISSUE: Email features not working
+SOLUTION: Configure EMAIL_* settings in .env with valid SMTP credentials
+
+================================================================================
+                        PROJECT STRUCTURE
+================================================================================
+
+    CapstoneCH61/
+    ├── config/              # Django project settings
+    │   ├── settings.py      # Main configuration
+    │   ├── urls.py          # URL routing
+    │   └── wsgi.py          # WSGI application
+    ├── pages/               # Main Django application
+    │   ├── models.py        # Database models
+    │   ├── views.py         # View functions
+    │   ├── forms.py         # Form definitions
+    │   ├── urls.py          # App URL routing
+    │   └── admin.py         # Admin configuration
+    ├── templates/           # HTML templates
+    ├── static/              # Static files (CSS, JS, images)
+    ├── media/               # User-uploaded files
+    ├── logs/                # Application logs
+    ├── requirements.txt     # Python dependencies
+    ├── manage.py            # Django management script
+    ├── .env                 # Environment variables (create this)
+    └── README.txt           # This file
+
+================================================================================
+                        TECHNOLOGY STACK
+================================================================================
+
+    Backend:
+    - Django 4.2 (Python web framework)
+    - SQLite (development) / PostgreSQL (production)
+    - Gunicorn (production WSGI server)
+
+    Frontend:
+    - HTML5, CSS3, JavaScript
+    - Bootstrap (responsive design)
+    - Font Awesome (icons)
+
+    Integrations:
+    - Stripe (payment processing)
+    - Twilio (SMS notifications)
+    - Django SMTP (email)
+
+    Security:
+    - django-axes (brute force protection)
+    - django-ratelimit (API rate limiting)
+    - python-decouple (environment variables)
+
+================================================================================
+                        FEATURES
+================================================================================
+
+    Public Features:
+    - Homepage, About, Contact pages
+    - Chapter Leadership roster
+    - Chapter Programs with photo galleries
+    - Events calendar with ticket purchasing
+    - Public chatbot
+
+    Member Portal:
+    - Dashboard with statistics
+    - Member directory
+    - Wall posts with comments/likes
+    - Photo gallery with albums
+    - Direct messaging
+    - Profile management
+    - Online dues payment (Stripe)
+
+    Officer Features:
+    - Member/Officer CRUD management
+    - CSV import (officers, members, products)
+    - Invitation code system
+    - Attendance tracking
+    - Email/SMS communications
+    - HQ member synchronization
+
+    Boutique Shop:
+    - Product catalog
+    - Shopping cart
+    - Stripe checkout
+    - Order history
+
+================================================================================
+
 PROJECT OVERVIEW:
 -----------------
 Django-based web application following OWASP Top 10 security standards and
