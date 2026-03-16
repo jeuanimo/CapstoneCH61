@@ -406,6 +406,17 @@ class CreateEventForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields['end_date'].required = False
         self.fields['image'].required = False
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        start_date = cleaned_data.get('start_date')
+        end_date = cleaned_data.get('end_date')
+        
+        # Default end_date to start_date if not provided
+        if start_date and not end_date:
+            cleaned_data['end_date'] = start_date
+        
+        return cleaned_data
 
 
 class DocumentForm(forms.ModelForm):
