@@ -4,16 +4,23 @@ from .models import (
     EventAttendance, Announcement, AnnouncementView, Document, Message, 
     ProfileComment, CommentLike, PhotoAlbum, Photo, 
     PhotoComment, PhotoLike, InvitationCode,
-    Product, Cart, CartItem, Order, OrderItem
+    Product, Cart, CartItem, Order, OrderItem,
+    Category
 )
 
+
+class CategoryAdmin(admin.ModelAdmin):
+    list_display = ('name', 'color', 'created_at')
+    search_fields = ('name', 'description')
+
+
 class EventAdmin(admin.ModelAdmin):
-    list_display = ('title', 'start_date', 'location', 'image')
-    list_filter = ('start_date', 'category')
+    list_display = ('title', 'start_date', 'location', 'event_type', 'image')
+    list_filter = ('start_date', 'category', 'event_type')
     search_fields = ('title', 'description', 'location')
     fieldsets = (
         ('Event Information', {
-            'fields': ('title', 'description', 'category')
+            'fields': ('title', 'description', 'category', 'event_type')
         }),
         ('Date & Time', {
             'fields': ('start_date', 'end_date')
@@ -43,6 +50,7 @@ class ChapterLeadershipAdmin(admin.ModelAdmin):
         }),
     )
 
+admin.site.register(Category, CategoryAdmin)
 admin.site.register(Event, EventAdmin)
 admin.site.register(ChapterLeadership, ChapterLeadershipAdmin)
 
