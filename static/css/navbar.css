@@ -704,6 +704,11 @@ body.dark-mode .dropdown-divider {
     font-size: 0.8rem;
 }
 
+/* Hide portal toggler on desktop */
+.portal-navbar-toggler {
+    display: none;
+}
+
 .portal-nav {
     display: flex;
     gap: 0.25rem;
@@ -943,7 +948,48 @@ body.dark-mode .portal-nav-link.admin-link.active {
     }
 
     .portal-navbar-header {
+        justify-content: space-between;
+        width: 100%;
+    }
+
+    .portal-navbar-toggler {
+        display: flex;
+        align-items: center;
         justify-content: center;
+        width: 40px;
+        height: 32px;
+        background: linear-gradient(180deg, #2a7dd4 0%, #1e6bb8 50%, #0f3d6e 100%);
+        border: 1px solid #0a2d52;
+        border-radius: 4px;
+        color: var(--text-light);
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .portal-navbar-toggler:hover {
+        background: linear-gradient(180deg, #3a8be3 0%, #2a7dd4 50%, #15508c 100%);
+    }
+
+    .portal-navbar-toggler[aria-expanded="true"] i::before {
+        content: "\f00d"; /* X icon */
+    }
+
+    .portal-collapse {
+        display: none;
+        flex-direction: column;
+        gap: 0.25rem;
+        width: 100%;
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease-out;
+    }
+
+    .portal-collapse.show {
+        display: flex;
+        max-height: 2000px;
+        transition: max-height 0.5s ease-in;
     }
 
     .portal-nav {
@@ -954,6 +1000,33 @@ body.dark-mode .portal-nav-link.admin-link.active {
     .portal-nav-link {
         width: 100%;
         min-width: auto;
+        max-width: 100%;
+        height: auto;
+        padding: 0.6rem 1rem;
+        flex-direction: row;
+        justify-content: flex-start;
+        gap: 0.75rem;
+        font-size: 0.85rem;
+    }
+
+    .portal-nav-link i {
+        font-size: 1rem;
+        width: 1.5rem;
+        text-align: center;
+    }
+
+    .portal-nav-link span {
+        font-size: 0.85rem;
+        max-height: none;
+    }
+
+    body.dark-mode .portal-navbar-toggler {
+        background: linear-gradient(180deg, #1f3b6a 0%, #112746 100%);
+        border-color: #0a2d52;
+    }
+
+    body.dark-mode .portal-navbar-toggler:hover {
+        background: linear-gradient(180deg, #2a4d8c 0%, #1f3b6a 60%, #112746 100%);
     }
 }
 
